@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{ef3b63e3-6d65-40f1-84a3-fc78ba792bb8}">
+		<property name="assetPath">
+			<value>SoundEffects/BnB_Paladin_Spell01.ogg</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>1.5015000000000001</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{f24e18cd-8f6a-4b3a-9b51-f3181c79b9f8}</destination>
+		</relationship>
+	</object>
+</objects>

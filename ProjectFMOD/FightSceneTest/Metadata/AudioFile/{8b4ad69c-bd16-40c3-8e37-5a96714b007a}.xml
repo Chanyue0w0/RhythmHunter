@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{8b4ad69c-bd16-40c3-8e37-5a96714b007a}">
+		<property name="assetPath">
+			<value>BnB_Combat1_LoopAB.ogg</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>146.35454166666668</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{f24e18cd-8f6a-4b3a-9b51-f3181c79b9f8}</destination>
+		</relationship>
+	</object>
+</objects>

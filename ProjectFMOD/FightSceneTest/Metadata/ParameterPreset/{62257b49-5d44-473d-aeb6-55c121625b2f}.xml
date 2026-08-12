@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{62257b49-5d44-473d-aeb6-55c121625b2f}">
+		<property name="name">
+			<value>SFXOnOff</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{cff41fff-0e8d-46d1-9400-b4c00cc60edb}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{cff41fff-0e8d-46d1-9400-b4c00cc60edb}">
+		<property name="isGlobal">
+			<value>true</value>
+		</property>
+		<property name="initialValue">
+			<value>1</value>
+		</property>
+		<property name="isExposedRecursively">
+			<value>false</value>
+		</property>
+	</object>
+</objects>

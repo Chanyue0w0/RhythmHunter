@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{5861bf28-2ea2-4d65-b317-18d97865ddaf}">
+		<property name="name">
+			<value>Rethys_Singing</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{4650797a-a117-479a-a9f6-65844c098a0f}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{4650797a-a117-479a-a9f6-65844c098a0f}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="seekSpeed">
+			<value>0.59999996423721313</value>
+		</property>
+	</object>
+</objects>

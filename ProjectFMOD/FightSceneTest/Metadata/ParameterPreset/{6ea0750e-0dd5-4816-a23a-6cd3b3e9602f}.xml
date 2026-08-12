@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{6ea0750e-0dd5-4816-a23a-6cd3b3e9602f}">
+		<property name="name">
+			<value>FeverTime</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{e310ae60-66db-4e20-8804-4714a7db5ad9}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{e310ae60-66db-4e20-8804-4714a7db5ad9}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

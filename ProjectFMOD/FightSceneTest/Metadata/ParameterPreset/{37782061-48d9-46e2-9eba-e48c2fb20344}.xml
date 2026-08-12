@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{37782061-48d9-46e2-9eba-e48c2fb20344}">
+		<property name="name">
+			<value>Elvin_Singing</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{fd78cf9e-5638-4308-8d79-44c0cb635301}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{fd78cf9e-5638-4308-8d79-44c0cb635301}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="seekSpeed">
+			<value>0.59999996423721313</value>
+		</property>
+	</object>
+</objects>

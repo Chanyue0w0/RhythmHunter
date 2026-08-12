@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{2c1b0da3-ea15-4541-bf19-7ad0e16796e0}">
+		<property name="name">
+			<value>FeverCombo</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{4ec9cc3a-5af6-4221-ad04-a53c6712e010}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{4ec9cc3a-5af6-4221-ad04-a53c6712e010}">
+		<property name="maximum">
+			<value>48</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

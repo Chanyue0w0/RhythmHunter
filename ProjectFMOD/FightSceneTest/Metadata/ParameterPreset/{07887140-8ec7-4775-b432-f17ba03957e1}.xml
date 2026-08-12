@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{07887140-8ec7-4775-b432-f17ba03957e1}">
+		<property name="name">
+			<value>TrackUpgrade</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{e96ddff7-53fa-4971-b69b-78697d2ac31b}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{e96ddff7-53fa-4971-b69b-78697d2ac31b}">
+		<property name="maximum">
+			<value>3</value>
+		</property>
+		<property name="isGlobal">
+			<value>true</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="isExposedRecursively">
+			<value>false</value>
+		</property>
+	</object>
+</objects>
