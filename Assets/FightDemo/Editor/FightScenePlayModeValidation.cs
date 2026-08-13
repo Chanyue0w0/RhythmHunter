@@ -15,6 +15,7 @@ namespace RhythmHunter.FightDemoEditor
         private const string ActiveKey = "FightDemo.Validation.Active";
         private const string StartedAtKey = "FightDemo.Validation.StartedAt";
         private const string AttemptedKey = "FightDemo.Validation.Attempted";
+        private const string NormalAttackAttemptedKey = "FightDemo.Validation.NormalAttackAttempted";
         private const string PassedKey = "FightDemo.Validation.Passed";
         private const string FailureKey = "FightDemo.Validation.Failure";
 
@@ -37,9 +38,17 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             EditorSceneManager.OpenScene(FightSceneBuilder.ScenePath);
+            if (!ValidateWorldBattlefield(out string battlefieldFailure))
+            {
+                Debug.LogError($"FIGHT_SCENE_SMOKE_TEST_FAIL: {battlefieldFailure}");
+                EditorApplication.Exit(1);
+                return;
+            }
+
             SessionState.SetBool(ActiveKey, true);
             SessionState.SetFloat(StartedAtKey, 0f);
             SessionState.SetBool(AttemptedKey, false);
+            SessionState.SetBool(NormalAttackAttemptedKey, false);
             SessionState.SetBool(PassedKey, false);
             SessionState.SetString(FailureKey, "FightScene validation timed out.");
 
@@ -84,6 +93,8 @@ namespace RhythmHunter.FightDemoEditor
             FmodBeatClock clock = Object.FindFirstObjectByType<FmodBeatClock>();
             FightInputRouter input = Object.FindFirstObjectByType<FightInputRouter>();
             FightCombatController fight = Object.FindFirstObjectByType<FightCombatController>();
+            FightBattlefieldPresenter battlefield = Object.FindFirstObjectByType<FightBattlefieldPresenter>();
+            FightUnitSlot tank = fight != null ? fight.TankSlot : null;
 
             if (clock != null && !string.IsNullOrEmpty(clock.LastError))
             {
@@ -97,7 +108,15 @@ namespace RhythmHunter.FightDemoEditor
                 return;
             }
 
-            if (clock != null && fight != null && clock.ReceivedBeatCount >= 4 &&
+            if (clock != null && fight != null && tank != null && clock.ReceivedBeatCount >= 1 &&
+                clock.LatestBeat.Beat != 4 && !SessionState.GetBool(NormalAttackAttemptedKey, false) &&
+                clock.TryGetBeatPhase(out float normalPhase) && normalPhase < 0.08f)
+            {
+                SessionState.SetBool(NormalAttackAttemptedKey, true);
+                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Tank);
+            }
+
+            if (clock != null && fight != null && battlefield != null && clock.ReceivedBeatCount >= 4 &&
                 clock.LatestBeat.Beat == 4 && !SessionState.GetBool(AttemptedKey, false) &&
                 clock.TryGetBeatPhase(out float phase) && phase < 0.08f)
             {
@@ -108,13 +127,14 @@ namespace RhythmHunter.FightDemoEditor
             if (fight != null && SessionState.GetBool(AttemptedKey, false) && fight.BlockedAttackCount >= 1)
             {
                 bool passed = fight.PartyHp == fight.MaxPartyHp && fight.ReceivedAttackCount == 0 &&
+                              tank != null && tank.NormalAttackPlayCount >= 1 &&
                               clock != null && clock.IsPlaying;
                 SessionState.SetBool(PassedKey, passed);
                 SessionState.SetString(
                     FailureKey,
                     passed
                         ? string.Empty
-                        : $"Guard resolution invalid. HP={fight.PartyHp}/{fight.MaxPartyHp}, Hits={fight.ReceivedAttackCount}.");
+                        : $"Fight flow invalid. HP={fight.PartyHp}/{fight.MaxPartyHp}, Hits={fight.ReceivedAttackCount}, NormalVFX={tank?.NormalAttackPlayCount ?? 0}.");
                 EditorApplication.ExitPlaymode();
                 return;
             }
@@ -137,6 +157,61 @@ namespace RhythmHunter.FightDemoEditor
                    HasBindings(asset, "Character2Attack", "<Keyboard>/w", "<Gamepad>/buttonNorth", out failure) &&
                    HasBindings(asset, "Character3Attack", "<Keyboard>/e", "<Gamepad>/buttonEast", out failure) &&
                    HasBindings(asset, "FeverUlt", "<Keyboard>/r", "<Gamepad>/buttonSouth", out failure);
+        }
+
+        private static bool ValidateWorldBattlefield(out string failure)
+        {
+            failure = string.Empty;
+            FightUnitSlot[] slots = Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
+            if (slots.Length != 6)
+            {
+                failure = $"Expected six world-space FightUnitSlot objects, found {slots.Length}.";
+                return false;
+            }
+
+            int heroCount = 0;
+            int enemyCount = 0;
+            FightUnitSlot tank = null;
+            foreach (FightUnitSlot slot in slots)
+            {
+                if (slot.transform is RectTransform)
+                {
+                    failure = $"{slot.name} is still a Canvas RectTransform.";
+                    return false;
+                }
+
+                if (slot.Team == FightUnitSlot.UnitTeam.Hero)
+                    heroCount++;
+                else
+                    enemyCount++;
+
+                if (slot.Role == FightUnitSlot.UnitRole.Tank)
+                    tank = slot;
+
+                if (slot.MaxHp <= 0 || slot.AttackPower < 0 || slot.ActorRoot == null ||
+                    slot.NormalAttackEffectSpawnPoint == null)
+                {
+                    failure = $"{slot.name} is missing prefab/stat/VFX slot data.";
+                    return false;
+                }
+            }
+
+            if (heroCount != 3 || enemyCount != 3 || tank == null)
+            {
+                failure = $"World slot roles invalid. Heroes={heroCount}, Enemies={enemyCount}, Tank={(tank != null)}.";
+                return false;
+            }
+
+            FightCombatController fight = Object.FindFirstObjectByType<FightCombatController>();
+            FightBattlefieldPresenter presenter = Object.FindFirstObjectByType<FightBattlefieldPresenter>();
+            if (fight == null || presenter == null || fight.TankSlot != tank || presenter.HeroSlots?.Length != 3 ||
+                presenter.EnemySlots?.Length != 3)
+            {
+                failure = "Fight controller and world presenter references are incomplete.";
+                return false;
+            }
+
+            return true;
         }
 
         private static bool HasBindings(
@@ -193,6 +268,7 @@ namespace RhythmHunter.FightDemoEditor
             SessionState.EraseBool(ActiveKey);
             SessionState.EraseFloat(StartedAtKey);
             SessionState.EraseBool(AttemptedKey);
+            SessionState.EraseBool(NormalAttackAttemptedKey);
             SessionState.EraseBool(PassedKey);
             SessionState.EraseString(FailureKey);
         }

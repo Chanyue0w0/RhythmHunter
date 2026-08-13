@@ -31,22 +31,16 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Slider beatProgress;
         [SerializeField] private Slider healthBar;
 
-        [Header("Battlefield UI")]
-        [SerializeField] private Image[] enemySlots;
-        [SerializeField] private Image[] heroSlots;
-        [SerializeField] private Image shieldEffect;
+        [Header("Screen Feedback")]
         [SerializeField] private Image screenFlash;
 
         private float resultTimer;
-        private float shieldTimer;
         private float flashTimer;
         private int currentBeat;
         private int perfectCalls;
         private int missCalls;
         private int blockedAttacks;
         private int receivedAttacks;
-        private int pulsingHero = -1;
-        private float heroPulse;
 
         public void Configure(
             FmodBeatClock clock,
@@ -62,9 +56,6 @@ namespace RhythmHunter.FightDemo
             Image[] beats,
             Slider progress,
             Slider hpBar,
-            Image[] enemies,
-            Image[] heroes,
-            Image shield,
             Image flash)
         {
             beatClock = clock;
@@ -80,9 +71,6 @@ namespace RhythmHunter.FightDemo
             beatNodes = beats;
             beatProgress = progress;
             healthBar = hpBar;
-            enemySlots = enemies;
-            heroSlots = heroes;
-            shieldEffect = shield;
             screenFlash = flash;
         }
 
@@ -104,8 +92,6 @@ namespace RhythmHunter.FightDemo
             SetResult("GET READY", Cyan, "Enemy attacks land on every fourth beat.", 2f);
             UpdateStatistics();
 
-            if (shieldEffect != null)
-                shieldEffect.color = new Color(Green.r, Green.g, Green.b, 0f);
             if (screenFlash != null)
                 screenFlash.color = new Color(Red.r, Red.g, Red.b, 0f);
         }
@@ -127,7 +113,6 @@ namespace RhythmHunter.FightDemo
             UpdatePlaybackReadout();
             UpdateBeatProgress();
             UpdateFades();
-            UpdateHeroPulse();
         }
 
         private void OnFightBeat(FmodBeatClock.BeatSnapshot beat)
@@ -166,15 +151,10 @@ namespace RhythmHunter.FightDemo
                 }
             }
 
-            if (enemySlots != null && enemySlots.Length > 1 && enemySlots[1] != null)
-                enemySlots[1].color = beat.Beat == 4 ? Red : new Color(0.52f, 0.18f, 0.22f, 1f);
         }
 
         private void OnHeroCalled(FightCombatController.HeroCallResult call)
         {
-            pulsingHero = HeroIndex(call.Command);
-            heroPulse = 1f;
-
             if (call.Command == FightInputRouter.HeroCommand.Ultimate)
             {
                 SetResult("ULTIMATE RESERVED", Purple, "A / R • redesign in progress", 1.5f);
@@ -217,7 +197,6 @@ namespace RhythmHunter.FightDemo
             if (attack.Blocked)
             {
                 blockedAttacks++;
-                shieldTimer = 0.8f;
                 SetResult("BLOCKED", Green, "Tank absorbed the heavy attack", 1.4f);
             }
             else
@@ -233,7 +212,7 @@ namespace RhythmHunter.FightDemo
         private void OnPartyHealthChanged(int current, int maximum)
         {
             if (healthText != null)
-                healthText.text = $"PARTY HP   {current} / {maximum}";
+                healthText.text = $"TANK HP   {current} / {maximum}";
 
             if (healthBar != null)
                 healthBar.SetValueWithoutNotify(maximum > 0 ? (float)current / maximum : 0f);
@@ -293,35 +272,11 @@ namespace RhythmHunter.FightDemo
                 detailText.color = color;
             }
 
-            shieldTimer = Mathf.Max(0f, shieldTimer - Time.unscaledDeltaTime);
-            if (shieldEffect != null)
-            {
-                float alpha = Mathf.Clamp01(shieldTimer * 3f) * 0.55f;
-                shieldEffect.color = new Color(Green.r, Green.g, Green.b, alpha);
-                shieldEffect.rectTransform.localScale = Vector3.one * Mathf.Lerp(1f, 1.25f, alpha);
-            }
-
             flashTimer = Mathf.Max(0f, flashTimer - Time.unscaledDeltaTime);
             if (screenFlash != null)
             {
                 float alpha = Mathf.Clamp01(flashTimer * 4f) * 0.28f;
                 screenFlash.color = new Color(Red.r, Red.g, Red.b, alpha);
-            }
-        }
-
-        private void UpdateHeroPulse()
-        {
-            if (heroSlots == null)
-                return;
-
-            heroPulse = Mathf.MoveTowards(heroPulse, 0f, Time.unscaledDeltaTime * 3.5f);
-            for (int i = 0; i < heroSlots.Length; i++)
-            {
-                if (heroSlots[i] == null)
-                    continue;
-
-                float scale = i == pulsingHero ? Mathf.Lerp(1f, 1.14f, heroPulse) : 1f;
-                heroSlots[i].rectTransform.localScale = Vector3.one * scale;
             }
         }
 
@@ -350,17 +305,6 @@ namespace RhythmHunter.FightDemo
             statisticsText.text =
                 $"CALLS  PERFECT {perfectCalls:00}  MISS {missCalls:00}     " +
                 $"DEFENSE  BLOCK {blockedAttacks:00}  HIT {receivedAttacks:00}";
-        }
-
-        private static int HeroIndex(FightInputRouter.HeroCommand command)
-        {
-            return command switch
-            {
-                FightInputRouter.HeroCommand.Tank => 0,
-                FightInputRouter.HeroCommand.Support => 1,
-                FightInputRouter.HeroCommand.Damage => 2,
-                _ => -1
-            };
         }
 
         private static string FormatDelta(double deltaMs)

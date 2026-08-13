@@ -55,6 +55,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FmodBeatClock beatClock;
         [SerializeField] private FmodRhythmJudge rhythmJudge;
         [SerializeField] private FightInputRouter inputRouter;
+        [SerializeField] private FightUnitSlot tankSlot;
+        [SerializeField] private FightUnitSlot activeEnemySlot;
 
         [Header("Prototype Rules")]
         [SerializeField, Min(1)] private int maxPartyHp = 5;
@@ -83,25 +85,36 @@ namespace RhythmHunter.FightDemo
         public bool HasPendingEnemyAttack => pendingEnemyAttack;
         public int BlockedAttackCount => blockedAttackCount;
         public int ReceivedAttackCount => receivedAttackCount;
+        public FightUnitSlot TankSlot => tankSlot;
+        public FightUnitSlot ActiveEnemySlot => activeEnemySlot;
 
         public void Configure(
             FmodBeatClock clock,
             FmodRhythmJudge judge,
             FightInputRouter router,
+            FightUnitSlot tank = null,
+            FightUnitSlot enemy = null,
             int partyHealth = 5,
             int attackDamage = 1)
         {
             beatClock = clock;
             rhythmJudge = judge;
             inputRouter = router;
-            maxPartyHp = Mathf.Max(1, partyHealth);
-            enemyAttackDamage = Mathf.Max(1, attackDamage);
+            tankSlot = tank;
+            activeEnemySlot = enemy;
+            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(1, partyHealth);
+            enemyAttackDamage = activeEnemySlot != null
+                ? Mathf.Max(1, activeEnemySlot.AttackPower)
+                : Mathf.Max(1, attackDamage);
             partyHp = maxPartyHp;
         }
 
         private void Awake()
         {
+            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : maxPartyHp;
             partyHp = maxPartyHp;
+            if (tankSlot != null)
+                tankSlot.RestoreFullHealth();
         }
 
         private void OnEnable()
@@ -234,7 +247,15 @@ namespace RhythmHunter.FightDemo
             else
                 receivedAttackCount++;
 
-            partyHp = Mathf.Max(0, partyHp - damage);
+            partyHp = tankSlot != null
+                ? tankSlot.CurrentHp
+                : Mathf.Max(0, partyHp - damage);
+
+            if (!blocked && tankSlot != null)
+            {
+                tankSlot.TakeDamage(damage);
+                partyHp = tankSlot.CurrentHp;
+            }
             pendingEnemyAttack = false;
 
             EnemyAttackResolved?.Invoke(new EnemyAttackResult(
