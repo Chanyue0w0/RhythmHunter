@@ -20,6 +20,9 @@ namespace RhythmHunter.PirateOceanPrototype
         [SerializeField] private Rect windowRect = new(18f, 18f, 390f, 650f);
 
         public bool PanelVisible => panelVisible;
+        public PirateOceanWaveController OceanWaves => oceanWaves;
+        public PirateShipMotionController ShipMotion => shipMotion;
+        public PirateBossCameraController BossCamera => bossCamera;
 
         public void Configure(
             PirateOceanWaveController waveController,
@@ -145,21 +148,21 @@ namespace RhythmHunter.PirateOceanPrototype
                 setter(nextValue);
         }
 
-        private void ApplyCalmPreset()
+        public void ApplyCalmPreset()
         {
             ApplyPreset(
                 0.55f, 0.18f, 0.75f, 0.65f, 0.4f,
                 0.55f, 0.08f, 0.035f, 1.3f, 0.012f, 0.55f);
         }
 
-        private void ApplyCombatPreset()
+        public void ApplyCombatPreset()
         {
             ApplyPreset(
                 1f, 0.34f, 1.25f, 0.82f, 0.72f,
                 1f, 0.14f, 0.08f, 2.8f, 0.025f, 0.78f);
         }
 
-        private void ApplyStormPreset()
+        public void ApplyStormPreset()
         {
             ApplyPreset(
                 1.5f, 0.65f, 2.4f, 1.15f, 1f,

@@ -161,6 +161,9 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
+            if (!PirateOceanPrototypeValidation.ValidateScene(false))
+                Debug.LogError("[PirateOceanPrototype] Generated scene failed integration validation.");
+
             if (!Application.isBatchMode
                 && !replacingLoadedPrototype
                 && previousScene.IsValid()
