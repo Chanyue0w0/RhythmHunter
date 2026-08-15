@@ -62,6 +62,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             bool foundContinuousSurface = false;
             bool foundShipMotion = false;
             bool foundBossCamera = false;
+            bool foundRuntimePanel = false;
             foreach (GameObject root in scene.GetRootGameObjects())
             {
                 if (root.GetComponentInChildren<PirateOceanWaveController>(true) != null)
@@ -72,12 +73,18 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
                     foundShipMotion = true;
                 if (root.GetComponentInChildren<PirateBossCameraController>(true) != null)
                     foundBossCamera = true;
+                if (root.GetComponentInChildren<PirateOceanRuntimePanel>(true) != null)
+                    foundRuntimePanel = true;
             }
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
 
-            return foundWaveController && foundContinuousSurface && foundShipMotion && foundBossCamera;
+            return foundWaveController
+                && foundContinuousSurface
+                && foundShipMotion
+                && foundBossCamera
+                && foundRuntimePanel;
         }
 
         [MenuItem("Rhythm Hunter/Build Pirate Ocean Prototype Scene")]
@@ -109,7 +116,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
 
             Transform prototypeRoot = new GameObject("PirateOceanPrototype").transform;
             Transform environmentRoot = CreateEmpty("EnvironmentRoot", prototypeRoot);
-            CreateEnvironment(environmentRoot, sprite, font);
+            PirateOceanWaveController waveController = CreateEnvironment(environmentRoot, sprite, font);
 
             Transform shipSystemRoot = CreateEmpty("ShipSystemRoot", prototypeRoot);
             Transform shipMotionRoot = CreateEmpty("ShipMotionRoot (Visuals Only)", shipSystemRoot);
@@ -131,7 +138,12 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             bossRoot.localPosition = new Vector3(0f, 8.1f, 0f);
             CreateBossPlaceholder(bossRoot, sprite, font);
 
-            CreateCinemachineSystem(prototypeRoot, mainCamera, shipCombatTarget, bossWideTarget);
+            PirateBossCameraController bossCamera = CreateCinemachineSystem(
+                prototypeRoot,
+                mainCamera,
+                shipCombatTarget,
+                bossWideTarget);
+            CreateRuntimePanel(prototypeRoot, waveController, shipMotion, bossCamera);
 
             CreateWorldText(
                 "PrototypeTitle",
@@ -177,7 +189,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             return camera;
         }
 
-        private static void CreateCinemachineSystem(
+        private static PirateBossCameraController CreateCinemachineSystem(
             Transform prototypeRoot,
             Camera mainCamera,
             Transform shipCombatTarget,
@@ -199,6 +211,18 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
 
             PirateBossCameraController controller = cameraSystemRoot.gameObject.AddComponent<PirateBossCameraController>();
             controller.Configure(mainCamera.GetComponent<CinemachineBrain>(), combatCamera, bossCamera);
+            return controller;
+        }
+
+        private static void CreateRuntimePanel(
+            Transform prototypeRoot,
+            PirateOceanWaveController waveController,
+            PirateShipMotionController shipMotion,
+            PirateBossCameraController bossCamera)
+        {
+            GameObject panelObject = new("RuntimeControlPanel", typeof(PirateOceanRuntimePanel));
+            panelObject.transform.SetParent(prototypeRoot, false);
+            panelObject.GetComponent<PirateOceanRuntimePanel>().Configure(waveController, shipMotion, bossCamera);
         }
 
         private static CinemachineCamera CreateCinemachineCamera(
@@ -224,7 +248,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             return camera;
         }
 
-        private static void CreateEnvironment(Transform root, Sprite sprite, Font font)
+        private static PirateOceanWaveController CreateEnvironment(Transform root, Sprite sprite, Font font)
         {
             CreateWorldSprite("Sky", root, sprite, SkyTop, new Vector3(0f, 2.2f, 5f), new Vector2(24f, 15f), -100);
             CreateWorldSprite("HorizonBand", root, sprite, SkyHorizon, new Vector3(0f, -0.1f, 4f), new Vector2(24f, 4.2f), -95);
@@ -268,6 +292,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
                 0.014f,
                 FontStyle.Normal,
                 101);
+            return waveController;
         }
 
         private static Transform[] CreateWaveBand(
