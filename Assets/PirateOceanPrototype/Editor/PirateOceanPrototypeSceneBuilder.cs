@@ -2,6 +2,7 @@ using RhythmHunter.FightDemo;
 using RhythmHunter.PirateOceanPrototype;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -60,6 +61,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             bool foundWaveController = false;
             bool foundContinuousSurface = false;
             bool foundShipMotion = false;
+            bool foundBossCamera = false;
             foreach (GameObject root in scene.GetRootGameObjects())
             {
                 if (root.GetComponentInChildren<PirateOceanWaveController>(true) != null)
@@ -68,12 +70,14 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
                     foundContinuousSurface = true;
                 if (root.GetComponentInChildren<PirateShipMotionController>(true) != null)
                     foundShipMotion = true;
+                if (root.GetComponentInChildren<PirateBossCameraController>(true) != null)
+                    foundBossCamera = true;
             }
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
 
-            return foundWaveController && foundContinuousSurface && foundShipMotion;
+            return foundWaveController && foundContinuousSurface && foundShipMotion && foundBossCamera;
         }
 
         [MenuItem("Rhythm Hunter/Build Pirate Ocean Prototype Scene")]
@@ -101,7 +105,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             if (!Application.isBatchMode && replacingLoadedPrototype)
                 EditorSceneManager.CloseScene(previousScene, true);
 
-            CreateCamera();
+            Camera mainCamera = CreateCamera();
 
             Transform prototypeRoot = new GameObject("PirateOceanPrototype").transform;
             Transform environmentRoot = CreateEmpty("EnvironmentRoot", prototypeRoot);
@@ -120,12 +124,14 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             shipMotion.Configure(shipMotionRoot, combatRoot);
 
             Transform cameraTargets = CreateEmpty("CameraTargets", prototypeRoot);
-            CreateMarker("ShipCombatTarget", cameraTargets, new Vector3(0f, 0.25f, 0f));
-            CreateMarker("BossWideTarget", cameraTargets, new Vector3(0f, 3.1f, 0f));
+            Transform shipCombatTarget = CreateMarker("ShipCombatTarget", cameraTargets, new Vector3(0f, 0.25f, 0f));
+            Transform bossWideTarget = CreateMarker("BossWideTarget", cameraTargets, new Vector3(0f, 3.1f, 0f));
 
             Transform bossRoot = CreateEmpty("BossPreviewRoot (Wide Shot)", prototypeRoot);
             bossRoot.localPosition = new Vector3(0f, 8.1f, 0f);
             CreateBossPlaceholder(bossRoot, sprite, font);
+
+            CreateCinemachineSystem(prototypeRoot, mainCamera, shipCombatTarget, bossWideTarget);
 
             CreateWorldText(
                 "PrototypeTitle",
@@ -157,9 +163,9 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             Debug.Log($"[PirateOceanPrototype] Scene skeleton created: {ScenePath}");
         }
 
-        private static void CreateCamera()
+        private static Camera CreateCamera()
         {
-            GameObject cameraObject = new("Main Camera", typeof(Camera), typeof(AudioListener));
+            GameObject cameraObject = new("Main Camera", typeof(Camera), typeof(AudioListener), typeof(CinemachineBrain));
             cameraObject.tag = "MainCamera";
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
 
@@ -168,6 +174,54 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             camera.backgroundColor = SkyTop;
             camera.orthographic = true;
             camera.orthographicSize = 5.35f;
+            return camera;
+        }
+
+        private static void CreateCinemachineSystem(
+            Transform prototypeRoot,
+            Camera mainCamera,
+            Transform shipCombatTarget,
+            Transform bossWideTarget)
+        {
+            Transform cameraSystemRoot = CreateEmpty("CinemachineCameraSystem", prototypeRoot);
+            CinemachineCamera combatCamera = CreateCinemachineCamera(
+                "ShipCombatCamera",
+                cameraSystemRoot,
+                shipCombatTarget,
+                5.35f,
+                20);
+            CinemachineCamera bossCamera = CreateCinemachineCamera(
+                "BossWideCamera",
+                cameraSystemRoot,
+                bossWideTarget,
+                8.1f,
+                10);
+
+            PirateBossCameraController controller = cameraSystemRoot.gameObject.AddComponent<PirateBossCameraController>();
+            controller.Configure(mainCamera.GetComponent<CinemachineBrain>(), combatCamera, bossCamera);
+        }
+
+        private static CinemachineCamera CreateCinemachineCamera(
+            string name,
+            Transform parent,
+            Transform framingTarget,
+            float orthographicSize,
+            int priority)
+        {
+            GameObject cameraObject = new(name, typeof(CinemachineCamera));
+            cameraObject.transform.SetParent(parent, false);
+            Vector3 targetPosition = framingTarget.position;
+            cameraObject.transform.position = new Vector3(targetPosition.x, targetPosition.y, -10f);
+
+            CinemachineCamera camera = cameraObject.GetComponent<CinemachineCamera>();
+            LensSettings lens = camera.Lens;
+            lens.ModeOverride = LensSettings.OverrideModes.Orthographic;
+            lens.OrthographicSize = orthographicSize;
+            lens.NearClipPlane = 0.1f;
+            lens.FarClipPlane = 1000f;
+            camera.Lens = lens;
+            camera.Priority = priority;
+            return camera;
         }
 
         private static void CreateEnvironment(Transform root, Sprite sprite, Font font)
@@ -356,10 +410,11 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             return result;
         }
 
-        private static void CreateMarker(string name, Transform parent, Vector3 localPosition)
+        private static Transform CreateMarker(string name, Transform parent, Vector3 localPosition)
         {
             Transform marker = CreateEmpty(name, parent);
             marker.localPosition = localPosition;
+            return marker;
         }
 
         private static SpriteRenderer CreateWorldSprite(string name, Transform parent, Sprite sprite, Color color, Vector3 localPosition, Vector2 size, int sortingOrder)
