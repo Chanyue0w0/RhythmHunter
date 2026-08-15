@@ -1,4 +1,5 @@
 using RhythmHunter.FightDemo;
+using RhythmHunter.PirateOceanPrototype;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -45,8 +46,31 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneContainsWaveController())
                 BuildScene();
+        }
+
+        private static bool SceneContainsWaveController()
+        {
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            bool wasLoaded = scene.IsValid() && scene.isLoaded;
+            if (!wasLoaded)
+                scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+
+            bool found = false;
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                if (root.GetComponentInChildren<PirateOceanWaveController>(true) != null)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!wasLoaded)
+                EditorSceneManager.CloseScene(scene, true);
+
+            return found;
         }
 
         [MenuItem("Rhythm Hunter/Build Pirate Ocean Prototype Scene")]
@@ -63,10 +87,16 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             }
 
             Scene previousScene = SceneManager.GetActiveScene();
+            bool replacingLoadedPrototype = previousScene.IsValid()
+                && previousScene.isLoaded
+                && previousScene.path == ScenePath;
             NewSceneMode mode = Application.isBatchMode ? NewSceneMode.Single : NewSceneMode.Additive;
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, mode);
             scene.name = "PirateOceanPrototype";
             SceneManager.SetActiveScene(scene);
+
+            if (!Application.isBatchMode && replacingLoadedPrototype)
+                EditorSceneManager.CloseScene(previousScene, true);
 
             CreateCamera();
 
@@ -105,7 +135,11 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            if (!Application.isBatchMode && previousScene.IsValid() && previousScene.isLoaded && previousScene != scene)
+            if (!Application.isBatchMode
+                && !replacingLoadedPrototype
+                && previousScene.IsValid()
+                && previousScene.isLoaded
+                && previousScene != scene)
             {
                 SceneManager.SetActiveScene(previousScene);
                 EditorSceneManager.CloseScene(scene, true);
@@ -134,20 +168,81 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             CreateWorldSprite("HorizonBand", root, sprite, SkyHorizon, new Vector3(0f, -0.1f, 4f), new Vector2(24f, 4.2f), -95);
 
             Transform oceanRoot = CreateEmpty("OceanVisualRoot (Wave Stage)", root);
-            CreateWorldSprite("OceanFar", oceanRoot, sprite, OceanFar, new Vector3(0f, -2.6f, 3f), new Vector2(24f, 5.2f), -80);
-            CreateWorldSprite("OceanNear", oceanRoot, sprite, OceanNear, new Vector3(0f, -4.25f, 2f), new Vector2(24f, 3.3f), 20);
-            CreateWorldSprite("FoamGuide", oceanRoot, sprite, Foam, new Vector3(0f, -2.25f, 1f), new Vector2(24f, 0.12f), 19);
+            CreateWorldSprite("OceanFarBase", oceanRoot, sprite, OceanFar, new Vector3(0f, -2.6f, 3f), new Vector2(24f, 5.2f), -80);
+            CreateWorldSprite("OceanNearBase", oceanRoot, sprite, OceanNear, new Vector3(0f, -4.25f, 2f), new Vector2(24f, 3.3f), 20);
+
+            Transform farBand = CreateEmpty("FarWaveBand", oceanRoot);
+            Transform midBand = CreateEmpty("MidWaveBand", oceanRoot);
+            Transform nearBand = CreateEmpty("NearWaveBand", oceanRoot);
+            Transform foamBand = CreateEmpty("FoamBand", oceanRoot);
+
+            Transform[] farSegments = CreateWaveBand("FarWave", farBand, sprite, new Color(0.2f, 0.55f, 0.64f, 0.62f), -70, 8, 3.15f, -0.55f, new Vector2(2.7f, 0.09f));
+            Transform[] midSegments = CreateWaveBand("MidWave", midBand, sprite, new Color(0.12f, 0.46f, 0.6f, 0.78f), -60, 9, 2.75f, -1.62f, new Vector2(2.25f, 0.13f));
+            Transform[] nearSegments = CreateWaveBand("NearWave", nearBand, sprite, new Color(0.07f, 0.34f, 0.52f, 1f), 24, 8, 3.2f, -2.48f, new Vector2(2.7f, 0.2f));
+            SpriteRenderer[] foamSegments = CreateFoamBand(foamBand, sprite, 11, 2.25f, -2.3f);
+
+            PirateOceanWaveController waveController = oceanRoot.gameObject.AddComponent<PirateOceanWaveController>();
+            waveController.Configure(farSegments, midSegments, nearSegments, foamSegments);
 
             CreateWorldText(
                 "OceanStageNote",
                 oceanRoot,
                 font,
-                "OCEAN VISUAL ROOT  -  WAVE SYSTEM WILL BE ADDED IN STAGE 2",
+                "OCEAN WAVE CONTROLLER  -  ADJUST SEA STATE IN THE INSPECTOR",
                 new Color(0.75f, 0.94f, 1f, 0.45f),
                 new Vector3(0f, -4.65f, 0f),
                 0.014f,
                 FontStyle.Normal,
                 101);
+        }
+
+        private static Transform[] CreateWaveBand(
+            string prefix,
+            Transform parent,
+            Sprite sprite,
+            Color color,
+            int sortingOrder,
+            int count,
+            float spacing,
+            float y,
+            Vector2 size)
+        {
+            Transform[] segments = new Transform[count];
+            float startX = -(count - 1) * spacing * 0.5f;
+            for (int i = 0; i < count; i++)
+            {
+                SpriteRenderer renderer = CreateWorldSprite(
+                    $"{prefix}_{i + 1:00}",
+                    parent,
+                    sprite,
+                    color,
+                    new Vector3(startX + i * spacing, y, 0f),
+                    size,
+                    sortingOrder);
+                segments[i] = renderer.transform;
+            }
+
+            return segments;
+        }
+
+        private static SpriteRenderer[] CreateFoamBand(Transform parent, Sprite sprite, int count, float spacing, float y)
+        {
+            SpriteRenderer[] segments = new SpriteRenderer[count];
+            float startX = -(count - 1) * spacing * 0.5f;
+            for (int i = 0; i < count; i++)
+            {
+                float width = i % 2 == 0 ? 1.35f : 0.9f;
+                segments[i] = CreateWorldSprite(
+                    $"Foam_{i + 1:00}",
+                    parent,
+                    sprite,
+                    Foam,
+                    new Vector3(startX + i * spacing, y, 0f),
+                    new Vector2(width, 0.075f),
+                    26);
+            }
+
+            return segments;
         }
 
         private static void CreateShip(Transform root, Sprite sprite)
@@ -295,6 +390,8 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
                 AssetDatabase.CreateFolder("Assets/PirateOceanPrototype", "Scenes");
             if (!AssetDatabase.IsValidFolder("Assets/PirateOceanPrototype/Editor"))
                 AssetDatabase.CreateFolder("Assets/PirateOceanPrototype", "Editor");
+            if (!AssetDatabase.IsValidFolder("Assets/PirateOceanPrototype/Scripts"))
+                AssetDatabase.CreateFolder("Assets/PirateOceanPrototype", "Scripts");
         }
     }
 }
