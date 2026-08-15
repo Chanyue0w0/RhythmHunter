@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity
+    guid: 7dd59521754ea9c42972be1ff697a605
+  - enabled: 1
     path: Assets/FightDemo/Scenes/FightScene.unity
     guid: 684d6754bf3bae64c9fd000158b93fc7
   - enabled: 1
