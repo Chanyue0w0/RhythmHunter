@@ -33,6 +33,7 @@ namespace RhythmHunter.PirateOceanPrototype
         [SerializeField, Range(0f, 12f)] private float previewPhase;
 
         [Header("Generated Wave Segments")]
+        [SerializeField] private PirateOceanSurface continuousSurface;
         [SerializeField] private Transform[] farWaveSegments;
         [SerializeField] private Transform[] midWaveSegments;
         [SerializeField] private Transform[] nearWaveSegments;
@@ -57,13 +58,16 @@ namespace RhythmHunter.PirateOceanPrototype
         public float Frequency => frequency;
         public float FoamAmount => foamAmount;
         public TravelDirection Direction => direction;
+        public PirateOceanSurface ContinuousSurface => continuousSurface;
 
         public void Configure(
+            PirateOceanSurface generatedSurface,
             Transform[] farSegments,
             Transform[] midSegments,
             Transform[] nearSegments,
             SpriteRenderer[] generatedFoamSegments)
         {
+            continuousSurface = generatedSurface;
             farWaveSegments = farSegments;
             midWaveSegments = midSegments;
             nearWaveSegments = nearSegments;
@@ -180,6 +184,8 @@ namespace RhythmHunter.PirateOceanPrototype
             ApplyBand(midWaveSegments, midBasePositions, midBaseScales, time, directionSign, 0.68f, 0.9f, 1.35f);
             ApplyBand(nearWaveSegments, nearBasePositions, nearBaseScales, time, directionSign, 1f, 1.08f, 2.6f);
             ApplyFoam(time, directionSign);
+            if (continuousSurface != null)
+                continuousSurface.ApplyWave(time, intensity, waveHeight, waveSpeed, frequency, directionSign);
         }
 
         private void ApplyBand(

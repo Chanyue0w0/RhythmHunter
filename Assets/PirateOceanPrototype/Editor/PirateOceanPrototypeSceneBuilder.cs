@@ -46,31 +46,31 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneContainsWaveController())
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneContainsCurrentOceanSystem())
                 BuildScene();
         }
 
-        private static bool SceneContainsWaveController()
+        private static bool SceneContainsCurrentOceanSystem()
         {
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             bool wasLoaded = scene.IsValid() && scene.isLoaded;
             if (!wasLoaded)
                 scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
 
-            bool found = false;
+            bool foundWaveController = false;
+            bool foundContinuousSurface = false;
             foreach (GameObject root in scene.GetRootGameObjects())
             {
                 if (root.GetComponentInChildren<PirateOceanWaveController>(true) != null)
-                {
-                    found = true;
-                    break;
-                }
+                    foundWaveController = true;
+                if (root.GetComponentInChildren<PirateOceanSurface>(true) != null)
+                    foundContinuousSurface = true;
             }
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
 
-            return found;
+            return foundWaveController && foundContinuousSurface;
         }
 
         [MenuItem("Rhythm Hunter/Build Pirate Ocean Prototype Scene")]
@@ -168,8 +168,20 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             CreateWorldSprite("HorizonBand", root, sprite, SkyHorizon, new Vector3(0f, -0.1f, 4f), new Vector2(24f, 4.2f), -95);
 
             Transform oceanRoot = CreateEmpty("OceanVisualRoot (Wave Stage)", root);
-            CreateWorldSprite("OceanFarBase", oceanRoot, sprite, OceanFar, new Vector3(0f, -2.6f, 3f), new Vector2(24f, 5.2f), -80);
+            CreateWorldSprite("OceanDepthBackdrop", oceanRoot, sprite, OceanFar, new Vector3(0f, -3.55f, 3f), new Vector2(28f, 7.1f), -85);
             CreateWorldSprite("OceanNearBase", oceanRoot, sprite, OceanNear, new Vector3(0f, -4.25f, 2f), new Vector2(24f, 3.3f), 20);
+
+            GameObject continuousWaterObject = new("ContinuousWaterSurface", typeof(PirateOceanSurface));
+            continuousWaterObject.transform.SetParent(oceanRoot, false);
+            PirateOceanSurface continuousSurface = continuousWaterObject.GetComponent<PirateOceanSurface>();
+            continuousSurface.Configure(
+                28f,
+                -0.25f,
+                -7f,
+                96,
+                -75,
+                new Color(0.08f, 0.44f, 0.58f, 1f),
+                new Color(0.018f, 0.09f, 0.2f, 1f));
 
             Transform farBand = CreateEmpty("FarWaveBand", oceanRoot);
             Transform midBand = CreateEmpty("MidWaveBand", oceanRoot);
@@ -182,7 +194,7 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             SpriteRenderer[] foamSegments = CreateFoamBand(foamBand, sprite, 11, 2.25f, -2.3f);
 
             PirateOceanWaveController waveController = oceanRoot.gameObject.AddComponent<PirateOceanWaveController>();
-            waveController.Configure(farSegments, midSegments, nearSegments, foamSegments);
+            waveController.Configure(continuousSurface, farSegments, midSegments, nearSegments, foamSegments);
 
             CreateWorldText(
                 "OceanStageNote",
@@ -342,7 +354,11 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             GameObject gameObject = new(name, typeof(SpriteRenderer));
             gameObject.transform.SetParent(parent, false);
             gameObject.transform.localPosition = localPosition;
-            gameObject.transform.localScale = new Vector3(size.x, size.y, 1f);
+
+            Vector2 nativeSize = sprite != null ? sprite.bounds.size : Vector2.one;
+            float scaleX = nativeSize.x > Mathf.Epsilon ? size.x / nativeSize.x : size.x;
+            float scaleY = nativeSize.y > Mathf.Epsilon ? size.y / nativeSize.y : size.y;
+            gameObject.transform.localScale = new Vector3(scaleX, scaleY, 1f);
 
             SpriteRenderer renderer = gameObject.GetComponent<SpriteRenderer>();
             renderer.sprite = sprite;
