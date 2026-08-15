@@ -46,11 +46,11 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneContainsCurrentOceanSystem())
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneContainsCurrentPrototypeSystems())
                 BuildScene();
         }
 
-        private static bool SceneContainsCurrentOceanSystem()
+        private static bool SceneContainsCurrentPrototypeSystems()
         {
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
             bool wasLoaded = scene.IsValid() && scene.isLoaded;
@@ -59,18 +59,21 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
 
             bool foundWaveController = false;
             bool foundContinuousSurface = false;
+            bool foundShipMotion = false;
             foreach (GameObject root in scene.GetRootGameObjects())
             {
                 if (root.GetComponentInChildren<PirateOceanWaveController>(true) != null)
                     foundWaveController = true;
                 if (root.GetComponentInChildren<PirateOceanSurface>(true) != null)
                     foundContinuousSurface = true;
+                if (root.GetComponentInChildren<PirateShipMotionController>(true) != null)
+                    foundShipMotion = true;
             }
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
 
-            return foundWaveController && foundContinuousSurface;
+            return foundWaveController && foundContinuousSurface && foundShipMotion;
         }
 
         [MenuItem("Rhythm Hunter/Build Pirate Ocean Prototype Scene")]
@@ -105,11 +108,16 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             CreateEnvironment(environmentRoot, sprite, font);
 
             Transform shipSystemRoot = CreateEmpty("ShipSystemRoot", prototypeRoot);
-            Transform shipVisualRoot = CreateEmpty("ShipVisualRoot (Future Motion)", shipSystemRoot);
+            Transform shipMotionRoot = CreateEmpty("ShipMotionRoot (Visuals Only)", shipSystemRoot);
+            Transform shipVisualRoot = CreateEmpty("ShipVisualRoot", shipMotionRoot);
             CreateShip(shipVisualRoot, sprite);
 
             Transform combatRoot = CreateEmpty("DeckCombatRoot (Stable Logic)", shipSystemRoot);
-            CreateCombatSlots(combatRoot, sprite, font);
+            Transform deckVisualRoot = CreateEmpty("DeckVisualRoot", shipMotionRoot);
+            CreateCombatSlots(combatRoot, deckVisualRoot, sprite, font);
+
+            PirateShipMotionController shipMotion = shipSystemRoot.gameObject.AddComponent<PirateShipMotionController>();
+            shipMotion.Configure(shipMotionRoot, combatRoot);
 
             Transform cameraTargets = CreateEmpty("CameraTargets", prototypeRoot);
             CreateMarker("ShipCombatTarget", cameraTargets, new Vector3(0f, 0.25f, 0f));
@@ -273,22 +281,25 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             CreateWorldSprite("ShipMotionPivotGuide", root, sprite, new Color(GuideGold.r, GuideGold.g, GuideGold.b, 0.35f), new Vector3(0f, -1.05f, -0.5f), new Vector2(0.22f, 0.22f), 30);
         }
 
-        private static void CreateCombatSlots(Transform combatRoot, Sprite sprite, Font font)
+        private static void CreateCombatSlots(Transform combatRoot, Transform deckVisualRoot, Sprite sprite, Font font)
         {
-            Transform enemyRoot = CreateEmpty("EnemySlots_Left", combatRoot);
-            Transform heroRoot = CreateEmpty("HeroSlots_Right", combatRoot);
+            Transform enemyRoot = CreateEmpty("EnemySlots_Left (Stable)", combatRoot);
+            Transform heroRoot = CreateEmpty("HeroSlots_Right (Stable)", combatRoot);
+            Transform enemyVisualRoot = CreateEmpty("EnemyVisuals_Left", deckVisualRoot);
+            Transform heroVisualRoot = CreateEmpty("HeroVisuals_Right", deckVisualRoot);
 
-            CreateUnitSlot(enemyRoot, sprite, font, "EnemySlot_1", "BOARDER 1", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 0, new Vector3(-5.8f, 0.15f, 0f), 80, 12, EnemyRed);
-            CreateUnitSlot(enemyRoot, sprite, font, "EnemySlot_2", "BOARDER 2", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 1, new Vector3(-4.05f, 0.15f, 0f), 120, 18, EnemyRed);
-            CreateUnitSlot(enemyRoot, sprite, font, "EnemySlot_3", "BOARDER 3", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 2, new Vector3(-2.3f, 0.15f, 0f), 90, 14, EnemyRed);
+            CreateUnitSlot(enemyRoot, enemyVisualRoot, sprite, font, "EnemySlot_1", "BOARDER 1", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 0, new Vector3(-5.8f, 0.15f, 0f), 80, 12, EnemyRed);
+            CreateUnitSlot(enemyRoot, enemyVisualRoot, sprite, font, "EnemySlot_2", "BOARDER 2", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 1, new Vector3(-4.05f, 0.15f, 0f), 120, 18, EnemyRed);
+            CreateUnitSlot(enemyRoot, enemyVisualRoot, sprite, font, "EnemySlot_3", "BOARDER 3", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 2, new Vector3(-2.3f, 0.15f, 0f), 90, 14, EnemyRed);
 
-            CreateUnitSlot(heroRoot, sprite, font, "HeroSlot_Tank", "TANK", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank, 0, new Vector3(2.3f, 0.15f, 0f), 120, 12, HeroCyan);
-            CreateUnitSlot(heroRoot, sprite, font, "HeroSlot_Support", "SUPPORT", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support, 1, new Vector3(4.05f, 0.15f, 0f), 85, 8, HeroCyan);
-            CreateUnitSlot(heroRoot, sprite, font, "HeroSlot_Damage", "DAMAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage, 2, new Vector3(5.8f, 0.15f, 0f), 75, 24, HeroCyan);
+            CreateUnitSlot(heroRoot, heroVisualRoot, sprite, font, "HeroSlot_Tank", "TANK", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank, 0, new Vector3(2.3f, 0.15f, 0f), 120, 12, HeroCyan);
+            CreateUnitSlot(heroRoot, heroVisualRoot, sprite, font, "HeroSlot_Support", "SUPPORT", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support, 1, new Vector3(4.05f, 0.15f, 0f), 85, 8, HeroCyan);
+            CreateUnitSlot(heroRoot, heroVisualRoot, sprite, font, "HeroSlot_Damage", "DAMAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage, 2, new Vector3(5.8f, 0.15f, 0f), 75, 24, HeroCyan);
         }
 
         private static FightUnitSlot CreateUnitSlot(
-            Transform parent,
+            Transform logicalParent,
+            Transform visualParent,
             Sprite sprite,
             Font font,
             string objectName,
@@ -302,25 +313,27 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
             Color color)
         {
             GameObject slotObject = new(objectName);
-            slotObject.transform.SetParent(parent, false);
+            slotObject.transform.SetParent(logicalParent, false);
             slotObject.transform.localPosition = position;
             FightUnitSlot slot = slotObject.AddComponent<FightUnitSlot>();
 
-            CreateWorldSprite("SlotGround", slotObject.transform, sprite, new Color(color.r, color.g, color.b, 0.28f), new Vector3(0f, -1.25f, 0.3f), new Vector2(1.45f, 0.22f), 8);
+            Transform slotVisualRoot = CreateEmpty($"{objectName}_Visual", visualParent);
+            slotVisualRoot.localPosition = position;
+            CreateWorldSprite("SlotGround", slotVisualRoot, sprite, new Color(color.r, color.g, color.b, 0.28f), new Vector3(0f, -1.25f, 0.3f), new Vector2(1.45f, 0.22f), 8);
 
-            Transform actorRoot = CreateEmpty("ActorRoot (Assign Prefab Here)", slotObject.transform);
+            Transform actorRoot = CreateEmpty("ActorRoot (Assign Prefab Here)", slotVisualRoot);
             Transform placeholder = CreateEmpty("PrototypePlaceholder", actorRoot);
             CreateWorldSprite("Body", placeholder, sprite, new Color(color.r * 0.55f, color.g * 0.55f, color.b * 0.55f, 1f), new Vector3(0f, -0.05f, 0f), new Vector2(0.9f, 1.55f), 10);
             CreateWorldSprite("Accent", placeholder, sprite, color, new Vector3(0f, 0.18f, -0.1f), new Vector2(0.52f, 0.62f), 11);
             CreateWorldText("PrefabLabel", placeholder, font, "PREFAB\nSLOT", Color.white, new Vector3(0f, 0.15f, -0.2f), 0.018f, FontStyle.Bold, 12);
 
-            Transform effectPoint = CreateEmpty("NormalAttackEffectSpawnPoint", slotObject.transform);
+            Transform effectPoint = CreateEmpty("NormalAttackEffectSpawnPoint", slotVisualRoot);
             effectPoint.localPosition = new Vector3(team == FightUnitSlot.UnitTeam.Hero ? -0.72f : 0.72f, 0.15f, -0.3f);
 
-            CreateWorldText("UnitName", slotObject.transform, font, displayName, Color.white, new Vector3(0f, -1.55f, 0f), 0.021f, FontStyle.Bold, 15);
-            CreateWorldSprite("HealthBackground", slotObject.transform, sprite, new Color(0.025f, 0.035f, 0.045f, 1f), new Vector3(0f, 1.28f, 0f), new Vector2(1.18f, 0.11f), 15);
-            SpriteRenderer hpFill = CreateWorldSprite("HealthFill", slotObject.transform, sprite, color, new Vector3(0f, 1.28f, -0.1f), new Vector2(1.13f, 0.065f), 16);
-            TextMesh hpLabel = CreateWorldText("Stats", slotObject.transform, font, $"HP {hp}/{hp}", new Color(0.78f, 0.9f, 0.94f, 1f), new Vector3(0f, 1.52f, 0f), 0.012f, FontStyle.Normal, 17);
+            CreateWorldText("UnitName", slotVisualRoot, font, displayName, Color.white, new Vector3(0f, -1.55f, 0f), 0.021f, FontStyle.Bold, 15);
+            CreateWorldSprite("HealthBackground", slotVisualRoot, sprite, new Color(0.025f, 0.035f, 0.045f, 1f), new Vector3(0f, 1.28f, 0f), new Vector2(1.18f, 0.11f), 15);
+            SpriteRenderer hpFill = CreateWorldSprite("HealthFill", slotVisualRoot, sprite, color, new Vector3(0f, 1.28f, -0.1f), new Vector2(1.13f, 0.065f), 16);
+            TextMesh hpLabel = CreateWorldText("Stats", slotVisualRoot, font, $"HP {hp}/{hp}", new Color(0.78f, 0.9f, 0.94f, 1f), new Vector3(0f, 1.52f, 0f), 0.012f, FontStyle.Normal, 17);
 
             slot.Configure(objectName, displayName, team, role, index, hp, attack, color, actorRoot, effectPoint, placeholder.gameObject, sprite, hpFill, hpLabel);
             return slot;
