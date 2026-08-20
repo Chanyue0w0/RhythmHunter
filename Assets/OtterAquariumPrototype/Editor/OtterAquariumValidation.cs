@@ -52,6 +52,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && background.sprite != null
                 && AssetDatabase.GetAssetPath(background.sprite) == OtterAquariumSceneBuilder.BackgroundSpritePath;
             bool hasBoundary = FindNamedInScene<EdgeCollider2D>(scene, "AquariumInnerWallBoundary") != null;
+            AquariumObstacle[] obstacles = FindAllInScene<AquariumObstacle>(scene);
+            int solidObstacleCount = System.Array.FindAll(
+                obstacles,
+                obstacle => obstacle.GetComponent<PolygonCollider2D>() != null
+                    && !obstacle.GetComponent<PolygonCollider2D>().isTrigger).Length;
+            SpriteRenderer waterOverlay = FindNamedInScene<SpriteRenderer>(scene, "WaterSurfaceOverlay");
+            Material waterMaterial = AssetDatabase.LoadAssetAtPath<Material>(OtterAquariumSceneBuilder.WaterSurfaceMaterialPath);
+            bool hasWaterOverlay = waterOverlay != null
+                && waterOverlay.sharedMaterial == waterMaterial
+                && waterMaterial != null
+                && waterMaterial.shader != null
+                && waterMaterial.shader.name == "RhythmHunter/Aquarium Water Overlay"
+                && AssetDatabase.GetAssetPath(waterMaterial.GetTexture("_MaskTex")) == OtterAquariumSceneBuilder.WaterSurfaceMaskPath
+                && AssetDatabase.GetAssetPath(waterMaterial.GetTexture("_NoiseTex")) == OtterAquariumSceneBuilder.WaterSurfaceNoisePath;
 
             Physics2D.SyncTransforms();
             AquariumSurfaceType? deepSample = GetSurfaceAtPixel(zones, new Vector2(720f, 650f));
@@ -66,7 +80,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             bool valid = hasMovement && hasSensor && hasVfx && hasPresenter && hasCamera && hasHud
                 && hasWater && hasShallow && hasLand && hasBackground && hasBoundary && imageSamplesMatch
-                && expectedParticleMaterial != null && validParticleMaterials >= 5;
+                && solidObstacleCount >= 5 && hasWaterOverlay
+                && expectedParticleMaterial != null && validParticleMaterials >= 6;
             if (!valid)
             {
                 Debug.LogError(
@@ -74,8 +89,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Movement={hasMovement}, Sensor={hasSensor}, VFX={hasVfx}, Presenter={hasPresenter}, "
                     + $"Camera={hasCamera}, HUD={hasHud}, Water={hasWater}, Shallow={hasShallow}, Land={hasLand}, "
                     + $"LandZones={landZoneCount}/6, Background={hasBackground}, Boundary={hasBoundary}, "
+                    + $"SolidObstacles={solidObstacleCount}/5, WaterOverlay={hasWaterOverlay}, "
                     + $"Samples(Deep/Shallow/Land)={deepSample}/{shallowSample}/{landSample}, "
-                    + $"ParticleMaterial={(expectedParticleMaterial != null)}, ValidParticleRenderers={validParticleMaterials}/5");
+                    + $"ParticleMaterial={(expectedParticleMaterial != null)}, ValidParticleRenderers={validParticleMaterials}/6");
                 return false;
             }
 

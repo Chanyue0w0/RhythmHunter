@@ -10,7 +10,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     public static class OtterAquariumPlayModeValidation
     {
         private const string ActiveKey = "OtterAquarium.Smoke.Active";
-        private const string AttemptedKey = "OtterAquarium.Smoke.Attempted.ZooBackgroundV9";
+        private const string AttemptedKey = "OtterAquarium.Smoke.Attempted.AuthoringAndWaterV14";
         private const string PassedKey = "OtterAquarium.Smoke.Passed";
         private const string FailureKey = "OtterAquarium.Smoke.Failure";
         private const string StartedAtKey = "OtterAquarium.Smoke.StartedAt";
@@ -121,7 +121,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 renderer => renderer.sharedMaterial == null
                     || renderer.sharedMaterial.shader == null
                     || renderer.sharedMaterial.shader.name == "Hidden/InternalErrorShader");
-            if (body == null || particles.Length < 5 || particleRenderers.Length < 5 || hasInvalidParticleMaterial)
+            if (body == null || particles.Length < 6 || particleRenderers.Length < 6 || hasInvalidParticleMaterial)
             {
                 FailAndExit("Rigidbody2D, water VFX systems, or valid particle materials are missing.");
                 return;

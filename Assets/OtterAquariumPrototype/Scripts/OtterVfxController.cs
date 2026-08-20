@@ -7,6 +7,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private OtterMovementController movement;
         [SerializeField] private OtterSurfaceSensor surfaceSensor;
         [SerializeField] private ParticleSystem swimTrail;
+        [SerializeField] private ParticleSystem swimRipples;
         [SerializeField] private ParticleSystem entrySplash;
         [SerializeField] private ParticleSystem exitDrops;
         [SerializeField] private ParticleSystem slideSpray;
@@ -22,6 +23,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             OtterMovementController movementController,
             OtterSurfaceSensor sensor,
             ParticleSystem configuredSwimTrail,
+            ParticleSystem configuredSwimRipples,
             ParticleSystem configuredEntrySplash,
             ParticleSystem configuredExitDrops,
             ParticleSystem configuredSlideSpray,
@@ -30,6 +32,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             movement = movementController;
             surfaceSensor = sensor;
             swimTrail = configuredSwimTrail;
+            swimRipples = configuredSwimRipples;
             entrySplash = configuredEntrySplash;
             exitDrops = configuredExitDrops;
             slideSpray = configuredSlideSpray;
@@ -78,11 +81,26 @@ namespace RhythmHunter.OtterAquariumPrototype
             bool active = surfaceSensor.IsInWater && movement.Speed > trailStartSpeed;
             ParticleSystem.EmissionModule emission = swimTrail.emission;
             emission.rateOverTime = active ? Mathf.Lerp(5f, 24f, Mathf.InverseLerp(trailStartSpeed, 7f, movement.Speed)) : 0f;
+            if (swimRipples != null)
+            {
+                ParticleSystem.EmissionModule rippleEmission = swimRipples.emission;
+                rippleEmission.rateOverTime = active
+                    ? Mathf.Lerp(2.5f, 7f, Mathf.InverseLerp(trailStartSpeed, 7f, movement.Speed))
+                    : 0f;
+            }
 
             if (active && !swimTrail.isPlaying)
                 swimTrail.Play();
             else if (!active && swimTrail.isPlaying)
                 swimTrail.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+            if (swimRipples != null)
+            {
+                if (active && !swimRipples.isPlaying)
+                    swimRipples.Play();
+                else if (!active && swimRipples.isPlaying)
+                    swimRipples.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
         }
 
         private void UpdateSlideSpray()
