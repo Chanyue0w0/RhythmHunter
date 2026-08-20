@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/OtterAquariumPrototype/Scenes/OtterAquarium.unity
     guid: 72d9685db07efdf409c01279752c1372
+  - enabled: 1
+    path: Assets/OtterAquariumPrototype/Scenes/OtterAquariumCombat.unity
+    guid: aade6b3556baf7d4194c708efd2cf6eb
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
