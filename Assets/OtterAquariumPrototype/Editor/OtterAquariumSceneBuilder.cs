@@ -11,8 +11,13 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     public static class OtterAquariumSceneBuilder
     {
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterAquarium.unity";
+        public const string BackgroundSpritePath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_background.png";
         public const string WaterParticleMaterialPath = "Assets/OtterAquariumPrototype/Materials/M_WaterParticles.mat";
         public const string WaterParticleTexturePath = "Assets/OtterAquariumPrototype/Materials/T_WaterParticle.asset";
+
+        private static readonly Vector2 BackgroundImageSize = new(1448f, 1086f);
+        private static readonly Vector2 BackgroundWorldSize = new(22f, 16.5f);
+        private const string SurfaceZoneLayoutName = "ImageMatchedSurfaceZones_v1";
 
         private static readonly Color DeepTeal = new(0.035f, 0.18f, 0.2f, 1f);
         private static readonly Color WaterDeep = new(0.06f, 0.42f, 0.52f, 1f);
@@ -47,9 +52,12 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 return;
 
             Material particleMaterial = AssetDatabase.LoadAssetAtPath<Material>(WaterParticleMaterialPath);
+            Sprite backgroundSprite = LoadBackgroundSprite();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null
                 || particleMaterial == null
-                || !SceneUsesWaterParticleMaterial(particleMaterial))
+                || backgroundSprite == null
+                || !SceneUsesWaterParticleMaterial(particleMaterial)
+                || !SceneUsesZooBackground(backgroundSprite))
             {
                 BuildScene();
             }
@@ -60,11 +68,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         {
             EnsureFolders();
             Sprite sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            Sprite backgroundSprite = LoadBackgroundSprite();
             Material waterParticleMaterial = EnsureWaterParticleMaterial();
-            if (sprite == null || font == null || waterParticleMaterial == null)
+            if (sprite == null || backgroundSprite == null || waterParticleMaterial == null)
             {
-                Debug.LogError("[OtterAquarium] A required built-in asset or the water particle material could not be loaded.");
+                Debug.LogError($"[OtterAquarium] Required assets are missing. Expected background: {BackgroundSpritePath}");
                 return;
             }
 
@@ -80,26 +88,15 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             Transform root = new GameObject("OtterAquariumPrototype").transform;
             Transform environment = CreateEmpty("Environment", root);
-            CreateEnvironment(environment, sprite, font);
+            CreateEnvironment(environment, backgroundSprite);
             CreateSurfaceZones(environment);
-            CreateBounds(environment, sprite);
+            CreateBounds(environment);
 
             OtterMovementController otter = CreateOtter(root, sprite, waterParticleMaterial);
             CreateCamera(root, otter.transform);
             OtterPrototypeHud hud = new GameObject("PrototypeHUD", typeof(OtterPrototypeHud)).GetComponent<OtterPrototypeHud>();
             hud.transform.SetParent(root, false);
             hud.Configure(otter);
-
-            CreateWorldText(
-                "PrototypeTitle",
-                root,
-                font,
-                "SEA OTTER AQUARIUM  •  MOVEMENT & WATER VFX PROTOTYPE",
-                new Color(0.95f, 1f, 0.92f, 0.9f),
-                new Vector3(0f, 7.95f, 0f),
-                0.026f,
-                FontStyle.Bold,
-                30);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -125,33 +122,19 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Debug.Log($"[OtterAquarium] Prototype scene created: {ScenePath}");
         }
 
-        private static void CreateEnvironment(Transform root, Sprite sprite, Font font)
+        private static void CreateEnvironment(Transform root, Sprite backgroundSprite)
         {
-            CreateWorldSprite("FacilityFloor", root, sprite, DeepTeal, new Vector3(0f, 0f, 5f), new Vector2(29f, 18f), -100);
-            CreateWorldSprite("VisitorFloor", root, sprite, SandLight, new Vector3(0f, 0f, 4f), new Vector2(27f, 16.5f), -95);
-            CreateWorldSprite("TopVisitorPath", root, sprite, Path, new Vector3(0f, 6.4f, 3.5f), new Vector2(26f, 2.2f), -90);
-            CreateWorldSprite("BottomVisitorPath", root, sprite, Path, new Vector3(0f, -6.4f, 3.5f), new Vector2(26f, 2.2f), -90);
+            GameObject backgroundObject = new("ZooBackground", typeof(SpriteRenderer));
+            backgroundObject.transform.SetParent(root, false);
+            SpriteRenderer renderer = backgroundObject.GetComponent<SpriteRenderer>();
+            renderer.sprite = backgroundSprite;
+            renderer.color = Color.white;
+            renderer.sortingOrder = -100;
 
-            Transform pool = CreateEmpty("OtterPool", root);
-            CreateWorldSprite("PoolDropShadow", pool, sprite, new Color(0.02f, 0.1f, 0.12f, 0.55f), new Vector3(0.25f, -0.35f, 3f), new Vector2(17.4f, 10.7f), -82);
-            CreateWorldSprite("ShallowWater", pool, sprite, WaterShallow, new Vector3(0f, 0f, 2.8f), new Vector2(17f, 10.2f), -80);
-            CreateWorldSprite("MidWater", pool, sprite, WaterMid, new Vector3(0f, -0.05f, 2.6f), new Vector2(15.8f, 9.2f), -78);
-            CreateWorldSprite("DeepWater", pool, sprite, WaterDeep, new Vector3(0f, -0.15f, 2.4f), new Vector2(14.4f, 8.1f), -76);
-
-            for (int i = 0; i < 14; i++)
-            {
-                float angle = i * Mathf.PI * 2f / 14f;
-                Vector3 position = new(Mathf.Cos(angle) * 7.85f, Mathf.Sin(angle) * 4.55f, 2f);
-                Vector2 size = i % 2 == 0 ? new Vector2(1.25f, 0.09f) : new Vector2(0.82f, 0.07f);
-                SpriteRenderer foam = CreateWorldSprite($"ShoreFoam_{i + 1:00}", pool, sprite, Foam, position, size, -60);
-                foam.transform.localRotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg + 90f);
-            }
-
-            CreateRockIsland(pool, sprite, font, "LargeRockIsland", new Vector2(-3.9f, 1.05f), new Vector2(3.2f, 2.15f), "SUNNING ROCK");
-            CreateRockIsland(pool, sprite, font, "SmallRockIsland", new Vector2(3.75f, -1.7f), new Vector2(2.4f, 1.55f), "SLIDE ROCK");
-
-            CreatePoolDetails(pool, sprite);
-            CreateVisitorProps(root, sprite, font);
+            float scale = BackgroundWorldSize.x / backgroundSprite.bounds.size.x;
+            backgroundObject.transform.localScale = new Vector3(scale, scale, 1f);
+            Vector3 scaledCenter = backgroundSprite.bounds.center * scale;
+            backgroundObject.transform.localPosition = new Vector3(-scaledCenter.x, -scaledCenter.y, 5f);
         }
 
         private static void CreateRockIsland(Transform parent, Sprite sprite, Font font, string name, Vector2 position, Vector2 size, string label)
@@ -218,11 +201,86 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
         private static void CreateSurfaceZones(Transform root)
         {
-            Transform zones = CreateEmpty("SurfaceZones", root);
-            CreateEllipseZone("ShallowWaterZone", zones, Vector2.zero, new Vector2(8.25f, 4.85f), AquariumSurfaceType.ShallowWater, 20, 0.82f);
-            CreateEllipseZone("DeepWaterZone", zones, new Vector2(0f, -0.08f), new Vector2(7.25f, 4.08f), AquariumSurfaceType.Water, 50, 1f);
-            CreateEllipseZone("LargeRockLandZone", zones, new Vector2(-3.9f, 1.05f), new Vector2(1.35f, 0.8f), AquariumSurfaceType.Land, 100, 1f);
-            CreateEllipseZone("SmallRockLandZone", zones, new Vector2(3.75f, -1.7f), new Vector2(0.95f, 0.54f), AquariumSurfaceType.Land, 100, 1f);
+            Transform zones = CreateEmpty(SurfaceZoneLayoutName, root);
+
+            // The broad pale-blue pool footprint. Higher-priority deep-water
+            // and land paths below cut this into the visible image regions.
+            CreateImagePolygonZone(
+                "ShallowWater_MainPool",
+                zones,
+                AquariumSurfaceType.ShallowWater,
+                20,
+                0.82f,
+                P(105, 150), P(250, 112), P(520, 115), P(610, 210), P(690, 320),
+                P(820, 365), P(930, 300), P(1060, 315), P(1190, 380), P(1325, 520),
+                P(1350, 760), P(1280, 870), P(1110, 880), P(970, 830), P(730, 890),
+                P(500, 880), P(300, 850), P(130, 850), P(80, 700), P(75, 280));
+
+            CreateImagePolygonZone(
+                "DeepWater_CentralBasin",
+                zones,
+                AquariumSurfaceType.Water,
+                50,
+                1f,
+                P(160, 500), P(210, 380), P(330, 300), P(480, 315), P(610, 405),
+                P(730, 450), P(880, 420), P(1000, 360), P(1120, 415), P(1220, 545),
+                P(1260, 660), P(1170, 760), P(980, 820), P(720, 860), P(470, 830),
+                P(270, 760), P(150, 650));
+
+            // Walkable rock and sand areas which visually sit inside the pool
+            // outline. Land priority intentionally overrides both water zones.
+            CreateImagePolygonZone("Land_CentralRockTerrace", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(535, 70), P(1015, 65), P(1010, 150), P(950, 190), P(950, 270),
+                P(900, 320), P(810, 385), P(715, 370), P(650, 410), P(610, 355),
+                P(650, 300), P(600, 240), P(560, 200));
+            CreateImagePolygonZone("Land_UpperLeftRocks", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(180, 90), P(550, 85), P(590, 160), P(520, 210), P(420, 210),
+                P(340, 235), P(255, 220), P(200, 175));
+            CreateImagePolygonZone("Land_UpperRightSand", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(955, 125), P(1305, 130), P(1340, 245), P(1320, 340), P(1240, 360),
+                P(1150, 330), P(1030, 315), P(930, 280), P(900, 210));
+            CreateImagePolygonZone("Land_RightSand", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(1270, 330), P(1370, 340), P(1360, 790), P(1290, 830), P(1230, 760),
+                P(1240, 650), P(1180, 600), P(1210, 520), P(1270, 480));
+            CreateImagePolygonZone("Land_RightRockIsland", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(1040, 380), P(1180, 360), P(1270, 430), P(1260, 520),
+                P(1170, 570), P(1040, 540), P(990, 480));
+            CreateImagePolygonZone("Land_BottomLeftSand", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(75, 700), P(180, 690), P(300, 760), P(400, 880), P(100, 890));
+            CreateImagePolygonZone("Land_BottomRightSand", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(1190, 700), P(1300, 650), P(1370, 730), P(1360, 890), P(1130, 890), P(1080, 820));
+            CreateImagePolygonZone("Land_LeftRockShelf", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(65, 245), P(140, 225), P(165, 330), P(125, 435), P(70, 445));
+            CreateImagePolygonZone("Land_LeftLowerRocks", zones, AquariumSurfaceType.Land, 100, 1f,
+                P(65, 420), P(125, 405), P(155, 500), P(130, 650), P(80, 690));
+        }
+
+        private static void CreateImagePolygonZone(
+            string name,
+            Transform parent,
+            AquariumSurfaceType surface,
+            int priority,
+            float speedMultiplier,
+            params Vector2[] worldPoints)
+        {
+            GameObject zoneObject = new(name, typeof(PolygonCollider2D), typeof(AquariumSurfaceZone));
+            zoneObject.transform.SetParent(parent, false);
+            PolygonCollider2D polygon = zoneObject.GetComponent<PolygonCollider2D>();
+            polygon.points = worldPoints;
+            polygon.isTrigger = true;
+            zoneObject.GetComponent<AquariumSurfaceZone>().Configure(surface, priority, speedMultiplier);
+        }
+
+        private static Vector2 P(float imageX, float imageY)
+        {
+            return ImagePixelToWorld(new Vector2(imageX, imageY));
+        }
+
+        public static Vector2 ImagePixelToWorld(Vector2 pixel)
+        {
+            return new Vector2(
+                (pixel.x / BackgroundImageSize.x - 0.5f) * BackgroundWorldSize.x,
+                (0.5f - pixel.y / BackgroundImageSize.y) * BackgroundWorldSize.y);
         }
 
         private static void CreateEllipseZone(
@@ -249,34 +307,24 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             zoneObject.GetComponent<AquariumSurfaceZone>().Configure(surface, priority, speedMultiplier);
         }
 
-        private static void CreateBounds(Transform root, Sprite sprite)
+        private static void CreateBounds(Transform root)
         {
-            Transform bounds = CreateEmpty("AquariumBounds", root);
-            CreateBoundary("NorthBoundary", bounds, sprite, new Vector2(0f, 8.35f), new Vector2(27.8f, 0.35f));
-            CreateBoundary("SouthBoundary", bounds, sprite, new Vector2(0f, -8.35f), new Vector2(27.8f, 0.35f));
-            CreateBoundary("WestBoundary", bounds, sprite, new Vector2(-13.75f, 0f), new Vector2(0.35f, 16.8f));
-            CreateBoundary("EastBoundary", bounds, sprite, new Vector2(13.75f, 0f), new Vector2(0.35f, 16.8f));
-        }
-
-        private static void CreateBoundary(string name, Transform parent, Sprite sprite, Vector2 position, Vector2 size)
-        {
-            GameObject boundary = new(name, typeof(SpriteRenderer), typeof(BoxCollider2D));
-            boundary.transform.SetParent(parent, false);
-            boundary.transform.localPosition = position;
-            boundary.transform.localScale = size;
-            SpriteRenderer renderer = boundary.GetComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
-            renderer.color = new Color(0.08f, 0.25f, 0.26f, 0.9f);
-            renderer.sortingOrder = 300;
-            BoxCollider2D collider = boundary.GetComponent<BoxCollider2D>();
-            collider.size = Vector2.one;
+            GameObject boundary = new("AquariumInnerWallBoundary", typeof(EdgeCollider2D));
+            boundary.transform.SetParent(root, false);
+            EdgeCollider2D edge = boundary.GetComponent<EdgeCollider2D>();
+            edge.edgeRadius = 0.06f;
+            edge.points = new[]
+            {
+                P(115, 145), P(150, 100), P(1280, 100), P(1340, 155),
+                P(1360, 830), P(1300, 890), P(145, 890), P(85, 830), P(115, 145)
+            };
         }
 
         private static OtterMovementController CreateOtter(Transform parent, Sprite sprite, Material waterParticleMaterial)
         {
             GameObject otterObject = new("PlayerSeaOtter", typeof(Rigidbody2D), typeof(CapsuleCollider2D), typeof(OtterSurfaceSensor), typeof(OtterMovementController));
             otterObject.transform.SetParent(parent, false);
-            otterObject.transform.localPosition = new Vector3(0f, -2.6f, 0f);
+            otterObject.transform.localPosition = ImagePixelToWorld(new Vector2(720f, 650f));
 
             Rigidbody2D body = otterObject.GetComponent<Rigidbody2D>();
             body.gravityScale = 0f;
@@ -439,6 +487,42 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             return material;
         }
 
+        private static Sprite LoadBackgroundSprite()
+        {
+            return AssetDatabase.LoadAllAssetsAtPath(BackgroundSpritePath)
+                .OfType<Sprite>()
+                .FirstOrDefault();
+        }
+
+        private static bool SceneUsesZooBackground(Sprite expectedSprite)
+        {
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            bool wasLoaded = scene.IsValid() && scene.isLoaded;
+            if (!wasLoaded)
+                scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+
+            bool hasExpectedBackground = false;
+            bool hasImageMatchedZones = false;
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (SpriteRenderer renderer in root.GetComponentsInChildren<SpriteRenderer>(true))
+                {
+                    if (renderer.name == "ZooBackground" && renderer.sprite == expectedSprite)
+                        hasExpectedBackground = true;
+                }
+
+                foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (child.name == SurfaceZoneLayoutName)
+                        hasImageMatchedZones = true;
+                }
+            }
+
+            if (!wasLoaded)
+                EditorSceneManager.CloseScene(scene, true);
+            return hasExpectedBackground && hasImageMatchedZones;
+        }
+
         private static bool SceneUsesWaterParticleMaterial(Material expectedMaterial)
         {
             Scene scene = SceneManager.GetSceneByPath(ScenePath);
@@ -469,12 +553,12 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             cameraObject.transform.position = new Vector3(0f, 0.5f, -10f);
             Camera camera = cameraObject.GetComponent<Camera>();
             camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = DeepTeal;
+            camera.backgroundColor = new Color(0.75f, 0.82f, 0.66f, 1f);
             camera.orthographic = true;
             camera.orthographicSize = 5.65f;
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 100f;
-            cameraObject.GetComponent<OtterCameraFollow>().Configure(target, new Vector2(-4.1f, -2.4f), new Vector2(4.1f, 2.4f));
+            cameraObject.GetComponent<OtterCameraFollow>().Configure(target, new Vector2(-1.1f, -2.55f), new Vector2(1.1f, 2.55f));
         }
 
         private static SpriteRenderer CreateWorldSprite(
@@ -542,6 +626,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             EnsureFolder("Assets/OtterAquariumPrototype", "Prefabs");
             EnsureFolder("Assets/OtterAquariumPrototype", "Materials");
             EnsureFolder("Assets/OtterAquariumPrototype", "VFX");
+            EnsureFolder("Assets/OtterAquariumPrototype", "Arts");
+            EnsureFolder("Assets/OtterAquariumPrototype/Arts", "Background");
         }
 
         private static void EnsureFolder(string parent, string child)
