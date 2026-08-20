@@ -22067,8 +22067,9 @@ MonoBehaviour:
   target: {fileID: 2058408921}
   lookAhead: {x: 0, y: 0.65}
   smoothTime: 0.22
-  minimum: {x: -1.1, y: -2.55}
-  maximum: {x: 1.1, y: 2.55}
+  minimum: {x: -11, y: -8.25}
+  maximum: {x: 11, y: 8.25}
+  keepViewportInsideBounds: 1
 --- !u!81 &1867637495
 AudioListener:
   m_ObjectHideFlags: 0
@@ -22112,7 +22113,7 @@ Camera:
   far clip plane: 100
   field of view: 60
   orthographic: 1
-  orthographic size: 5.65
+  orthographic size: 3.75
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2

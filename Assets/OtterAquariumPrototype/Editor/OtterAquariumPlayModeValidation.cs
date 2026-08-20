@@ -10,7 +10,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     public static class OtterAquariumPlayModeValidation
     {
         private const string ActiveKey = "OtterAquarium.Smoke.Active";
-        private const string AttemptedKey = "OtterAquarium.Smoke.Attempted.AuthoringAndWaterV14";
+        private const string AttemptedKey = "OtterAquarium.Smoke.Attempted.ExplorationCameraV15";
         private const string PassedKey = "OtterAquarium.Smoke.Passed";
         private const string FailureKey = "OtterAquarium.Smoke.Failure";
         private const string StartedAtKey = "OtterAquarium.Smoke.StartedAt";

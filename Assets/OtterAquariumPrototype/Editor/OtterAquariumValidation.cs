@@ -33,6 +33,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             bool hasVfx = FindInScene<OtterVfxController>(scene) != null;
             bool hasPresenter = FindInScene<OtterVisualPresenter>(scene) != null;
             bool hasCamera = FindInScene<OtterCameraFollow>(scene) != null;
+            Camera sceneCamera = FindNamedInScene<Camera>(scene, "Main Camera");
+            bool hasExplorationCamera = sceneCamera != null
+                && sceneCamera.orthographic
+                && sceneCamera.orthographicSize <= 4f;
             bool hasHud = FindInScene<OtterPrototypeHud>(scene) != null;
             ParticleSystemRenderer[] particleRenderers = FindAllInScene<ParticleSystemRenderer>(scene);
             Material expectedParticleMaterial = AssetDatabase.LoadAssetAtPath<Material>(OtterAquariumSceneBuilder.WaterParticleMaterialPath);
@@ -78,7 +82,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
 
-            bool valid = hasMovement && hasSensor && hasVfx && hasPresenter && hasCamera && hasHud
+            bool valid = hasMovement && hasSensor && hasVfx && hasPresenter && hasCamera && hasExplorationCamera && hasHud
                 && hasWater && hasShallow && hasLand && hasBackground && hasBoundary && imageSamplesMatch
                 && solidObstacleCount >= 5 && hasWaterOverlay
                 && expectedParticleMaterial != null && validParticleMaterials >= 6;
@@ -87,7 +91,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 Debug.LogError(
                     "[OtterAquariumValidation] Validation failed. "
                     + $"Movement={hasMovement}, Sensor={hasSensor}, VFX={hasVfx}, Presenter={hasPresenter}, "
-                    + $"Camera={hasCamera}, HUD={hasHud}, Water={hasWater}, Shallow={hasShallow}, Land={hasLand}, "
+                    + $"Camera={hasCamera}, ExplorationCamera={hasExplorationCamera}, HUD={hasHud}, "
+                    + $"Water={hasWater}, Shallow={hasShallow}, Land={hasLand}, "
                     + $"LandZones={landZoneCount}/6, Background={hasBackground}, Boundary={hasBoundary}, "
                     + $"SolidObstacles={solidObstacleCount}/5, WaterOverlay={hasWaterOverlay}, "
                     + $"Samples(Deep/Shallow/Land)={deepSample}/{shallowSample}/{landSample}, "

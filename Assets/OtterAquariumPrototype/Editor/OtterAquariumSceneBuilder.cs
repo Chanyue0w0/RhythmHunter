@@ -903,10 +903,13 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.75f, 0.82f, 0.66f, 1f);
             camera.orthographic = true;
-            camera.orthographicSize = 5.65f;
+            camera.orthographicSize = 3.75f;
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 100f;
-            cameraObject.GetComponent<OtterCameraFollow>().Configure(target, new Vector2(-1.1f, -2.55f), new Vector2(1.1f, 2.55f));
+            cameraObject.GetComponent<OtterCameraFollow>().Configure(
+                target,
+                new Vector2(-11f, -8.25f),
+                new Vector2(11f, 8.25f));
         }
 
         private static SpriteRenderer CreateWorldSprite(
