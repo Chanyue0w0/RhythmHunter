@@ -1,22 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using RhythmHunter.OtterAquariumPrototype;
+using RhythmHunter.PirateOceanPrototype;
+using RhythmHunter.PirateOceanPrototypeEditor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace RhythmHunter.OtterAquariumPrototypeEditor
 {
     /// <summary>
-    /// Creates the aquarium-owned combat scene once from the stable FightDemo
-    /// scene. The target is intentionally not overwritten after creation so
-    /// future production work can continue in OtterAquariumPrototype/Scenes.
+    /// Rebuilds the aquarium-owned combat scene from PirateFightScene, retaining
+    /// its fight staging and cinematic camera while stripping all wave systems.
     /// </summary>
     public static class OtterAquariumCombatSceneSetup
     {
-        public const string SourceScenePath = "Assets/FightDemo/Scenes/FightScene.unity";
+        public const string SourceScenePath = "Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity";
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterAquariumCombat.unity";
+        public const int CurrentLayoutRevision = 4;
 
         [InitializeOnLoadMethod]
         private static void QueueInitialSetup()
@@ -35,28 +38,63 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-                CreateCombatScene();
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || SceneRequiresRebuild())
+                RebuildCombatScene();
         }
 
-        [MenuItem("Rhythm Hunter/Create Otter Aquarium Combat Scene")]
-        public static void CreateCombatScene()
+        [MenuItem("Rhythm Hunter/Rebuild Otter Aquarium Combat From Pirate Fight")]
+        public static void RebuildCombatScene()
         {
             SceneAsset source = AssetDatabase.LoadAssetAtPath<SceneAsset>(SourceScenePath);
             if (source == null)
             {
-                Debug.LogError($"[OtterAquariumCombat] Source fight scene is missing: {SourceScenePath}");
-                return;
+                PirateFightSceneBuilder.BuildScene();
+                source = AssetDatabase.LoadAssetAtPath<SceneAsset>(SourceScenePath);
+                if (source == null)
+                {
+                    Debug.LogError($"[OtterAquariumCombat] Source pirate fight scene is missing: {SourceScenePath}");
+                    return;
+                }
+            }
+
+            Scene previousScene = SceneManager.GetActiveScene();
+            bool replacingLoadedTarget = previousScene.IsValid()
+                && previousScene.isLoaded
+                && previousScene.path == ScenePath;
+            Scene loadedTarget = SceneManager.GetSceneByPath(ScenePath);
+            Scene temporaryScene = default;
+            bool createdTemporaryScene = false;
+            if (loadedTarget.IsValid() && loadedTarget.isLoaded)
+            {
+                if (SceneManager.sceneCount == 1)
+                {
+                    temporaryScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+                    SceneManager.SetActiveScene(temporaryScene);
+                    createdTemporaryScene = true;
+                }
+                EditorSceneManager.CloseScene(loadedTarget, true);
             }
 
             SceneAsset existing = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
-            if (existing == null && !AssetDatabase.CopyAsset(SourceScenePath, ScenePath))
+            bool copied = existing == null
+                ? AssetDatabase.CopyAsset(SourceScenePath, ScenePath)
+                : ReplaceSceneContentsPreservingMeta();
+            if (!copied)
             {
                 Debug.LogError($"[OtterAquariumCombat] Could not copy {SourceScenePath} to {ScenePath}.");
                 return;
             }
 
-            AddOwnershipMarker();
+            AssetDatabase.ImportAsset(ScenePath, ImportAssetOptions.ForceSynchronousImport);
+            OpenSceneMode openMode = Application.isBatchMode ? OpenSceneMode.Single : OpenSceneMode.Additive;
+            Scene targetScene = EditorSceneManager.OpenScene(ScenePath, openMode);
+            SceneManager.SetActiveScene(targetScene);
+
+            StripWaveSystems(targetScene);
+            AddOwnershipMarker(targetScene);
+            UpdateSceneLabels(targetScene);
+            EditorSceneManager.MarkSceneDirty(targetScene);
+            EditorSceneManager.SaveScene(targetScene, ScenePath);
             AddSceneToBuildSettings(ScenePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -67,19 +105,59 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 return;
             }
 
+            if (replacingLoadedTarget)
+            {
+                SceneManager.SetActiveScene(targetScene);
+                if (createdTemporaryScene && temporaryScene.IsValid() && temporaryScene.isLoaded)
+                    EditorSceneManager.CloseScene(temporaryScene, true);
+            }
+            else if (!Application.isBatchMode
+                && !replacingLoadedTarget
+                && previousScene.IsValid()
+                && previousScene.isLoaded
+                && previousScene != targetScene)
+            {
+                SceneManager.SetActiveScene(previousScene);
+                EditorSceneManager.CloseScene(targetScene, true);
+            }
+
             Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
-            Debug.Log($"[OtterAquariumCombat] Combat scene ready for future work: {ScenePath}");
+            Debug.Log($"[OtterAquariumCombat] Pirate fight staging rebuilt without waves: {ScenePath}");
         }
 
-        private static void AddOwnershipMarker()
+        private static bool ReplaceSceneContentsPreservingMeta()
         {
-            Scene previousScene = SceneManager.GetActiveScene();
-            Scene targetScene = SceneManager.GetSceneByPath(ScenePath);
-            bool wasLoaded = targetScene.IsValid() && targetScene.isLoaded;
-            if (!wasLoaded)
-                targetScene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            FileUtil.ReplaceFile(SourceScenePath, ScenePath);
+            return true;
+        }
 
-            SceneManager.SetActiveScene(targetScene);
+        private static void StripWaveSystems(Scene targetScene)
+        {
+            foreach (PirateShipMotionController shipMotion in FindAllInScene<PirateShipMotionController>(targetScene))
+            {
+                shipMotion.ResetToBaseline();
+                Object.DestroyImmediate(shipMotion);
+            }
+
+            foreach (PirateOceanWaveController waveController in FindAllInScene<PirateOceanWaveController>(targetScene))
+                Object.DestroyImmediate(waveController);
+            foreach (PirateOceanSurface surface in FindAllInScene<PirateOceanSurface>(targetScene))
+                Object.DestroyImmediate(surface.gameObject);
+            foreach (PirateOceanRuntimePanel panel in FindAllInScene<PirateOceanRuntimePanel>(targetScene))
+                Object.DestroyImmediate(panel.gameObject);
+
+            string[] waveVisualRoots = { "FarWaveBand", "MidWaveBand", "NearWaveBand", "FoamBand", "OceanStageNote" };
+            foreach (GameObject gameObject in FindAllGameObjects(targetScene))
+            {
+                if (gameObject == null)
+                    continue;
+                if (waveVisualRoots.Contains(gameObject.name))
+                    Object.DestroyImmediate(gameObject);
+            }
+        }
+
+        private static void AddOwnershipMarker(Scene targetScene)
+        {
             OtterAquariumCombatSceneMarker marker = FindInScene<OtterAquariumCombatSceneMarker>(targetScene);
             if (marker == null)
             {
@@ -88,15 +166,55 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 marker = markerObject.GetComponent<OtterAquariumCombatSceneMarker>();
             }
 
-            marker.Configure(SourceScenePath, false);
+            marker.Configure(SourceScenePath, false, true, CurrentLayoutRevision);
             EditorUtility.SetDirty(marker);
-            EditorSceneManager.MarkSceneDirty(targetScene);
-            EditorSceneManager.SaveScene(targetScene, ScenePath);
+        }
 
-            if (previousScene.IsValid() && previousScene.isLoaded)
-                SceneManager.SetActiveScene(previousScene);
+        private static void UpdateSceneLabels(Scene targetScene)
+        {
+            foreach (GameObject root in targetScene.GetRootGameObjects())
+            {
+                if (root.name == "PirateOceanPrototype")
+                    root.name = "OtterAquariumCombatStage";
+                else if (root.name == "PirateFightController")
+                    root.name = "OtterAquariumCombatController";
+                else if (root.name == "PirateFightHudCanvas")
+                    root.name = "OtterAquariumCombatHudCanvas";
+            }
+
+            foreach (TextMesh text in FindAllInScene<TextMesh>(targetScene))
+            {
+                if (text.name == "PrototypeTitle")
+                    text.text = "OTTER AQUARIUM COMBAT  |  RHYTHM BATTLE + CINEMATIC CAMERA";
+            }
+
+            foreach (Text text in FindAllInScene<Text>(targetScene))
+            {
+                if (text.name == "Title")
+                    text.text = "RHYTHM HUNTER  |  OTTER AQUARIUM COMBAT";
+                else if (text.name == "FightDetail")
+                    text.text = "Press Q on beat 4 to guard  |  B toggles combat / boss camera";
+            }
+        }
+
+        private static bool SceneRequiresRebuild()
+        {
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            bool wasLoaded = scene.IsValid() && scene.isLoaded;
             if (!wasLoaded)
-                EditorSceneManager.CloseScene(targetScene, true);
+                scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+
+            OtterAquariumCombatSceneMarker marker = FindInScene<OtterAquariumCombatSceneMarker>(scene);
+            bool needsRebuild = marker == null
+                || marker.LayoutRevision < CurrentLayoutRevision
+                || marker.SourceScene != SourceScenePath
+                || marker.IncludesOceanWaves
+                || !marker.IncludesCinematicCamera
+                || FindInScene<PirateBossCameraController>(scene) == null;
+
+            if (!wasLoaded)
+                EditorSceneManager.CloseScene(scene, true);
+            return needsRebuild;
         }
 
         private static T FindInScene<T>(Scene scene) where T : Component
@@ -108,6 +226,22 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     return component;
             }
             return null;
+        }
+
+        private static T[] FindAllInScene<T>(Scene scene) where T : Component
+        {
+            List<T> results = new();
+            foreach (GameObject root in scene.GetRootGameObjects())
+                results.AddRange(root.GetComponentsInChildren<T>(true));
+            return results.ToArray();
+        }
+
+        private static GameObject[] FindAllGameObjects(Scene scene)
+        {
+            List<GameObject> results = new();
+            foreach (GameObject root in scene.GetRootGameObjects())
+                results.AddRange(root.GetComponentsInChildren<Transform>(true).Select(item => item.gameObject));
+            return results.ToArray();
         }
 
         private static void AddSceneToBuildSettings(string scenePath)

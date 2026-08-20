@@ -3,6 +3,7 @@ using RhythmHunter.FightDemo;
 using RhythmHunter.OtterAquariumPrototype;
 using RhythmHunter.PirateOceanPrototype;
 using RhythmHunter.RhythmDemo;
+using Unity.Cinemachine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -41,6 +42,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             RequireCount(FindAllInScene<FightScenePresenter>(scene), 1, "fight HUD presenter", failures);
             RequireCount(FindAllInScene<FightBattlefieldPresenter>(scene), 1, "battlefield presenter", failures);
             RequireCount(FindAllInScene<FightUnitSlot>(scene), 6, "fight unit slots", failures);
+            RequireCount(FindAllInScene<PirateBossCameraController>(scene), 1, "cinematic camera controller", failures);
+            RequireCount(FindAllInScene<CinemachineBrain>(scene), 1, "Cinemachine brain", failures);
+            RequireCount(FindAllInScene<CinemachineCamera>(scene), 2, "Cinemachine cameras", failures);
 
             if (FindAllInScene<PirateOceanWaveController>(scene).Length != 0)
                 failures.Add("PirateOceanWaveController must not be present in the aquarium combat scene.");
@@ -48,12 +52,26 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 failures.Add("PirateOceanSurface must not be present in the aquarium combat scene.");
             if (FindAllInScene<PirateShipMotionController>(scene).Length != 0)
                 failures.Add("PirateShipMotionController must not be present in the aquarium combat scene.");
+            if (FindAllInScene<PirateOceanRuntimePanel>(scene).Length != 0)
+                failures.Add("PirateOceanRuntimePanel must not be present in the aquarium combat scene.");
+
+            PirateBossCameraController[] cameraControllers = FindAllInScene<PirateBossCameraController>(scene);
+            if (cameraControllers.Length == 1
+                && (cameraControllers[0].Brain == null
+                    || cameraControllers[0].ShipCombatCamera == null
+                    || cameraControllers[0].BossWideCamera == null))
+            {
+                failures.Add("Cinematic camera controller references are incomplete.");
+            }
 
             OtterAquariumCombatSceneMarker[] markers = FindAllInScene<OtterAquariumCombatSceneMarker>(scene);
             if (markers.Length == 1
-                && (markers[0].IncludesOceanWaves || markers[0].SourceScene != OtterAquariumCombatSceneSetup.SourceScenePath))
+                && (markers[0].IncludesOceanWaves
+                    || !markers[0].IncludesCinematicCamera
+                    || markers[0].LayoutRevision != OtterAquariumCombatSceneSetup.CurrentLayoutRevision
+                    || markers[0].SourceScene != OtterAquariumCombatSceneSetup.SourceScenePath))
             {
-                failures.Add("Aquarium combat ownership marker contains incorrect source or wave settings.");
+                failures.Add("Aquarium combat ownership marker contains incorrect source, wave, camera, or revision settings.");
             }
 
             if (!wasLoaded)
