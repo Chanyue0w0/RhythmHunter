@@ -2,8 +2,27 @@
 
 - `OtterAquarium.unity` is the top-down sea otter movement, surface transition, slide, and water VFX prototype.
 - `OtterAquariumCombat.unity` uses the PirateFightScene battle staging and its Cinemachine combat/boss camera transition.
+- `OtterShellBeatLab.unity` is a fixed-camera, one-button call-and-response playtest. The crab demonstrates a rhythm and the otter repeats it one bar later.
 - The combat scene intentionally removes pirate ocean waves, animated ocean surfaces, ship motion, and the ocean tuning panel.
 - `Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity` remains the source reference. Continue future scene work in this folder.
+
+## Shell Beat Lab
+
+- **Audio status:** cue, hit, miss, and success sound effects have not been added yet. Their FMOD event fields are intentionally left empty for later production integration.
+- Open `OtterShellBeatLab.unity` and press Play. Use Space, Enter, left click, or the gamepad south button.
+- The prototype uses `event:/Combat soundtracks/Combat 01` at 100 BPM as temporary music.
+- Edit `Assets/OtterAquariumPrototype/Data/OtterShellBeatLevel.asset` to replace the optional cue, hit, miss, and success FMOD event paths.
+- The chart uses 480 PPQ and contains 11 two-bar call/response phrases. The final two phrases select Assist, Standard, or Challenge patterns from recent performance without changing judgement windows.
+- Rebuild or validate from `Rhythm Hunter > Otter Aquarium > Build/Validate Shell Beat Lab`.
+
+## Rhythm level authoring
+
+- Open `Rhythm Hunter > Otter Aquarium > Open Rhythm Level Editor`.
+- Create or duplicate a level asset, then use a Chinese rhythm preset, a quick progression template, or the 16-step grid.
+- Each phrase supports fixed timing or Assist / Standard / Challenge adaptive variants.
+- `Chart Offset (ms)` shifts the full authored chart against the first FMOD timeline beat without changing input calibration.
+- Apply the selected asset to `OtterShellBeatLab.unity` with `Apply To Test Scene` in the editor window.
+- Full JSON can round-trip level data. Producer CSV expands cue and response events into bars, beats, PPQ ticks, absolute beats, and timeline seconds.
 
 ## Aquarium area authoring
 
