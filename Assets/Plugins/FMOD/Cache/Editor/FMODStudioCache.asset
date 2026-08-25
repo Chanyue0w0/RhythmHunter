@@ -259,6 +259,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 1000
+--- !u!114 &-2984020202965395412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ZooGoblinFight/SoundEffects/Warning
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/ZooGoblinFight/SoundEffects/Warning
+  Guid:
+    Data1: -28931660
+    Data2: 1170839212
+    Data3: -1983640423
+    Data4: 290110649
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 0
 --- !u!114 &-2926191929665069138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -452,6 +479,7 @@ MonoBehaviour:
   - {fileID: 5394457282141787622}
   - {fileID: 2603954178992123188}
   - {fileID: -1035221201785074293}
+  - {fileID: -2984020202965395412}
   EditorParameters:
   - {fileID: -5040547114344505986}
   - {fileID: -1051140484031798589}
@@ -462,7 +490,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: 3274462911295270183}
   cacheVersion: 131860
-  cacheTime: 639232708247570763
+  cacheTime: 639232743492236588
   SerializableEventsDict:
   - key: event:/SoundEffects/InCombat/Paladin_NormalParry
     index: 0
@@ -502,6 +530,10 @@ MonoBehaviour:
     index: 17
   - key: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
     index: 18
+  - key: event:/ZooGoblinFight/BGM/Otter's Revenge
+    index: 19
+  - key: event:/ZooGoblinFight/SoundEffects/Warning
+    index: 20
 --- !u!114 &1068593537462916099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -731,10 +763,10 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639232708247570763
+  lastModified: 639232743492236588
   FileSizes:
   - Name: Desktop
-    Value: 2408
+    Value: 2446
   Exists: 1
 --- !u!114 &3656930557680544666
 MonoBehaviour:
@@ -932,8 +964,8 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639232708247534568
+  lastModified: 639232743492206181
   FileSizes:
   - Name: Desktop
-    Value: 10251936
+    Value: 10264480
   Exists: 1

@@ -90,6 +90,7 @@ namespace RhythmHunter.RhythmDemo
         [Header("FMOD Music")]
         [SerializeField] private string musicEventPath = "event:/Combat soundtracks/Combat 01";
         [SerializeField, Min(0f)] private float musicStartDelaySeconds = 1f;
+        [SerializeField, Range(0f, 1f)] private float musicVolume = 1f;
         [SerializeField] private bool playOnStart = true;
 
         private readonly ConcurrentQueue<CallbackBeatData> pendingBeats = new();
@@ -109,6 +110,7 @@ namespace RhythmHunter.RhythmDemo
 
         public string MusicEventPath => musicEventPath;
         public float MusicStartDelaySeconds => musicStartDelaySeconds;
+        public float MusicVolume => musicVolume;
         public bool IsReady => initialized && musicInstance.isValid();
         public bool IsPlaying => playbackStarted && musicInstance.isValid();
         public bool HasTimingAnchor => hasAnchor;
@@ -145,11 +147,27 @@ namespace RhythmHunter.RhythmDemo
             ShutdownMusic();
         }
 
-        public void Configure(string eventPath, float startDelaySeconds, bool shouldPlayOnStart = true)
+        public void Configure(
+            string eventPath,
+            float startDelaySeconds,
+            bool shouldPlayOnStart = true,
+            float configuredMusicVolume = 1f)
         {
             musicEventPath = eventPath;
             musicStartDelaySeconds = Mathf.Max(0f, startDelaySeconds);
+            musicVolume = Mathf.Clamp01(configuredMusicVolume);
             playOnStart = shouldPlayOnStart;
+        }
+
+        public void SetMusicVolume(float volume)
+        {
+            musicVolume = Mathf.Clamp01(volume);
+            if (!musicInstance.isValid())
+                return;
+
+            RESULT result = musicInstance.setVolume(musicVolume);
+            if (result != RESULT.OK)
+                ReportError($"FMOD failed to set music volume for '{musicEventPath}': {result}");
         }
 
         public void StartMusic()
@@ -230,6 +248,15 @@ namespace RhythmHunter.RhythmDemo
             if (!musicInstance.isValid())
             {
                 ReportError($"FMOD event was not found: {musicEventPath}");
+                return;
+            }
+
+            RESULT volumeResult = musicInstance.setVolume(musicVolume);
+            if (volumeResult != RESULT.OK)
+            {
+                ReportError($"FMOD failed to set music volume for '{musicEventPath}': {volumeResult}");
+                musicInstance.release();
+                musicInstance.clearHandle();
                 return;
             }
 

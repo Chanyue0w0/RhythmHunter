@@ -1,0 +1,123 @@
+using RhythmHunter.OtterAquariumPrototype;
+using RhythmHunter.RhythmDemo;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace RhythmHunter.OtterAquariumPrototypeEditor
+{
+    public static class OtterGoblinDemo1Validation
+    {
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Validate Zoo Goblin Demo 1")]
+        public static void ValidateFromMenu()
+        {
+            ValidateScene(true);
+        }
+
+        public static bool ValidateScene(bool logSuccess)
+        {
+            SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(OtterGoblinDemo1SceneBuilder.ScenePath);
+            OtterGoblinDemo1LevelData data =
+                AssetDatabase.LoadAssetAtPath<OtterGoblinDemo1LevelData>(OtterGoblinDemo1SceneBuilder.DataPath);
+            if (sceneAsset == null || data == null)
+            {
+                Debug.LogError($"[OtterGoblinDemo1Validation] Missing scene or chart. Scene={sceneAsset != null}, Data={data != null}");
+                return false;
+            }
+
+            bool chartValid = data.Validate(out string chartError);
+            Scene scene = SceneManager.GetSceneByPath(OtterGoblinDemo1SceneBuilder.ScenePath);
+            bool wasLoaded = scene.IsValid() && scene.isLoaded;
+            if (!wasLoaded)
+                scene = EditorSceneManager.OpenScene(OtterGoblinDemo1SceneBuilder.ScenePath, OpenSceneMode.Additive);
+
+            FmodBeatClock clock = Find<FmodBeatClock>(scene);
+            OtterGoblinDemo1Runner runner = Find<OtterGoblinDemo1Runner>(scene);
+            OtterGoblinDemo1Input input = Find<OtterGoblinDemo1Input>(scene);
+            OtterGoblinDemo1Presenter presenter = Find<OtterGoblinDemo1Presenter>(scene);
+            SpriteRenderer goblin = FindNamed<SpriteRenderer>(scene, "GoblinSprite");
+            Transform otter = FindNamedTransform(scene, "Otter");
+            TextMesh health = FindNamed<TextMesh>(scene, "Health");
+
+            bool valid = chartValid
+                && clock != null
+                && runner != null
+                && runner.LevelData == data
+                && input != null
+                && presenter != null
+                && goblin != null
+                && goblin.sprite != null
+                && goblin.transform.position.x < 0f
+                && otter != null
+                && otter.position.x > 0f
+                && health != null
+                && data.OtterMaxHealth == 3
+                && data.DamagePerMiss == 1
+                && Mathf.Approximately(data.AuthoredBpm, 153.1f)
+                && data.TotalBars == 108
+                && data.Phrases.Count >= 20
+                && data.GoodWindowMs >= data.PerfectWindowMs
+                && Mathf.Approximately(data.MusicVolume, 0.55f)
+                && data.MusicEventPath == "event:/ZooGoblinFight/BGM/Otter's Revenge"
+                && data.WarningStartSoundEventPath == "event:/ZooGoblinFight/SoundEffects/Warning"
+                && data.WarningSoundEventPath == "event:/ZooGoblinFight/SoundEffects/BeatTapping"
+                && data.AttackSoundEventPath == "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
+
+            if (!wasLoaded)
+                EditorSceneManager.CloseScene(scene, true);
+
+            if (!valid)
+            {
+                Debug.LogError(
+                    "[OtterGoblinDemo1Validation] Validation failed. "
+                    + $"Chart={chartValid} ({chartError}), Clock={clock != null}, Runner={runner != null}, "
+                    + $"Input={input != null}, Presenter={presenter != null}, Goblin={goblin != null}, "
+                    + $"Otter={otter != null}, HealthHUD={health != null}, HP={data.OtterMaxHealth}, "
+                    + $"Damage={data.DamagePerMiss}, Phrases={data.Phrases.Count}");
+                return false;
+            }
+
+            if (logSuccess)
+                Debug.Log("OTTER_GOBLIN_DEMO1_VALIDATION_PASS");
+            return true;
+        }
+
+        private static T Find<T>(Scene scene) where T : Component
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                T component = root.GetComponentInChildren<T>(true);
+                if (component != null)
+                    return component;
+            }
+            return null;
+        }
+
+        private static T FindNamed<T>(Scene scene, string objectName) where T : Component
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (T component in root.GetComponentsInChildren<T>(true))
+                {
+                    if (component.name == objectName)
+                        return component;
+                }
+            }
+            return null;
+        }
+
+        private static Transform FindNamedTransform(Scene scene, string objectName)
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (Transform transform in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (transform.name == objectName)
+                        return transform;
+                }
+            }
+            return null;
+        }
+    }
+}
