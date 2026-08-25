@@ -389,6 +389,33 @@ MonoBehaviour:
   IsGlobal: 1
   Labels: []
   Exists: 1
+--- !u!114 &-1035221201785074293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ZooGoblinFight/BGM/Otter's Revenge
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/ZooGoblinFight/BGM/Otter's Revenge
+  Guid:
+    Data1: -1081030860
+    Data2: 1298504949
+    Data3: -1188041802
+    Data4: 369935368
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 170016
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,6 +449,9 @@ MonoBehaviour:
   - {fileID: -4012418388762648735}
   - {fileID: 3044207619034368335}
   - {fileID: -1476947051003202178}
+  - {fileID: 5394457282141787622}
+  - {fileID: 2603954178992123188}
+  - {fileID: -1035221201785074293}
   EditorParameters:
   - {fileID: -5040547114344505986}
   - {fileID: -1051140484031798589}
@@ -432,7 +462,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: 3274462911295270183}
   cacheVersion: 131860
-  cacheTime: 639221314388497587
+  cacheTime: 639232708247570763
   SerializableEventsDict:
   - key: event:/SoundEffects/InCombat/Paladin_NormalParry
     index: 0
@@ -468,6 +498,10 @@ MonoBehaviour:
     index: 15
   - key: event:/SoundEffects/CombatResult/Victory
     index: 16
+  - key: event:/ZooGoblinFight/SoundEffects/BeatTapping
+    index: 17
+  - key: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
+    index: 18
 --- !u!114 &1068593537462916099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -575,6 +609,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 18841
+--- !u!114 &2603954178992123188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
+  Guid:
+    Data1: -539738501
+    Data2: 1235454779
+    Data3: -1670274642
+    Data4: -59968833
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 0
+  Is3D: 1
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 250
 --- !u!114 &2606801606420903327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -670,10 +731,34 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639221314388497587
+  lastModified: 639232708247570763
   FileSizes:
   - Name: Desktop
-    Value: 2212
+    Value: 2408
+  Exists: 1
+--- !u!114 &3656930557680544666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/BeatTapping/SFXOnOff
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorParamRef
+  Name: SFXOnOff
+  StudioPath: 
+  Min: 0
+  Max: 1
+  Default: 1
+  ID:
+    data1: 347430142
+    data2: 3786689968
+  Type: 0
+  IsGlobal: 1
+  Labels: []
   Exists: 1
 --- !u!114 &3856049454007993069
 MonoBehaviour:
@@ -729,6 +814,34 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 500
+--- !u!114 &5394457282141787622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ZooGoblinFight/SoundEffects/BeatTapping
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/ZooGoblinFight/SoundEffects/BeatTapping
+  Guid:
+    Data1: 435965553
+    Data2: 1086419545
+    Data3: 1974973324
+    Data4: -1984845100
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters:
+  - {fileID: 3656930557680544666}
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 375
 --- !u!114 &5916420687753627236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -819,8 +932,8 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639221314388473892
+  lastModified: 639232708247534568
   FileSizes:
   - Name: Desktop
-    Value: 7977600
+    Value: 10251936
   Exists: 1
