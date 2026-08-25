@@ -188,7 +188,6 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnPhraseStarted(int number, OtterGoblinDemo1LevelData.AttackPhrase phrase)
         {
-            PlayOptional(runner.LevelData.WarningStartSoundEventPath);
             if (phraseText != null)
                 phraseText.text = $"#{number:00}  {phrase.Label}";
             if (patternText != null)

@@ -60,8 +60,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && data.GoodWindowMs >= data.PerfectWindowMs
                 && Mathf.Approximately(data.MusicVolume, 0.55f)
                 && data.MusicEventPath == "event:/ZooGoblinFight/BGM/Otter's Revenge"
-                && data.WarningStartSoundEventPath == "event:/ZooGoblinFight/SoundEffects/Warning"
-                && data.WarningSoundEventPath == "event:/ZooGoblinFight/SoundEffects/BeatTapping"
+                && data.WarningSoundEventPath == "event:/ZooGoblinFight/SoundEffects/Warning"
                 && data.AttackSoundEventPath == "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
 
             if (!wasLoaded)

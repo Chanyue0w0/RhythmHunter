@@ -29,7 +29,7 @@
 
 - Open `OtterZooGoblinDemo1.unity`, press Play, and defend with Space, Enter, left click, or gamepad south. Press R to restart.
 - FMOD music is `event:/ZooGoblinFight/BGM/Otter's Revenge`, authored at 153.1 BPM / 4-4 with a +49 ms music-grid alignment.
-- `Warning` plays once when each LISTEN phase begins, `BeatTapping` demonstrates the warning rhythm, and `AxeGoblin_NormalAttack` plays each real attack. Perfect, Good, and Miss result-SFX fields remain intentionally empty for later production audio.
+- `Warning` plays on every authored warning hit: a pattern such as `x_xx` plays it exactly three times, while rests stay silent. `AxeGoblin_NormalAttack` plays each real attack. Perfect, Good, and Miss result-SFX fields remain intentionally empty for later production audio.
 - Demo1 BGM volume is set to 55% in its level asset so warning and attack cues remain readable.
 - The otter has exactly 3 HP. Every unresolved attack is a Miss and deals exactly 1 damage; Perfect and Good block all damage, while Perfect also shows a counter response.
 - The chart contains quarter-note, rest, safe eighth-note syncopation, delayed-response, and two-bar phrases arranged across the analyzed song sections. Edit `Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset` for later tuning.

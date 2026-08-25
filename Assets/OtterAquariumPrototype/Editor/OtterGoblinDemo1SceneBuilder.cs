@@ -189,7 +189,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         {
             Transform enemy = Empty("ZooGoblin", parent);
             enemy.localPosition = new Vector3(-3.45f, -1.25f, 0f);
-            enemy.localScale = new Vector3(-1f, 1f, 1f);
             stage.EnemyRoot = enemy;
             SpriteRenderer renderer = Sprite(
                 "GoblinSprite", enemy, initialSprite, Color.white,

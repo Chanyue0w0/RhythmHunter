@@ -31,8 +31,7 @@ MonoBehaviour:
   perfectWindowMs: 70
   goodWindowMs: 140
   judgementOffsetMs: 0
-  warningStartSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
-  warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
+  warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
   attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
   perfectSoundEventPath: 
   goodSoundEventPath: 
