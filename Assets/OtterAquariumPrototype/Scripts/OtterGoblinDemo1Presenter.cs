@@ -105,6 +105,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             runner.PhaseChanged += SetPhase;
             runner.PhraseStarted += OnPhraseStarted;
             runner.WarningCue += OnWarningCue;
+            runner.WaitCue += OnWaitCue;
             runner.AttackCue += OnAttackCue;
             runner.Judged += OnJudged;
             runner.HealthChanged += OnHealthChanged;
@@ -121,6 +122,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             runner.PhaseChanged -= SetPhase;
             runner.PhraseStarted -= OnPhraseStarted;
             runner.WarningCue -= OnWarningCue;
+            runner.WaitCue -= OnWaitCue;
             runner.AttackCue -= OnAttackCue;
             runner.Judged -= OnJudged;
             runner.HealthChanged -= OnHealthChanged;
@@ -198,9 +200,9 @@ namespace RhythmHunter.OtterAquariumPrototype
                 judgementText.color = Cyan;
             }
             if (timingText != null)
-                timingText.text = phrase.GapBeats > 0
-                    ? $"REMEMBER IT • THEN WAIT {phrase.GapBeats} BEAT{(phrase.GapBeats == 1 ? string.Empty : "S")}" 
-                    : "REMEMBER IT • ATTACK WILL ECHO";
+                timingText.text = phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Single
+                    ? "ONE WARNING • ONE ATTACK BEAT • BLOCK ONCE"
+                    : "THREE QUICK WARNINGS • ONE ATTACK BEAT • BLOCK THREE STEADY HITS";
         }
 
         private void OnWarningCue(int index, int count, string patternId)
@@ -208,21 +210,30 @@ namespace RhythmHunter.OtterAquariumPrototype
             warningPulse = 1f;
             if (judgementText != null)
             {
-                judgementText.text = $"WATCH  {index}/{count}";
+                judgementText.text = $"WARNING  {index}/{count}";
                 judgementText.color = Cyan;
             }
             PlayOptional(runner.LevelData.WarningSoundEventPath);
         }
 
-        private void OnAttackCue(int index, int count, string patternId)
+        private void OnWaitCue(int index, int count)
         {
             attackPulse = 1f;
+            if (judgementText != null)
+            {
+                judgementText.text = $"AXE  {index}/{count}";
+                judgementText.color = GoodGold;
+            }
+            PlayOptional(runner.LevelData.AttackSoundEventPath);
+        }
+
+        private void OnAttackCue(int index, int count, string patternId)
+        {
             if (judgementText != null)
             {
                 judgementText.text = $"DEFEND  {index}/{count}";
                 judgementText.color = Color.white;
             }
-            PlayOptional(runner.LevelData.AttackSoundEventPath);
         }
 
         private void OnJudged(OtterGoblinDemo1Runner.JudgementResult result)
@@ -251,6 +262,7 @@ namespace RhythmHunter.OtterAquariumPrototype
                     if (shield != null)
                         shield.color = new Color(PerfectGreen.r, PerfectGreen.g, PerfectGreen.b, shield.color.a);
                     SetJudgement("PERFECT", PerfectGreen, FormatDelta(result.DeltaMs) + " • COUNTER");
+                    PlayOptional(runner.LevelData.BlockSoundEventPath);
                     PlayOptional(runner.LevelData.PerfectSoundEventPath);
                     break;
 
@@ -259,6 +271,7 @@ namespace RhythmHunter.OtterAquariumPrototype
                     if (shield != null)
                         shield.color = new Color(GoodGold.r, GoodGold.g, GoodGold.b, shield.color.a);
                     SetJudgement("GOOD", GoodGold, FormatDelta(result.DeltaMs) + " • BLOCKED");
+                    PlayOptional(runner.LevelData.BlockSoundEventPath);
                     PlayOptional(runner.LevelData.GoodSoundEventPath);
                     break;
 
@@ -391,7 +404,7 @@ namespace RhythmHunter.OtterAquariumPrototype
                 return;
             OtterGoblinDemo1Runner.CombatSummary summary = runner.GetSummary();
             statusText.text =
-                $"BAR {currentBar:000}/{runner.LevelData.TotalBars}  BEAT {currentBeat}/4   •   153.1 BPM\n"
+                $"BAR {currentBar:000}/{runner.LevelData.TotalBars}  BEAT {currentBeat}/4   •   {runner.LevelData.AuthoredBpm:0.#} BPM\n"
                 + $"P {summary.Perfect:00}   G {summary.Good:00}   M {summary.Miss:00}   EXTRA {summary.Extra:00}";
         }
 

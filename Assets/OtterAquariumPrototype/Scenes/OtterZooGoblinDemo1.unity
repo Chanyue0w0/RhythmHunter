@@ -179,7 +179,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100404752}
-  m_Text: "BAR 001/108  BEAT 1/4   \u2022   153.1 BPM\nP 00   G 00   M 00   EXTRA
+  m_Text: "BAR 001/033  BEAT 1/4   \u2022   120 BPM\nP 00   G 00   M 00   EXTRA
     00"
   m_OffsetZ: 0
   m_CharacterSize: 0.058
@@ -780,7 +780,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 293324302}
-  m_Text: "DEMO1  \u2022  OTTER'S REVENGE"
+  m_Text: "DEMO1  \u2022  GOBLIN PATROL"
   m_OffsetZ: 0
   m_CharacterSize: 0.105
   m_LineSpacing: 1
@@ -2828,7 +2828,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3814f07b225d8f34084d9aed7684d7c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock
-  musicEventPath: event:/ZooGoblinFight/BGM/Otter's Revenge
+  musicEventPath: event:/ZooGoblinFight/BGM/Goblin Patrol
   musicStartDelaySeconds: 1
   musicVolume: 0.55
   playOnStart: 1

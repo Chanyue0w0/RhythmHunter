@@ -14,250 +14,204 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1LevelData
   levelId: zoo-goblin-demo-1
   displayName: "Demo1\uFF1A\u52D5\u7269\u5712\u54E5\u5E03\u6797\u7BC0\u62CD\u6230"
-  authoringNotes: "\u4F9D Otter's Revenge \u6BB5\u843D\u7DE8\u6392\u3002\u524D 4
-    \u5C0F\u7BC0\u9032\u5834\uFF1B\u8B66\u544A\u7BC0\u594F\u5F8C\u63D2\u5165 0\uFF5E2
-    \u62CD\u7A7A\u62CD\uFF0C\u518D\u7531\u65A7\u64CA\u91CD\u8907\u7BC0\u594F\u3002\u97F3\u6548\u4E8B\u4EF6\u5DF2\u63A5\u5165\uFF0CPerfect/Good/Miss
-    \u984D\u5916\u56DE\u994B\u97F3\u4ECD\u4FDD\u7559\u7A7A\u4F4D\u3002"
-  musicEventPath: event:/ZooGoblinFight/BGM/Otter's Revenge
+  authoringNotes: "Goblin Patrol beginner chart. Only X _ and X X X _ cues are used."
+  musicEventPath: event:/ZooGoblinFight/BGM/Goblin Patrol
   musicStartDelaySeconds: 1
   musicVolume: 0.55
-  musicGridOffsetMs: 49
-  authoredBpm: 153.1
+  musicGridOffsetMs: 0
+  authoredBpm: 120
   beatsPerBar: 4
-  totalBars: 108
+  totalBars: 33
   ppq: 480
   otterMaxHealth: 3
   damagePerMiss: 1
-  perfectWindowMs: 70
-  goodWindowMs: 140
+  perfectWindowMs: 85
+  goodWindowMs: 170
   judgementOffsetMs: 0
   warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
   attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
+  blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
   perfectSoundEventPath: 
   goodSoundEventPath: 
   missSoundEventPath: 
   phrases:
   - startBar: 5
-    label: TWO STRONG
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
     pattern:
-      id: two-strong
-      hitTicks: 00000000c0030000
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 7
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
   - startBar: 9
-    label: BACK PAIR
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
     pattern:
-      id: back-pair
-      hitTicks: c0030000a0050000
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 11
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
   - startBar: 13
-    label: SKIP THE THIRD
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
+    label: SPECIAL - X X X _
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
     pattern:
-      id: skip-third
-      hitTicks: 00000000e0010000a0050000
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 15
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
   - startBar: 17
-    label: "WAIT TWO \u2022 SYNCOPATE"
-    warningLengthBeats: 4
-    gapBeats: 2
-    attackLengthBeats: 4
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
     pattern:
-      id: syncopated
-      hitTicks: 00000000d0020000a0050000
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 19
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
   - startBar: 21
-    label: OFFBEAT ECHO
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
+    label: SPECIAL - X X X _
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
     pattern:
-      id: offbeat-pair
-      hitTicks: f0000000b0040000
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 23
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
   - startBar: 25
-    label: LATE THREE
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
+    label: SPECIAL - X X X _
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
     pattern:
-      id: late-three
-      hitTicks: e0010000c0030000a0050000
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 27
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
   - startBar: 29
-    label: LONG WAVE
-    warningLengthBeats: 8
-    gapBeats: 0
-    attackLengthBeats: 8
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
     pattern:
-      id: long-wave
-      hitTicks: 00000000c003000080070000500a0000200d0000
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 31
+    label: SPECIAL - X X X _
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
   - startBar: 33
-    label: PICKUP AFTER TWO
-    warningLengthBeats: 4
-    gapBeats: 2
-    attackLengthBeats: 4
+    label: SINGLE - X _
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
     pattern:
-      id: pickup
-      hitTicks: 00000000c003000090060000
-  - startBar: 37
-    label: RETURN TO TWO
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: two-strong
-      hitTicks: 00000000c0030000
-  - startBar: 41
-    label: SKIP PRESSURE
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: skip-third
-      hitTicks: 00000000e0010000a0050000
-  - startBar: 43
-    label: LATE PRESSURE
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: late-three
-      hitTicks: e0010000c0030000a0050000
-  - startBar: 45
-    label: OFFBEAT PRESSURE
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: offbeat-pair
-      hitTicks: f0000000b0040000
-  - startBar: 49
-    label: FOUR AXES
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: all-four
-      hitTicks: 00000000e0010000c0030000a0050000
-  - startBar: 53
-    label: PRESSURE WAVE
-    warningLengthBeats: 8
-    gapBeats: 0
-    attackLengthBeats: 8
-    pattern:
-      id: long-wave
-      hitTicks: 00000000c003000080070000500a0000200d0000
-  - startBar: 57
-    label: "BREAKDOWN \u2022 HOLD"
-    warningLengthBeats: 8
-    gapBeats: 0
-    attackLengthBeats: 8
-    pattern:
-      id: long-break
-      hitTicks: 00000000a005000070080000200d0000
-  - startBar: 63
-    label: WAKE UP
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: two-strong
-      hitTicks: 00000000c0030000
-  - startBar: 65
-    label: SYNCOPATED RETURN
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: syncopated
-      hitTicks: 00000000d0020000a0050000
-  - startBar: 69
-    label: SKIP RETURN
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: skip-third
-      hitTicks: 00000000e0010000a0050000
-  - startBar: 73
-    label: PICKUP AFTER TWO
-    warningLengthBeats: 4
-    gapBeats: 2
-    attackLengthBeats: 4
-    pattern:
-      id: pickup
-      hitTicks: 00000000c003000090060000
-  - startBar: 77
-    label: LATE RETURN
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: late-three
-      hitTicks: e0010000c0030000a0050000
-  - startBar: 81
-    label: OFFBEAT RETURN
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: offbeat-pair
-      hitTicks: f0000000b0040000
-  - startBar: 85
-    label: REBUILD WAVE
-    warningLengthBeats: 8
-    gapBeats: 0
-    attackLengthBeats: 8
-    pattern:
-      id: long-wave
-      hitTicks: 00000000c003000080070000500a0000200d0000
-  - startBar: 89
-    label: FINALE FOUR
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: all-four
-      hitTicks: 00000000e0010000c0030000a0050000
-  - startBar: 91
-    label: FINALE SYNC
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: syncopated
-      hitTicks: 00000000d0020000a0050000
-  - startBar: 93
-    label: FINALE SKIP
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: skip-third
-      hitTicks: 00000000e0010000a0050000
-  - startBar: 97
-    label: FINAL WAVE
-    warningLengthBeats: 8
-    gapBeats: 0
-    attackLengthBeats: 8
-    pattern:
-      id: long-wave
-      hitTicks: 00000000c003000080070000500a0000200d0000
-  - startBar: 101
-    label: LAST FOUR
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: all-four
-      hitTicks: 00000000e0010000c0030000a0050000
-  - startBar: 103
-    label: LAST ECHO
-    warningLengthBeats: 4
-    gapBeats: 0
-    attackLengthBeats: 4
-    pattern:
-      id: pickup
-      hitTicks: 00000000c003000090060000
+      id: single-response
+      hitTicks: 00000000

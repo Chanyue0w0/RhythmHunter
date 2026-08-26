@@ -39,9 +39,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             SpriteRenderer goblin = FindNamed<SpriteRenderer>(scene, "GoblinSprite");
             Transform otter = FindNamedTransform(scene, "Otter");
             TextMesh health = FindNamed<TextMesh>(scene, "Health");
+            int singleCount = 0;
+            int tripleCount = 0;
+            foreach (OtterGoblinDemo1LevelData.AttackPhrase phrase in data.Phrases)
+            {
+                if (phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Single)
+                    singleCount++;
+                else if (phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Triple)
+                    tripleCount++;
+            }
 
             bool valid = chartValid
                 && clock != null
+                && clock.MusicEventPath == data.MusicEventPath
+                && Mathf.Approximately(clock.MusicVolume, data.MusicVolume)
                 && runner != null
                 && runner.LevelData == data
                 && input != null
@@ -54,14 +65,17 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && health != null
                 && data.OtterMaxHealth == 3
                 && data.DamagePerMiss == 1
-                && Mathf.Approximately(data.AuthoredBpm, 153.1f)
-                && data.TotalBars == 108
-                && data.Phrases.Count >= 20
+                && Mathf.Approximately(data.AuthoredBpm, 120f)
+                && data.TotalBars == 33
+                && data.Phrases.Count == 15
+                && singleCount == 11
+                && tripleCount == 4
                 && data.GoodWindowMs >= data.PerfectWindowMs
                 && Mathf.Approximately(data.MusicVolume, 0.55f)
-                && data.MusicEventPath == "event:/ZooGoblinFight/BGM/Otter's Revenge"
+                && data.MusicEventPath == "event:/ZooGoblinFight/BGM/Goblin Patrol"
                 && data.WarningSoundEventPath == "event:/ZooGoblinFight/SoundEffects/Warning"
-                && data.AttackSoundEventPath == "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
+                && data.AttackSoundEventPath == "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack"
+                && data.BlockSoundEventPath == "event:/ZooGoblinFight/SoundEffects/BeatTapping";
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
@@ -73,7 +87,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Chart={chartValid} ({chartError}), Clock={clock != null}, Runner={runner != null}, "
                     + $"Input={input != null}, Presenter={presenter != null}, Goblin={goblin != null}, "
                     + $"Otter={otter != null}, HealthHUD={health != null}, HP={data.OtterMaxHealth}, "
-                    + $"Damage={data.DamagePerMiss}, Phrases={data.Phrases.Count}");
+                    + $"Damage={data.DamagePerMiss}, Phrases={data.Phrases.Count}, "
+                    + $"Single={singleCount}, Triple={tripleCount}");
                 return false;
             }
 

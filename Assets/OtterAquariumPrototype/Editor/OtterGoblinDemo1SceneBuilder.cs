@@ -156,7 +156,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             Transform titlePanel = Empty("TitlePanel", root);
             Sprite("TitlePanelFill", titlePanel, shape, Ink, new Vector3(0f, 4.55f, 0f), new Vector2(18.6f, 1.15f), 90);
-            Text("Title", titlePanel, font, "DEMO1  •  OTTER'S REVENGE", Color.white,
+            Text("Title", titlePanel, font, "DEMO1  •  GOBLIN PATROL", Color.white,
                 new Vector3(-5.3f, 4.64f, -0.2f), 0.105f, FontStyle.Bold, 100, TextAnchor.MiddleLeft);
             stage.Health = Text("Health", titlePanel, font, "OTTER HP   ■■■   3/3", Color.white,
                 new Vector3(5.8f, 4.64f, -0.2f), 0.1f, FontStyle.Bold, 100, TextAnchor.MiddleRight);
@@ -179,7 +179,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 new Vector3(0f, -3.55f, -0.2f), 0.15f, FontStyle.Bold, 100);
             stage.Timing = Text("Timing", resultPanel, font, "LISTEN TO THE WARNING • REPEAT IT WHEN THE AXE SWINGS", Cyan,
                 new Vector3(0f, -4.02f, -0.2f), 0.075f, FontStyle.Normal, 100);
-            stage.Status = Text("Status", resultPanel, font, "BAR 001/108  BEAT 1/4   •   153.1 BPM\nP 00   G 00   M 00   EXTRA 00",
+            stage.Status = Text("Status", resultPanel, font, "BAR 001/033  BEAT 1/4   •   120 BPM\nP 00   G 00   M 00   EXTRA 00",
                 new Color(0.72f, 0.84f, 0.84f, 1f), new Vector3(0f, -4.48f, -0.2f), 0.058f, FontStyle.Normal, 100);
 
             return stage;

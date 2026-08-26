@@ -75,6 +75,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private readonly List<TargetState> activeTargets = new();
         private int phraseIndex;
         private int nextWarningIndex;
+        private int nextWaitIndex;
         private int nextAttackIndex;
         private long activePhraseStartTick;
         private long warningEndTick;
@@ -93,6 +94,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public event Action<CombatPhase> PhaseChanged;
         public event Action<int, OtterGoblinDemo1LevelData.AttackPhrase> PhraseStarted;
         public event Action<int, int, string> WarningCue;
+        public event Action<int, int> WaitCue;
         public event Action<int, int, string> AttackCue;
         public event Action<JudgementResult> Judged;
         public event Action<int, int> HealthChanged;
@@ -216,17 +218,9 @@ namespace RhythmHunter.OtterAquariumPrototype
                 return "— — — —";
 
             OtterGoblinDemo1LevelData.AttackPhrase phrase = levelData.Phrases[phraseIndex];
-            int steps = phrase.WarningLengthBeats * 2;
-            char[] display = new char[steps];
-            for (int i = 0; i < display.Length; i++)
-                display[i] = '·';
-            foreach (int tick in phrase.Pattern.HitTicks)
-            {
-                int step = Mathf.RoundToInt(tick / (levelData.Ppq * 0.5f));
-                if (step >= 0 && step < display.Length)
-                    display[step] = '●';
-            }
-            return string.Join(" ", display);
+            return phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Single
+                ? "CUE  x _   •   DEFEND  x"
+                : "CUE  x x x _   •   DEFEND  x _ x _ x";
         }
 
         private void ProcessTimeline(long songTick, double evaluatedTimelineMs)
@@ -249,13 +243,25 @@ namespace RhythmHunter.OtterAquariumPrototype
                 StartPhrase(phrase, scheduledStart);
             }
 
-            while (nextWarningIndex < phrase.Pattern.HitTicks.Count)
+            while (nextWarningIndex < phrase.WarningPattern.HitTicks.Count)
             {
-                long cueTick = activePhraseStartTick + phrase.Pattern.HitTicks[nextWarningIndex];
+                long cueTick = activePhraseStartTick + phrase.WarningPattern.HitTicks[nextWarningIndex];
                 if (songTick < cueTick)
                     break;
-                WarningCue?.Invoke(nextWarningIndex + 1, phrase.Pattern.HitTicks.Count, phrase.Pattern.Id);
+                WarningCue?.Invoke(
+                    nextWarningIndex + 1,
+                    phrase.WarningPattern.HitTicks.Count,
+                    phrase.WarningPattern.Id);
                 nextWarningIndex++;
+            }
+
+            while (nextWaitIndex < phrase.WaitBeatCount)
+            {
+                long waitTick = GetWaitCueTick(phrase, nextWaitIndex);
+                if (songTick < waitTick)
+                    break;
+                WaitCue?.Invoke(nextWaitIndex + 1, phrase.WaitBeatCount);
+                nextWaitIndex++;
             }
 
             if (songTick >= attackStartTick)
@@ -303,10 +309,13 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             activePhrase = true;
             activePhraseStartTick = startTick;
-            warningEndTick = startTick + (long)phrase.WarningLengthBeats * levelData.Ppq;
-            attackStartTick = warningEndTick + (long)phrase.GapBeats * levelData.Ppq;
+            warningEndTick = phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Triple
+                ? startTick + (long)levelData.Ppq * 3 / 2
+                : startTick + levelData.Ppq;
+            attackStartTick = startTick + (long)phrase.ResponseDelayBeats * levelData.Ppq;
             phraseEndTick = attackStartTick + (long)phrase.AttackLengthBeats * levelData.Ppq;
             nextWarningIndex = 0;
+            nextWaitIndex = 0;
             nextAttackIndex = 0;
             activeTargets.Clear();
             foreach (int relativeTick in phrase.Pattern.HitTicks)
@@ -318,6 +327,13 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
             ChangePhase(CombatPhase.Warning);
             PhraseStarted?.Invoke(phraseIndex + 1, phrase);
+        }
+
+        private long GetWaitCueTick(OtterGoblinDemo1LevelData.AttackPhrase phrase, int waitIndex)
+        {
+            return phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Single
+                ? activePhraseStartTick + (long)(waitIndex + 1) * levelData.Ppq
+                : activePhraseStartTick + (long)levelData.Ppq * 3 / 2;
         }
 
         private void ApplyDamage()

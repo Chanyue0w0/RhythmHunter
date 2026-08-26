@@ -3,7 +3,7 @@
 - `OtterAquarium.unity` is the top-down sea otter movement, surface transition, slide, and water VFX prototype.
 - `OtterAquariumCombat.unity` uses the PirateFightScene battle staging and its Cinemachine combat/boss camera transition.
 - `OtterShellBeatLab.unity` is a fixed-camera, one-button call-and-response playtest. The crab demonstrates a rhythm and the otter repeats it one bar later.
-- `OtterZooGoblinDemo1.unity` is the first music-authored battle demo for `Otter's Revenge`: the axe goblin warns with a rhythm, optionally leaves a gap, then attacks with the same pattern.
+- `OtterZooGoblinDemo1.unity` is the first music-authored battle demo for `Goblin Patrol`: the axe goblin gives one of two fixed beginner cues, then the otter responds.
 - The combat scene intentionally removes pirate ocean waves, animated ocean surfaces, ship motion, and the ocean tuning panel.
 - `Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity` remains the source reference. Continue future scene work in this folder.
 
@@ -28,11 +28,12 @@
 ## Zoo Goblin Demo 1
 
 - Open `OtterZooGoblinDemo1.unity`, press Play, and defend with Space, Enter, left click, or gamepad south. Press R to restart.
-- FMOD music is `event:/ZooGoblinFight/BGM/Otter's Revenge`, authored at 153.1 BPM / 4-4 with a +49 ms music-grid alignment.
-- `Warning` plays on every authored warning hit: a pattern such as `x_xx` plays it exactly three times, while rests stay silent. `AxeGoblin_NormalAttack` plays each real attack. Perfect, Good, and Miss result-SFX fields remain intentionally empty for later production audio.
+- FMOD music is `event:/ZooGoblinFight/BGM/Goblin Patrol`, authored at 120 BPM / 4-4 with its Tempo Marker at 0 ms. Gameplay resolves after 33 complete bars (66 seconds), leaving the final second as an audio tail.
+- Demo1 uses exactly two reactions: `X _ → X` and `X X X _ → X _ X _ X`. There are no alternate wait lengths or additional pattern types.
+- `Warning` plays on each enemy `X`; `AxeGoblin_NormalAttack` plays on `_`; a successful Perfect or Good block plays `BeatTapping`. Miss/result-specific SFX fields remain available for later production audio.
 - Demo1 BGM volume is set to 55% in its level asset so warning and attack cues remain readable.
 - The otter has exactly 3 HP. Every unresolved attack is a Miss and deals exactly 1 damage; Perfect and Good block all damage, while Perfect also shows a counter response.
-- The chart contains quarter-note, rest, safe eighth-note syncopation, delayed-response, and two-bar phrases arranged across the analyzed song sections. Edit `Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset` for later tuning.
+- The Goblin Patrol chart contains 11 Single and 4 Triple phrases. Bars 1–4 are an intro; Triple phrases mark stronger transitions at bars 13, 21, 25, and 31, while bar 33 closes with a final Single before the audio tail. Edit `Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset` for later tuning.
 - Rebuild, validate, or run the FMOD play test from `Rhythm Hunter > Otter Aquarium > ... Zoo Goblin Demo 1`.
 
 ## Aquarium area authoring

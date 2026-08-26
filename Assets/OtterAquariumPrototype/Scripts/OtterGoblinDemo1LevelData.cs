@@ -11,6 +11,12 @@ namespace RhythmHunter.OtterAquariumPrototype
     {
         public const int DefaultPpq = 480;
 
+        public enum AttackKind
+        {
+            Single,
+            Triple
+        }
+
         [Serializable]
         public sealed class AttackPattern
         {
@@ -53,34 +59,43 @@ namespace RhythmHunter.OtterAquariumPrototype
         public sealed class AttackPhrase
         {
             [SerializeField, Min(1)] private int startBar = 5;
-            [SerializeField] private string label = "TWO STRONG";
-            [SerializeField, Min(1)] private int warningLengthBeats = 4;
-            [SerializeField, Min(0)] private int gapBeats;
-            [SerializeField, Min(1)] private int attackLengthBeats = 4;
+            [SerializeField] private string label = "SINGLE • X _";
+            [SerializeField] private AttackKind kind = AttackKind.Single;
+            [SerializeField, Min(1)] private int warningLengthBeats = 1;
+            [SerializeField, HideInInspector] private int responseDelayBeats = 1;
+            [SerializeField, Min(1)] private int attackLengthBeats = 1;
+            [SerializeField] private AttackPattern warningPattern;
             [SerializeField] private AttackPattern pattern;
 
             public int StartBar => startBar;
             public string Label => label;
+            public AttackKind Kind => kind;
             public int WarningLengthBeats => warningLengthBeats;
-            public int GapBeats => gapBeats;
+            public int WaitBeatCount => 1;
+            public int ResponseDelayBeats => 2;
             public int AttackLengthBeats => attackLengthBeats;
+            public AttackPattern WarningPattern => warningPattern;
             public AttackPattern Pattern => pattern;
-            public int TotalLengthBeats => warningLengthBeats + gapBeats + attackLengthBeats;
+            public int TotalLengthBeats => ResponseDelayBeats + attackLengthBeats;
 
             public AttackPhrase(
                 int configuredStartBar,
                 string configuredLabel,
+                AttackKind configuredKind,
                 int configuredWarningBeats,
-                int configuredGapBeats,
+                int configuredResponseDelayBeats,
                 int configuredAttackBeats,
-                AttackPattern configuredPattern)
+                AttackPattern configuredWarningPattern,
+                AttackPattern configuredAttackPattern)
             {
                 startBar = Mathf.Max(1, configuredStartBar);
                 label = string.IsNullOrWhiteSpace(configuredLabel) ? "RHYTHM ATTACK" : configuredLabel.Trim();
+                kind = configuredKind;
                 warningLengthBeats = Mathf.Max(1, configuredWarningBeats);
-                gapBeats = Mathf.Max(0, configuredGapBeats);
+                responseDelayBeats = 1;
                 attackLengthBeats = Mathf.Max(1, configuredAttackBeats);
-                pattern = configuredPattern?.Clone();
+                warningPattern = configuredWarningPattern?.Clone();
+                pattern = configuredAttackPattern?.Clone();
             }
 
             public AttackPhrase Clone()
@@ -88,9 +103,11 @@ namespace RhythmHunter.OtterAquariumPrototype
                 return new AttackPhrase(
                     startBar,
                     label,
+                    kind,
                     warningLengthBeats,
-                    gapBeats,
+                    responseDelayBeats,
                     attackLengthBeats,
+                    warningPattern,
                     pattern);
             }
         }
@@ -99,16 +116,16 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private string levelId = "zoo-goblin-demo-1";
         [SerializeField] private string displayName = "Demo1：動物園哥布林節拍戰";
         [SerializeField, TextArea(3, 7)] private string authoringNotes =
-            "153.1 BPM / 4-4。警告節奏後可插入空拍，再由攻擊重複同一節奏。音樂網格相對 FMOD timeline 約 +49 ms。";
+            "Demo1 只使用 X _ → X 與 X X X _ → X _ X _ X 兩種固定反應。";
 
         [Header("Music")]
-        [SerializeField] private string musicEventPath = "event:/ZooGoblinFight/BGM/Otter's Revenge";
+        [SerializeField] private string musicEventPath = "event:/ZooGoblinFight/BGM/Goblin Patrol";
         [SerializeField, Min(0f)] private float musicStartDelaySeconds = 1f;
         [SerializeField, Range(0f, 1f)] private float musicVolume = 0.55f;
-        [SerializeField] private float musicGridOffsetMs = 49f;
-        [SerializeField, Min(1f)] private float authoredBpm = 153.1f;
+        [SerializeField] private float musicGridOffsetMs;
+        [SerializeField, Min(1f)] private float authoredBpm = 120f;
         [SerializeField, Min(1)] private int beatsPerBar = 4;
-        [SerializeField, Min(4)] private int totalBars = 108;
+        [SerializeField, Min(4)] private int totalBars = 33;
         [SerializeField, Min(24)] private int ppq = DefaultPpq;
 
         [Header("Combat")]
@@ -121,11 +138,12 @@ namespace RhythmHunter.OtterAquariumPrototype
         [Header("FMOD Events")]
         [SerializeField] private string warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
         [SerializeField] private string attackSoundEventPath = "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
+        [SerializeField] private string blockSoundEventPath = "event:/ZooGoblinFight/SoundEffects/BeatTapping";
         [SerializeField] private string perfectSoundEventPath = string.Empty;
         [SerializeField] private string goodSoundEventPath = string.Empty;
         [SerializeField] private string missSoundEventPath = string.Empty;
 
-        [Header("Warning → Gap → Attack Phrases")]
+        [Header("Single / Triple Cue → Axe Beat → Defend")]
         [SerializeField] private List<AttackPhrase> phrases = new();
 
         public string LevelId => levelId;
@@ -147,6 +165,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public float JudgementOffsetMs => judgementOffsetMs;
         public string WarningSoundEventPath => warningSoundEventPath;
         public string AttackSoundEventPath => attackSoundEventPath;
+        public string BlockSoundEventPath => blockSoundEventPath;
         public string PerfectSoundEventPath => perfectSoundEventPath;
         public string GoodSoundEventPath => goodSoundEventPath;
         public string MissSoundEventPath => missSoundEventPath;
@@ -157,72 +176,49 @@ namespace RhythmHunter.OtterAquariumPrototype
             levelId = "zoo-goblin-demo-1";
             displayName = "Demo1：動物園哥布林節拍戰";
             authoringNotes =
-                "依 Otter's Revenge 段落編排。前 4 小節進場；警告節奏後插入 0～2 拍空拍，再由斧擊重複節奏。音效事件已接入，Perfect/Good/Miss 額外回饋音仍保留空位。";
-            musicEventPath = "event:/ZooGoblinFight/BGM/Otter's Revenge";
+                "Goblin Patrol 初學關卡，只使用 X _ → X 與 X X X _ → X _ X _ X。";
+            musicEventPath = "event:/ZooGoblinFight/BGM/Goblin Patrol";
             musicStartDelaySeconds = 1f;
             musicVolume = 0.55f;
-            musicGridOffsetMs = 49f;
-            authoredBpm = 153.1f;
+            musicGridOffsetMs = 0f;
+            authoredBpm = 120f;
             beatsPerBar = 4;
-            totalBars = 108;
+            totalBars = 33;
             ppq = DefaultPpq;
             otterMaxHealth = 3;
             damagePerMiss = 1;
-            perfectWindowMs = 70f;
-            goodWindowMs = 140f;
+            perfectWindowMs = 85f;
+            goodWindowMs = 170f;
             judgementOffsetMs = 0f;
             warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
             attackSoundEventPath = "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
+            blockSoundEventPath = "event:/ZooGoblinFight/SoundEffects/BeatTapping";
             perfectSoundEventPath = string.Empty;
             goodSoundEventPath = string.Empty;
             missSoundEventPath = string.Empty;
 
-            AttackPattern twoStrong = Pattern("two-strong", 0f, 2f);
-            AttackPattern backPair = Pattern("back-pair", 2f, 3f);
-            AttackPattern skipThird = Pattern("skip-third", 0f, 1f, 3f);
-            AttackPattern lateThree = Pattern("late-three", 1f, 2f, 3f);
-            AttackPattern allFour = Pattern("all-four", 0f, 1f, 2f, 3f);
-            AttackPattern offbeatPair = Pattern("offbeat-pair", 0.5f, 2.5f);
-            AttackPattern syncopated = Pattern("syncopated", 0f, 1.5f, 3f);
-            AttackPattern pickup = Pattern("pickup", 0f, 2f, 3.5f);
-            AttackPattern longWave = Pattern("long-wave", 0f, 2f, 4f, 5.5f, 7f);
-            AttackPattern longBreak = Pattern("long-break", 0f, 3f, 4.5f, 7f);
+            AttackPattern singleCue = Pattern("single-cue", 0f);
+            AttackPattern singleResponse = Pattern("single-response", 0f);
+            AttackPattern tripleCue = Pattern("triple-cue", 0f, 0.5f, 1f);
+            AttackPattern tripleResponse = Pattern("triple-response", 0f, 1f, 2f);
 
             phrases = new List<AttackPhrase>
             {
-                Phrase(5, "TWO STRONG", 4, 0, 4, twoStrong),
-                Phrase(9, "BACK PAIR", 4, 0, 4, backPair),
-                Phrase(13, "SKIP THE THIRD", 4, 0, 4, skipThird),
-                Phrase(17, "WAIT TWO • SYNCOPATE", 4, 2, 4, syncopated),
-                Phrase(21, "OFFBEAT ECHO", 4, 0, 4, offbeatPair),
-                Phrase(25, "LATE THREE", 4, 0, 4, lateThree),
-                Phrase(29, "LONG WAVE", 8, 0, 8, longWave),
-
-                Phrase(33, "PICKUP AFTER TWO", 4, 2, 4, pickup),
-                Phrase(37, "RETURN TO TWO", 4, 0, 4, twoStrong),
-
-                Phrase(41, "SKIP PRESSURE", 4, 0, 4, skipThird),
-                Phrase(43, "LATE PRESSURE", 4, 0, 4, lateThree),
-                Phrase(45, "OFFBEAT PRESSURE", 4, 0, 4, offbeatPair),
-                Phrase(49, "FOUR AXES", 4, 0, 4, allFour),
-                Phrase(53, "PRESSURE WAVE", 8, 0, 8, longWave),
-
-                Phrase(57, "BREAKDOWN • HOLD", 8, 0, 8, longBreak),
-                Phrase(63, "WAKE UP", 4, 0, 4, twoStrong),
-
-                Phrase(65, "SYNCOPATED RETURN", 4, 0, 4, syncopated),
-                Phrase(69, "SKIP RETURN", 4, 0, 4, skipThird),
-                Phrase(73, "PICKUP AFTER TWO", 4, 2, 4, pickup),
-                Phrase(77, "LATE RETURN", 4, 0, 4, lateThree),
-                Phrase(81, "OFFBEAT RETURN", 4, 0, 4, offbeatPair),
-                Phrase(85, "REBUILD WAVE", 8, 0, 8, longWave),
-
-                Phrase(89, "FINALE FOUR", 4, 0, 4, allFour),
-                Phrase(91, "FINALE SYNC", 4, 0, 4, syncopated),
-                Phrase(93, "FINALE SKIP", 4, 0, 4, skipThird),
-                Phrase(97, "FINAL WAVE", 8, 0, 8, longWave),
-                Phrase(101, "LAST FOUR", 4, 0, 4, allFour),
-                Phrase(103, "LAST ECHO", 4, 0, 4, pickup)
+                Single(5, singleCue, singleResponse),
+                Single(7, singleCue, singleResponse),
+                Single(9, singleCue, singleResponse),
+                Single(11, singleCue, singleResponse),
+                Triple(13, tripleCue, tripleResponse),
+                Single(15, singleCue, singleResponse),
+                Single(17, singleCue, singleResponse),
+                Single(19, singleCue, singleResponse),
+                Triple(21, tripleCue, tripleResponse),
+                Single(23, singleCue, singleResponse),
+                Triple(25, tripleCue, tripleResponse),
+                Single(27, singleCue, singleResponse),
+                Single(29, singleCue, singleResponse),
+                Triple(31, tripleCue, tripleResponse),
+                Single(33, singleCue, singleResponse)
             };
         }
 
@@ -244,7 +240,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             for (int i = 0; i < phrases.Count; i++)
             {
                 AttackPhrase phrase = phrases[i];
-                if (phrase == null || phrase.Pattern == null || phrase.Pattern.HitTicks.Count == 0)
+                if (phrase == null || phrase.WarningPattern == null || phrase.WarningPattern.HitTicks.Count == 0
+                    || phrase.Pattern == null || phrase.Pattern.HitTicks.Count == 0)
                 {
                     error = $"Phrase #{i + 1} has no pattern.";
                     return false;
@@ -257,10 +254,29 @@ namespace RhythmHunter.OtterAquariumPrototype
                     return false;
                 }
 
-                int lastHit = phrase.Pattern.HitTicks[phrase.Pattern.HitTicks.Count - 1];
-                if (lastHit >= phrase.WarningLengthBeats * Ppq || lastHit >= phrase.AttackLengthBeats * Ppq)
+                int lastWarning = phrase.WarningPattern.HitTicks[phrase.WarningPattern.HitTicks.Count - 1];
+                int lastAttack = phrase.Pattern.HitTicks[phrase.Pattern.HitTicks.Count - 1];
+                if (lastWarning >= phrase.WarningLengthBeats * Ppq || lastAttack >= phrase.AttackLengthBeats * Ppq)
                 {
                     error = $"Phrase #{i + 1} has a hit outside its warning/attack length.";
+                    return false;
+                }
+
+                int expectedCount = phrase.Kind == AttackKind.Single ? 1 : 3;
+                if (phrase.WarningPattern.HitTicks.Count != expectedCount
+                    || phrase.Pattern.HitTicks.Count != expectedCount
+                    || (phrase.Kind == AttackKind.Single
+                        && (phrase.WarningLengthBeats != 1
+                            || phrase.WaitBeatCount != 1
+                            || phrase.ResponseDelayBeats != 2
+                            || phrase.AttackLengthBeats != 1))
+                    || (phrase.Kind == AttackKind.Triple
+                        && (phrase.WarningLengthBeats != 2
+                            || phrase.WaitBeatCount != 1
+                            || phrase.ResponseDelayBeats != 2
+                            || phrase.AttackLengthBeats != 3)))
+                {
+                    error = $"Phrase #{i + 1} does not follow the Single/Triple beginner rules.";
                     return false;
                 }
 
@@ -282,15 +298,33 @@ namespace RhythmHunter.OtterAquariumPrototype
             return new AttackPattern(id, ticks);
         }
 
-        private static AttackPhrase Phrase(
+        private static AttackPhrase Single(
             int bar,
-            string label,
-            int warningBeats,
-            int gapBeats,
-            int attackBeats,
-            AttackPattern pattern)
+            AttackPattern cue,
+            AttackPattern response)
         {
-            return new AttackPhrase(bar, label, warningBeats, gapBeats, attackBeats, pattern);
+            return new AttackPhrase(
+                bar,
+                "SINGLE • X _",
+                AttackKind.Single,
+                1,
+                1,
+                1,
+                cue,
+                response);
+        }
+
+        private static AttackPhrase Triple(int bar, AttackPattern cue, AttackPattern response)
+        {
+            return new AttackPhrase(
+                bar,
+                "SPECIAL • X X X _",
+                AttackKind.Triple,
+                2,
+                1,
+                3,
+                cue,
+                response);
         }
 
         private void OnValidate()
