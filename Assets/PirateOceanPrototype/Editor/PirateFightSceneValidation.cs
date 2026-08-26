@@ -43,16 +43,6 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
         {
             if (SessionState.GetBool(ActiveKey, false))
                 RegisterCallbacks();
-            else
-                EditorApplication.delayCall += ValidateAfterScriptReload;
-        }
-
-        private static void ValidateAfterScriptReload()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(PirateFightSceneBuilder.ScenePath) != null)
-                ValidateScene(true);
         }
 
         [MenuItem("Rhythm Hunter/Validate Pirate Fight Scene Setup")]

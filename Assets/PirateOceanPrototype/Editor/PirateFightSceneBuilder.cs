@@ -24,30 +24,6 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
     {
         public const string ScenePath = "Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity";
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.delayCall += TryBuildInitialScene;
-        }
-
-        private static void TryBuildInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryBuildInitialScene;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null
-                || !SceneContainsIntegratedSystems())
-            {
-                BuildScene();
-            }
-        }
-
         private static bool SceneContainsIntegratedSystems()
         {
             Scene scene = SceneManager.GetSceneByPath(ScenePath);

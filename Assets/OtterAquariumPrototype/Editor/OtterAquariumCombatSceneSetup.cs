@@ -21,27 +21,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterAquariumCombat.unity";
         public const int CurrentLayoutRevision = 4;
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialSetup()
-        {
-            EditorApplication.delayCall += TryCreateInitialScene;
-        }
-
-        private static void TryCreateInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryCreateInitialScene;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || SceneRequiresRebuild())
-                RebuildCombatScene();
-        }
-
         [MenuItem("Rhythm Hunter/Rebuild Otter Aquarium Combat From Pirate Fight")]
         public static void RebuildCombatScene()
         {

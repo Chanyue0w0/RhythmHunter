@@ -10,7 +10,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     public static class OtterAquariumPlayModeValidation
     {
         private const string ActiveKey = "OtterAquarium.Smoke.Active";
-        private const string AttemptedKey = "OtterAquarium.Smoke.Attempted.ExplorationCameraV15";
         private const string PassedKey = "OtterAquarium.Smoke.Passed";
         private const string FailureKey = "OtterAquarium.Smoke.Failure";
         private const string StartedAtKey = "OtterAquarium.Smoke.StartedAt";
@@ -23,8 +22,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         {
             if (SessionState.GetBool(ActiveKey, false))
                 RegisterCallbacks();
-            else
-                EditorApplication.delayCall += RunInitialSmokeTestOnce;
         }
 
         [MenuItem("Rhythm Hunter/Run Sea Otter Aquarium Play Mode Smoke Test")]
@@ -53,19 +50,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             SessionState.SetFloat(StepStartedAtKey, 0f);
             RegisterCallbacks();
             EditorApplication.EnterPlaymode();
-        }
-
-        private static void RunInitialSmokeTestOnce()
-        {
-            if (SessionState.GetBool(AttemptedKey, false)
-                || EditorApplication.isPlayingOrWillChangePlaymode
-                || AssetDatabase.LoadAssetAtPath<SceneAsset>(OtterAquariumSceneBuilder.ScenePath) == null)
-            {
-                return;
-            }
-
-            SessionState.SetBool(AttemptedKey, true);
-            Run();
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)

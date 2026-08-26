@@ -13,7 +13,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     public static class OtterAquariumCombatPlayModeValidation
     {
         private const string ActiveKey = "OtterAquariumCombat.Smoke.Active";
-        private const string AttemptedKey = "OtterAquariumCombat.Smoke.Attempted.PirateCameraV7";
         private const string PassedKey = "OtterAquariumCombat.Smoke.Passed";
         private const string FailureKey = "OtterAquariumCombat.Smoke.Failure";
         private const string StartedAtKey = "OtterAquariumCombat.Smoke.StartedAt";
@@ -25,8 +24,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         {
             if (SessionState.GetBool(ActiveKey, false))
                 RegisterCallbacks();
-            else
-                EditorApplication.delayCall += RunInitialSmokeTestOnce;
         }
 
         [MenuItem("Rhythm Hunter/Run Otter Aquarium Combat Play Mode Smoke Test")]
@@ -51,28 +48,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             SessionState.SetInt(StepKey, 0);
             RegisterCallbacks();
             EditorApplication.EnterPlaymode();
-        }
-
-        private static void RunInitialSmokeTestOnce()
-        {
-            if (SessionState.GetBool(AttemptedKey, false)
-                || EditorApplication.isPlayingOrWillChangePlaymode
-                || AssetDatabase.LoadAssetAtPath<SceneAsset>(OtterAquariumCombatSceneSetup.ScenePath) == null)
-            {
-                return;
-            }
-
-            // Scene setup and smoke-test callbacks are both delayed after a
-            // domain reload. Wait until the rebuilt scene is fully imported
-            // instead of consuming the one-shot attempt on the legacy scene.
-            if (!OtterAquariumCombatValidation.ValidateScene(false))
-            {
-                EditorApplication.delayCall += RunInitialSmokeTestOnce;
-                return;
-            }
-
-            SessionState.SetBool(AttemptedKey, true);
-            Run();
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)

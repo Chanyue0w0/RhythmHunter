@@ -28,27 +28,6 @@ namespace RhythmHunter.FightDemoEditor
         private static readonly Color Primary = new(0.92f, 0.96f, 1f, 1f);
         private static readonly Color Secondary = new(0.58f, 0.68f, 0.78f, 1f);
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.delayCall += TryBuildInitialScene;
-        }
-
-        private static void TryBuildInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryBuildInitialScene;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-                BuildScene();
-        }
-
         [MenuItem("Rhythm Hunter/Build Fight Scene Demo")]
         public static void BuildScene()
         {

@@ -1,5 +1,8 @@
 # Otter Aquarium Prototype scenes
 
+- Project startup is passive: legacy FightDemo, RhythmDemo, and PirateOcean scenes are no longer built, opened, validated, or played automatically. Their manual editor menu commands remain available.
+- Build Settings contains only the four scenes under `Assets/OtterAquariumPrototype/Scenes`.
+
 - `OtterAquarium.unity` is the top-down sea otter movement, surface transition, slide, and water VFX prototype.
 - `OtterAquariumCombat.unity` uses the PirateFightScene battle staging and its Cinemachine combat/boss camera transition.
 - `OtterShellBeatLab.unity` is a fixed-camera, one-button call-and-response playtest. The crab demonstrates a rhythm and the otter repeats it one bar later.

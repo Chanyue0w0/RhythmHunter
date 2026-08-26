@@ -30,27 +30,6 @@ namespace RhythmHunter.PirateOceanPrototypeEditor
         private static readonly Color HeroCyan = new(0.12f, 0.82f, 0.9f, 1f);
         private static readonly Color GuideGold = new(1f, 0.72f, 0.2f, 1f);
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.delayCall += TryBuildInitialScene;
-        }
-
-        private static void TryBuildInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryBuildInitialScene;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneContainsCurrentPrototypeSystems())
-                BuildScene();
-        }
-
         private static bool SceneContainsCurrentPrototypeSystems()
         {
             Scene scene = SceneManager.GetSceneByPath(ScenePath);

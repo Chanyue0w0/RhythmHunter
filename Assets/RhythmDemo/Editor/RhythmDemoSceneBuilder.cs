@@ -22,27 +22,6 @@ namespace RhythmHunter.RhythmDemoEditor
         private static readonly Color PrimaryText = new(0.9f, 0.96f, 1f, 1f);
         private static readonly Color SecondaryText = new(0.55f, 0.68f, 0.78f, 1f);
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialSceneBuild()
-        {
-            EditorApplication.delayCall += TryBuildInitialScene;
-        }
-
-        private static void TryBuildInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryBuildInitialScene;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-                BuildScene();
-        }
-
         [MenuItem("Rhythm Hunter/Build FMOD Beat Demo")]
         public static void BuildScene()
         {
