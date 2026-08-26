@@ -459,8 +459,12 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
 
             runner.CopyPendingTargetTimelineMs(pendingTargetTimes);
-            Vector3 start = enemyRoot.position + new Vector3(1.15f, 0.62f, -0.45f);
-            Vector3 end = otterRoot.position + new Vector3(-1.05f, 0.38f, -0.45f);
+            float enemyScale = Mathf.Max(0.01f, Mathf.Abs(enemyRoot.lossyScale.x));
+            float otterScale = Mathf.Max(0.01f, Mathf.Abs(otterRoot.lossyScale.x));
+            Vector3 start = enemyRoot.position
+                + new Vector3(1.15f * enemyScale, 0.62f * enemyScale, -0.45f);
+            Vector3 end = otterRoot.position
+                + new Vector3(-1.05f * otterScale, 0.38f * otterScale, -0.45f);
             int spawnCount = Mathf.Min(Mathf.Max(1, projectileCount), pendingTargetTimes.Count);
             for (int i = 0; i < spawnCount; i++)
             {

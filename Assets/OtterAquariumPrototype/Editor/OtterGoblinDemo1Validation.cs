@@ -36,7 +36,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             OtterGoblinDemo1Runner runner = Find<OtterGoblinDemo1Runner>(scene);
             OtterGoblinDemo1Input input = Find<OtterGoblinDemo1Input>(scene);
             OtterGoblinDemo1Presenter presenter = Find<OtterGoblinDemo1Presenter>(scene);
+            SpriteRenderer background = FindNamed<SpriteRenderer>(scene, "ZooBackground");
             SpriteRenderer goblin = FindNamed<SpriteRenderer>(scene, "GoblinSprite");
+            Transform goblinRoot = FindNamedTransform(scene, "ZooGoblin");
             Transform otter = FindNamedTransform(scene, "Otter");
             TextMesh health = FindNamed<TextMesh>(scene, "Health");
             int singleCount = 0;
@@ -65,11 +67,18 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && presenter != null
                 && presenter.AxeProjectilePrefab != null
                 && presenter.AxeProjectilePrefab.GetComponent<RhythmTimelineProjectile>() != null
+                && background != null
+                && background.sprite != null
+                && AssetDatabase.GetAssetPath(background.sprite) == OtterGoblinDemo1SceneBuilder.BackgroundPath
+                && background.color == Color.white
                 && goblin != null
                 && goblin.sprite != null
-                && goblin.transform.position.x <= -4f
+                && goblinRoot != null
+                && goblinRoot.position.x <= -4.5f
+                && Mathf.Approximately(goblinRoot.localScale.x, 0.72f)
                 && otter != null
-                && otter.position.x >= 4f
+                && otter.position.x >= 4.5f
+                && Mathf.Approximately(Mathf.Abs(otter.localScale.x), 0.72f)
                 && otter.position.x - goblin.transform.position.x >= 8f
                 && health != null
                 && data.OtterMaxHealth == 3
@@ -96,7 +105,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 Debug.LogError(
                     "[OtterGoblinDemo1Validation] Validation failed. "
                     + $"Chart={chartValid} ({chartError}), Clock={clock != null}, Runner={runner != null}, "
-                    + $"Input={input != null}, Presenter={presenter != null}, Goblin={goblin != null}, "
+                    + $"Input={input != null}, Presenter={presenter != null}, Background={background != null}, "
+                    + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
                     + $"Otter={otter != null}, HealthHUD={health != null}, HP={data.OtterMaxHealth}, "
                     + $"Damage={data.DamagePerMiss}, Phrases={data.Phrases.Count}, "
                     + $"Single={singleCount}, Triple={tripleCount}, "
