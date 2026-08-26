@@ -35,7 +35,9 @@
 - Projectile motion uses the reusable `RhythmTimelineProjectile` component. Prefabs receive launch and target FMOD timeline positions rather than a hard-coded travel duration, so constant BPM and chart-target changes automatically retime their flight. Mid-song tempo maps remain a separate future feature.
 - Demo1 BGM volume is set to 55% in its level asset so warning and attack cues remain readable.
 - The otter has exactly 3 HP. Every unresolved attack is a Miss and deals exactly 1 damage; Perfect and Good block all damage, while Perfect also shows a counter response.
+- Pressing defend with no attack inside the Good window triggers `BeatMiss`, adds one Extra, and locks defend input for one full music beat. Inputs during that lock are ignored; the stray press itself deals no damage, but an incoming axe can still become a normal damaging Miss.
 - The Goblin Patrol chart has 15 phrases. Bars 5–9 teach three Singles; bar 11 introduces two `X _` attacks in one measure; bar 13 introduces alternating-beat Triple catches; bars 17–31 alternate denser Double Single and Triple → Single combinations; bar 33 closes with a Triple before the audio tail. Victory waits until its final catch has been judged.
+- `Rhythm Hunter > Otter Aquarium > Open Rhythm Level Editor` now accepts both Shell Beat `OtterRhythmLevelData` and Demo1 `OtterGoblinDemo1LevelData`. Demo1 mode exposes level/combat/FMOD settings, its Phrase list, type presets, and a 120-tick three-lane stepper for warning `X`, fixed axe `_`, and player catch `X'`. Editable lanes must retain the attack type's required hit count.
 - Rebuild, validate, or run the FMOD play test from `Rhythm Hunter > Otter Aquarium > ... Zoo Goblin Demo 1`.
 
 ## Aquarium area authoring

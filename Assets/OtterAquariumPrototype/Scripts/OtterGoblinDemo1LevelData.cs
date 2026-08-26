@@ -136,6 +136,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(1f)] private float perfectWindowMs = 70f;
         [SerializeField, Min(1f)] private float goodWindowMs = 140f;
         [SerializeField] private float judgementOffsetMs;
+        [SerializeField, Min(0.25f)] private float extraInputStunBeats = 1f;
 
         [Header("FMOD Events")]
         [SerializeField] private string warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
@@ -165,6 +166,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public float PerfectWindowMs => perfectWindowMs;
         public float GoodWindowMs => Mathf.Max(perfectWindowMs, goodWindowMs);
         public float JudgementOffsetMs => judgementOffsetMs;
+        public float ExtraInputStunBeats => Mathf.Max(0.25f, extraInputStunBeats);
         public string WarningSoundEventPath => warningSoundEventPath;
         public string AttackSoundEventPath => attackSoundEventPath;
         public string BlockSoundEventPath => blockSoundEventPath;
@@ -192,6 +194,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             perfectWindowMs = 85f;
             goodWindowMs = 170f;
             judgementOffsetMs = 0f;
+            extraInputStunBeats = 1f;
             warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
             attackSoundEventPath = "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
             blockSoundEventPath = "event:/ZooGoblinFight/SoundEffects/BeatTapping";
@@ -276,38 +279,23 @@ namespace RhythmHunter.OtterAquariumPrototype
                     AttackKind.TripleThenSingle => 4,
                     _ => 0
                 };
+                int expectedLength = phrase.Kind switch
+                {
+                    AttackKind.Single => 1,
+                    AttackKind.Triple => 2,
+                    AttackKind.DoubleSingle => 3,
+                    AttackKind.TripleThenSingle => 5,
+                    _ => 0
+                };
                 if (phrase.WarningPattern.HitTicks.Count != expectedCount
                     || phrase.Pattern.HitTicks.Count != expectedCount
-                    || (phrase.Kind == AttackKind.Single
-                        && (phrase.WarningLengthBeats != 1
-                            || phrase.WaitBeatCount != 1
-                            || phrase.ResponseDelayBeats != 2
-                            || phrase.AttackLengthBeats != 1
-                            || !Matches(phrase.WarningPattern, 0)
-                            || !Matches(phrase.Pattern, 0)))
-                    || (phrase.Kind == AttackKind.Triple
-                        && (phrase.WarningLengthBeats != 2
-                            || phrase.WaitBeatCount != 1
-                            || phrase.ResponseDelayBeats != 2
-                            || phrase.AttackLengthBeats != 2
-                            || !Matches(phrase.WarningPattern, 0, Ppq / 2, Ppq)
-                            || !Matches(phrase.Pattern, 0, Ppq, Ppq * 2)))
-                    || (phrase.Kind == AttackKind.DoubleSingle
-                        && (phrase.WarningLengthBeats != 3
-                            || phrase.WaitBeatCount != 2
-                            || phrase.ResponseDelayBeats != 2
-                            || phrase.AttackLengthBeats != 3
-                            || !Matches(phrase.WarningPattern, 0, Ppq * 2)
-                            || !Matches(phrase.Pattern, 0, Ppq * 2)))
-                    || (phrase.Kind == AttackKind.TripleThenSingle
-                        && (phrase.WarningLengthBeats != 5
-                            || phrase.WaitBeatCount != 2
-                            || phrase.ResponseDelayBeats != 2
-                            || phrase.AttackLengthBeats != 5
-                            || !Matches(phrase.WarningPattern, 0, Ppq / 2, Ppq, Ppq * 4)
-                            || !Matches(phrase.Pattern, 0, Ppq, Ppq * 2, Ppq * 4))))
+                    || phrase.WarningLengthBeats != expectedLength
+                    || phrase.ResponseDelayBeats != 2
+                    || phrase.AttackLengthBeats != expectedLength
+                    || !HasOrderedUniqueTicks(phrase.WarningPattern)
+                    || !HasOrderedUniqueTicks(phrase.Pattern))
                 {
-                    error = $"Phrase #{i + 1} does not follow the supported primitive/combo rules.";
+                    error = $"Phrase #{i + 1} does not follow the supported count/length rules.";
                     return false;
                 }
 
@@ -329,14 +317,17 @@ namespace RhythmHunter.OtterAquariumPrototype
             return new AttackPattern(id, ticks);
         }
 
-        private static bool Matches(AttackPattern pattern, params int[] expectedTicks)
+        private static bool HasOrderedUniqueTicks(AttackPattern pattern)
         {
-            if (pattern == null || pattern.HitTicks.Count != expectedTicks.Length)
+            if (pattern == null || pattern.HitTicks.Count == 0)
                 return false;
-            for (int i = 0; i < expectedTicks.Length; i++)
+            int previous = -1;
+            for (int i = 0; i < pattern.HitTicks.Count; i++)
             {
-                if (pattern.HitTicks[i] != expectedTicks[i])
+                int tick = pattern.HitTicks[i];
+                if (tick < 0 || tick <= previous)
                     return false;
+                previous = tick;
             }
             return true;
         }
@@ -407,6 +398,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             damagePerMiss = Mathf.Max(1, damagePerMiss);
             perfectWindowMs = Mathf.Max(1f, perfectWindowMs);
             goodWindowMs = Mathf.Max(perfectWindowMs, goodWindowMs);
+            extraInputStunBeats = Mathf.Max(0.25f, extraInputStunBeats);
             phrases?.Sort((left, right) => left.StartBar.CompareTo(right.StartBar));
         }
     }

@@ -263,13 +263,12 @@ namespace RhythmHunter.OtterAquariumPrototype
 
             if (result.ExtraInput)
             {
-                if (judgementText != null)
-                {
-                    judgementText.text = "EMPTY SWING";
-                    judgementText.color = MissRed;
-                }
-                if (timingText != null)
-                    timingText.text = "NO ATTACK IN RANGE • NO DAMAGE";
+                hurtPulse = 0.4f;
+                SetJudgement(
+                    "STAGGER",
+                    MissRed,
+                    $"LOCKED {runner.LevelData.ExtraInputStunBeats:0.##} BEAT • NO DAMAGE");
+                PlayOptional(runner.LevelData.MissSoundEventPath);
                 RefreshStatus();
                 return;
             }

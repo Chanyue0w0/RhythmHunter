@@ -14,6 +14,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private const string DefaultDataFolder = "Assets/OtterAquariumPrototype/Data";
 
         private OtterRhythmLevelData level;
+        private OtterGoblinDemo1LevelData combatLevel;
+        private Editor combatInspector;
         private Vector2 scroll;
         private bool showSettings = true;
         private bool showQuickTemplate = true;
@@ -64,20 +66,36 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private void OnEnable()
         {
             minSize = new Vector2(720f, 620f);
-            if (level == null)
+            if (Selection.activeObject is OtterGoblinDemo1LevelData selectedCombat)
             {
-                level = AssetDatabase.LoadAssetAtPath<OtterRhythmLevelData>(OtterShellBeatLabSceneBuilder.LevelDataPath);
-                if (level != null)
-                    LoadSettingsFromLevel();
+                SetCombatLevel(selectedCombat);
             }
+            else if (Selection.activeObject is OtterRhythmLevelData selectedRhythm)
+            {
+                SetRhythmLevel(selectedRhythm);
+            }
+            else if (level == null && combatLevel == null)
+            {
+                SetRhythmLevel(AssetDatabase.LoadAssetAtPath<OtterRhythmLevelData>(OtterShellBeatLabSceneBuilder.LevelDataPath));
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (combatInspector != null)
+                DestroyImmediate(combatInspector);
         }
 
         private void OnSelectionChange()
         {
-            if (Selection.activeObject is OtterRhythmLevelData selected && selected != level)
+            if (Selection.activeObject is OtterGoblinDemo1LevelData selectedCombat && selectedCombat != combatLevel)
             {
-                level = selected;
-                LoadSettingsFromLevel();
+                SetCombatLevel(selectedCombat);
+                Repaint();
+            }
+            else if (Selection.activeObject is OtterRhythmLevelData selectedRhythm && selectedRhythm != level)
+            {
+                SetRhythmLevel(selectedRhythm);
                 Repaint();
             }
         }
@@ -85,9 +103,18 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private void OnGUI()
         {
             DrawHeader();
+            if (combatLevel != null)
+            {
+                if (combatInspector == null || combatInspector.target != combatLevel)
+                    combatInspector = Editor.CreateEditor(combatLevel);
+                scroll = EditorGUILayout.BeginScrollView(scroll);
+                combatInspector.OnInspectorGUI();
+                EditorGUILayout.EndScrollView();
+                return;
+            }
             if (level == null)
             {
-                EditorGUILayout.HelpBox("請選擇或建立一個 OtterRhythmLevelData 關卡資產。", MessageType.Info);
+                EditorGUILayout.HelpBox("請選擇 OtterRhythmLevelData 或 OtterGoblinDemo1LevelData 關卡資產。", MessageType.Info);
                 return;
             }
 
@@ -106,36 +133,82 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("海獺節奏關卡編輯器", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "不需要先懂樂理：可直接選中文節奏預設，或點擊 16 格步進器。每組 Phrase 會先由螃蟹示範一小節，再由玩家重複一小節。",
+                combatLevel != null
+                    ? "Demo1 戰鬥模式：用提示／投斧／接取三軌步進器微調攻勢，並保留飛斧數量安全規則。"
+                    : "Shell Beat 模式：可直接選中文節奏預設，或點擊 16 格步進器。每組 Phrase 會先由螃蟹示範一小節，再由玩家重複一小節。",
                 MessageType.Info);
 
             EditorGUI.BeginChangeCheck();
-            OtterRhythmLevelData selected = (OtterRhythmLevelData)EditorGUILayout.ObjectField(
-                new GUIContent("目前關卡", "可拖入任何 OtterRhythmLevelData 資產"),
-                level,
-                typeof(OtterRhythmLevelData),
+            Object current = combatLevel != null ? combatLevel : level;
+            Object selected = EditorGUILayout.ObjectField(
+                new GUIContent("目前關卡", "支援 Shell Beat 與 Demo1 戰鬥關卡資產"),
+                current,
+                typeof(ScriptableObject),
                 false);
             if (EditorGUI.EndChangeCheck())
             {
-                level = selected;
-                selectedPhrase = -1;
-                if (level != null)
-                    LoadSettingsFromLevel();
+                if (selected is OtterGoblinDemo1LevelData selectedCombat)
+                    SetCombatLevel(selectedCombat);
+                else if (selected is OtterRhythmLevelData selectedRhythm)
+                    SetRhythmLevel(selectedRhythm);
+                else if (selected == null)
+                {
+                    SetCombatLevel(null);
+                    level = null;
+                }
+                else
+                    ShowNotification(new GUIContent("只支援兩種海獺節奏關卡資產"));
             }
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("建立新關卡", GUILayout.Height(28f)))
-                CreateNewLevel();
-            GUI.enabled = level != null;
-            if (GUILayout.Button("複製目前關卡", GUILayout.Height(28f)))
-                DuplicateLevel();
-            if (GUILayout.Button("套用到測試 Scene", GUILayout.Height(28f)))
-                ApplyToTestScene();
-            if (GUILayout.Button("在 Project 定位", GUILayout.Height(28f)))
-                EditorGUIUtility.PingObject(level);
+            if (combatLevel != null)
+            {
+                if (GUILayout.Button("開啟 Demo1 Scene", GUILayout.Height(28f)))
+                    EditorSceneManager.OpenScene(OtterGoblinDemo1SceneBuilder.ScenePath, OpenSceneMode.Single);
+                if (GUILayout.Button("在 Project 定位", GUILayout.Height(28f)))
+                    EditorGUIUtility.PingObject(combatLevel);
+            }
+            else
+            {
+                if (GUILayout.Button("建立新關卡", GUILayout.Height(28f)))
+                    CreateNewLevel();
+                GUI.enabled = level != null;
+                if (GUILayout.Button("複製目前關卡", GUILayout.Height(28f)))
+                    DuplicateLevel();
+                if (GUILayout.Button("套用到測試 Scene", GUILayout.Height(28f)))
+                    ApplyToTestScene();
+                if (GUILayout.Button("在 Project 定位", GUILayout.Height(28f)))
+                    EditorGUIUtility.PingObject(level);
+            }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space(6f);
+        }
+
+        private void SetRhythmLevel(OtterRhythmLevelData selected)
+        {
+            combatLevel = null;
+            if (combatInspector != null)
+            {
+                DestroyImmediate(combatInspector);
+                combatInspector = null;
+            }
+            level = selected;
+            selectedPhrase = -1;
+            if (level != null)
+                LoadSettingsFromLevel();
+        }
+
+        private void SetCombatLevel(OtterGoblinDemo1LevelData selected)
+        {
+            level = null;
+            combatLevel = selected;
+            selectedPhrase = -1;
+            if (combatInspector != null)
+            {
+                DestroyImmediate(combatInspector);
+                combatInspector = null;
+            }
         }
 
         private void DrawValidationSummary()
@@ -513,9 +586,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             created.ConfigureAuthoring(Path.GetFileNameWithoutExtension(path), Path.GetFileNameWithoutExtension(path), string.Empty);
             AssetDatabase.CreateAsset(created, path);
             AssetDatabase.SaveAssets();
-            level = created;
+            SetRhythmLevel(created);
             Selection.activeObject = created;
-            LoadSettingsFromLevel();
         }
 
         private void DuplicateLevel()
@@ -537,9 +609,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 return;
             }
             AssetDatabase.SaveAssets();
-            level = AssetDatabase.LoadAssetAtPath<OtterRhythmLevelData>(path);
+            SetRhythmLevel(AssetDatabase.LoadAssetAtPath<OtterRhythmLevelData>(path));
             Selection.activeObject = level;
-            LoadSettingsFromLevel();
         }
 
         private void ApplyToTestScene()

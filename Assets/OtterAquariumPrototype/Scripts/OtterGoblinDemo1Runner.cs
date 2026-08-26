@@ -88,6 +88,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private int goodCount;
         private int missCount;
         private int extraCount;
+        private double inputLockedUntilTimelineMs = double.NegativeInfinity;
         private CombatPhase phase = CombatPhase.Intro;
 
         public event Action<FmodBeatClock.BeatSnapshot> BeatObserved;
@@ -165,6 +166,9 @@ namespace RhythmHunter.OtterAquariumPrototype
                 return Publish(new JudgementResult(Grade.NotReady, 0.0, Health, false));
             }
 
+            if (timelineMs < inputLockedUntilTimelineMs)
+                return Publish(new JudgementResult(Grade.NotReady, 0.0, Health, false));
+
             double evaluatedMs = timelineMs + levelData.JudgementOffsetMs;
             TargetState nearest = null;
             double nearestDelta = double.MaxValue;
@@ -194,6 +198,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
 
             extraCount++;
+            inputLockedUntilTimelineMs = timelineMs
+                + levelData.ExtraInputStunBeats * MillisecondsPerBeat;
             return Publish(new JudgementResult(Grade.Miss, nearestDelta, Health, true));
         }
 
@@ -418,6 +424,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             goodCount = 0;
             missCount = 0;
             extraCount = 0;
+            inputLockedUntilTimelineMs = double.NegativeInfinity;
             Health = levelData != null ? levelData.OtterMaxHealth : 3;
         }
 

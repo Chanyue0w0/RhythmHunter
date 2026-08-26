@@ -83,7 +83,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     OtterGoblinDemo1Runner.JudgementResult result = runner.SubmitInput();
                     bool passed = result.Judgement == OtterGoblinDemo1Runner.Grade.Perfect
                         && !result.ExtraInput
-                        && result.Health == 3
+                        && result.Health == runner.LevelData.OtterMaxHealth
                         && Object.FindFirstObjectByType<RhythmTimelineProjectile>() != null
                         && runner.BeatClock.IsPlaying
                         && string.IsNullOrEmpty(runner.BeatClock.LastError);

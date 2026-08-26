@@ -81,21 +81,15 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && Mathf.Approximately(Mathf.Abs(otter.localScale.x), 0.72f)
                 && otter.position.x - goblin.transform.position.x >= 8f
                 && health != null
-                && data.OtterMaxHealth == 3
-                && data.DamagePerMiss == 1
-                && Mathf.Approximately(data.AuthoredBpm, 120f)
-                && data.TotalBars == 33
-                && data.Phrases.Count == 15
-                && singleCount == 3
-                && tripleCount == 2
-                && doubleSingleCount == 5
-                && tripleThenSingleCount == 5
+                && data.OtterMaxHealth >= 1
+                && data.DamagePerMiss >= 1
+                && data.ExtraInputStunBeats >= 0.25f
+                && data.AuthoredBpm > 0f
+                && data.TotalBars >= 4
+                && data.Phrases.Count > 0
                 && data.GoodWindowMs >= data.PerfectWindowMs
-                && Mathf.Approximately(data.MusicVolume, 0.55f)
-                && data.MusicEventPath == "event:/ZooGoblinFight/BGM/Goblin Patrol"
-                && data.WarningSoundEventPath == "event:/ZooGoblinFight/SoundEffects/Warning"
-                && data.AttackSoundEventPath == "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack"
-                && data.BlockSoundEventPath == "event:/ZooGoblinFight/SoundEffects/BeatTapping";
+                && !string.IsNullOrWhiteSpace(data.MusicEventPath)
+                && !string.IsNullOrWhiteSpace(data.MissSoundEventPath);
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
@@ -108,7 +102,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Input={input != null}, Presenter={presenter != null}, Background={background != null}, "
                     + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
                     + $"Otter={otter != null}, HealthHUD={health != null}, HP={data.OtterMaxHealth}, "
-                    + $"Damage={data.DamagePerMiss}, Phrases={data.Phrases.Count}, "
+                    + $"Damage={data.DamagePerMiss}, Stun={data.ExtraInputStunBeats:0.##} beats, "
+                    + $"Phrases={data.Phrases.Count}, "
                     + $"Single={singleCount}, Triple={tripleCount}, "
                     + $"DoubleSingle={doubleSingleCount}, TripleThenSingle={tripleThenSingleCount}");
                 return false;

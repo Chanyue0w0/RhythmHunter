@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1LevelData
   levelId: zoo-goblin-demo-1
   displayName: "Demo1\uFF1A\u52D5\u7269\u5712\u54E5\u5E03\u6797\u7BC0\u62CD\u6230"
-  authoringNotes: "Goblin Patrol difficulty ramps from bar 11 using only Single and Triple building blocks."
+  authoringNotes: Goblin Patrol difficulty ramps from bar 11 using only Single and
+    Triple building blocks.
   musicEventPath: event:/ZooGoblinFight/BGM/Goblin Patrol
   musicStartDelaySeconds: 1
   musicVolume: 0.55
@@ -28,15 +29,16 @@ MonoBehaviour:
   perfectWindowMs: 85
   goodWindowMs: 170
   judgementOffsetMs: 0
+  extraInputStunBeats: 1
   warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
   attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
   blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
   perfectSoundEventPath:
   goodSoundEventPath:
-  missSoundEventPath:
+  missSoundEventPath: event:/SoundEffects/BeatMiss
   phrases:
-  - startBar: 5
-    label: SINGLE - X _
+  - startBar: 3
+    label: "SINGLE \u2022 X _"
     kind: 0
     warningLengthBeats: 1
     responseDelayBeats: 1
@@ -47,6 +49,18 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+  - startBar: 5
+    label: "COMBO \u2022 X _ \xD72"
+    kind: 2
+    warningLengthBeats: 3
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: double-single-cue
+      hitTicks: 00000000c0030000
+    pattern:
+      id: double-single-response
+      hitTicks: 00000000c0030000
   - startBar: 7
     label: SINGLE - X _
     kind: 0
@@ -60,17 +74,17 @@ MonoBehaviour:
       id: single-response
       hitTicks: 00000000
   - startBar: 9
-    label: SINGLE - X _
-    kind: 0
-    warningLengthBeats: 1
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
     responseDelayBeats: 1
-    attackLengthBeats: 1
+    attackLengthBeats: 2
     warningPattern:
-      id: single-cue
-      hitTicks: 00000000
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
     pattern:
-      id: single-response
-      hitTicks: 00000000
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
   - startBar: 11
     label: COMBO - X _ x2
     kind: 2
@@ -215,3 +229,15 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+  - startBar: 35
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
