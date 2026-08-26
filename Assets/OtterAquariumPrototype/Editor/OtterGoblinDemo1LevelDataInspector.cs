@@ -188,8 +188,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             {
                 SerializedProperty phrase = phrases.GetArrayElementAtIndex(i);
                 int bar = phrase.FindPropertyRelative("startBar").intValue;
+                int offsetTicks = phrase.FindPropertyRelative("startOffsetTicks").intValue;
                 int kind = phrase.FindPropertyRelative("kind").enumValueIndex;
-                string text = $"#{i + 1:00}  Bar {bar:00}  {KindLabel((OtterGoblinDemo1LevelData.AttackKind)kind)}";
+                float beat = offsetTicks / (float)Ppq + 1f;
+                string text = $"#{i + 1:00}  Bar {bar:00} Beat {beat:0.##}  {KindLabel((OtterGoblinDemo1LevelData.AttackKind)kind)}";
                 if (GUILayout.Toggle(selectedPhrase == i, text, EditorStyles.miniButton))
                     selectedPhrase = i;
             }
@@ -216,6 +218,16 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField($"編輯 Phrase #{selectedPhrase + 1:00}", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(phrase.FindPropertyRelative("startBar"), new GUIContent("開始小節"));
+            SerializedProperty startOffset = phrase.FindPropertyRelative("startOffsetTicks");
+            int barSteps = Mathf.Max(1, beatsPerBar.intValue * StepsPerBeat);
+            int startStep = Mathf.Clamp(Mathf.RoundToInt(startOffset.intValue / (float)StepTicks), 0, barSteps - 1);
+            startStep = EditorGUILayout.IntSlider(
+                new GUIContent("小節內起點（十六分格）", "0 是第 1 拍；4 是第 2 拍；可讓前後 Phrase 無縫銜接。"),
+                startStep,
+                0,
+                barSteps - 1);
+            startOffset.intValue = startStep * StepTicks;
+            EditorGUILayout.LabelField("實際起點", $"Beat {startStep / (float)StepsPerBeat + 1f:0.##}  •  +{startOffset.intValue} tick");
             EditorGUILayout.PropertyField(phrase.FindPropertyRelative("label"), new GUIContent("顯示名稱"));
 
             SerializedProperty kindProperty = phrase.FindPropertyRelative("kind");
@@ -231,6 +243,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             if (GUILayout.Button("恢復此類型預設", GUILayout.Width(150f)))
                 ApplyPreset(phrase, newKind);
             EditorGUILayout.EndHorizontal();
+            DrawFixedPatternPreset(phrase, newKind);
 
             SerializedProperty warningLength = phrase.FindPropertyRelative("warningLengthBeats");
             SerializedProperty attackLength = phrase.FindPropertyRelative("attackLengthBeats");
@@ -341,6 +354,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             phrases.InsertArrayElementAtIndex(index);
             SerializedProperty phrase = phrases.GetArrayElementAtIndex(index);
             phrase.FindPropertyRelative("startBar").intValue = startBar;
+            phrase.FindPropertyRelative("startOffsetTicks").intValue = 0;
             ApplyPreset(phrase, OtterGoblinDemo1LevelData.AttackKind.Single);
             selectedPhrase = index;
         }
@@ -359,8 +373,12 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             {
                 for (int j = i + 1; j < phrases.arraySize; j++)
                 {
-                    int left = phrases.GetArrayElementAtIndex(i).FindPropertyRelative("startBar").intValue;
-                    int right = phrases.GetArrayElementAtIndex(j).FindPropertyRelative("startBar").intValue;
+                    SerializedProperty leftPhrase = phrases.GetArrayElementAtIndex(i);
+                    SerializedProperty rightPhrase = phrases.GetArrayElementAtIndex(j);
+                    long left = (long)leftPhrase.FindPropertyRelative("startBar").intValue * 100000
+                        + leftPhrase.FindPropertyRelative("startOffsetTicks").intValue;
+                    long right = (long)rightPhrase.FindPropertyRelative("startBar").intValue * 100000
+                        + rightPhrase.FindPropertyRelative("startOffsetTicks").intValue;
                     if (right < left)
                         phrases.MoveArrayElement(j, i);
                 }
@@ -411,6 +429,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     SetPattern(response, "triple-single-response", 0, 480, 960, 1920);
                     break;
             }
+        }
+
+        private static void DrawFixedPatternPreset(
+            SerializedProperty phrase,
+            OtterGoblinDemo1LevelData.AttackKind kind)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("固定節奏", GUILayout.Width(70f));
+            EditorGUILayout.HelpBox(
+                "短拍與三連拍不使用節奏變體；請以新增、排序及銜接 Phrase 調整密度。",
+                MessageType.Info);
+            if (GUILayout.Button("還原固定型", GUILayout.Width(90f)))
+                ApplyPreset(phrase, kind);
+            EditorGUILayout.EndHorizontal();
         }
 
         private static void SetPattern(SerializedProperty pattern, string id, params int[] ticks)

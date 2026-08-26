@@ -61,6 +61,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public sealed class AttackPhrase
         {
             [SerializeField, Min(1)] private int startBar = 5;
+            [SerializeField, Min(0)] private int startOffsetTicks;
             [SerializeField] private string label = "SINGLE • X _";
             [SerializeField] private AttackKind kind = AttackKind.Single;
             [SerializeField, Min(1)] private int warningLengthBeats = 1;
@@ -70,6 +71,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             [SerializeField] private AttackPattern pattern;
 
             public int StartBar => startBar;
+            public int StartOffsetTicks => Mathf.Max(0, startOffsetTicks);
             public string Label => label;
             public AttackKind Kind => kind;
             public int WarningLengthBeats => warningLengthBeats;
@@ -88,9 +90,11 @@ namespace RhythmHunter.OtterAquariumPrototype
                 int configuredResponseDelayBeats,
                 int configuredAttackBeats,
                 AttackPattern configuredWarningPattern,
-                AttackPattern configuredAttackPattern)
+                AttackPattern configuredAttackPattern,
+                int configuredStartOffsetTicks = 0)
             {
                 startBar = Mathf.Max(1, configuredStartBar);
+                startOffsetTicks = Mathf.Max(0, configuredStartOffsetTicks);
                 label = string.IsNullOrWhiteSpace(configuredLabel) ? "RHYTHM ATTACK" : configuredLabel.Trim();
                 kind = configuredKind;
                 warningLengthBeats = Mathf.Max(1, configuredWarningBeats);
@@ -110,7 +114,8 @@ namespace RhythmHunter.OtterAquariumPrototype
                     responseDelayBeats,
                     attackLengthBeats,
                     warningPattern,
-                    pattern);
+                    pattern,
+                    startOffsetTicks);
             }
         }
 
@@ -180,7 +185,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             levelId = "zoo-goblin-demo-1";
             displayName = "Demo1：動物園哥布林節拍戰";
             authoringNotes =
-                "Goblin Patrol 由 X _ 與快速三連構成；Bar 11 起加入雙 X _ 與三連接單擊。";
+                "Goblin Patrol 只使用固定的 X _ 與 X X X _；難度由兩種基底的排列與連續組合提升。";
             musicEventPath = "event:/ZooGoblinFight/BGM/Goblin Patrol";
             musicStartDelaySeconds = 1f;
             musicVolume = 0.55f;
@@ -213,20 +218,31 @@ namespace RhythmHunter.OtterAquariumPrototype
 
             phrases = new List<AttackPhrase>
             {
-                Single(5, singleCue, singleResponse),
+                Single(3, singleCue, singleResponse),
+                DoubleSingle(5, doubleSingleCue, doubleSingleResponse),
                 Single(7, singleCue, singleResponse),
-                Single(9, singleCue, singleResponse),
-                DoubleSingle(11, doubleSingleCue, doubleSingleResponse),
-                Triple(13, tripleCue, tripleResponse),
-                DoubleSingle(15, doubleSingleCue, doubleSingleResponse),
-                TripleThenSingle(17, tripleThenSingleCue, tripleThenSingleResponse),
-                DoubleSingle(19, doubleSingleCue, doubleSingleResponse),
-                TripleThenSingle(21, tripleThenSingleCue, tripleThenSingleResponse),
-                DoubleSingle(23, doubleSingleCue, doubleSingleResponse),
-                TripleThenSingle(25, tripleThenSingleCue, tripleThenSingleResponse),
-                DoubleSingle(27, doubleSingleCue, doubleSingleResponse),
-                TripleThenSingle(29, tripleThenSingleCue, tripleThenSingleResponse),
-                TripleThenSingle(31, tripleThenSingleCue, tripleThenSingleResponse),
+                Triple(9, tripleCue, tripleResponse),
+
+                Single(10, singleCue, singleResponse),
+                Single(10, singleCue, singleResponse, 3f),
+                Triple(11, tripleCue, tripleResponse, 2f),
+                DoubleSingle(12, doubleSingleCue, doubleSingleResponse, 2f),
+                TripleThenSingle(13, tripleThenSingleCue, tripleThenSingleResponse, 3f),
+                Single(15, singleCue, singleResponse, 2f),
+                Triple(16, tripleCue, tripleResponse, 1f),
+                DoubleSingle(17, doubleSingleCue, doubleSingleResponse, 1f),
+                TripleThenSingle(18, tripleThenSingleCue, tripleThenSingleResponse, 2f),
+                Single(20, singleCue, singleResponse, 1f),
+                DoubleSingle(21, doubleSingleCue, doubleSingleResponse),
+                Triple(22, tripleCue, tripleResponse, 1f),
+                TripleThenSingle(23, tripleThenSingleCue, tripleThenSingleResponse, 1f),
+                DoubleSingle(25, doubleSingleCue, doubleSingleResponse),
+                Single(26, singleCue, singleResponse, 1f),
+
+                Triple(29, tripleCue, tripleResponse),
+                Single(30, singleCue, singleResponse),
+                Triple(30, tripleCue, tripleResponse, 3f),
+                DoubleSingle(31, doubleSingleCue, doubleSingleResponse, 3f),
                 Triple(33, tripleCue, tripleResponse)
             };
         }
@@ -256,7 +272,13 @@ namespace RhythmHunter.OtterAquariumPrototype
                     return false;
                 }
 
-                long startTick = (long)(phrase.StartBar - 1) * TicksPerBar;
+                if (phrase.StartOffsetTicks >= TicksPerBar)
+                {
+                    error = $"Phrase #{i + 1} has a start offset outside its bar.";
+                    return false;
+                }
+
+                long startTick = (long)(phrase.StartBar - 1) * TicksPerBar + phrase.StartOffsetTicks;
                 if (startTick < previousEndTick)
                 {
                     error = $"Phrase #{i + 1} overlaps the preceding phrase.";
@@ -335,7 +357,8 @@ namespace RhythmHunter.OtterAquariumPrototype
         private static AttackPhrase Single(
             int bar,
             AttackPattern cue,
-            AttackPattern response)
+            AttackPattern response,
+            float startOffsetBeats = 0f)
         {
             return new AttackPhrase(
                 bar,
@@ -345,10 +368,15 @@ namespace RhythmHunter.OtterAquariumPrototype
                 1,
                 1,
                 cue,
-                response);
+                response,
+                StartOffsetTicks(startOffsetBeats));
         }
 
-        private static AttackPhrase Triple(int bar, AttackPattern cue, AttackPattern response)
+        private static AttackPhrase Triple(
+            int bar,
+            AttackPattern cue,
+            AttackPattern response,
+            float startOffsetBeats = 0f)
         {
             return new AttackPhrase(
                 bar,
@@ -358,10 +386,15 @@ namespace RhythmHunter.OtterAquariumPrototype
                 1,
                 2,
                 cue,
-                response);
+                response,
+                StartOffsetTicks(startOffsetBeats));
         }
 
-        private static AttackPhrase DoubleSingle(int bar, AttackPattern cue, AttackPattern response)
+        private static AttackPhrase DoubleSingle(
+            int bar,
+            AttackPattern cue,
+            AttackPattern response,
+            float startOffsetBeats = 0f)
         {
             return new AttackPhrase(
                 bar,
@@ -371,10 +404,15 @@ namespace RhythmHunter.OtterAquariumPrototype
                 1,
                 3,
                 cue,
-                response);
+                response,
+                StartOffsetTicks(startOffsetBeats));
         }
 
-        private static AttackPhrase TripleThenSingle(int bar, AttackPattern cue, AttackPattern response)
+        private static AttackPhrase TripleThenSingle(
+            int bar,
+            AttackPattern cue,
+            AttackPattern response,
+            float startOffsetBeats = 0f)
         {
             return new AttackPhrase(
                 bar,
@@ -384,7 +422,13 @@ namespace RhythmHunter.OtterAquariumPrototype
                 1,
                 5,
                 cue,
-                response);
+                response,
+                StartOffsetTicks(startOffsetBeats));
+        }
+
+        private static int StartOffsetTicks(float beats)
+        {
+            return Mathf.Max(0, Mathf.RoundToInt(beats * DefaultPpq));
         }
 
         private void OnValidate()
@@ -399,7 +443,11 @@ namespace RhythmHunter.OtterAquariumPrototype
             perfectWindowMs = Mathf.Max(1f, perfectWindowMs);
             goodWindowMs = Mathf.Max(perfectWindowMs, goodWindowMs);
             extraInputStunBeats = Mathf.Max(0.25f, extraInputStunBeats);
-            phrases?.Sort((left, right) => left.StartBar.CompareTo(right.StartBar));
+            phrases?.Sort((left, right) =>
+            {
+                int barOrder = left.StartBar.CompareTo(right.StartBar);
+                return barOrder != 0 ? barOrder : left.StartOffsetTicks.CompareTo(right.StartOffsetTicks);
+            });
         }
     }
 }

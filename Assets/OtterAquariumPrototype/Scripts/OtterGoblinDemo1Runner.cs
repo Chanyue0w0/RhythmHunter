@@ -257,7 +257,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
 
             OtterGoblinDemo1LevelData.AttackPhrase phrase = levelData.Phrases[phraseIndex];
-            long scheduledStart = (long)(phrase.StartBar - 1) * levelData.TicksPerBar;
+            long scheduledStart = (long)(phrase.StartBar - 1) * levelData.TicksPerBar
+                + phrase.StartOffsetTicks;
             if (!activePhrase)
             {
                 if (songTick < scheduledStart)
