@@ -84,6 +84,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     bool passed = result.Judgement == OtterGoblinDemo1Runner.Grade.Perfect
                         && !result.ExtraInput
                         && result.Health == 3
+                        && Object.FindFirstObjectByType<RhythmTimelineProjectile>() != null
                         && runner.BeatClock.IsPlaying
                         && string.IsNullOrEmpty(runner.BeatClock.LastError);
                     SessionState.SetBool(PassedKey, passed);

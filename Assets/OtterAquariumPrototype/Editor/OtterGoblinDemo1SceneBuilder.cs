@@ -14,9 +14,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     {
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity";
         public const string DataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset";
+        public const string AxePrefabPath = "Assets/OtterAquariumPrototype/Prefabs/GoblinFlyingAxe.prefab";
 
         private const string BackgroundPath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_background.png";
         private const string GoblinRoot = "Assets/OtterAquariumPrototype/Arts/Enemy/Goblin_Mercenary";
+        private const string AxeSpritePath = GoblinRoot + "/Axe.png";
 
         private static readonly Color Ink = new(0.025f, 0.045f, 0.055f, 0.96f);
         private static readonly Color Panel = new(0.04f, 0.12f, 0.14f, 0.93f);
@@ -31,6 +33,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public Sprite[] EnemyIdle;
             public Sprite[] EnemyAttack;
             public Sprite EnemyAttacked;
+            public GameObject AxeProjectilePrefab;
             public Transform OtterRoot;
             public SpriteRenderer OtterBody;
             public SpriteRenderer Shield;
@@ -48,6 +51,17 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static void QueueInitialBuild()
         {
             EditorApplication.delayCall += TryInitialBuild;
+            EditorApplication.delayCall += TryEnsureAxePrefab;
+        }
+
+        private static void TryEnsureAxePrefab()
+        {
+            if (EditorApplication.isCompiling)
+            {
+                EditorApplication.delayCall += TryEnsureAxePrefab;
+                return;
+            }
+            EnsureAxePrefab();
         }
 
         private static void TryInitialBuild()
@@ -84,9 +98,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 LoadSprite($"{GoblinRoot}/attack/attack_4.png")
             };
             Sprite attacked = LoadSprite($"{GoblinRoot}/attacked_1.png");
+            GameObject axePrefab = EnsureAxePrefab();
 
             if (data == null || shape == null || background == null || font == null
-                || idle.Any(sprite => sprite == null) || attack.Any(sprite => sprite == null) || attacked == null)
+                || idle.Any(sprite => sprite == null) || attack.Any(sprite => sprite == null)
+                || attacked == null || axePrefab == null)
             {
                 Debug.LogError("[OtterGoblinDemo1] Required data, font, background, or Goblin sprite is missing.");
                 return;
@@ -104,7 +120,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             Transform root = new GameObject("OtterZooGoblinDemo1").transform;
             CreateCamera(root);
-            Stage stage = CreateStage(root, shape, background, font, idle, attack, attacked);
+            Stage stage = CreateStage(root, shape, background, font, idle, attack, attacked, axePrefab);
             CreateController(root, data, stage);
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -133,13 +149,15 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Font font,
             Sprite[] idle,
             Sprite[] attack,
-            Sprite attacked)
+            Sprite attacked,
+            GameObject axePrefab)
         {
             Stage stage = new()
             {
                 EnemyIdle = idle,
                 EnemyAttack = attack,
-                EnemyAttacked = attacked
+                EnemyAttacked = attacked,
+                AxeProjectilePrefab = axePrefab
             };
 
             Transform environment = Empty("Environment", root);
@@ -188,7 +206,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static void CreateGoblin(Transform parent, Sprite initialSprite, Stage stage)
         {
             Transform enemy = Empty("ZooGoblin", parent);
-            enemy.localPosition = new Vector3(-3.45f, -1.25f, 0f);
+            enemy.localPosition = new Vector3(-4.2f, -1.25f, 0f);
             stage.EnemyRoot = enemy;
             SpriteRenderer renderer = Sprite(
                 "GoblinSprite", enemy, initialSprite, Color.white,
@@ -198,16 +216,16 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Transform label = Empty("GoblinLabel", parent);
             Sprite shape = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             Sprite("GoblinLabelPlate", label, shape, new Color(0.22f, 0.04f, 0.025f, 0.88f),
-                new Vector3(-3.45f, 0.65f, 0f), new Vector2(3.4f, 0.5f), 24);
+                new Vector3(-4.2f, 0.65f, 0f), new Vector2(3.4f, 0.5f), 24);
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             Text("GoblinName", label, font, "AXE GOBLIN", new Color(1f, 0.7f, 0.35f, 1f),
-                new Vector3(-3.45f, 0.67f, -0.2f), 0.075f, FontStyle.Bold, 30);
+                new Vector3(-4.2f, 0.67f, -0.2f), 0.075f, FontStyle.Bold, 30);
         }
 
         private static void CreateOtter(Transform parent, Sprite shape, Stage stage)
         {
             Transform otter = Empty("Otter", parent);
-            otter.localPosition = new Vector3(3.45f, -1.5f, 0f);
+            otter.localPosition = new Vector3(4.2f, -1.5f, 0f);
             otter.localScale = new Vector3(-1f, 1f, 1f);
             stage.OtterRoot = otter;
 
@@ -239,10 +257,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             Transform label = Empty("OtterLabel", parent);
             Sprite("OtterLabelPlate", label, shape, new Color(0.025f, 0.16f, 0.18f, 0.9f),
-                new Vector3(3.45f, 0.65f, 0f), new Vector2(3.4f, 0.5f), 24);
+                new Vector3(4.2f, 0.65f, 0f), new Vector2(3.4f, 0.5f), 24);
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             Text("OtterName", label, font, "OTTER • 3 HP", Cyan,
-                new Vector3(3.45f, 0.67f, -0.2f), 0.075f, FontStyle.Bold, 30);
+                new Vector3(4.2f, 0.67f, -0.2f), 0.075f, FontStyle.Bold, 30);
         }
 
         private static void CreateController(Transform root, OtterGoblinDemo1LevelData data, Stage stage)
@@ -264,6 +282,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.EnemyIdle,
                 stage.EnemyAttack,
                 stage.EnemyAttacked,
+                stage.AxeProjectilePrefab,
                 stage.OtterRoot,
                 stage.OtterBody,
                 stage.Shield,
@@ -275,6 +294,46 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.Timing,
                 stage.Health,
                 stage.Status);
+        }
+
+        private static GameObject EnsureAxePrefab()
+        {
+            TextureImporter importer = AssetImporter.GetAtPath(AxeSpritePath) as TextureImporter;
+            if (importer == null)
+                return null;
+
+            if (importer.textureType != TextureImporterType.Sprite
+                || importer.spriteImportMode != SpriteImportMode.Single
+                || importer.filterMode != FilterMode.Point
+                || importer.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.spritePixelsPerUnit = 100f;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.filterMode = FilterMode.Point;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.SaveAndReimport();
+            }
+
+            Sprite axeSprite = LoadSprite(AxeSpritePath);
+            if (axeSprite == null)
+                return null;
+
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AxePrefabPath);
+            if (prefab != null)
+                return prefab;
+
+            GameObject temporary = new("GoblinFlyingAxe", typeof(SpriteRenderer), typeof(RhythmTimelineProjectile));
+            temporary.transform.localScale = Vector3.one * 1.15f;
+            SpriteRenderer renderer = temporary.GetComponent<SpriteRenderer>();
+            renderer.sprite = axeSprite;
+            renderer.sortingOrder = 38;
+            prefab = PrefabUtility.SaveAsPrefabAsset(temporary, AxePrefabPath);
+            Object.DestroyImmediate(temporary);
+            AssetDatabase.SaveAssets();
+            return prefab;
         }
 
         private static OtterGoblinDemo1LevelData EnsureData()

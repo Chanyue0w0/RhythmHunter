@@ -14,7 +14,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         public enum AttackKind
         {
             Single,
-            Triple
+            Triple,
+            DoubleSingle,
+            TripleThenSingle
         }
 
         [Serializable]
@@ -71,7 +73,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             public string Label => label;
             public AttackKind Kind => kind;
             public int WarningLengthBeats => warningLengthBeats;
-            public int WaitBeatCount => 1;
+            public int WaitBeatCount => kind is AttackKind.DoubleSingle or AttackKind.TripleThenSingle ? 2 : 1;
             public int ResponseDelayBeats => 2;
             public int AttackLengthBeats => attackLengthBeats;
             public AttackPattern WarningPattern => warningPattern;
@@ -116,7 +118,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private string levelId = "zoo-goblin-demo-1";
         [SerializeField] private string displayName = "Demo1：動物園哥布林節拍戰";
         [SerializeField, TextArea(3, 7)] private string authoringNotes =
-            "Demo1 只使用 X _ → X 與 X X X _ → X _ X _ X 兩種固定反應。";
+            "Demo1 使用 X _ 與 X X X _ 兩種基本語彙，Bar 11 後開始組合成連續攻勢。";
 
         [Header("Music")]
         [SerializeField] private string musicEventPath = "event:/ZooGoblinFight/BGM/Goblin Patrol";
@@ -176,7 +178,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             levelId = "zoo-goblin-demo-1";
             displayName = "Demo1：動物園哥布林節拍戰";
             authoringNotes =
-                "Goblin Patrol 初學關卡，只使用 X _ → X 與 X X X _ → X _ X _ X。";
+                "Goblin Patrol 由 X _ 與快速三連構成；Bar 11 起加入雙 X _ 與三連接單擊。";
             musicEventPath = "event:/ZooGoblinFight/BGM/Goblin Patrol";
             musicStartDelaySeconds = 1f;
             musicVolume = 0.55f;
@@ -201,24 +203,28 @@ namespace RhythmHunter.OtterAquariumPrototype
             AttackPattern singleResponse = Pattern("single-response", 0f);
             AttackPattern tripleCue = Pattern("triple-cue", 0f, 0.5f, 1f);
             AttackPattern tripleResponse = Pattern("triple-response", 0f, 1f, 2f);
+            AttackPattern doubleSingleCue = Pattern("double-single-cue", 0f, 2f);
+            AttackPattern doubleSingleResponse = Pattern("double-single-response", 0f, 2f);
+            AttackPattern tripleThenSingleCue = Pattern("triple-single-cue", 0f, 0.5f, 1f, 4f);
+            AttackPattern tripleThenSingleResponse = Pattern("triple-single-response", 0f, 1f, 2f, 4f);
 
             phrases = new List<AttackPhrase>
             {
                 Single(5, singleCue, singleResponse),
                 Single(7, singleCue, singleResponse),
                 Single(9, singleCue, singleResponse),
-                Single(11, singleCue, singleResponse),
+                DoubleSingle(11, doubleSingleCue, doubleSingleResponse),
                 Triple(13, tripleCue, tripleResponse),
-                Single(15, singleCue, singleResponse),
-                Single(17, singleCue, singleResponse),
-                Single(19, singleCue, singleResponse),
-                Triple(21, tripleCue, tripleResponse),
-                Single(23, singleCue, singleResponse),
-                Triple(25, tripleCue, tripleResponse),
-                Single(27, singleCue, singleResponse),
-                Single(29, singleCue, singleResponse),
-                Triple(31, tripleCue, tripleResponse),
-                Single(33, singleCue, singleResponse)
+                DoubleSingle(15, doubleSingleCue, doubleSingleResponse),
+                TripleThenSingle(17, tripleThenSingleCue, tripleThenSingleResponse),
+                DoubleSingle(19, doubleSingleCue, doubleSingleResponse),
+                TripleThenSingle(21, tripleThenSingleCue, tripleThenSingleResponse),
+                DoubleSingle(23, doubleSingleCue, doubleSingleResponse),
+                TripleThenSingle(25, tripleThenSingleCue, tripleThenSingleResponse),
+                DoubleSingle(27, doubleSingleCue, doubleSingleResponse),
+                TripleThenSingle(29, tripleThenSingleCue, tripleThenSingleResponse),
+                TripleThenSingle(31, tripleThenSingleCue, tripleThenSingleResponse),
+                Triple(33, tripleCue, tripleResponse)
             };
         }
 
@@ -256,27 +262,52 @@ namespace RhythmHunter.OtterAquariumPrototype
 
                 int lastWarning = phrase.WarningPattern.HitTicks[phrase.WarningPattern.HitTicks.Count - 1];
                 int lastAttack = phrase.Pattern.HitTicks[phrase.Pattern.HitTicks.Count - 1];
-                if (lastWarning >= phrase.WarningLengthBeats * Ppq || lastAttack >= phrase.AttackLengthBeats * Ppq)
+                if (lastWarning >= phrase.WarningLengthBeats * Ppq || lastAttack > phrase.AttackLengthBeats * Ppq)
                 {
                     error = $"Phrase #{i + 1} has a hit outside its warning/attack length.";
                     return false;
                 }
 
-                int expectedCount = phrase.Kind == AttackKind.Single ? 1 : 3;
+                int expectedCount = phrase.Kind switch
+                {
+                    AttackKind.Single => 1,
+                    AttackKind.Triple => 3,
+                    AttackKind.DoubleSingle => 2,
+                    AttackKind.TripleThenSingle => 4,
+                    _ => 0
+                };
                 if (phrase.WarningPattern.HitTicks.Count != expectedCount
                     || phrase.Pattern.HitTicks.Count != expectedCount
                     || (phrase.Kind == AttackKind.Single
                         && (phrase.WarningLengthBeats != 1
                             || phrase.WaitBeatCount != 1
                             || phrase.ResponseDelayBeats != 2
-                            || phrase.AttackLengthBeats != 1))
+                            || phrase.AttackLengthBeats != 1
+                            || !Matches(phrase.WarningPattern, 0)
+                            || !Matches(phrase.Pattern, 0)))
                     || (phrase.Kind == AttackKind.Triple
                         && (phrase.WarningLengthBeats != 2
                             || phrase.WaitBeatCount != 1
                             || phrase.ResponseDelayBeats != 2
-                            || phrase.AttackLengthBeats != 3)))
+                            || phrase.AttackLengthBeats != 2
+                            || !Matches(phrase.WarningPattern, 0, Ppq / 2, Ppq)
+                            || !Matches(phrase.Pattern, 0, Ppq, Ppq * 2)))
+                    || (phrase.Kind == AttackKind.DoubleSingle
+                        && (phrase.WarningLengthBeats != 3
+                            || phrase.WaitBeatCount != 2
+                            || phrase.ResponseDelayBeats != 2
+                            || phrase.AttackLengthBeats != 3
+                            || !Matches(phrase.WarningPattern, 0, Ppq * 2)
+                            || !Matches(phrase.Pattern, 0, Ppq * 2)))
+                    || (phrase.Kind == AttackKind.TripleThenSingle
+                        && (phrase.WarningLengthBeats != 5
+                            || phrase.WaitBeatCount != 2
+                            || phrase.ResponseDelayBeats != 2
+                            || phrase.AttackLengthBeats != 5
+                            || !Matches(phrase.WarningPattern, 0, Ppq / 2, Ppq, Ppq * 4)
+                            || !Matches(phrase.Pattern, 0, Ppq, Ppq * 2, Ppq * 4))))
                 {
-                    error = $"Phrase #{i + 1} does not follow the Single/Triple beginner rules.";
+                    error = $"Phrase #{i + 1} does not follow the supported primitive/combo rules.";
                     return false;
                 }
 
@@ -296,6 +327,18 @@ namespace RhythmHunter.OtterAquariumPrototype
             for (int i = 0; i < beats.Length; i++)
                 ticks[i] = Mathf.RoundToInt(beats[i] * ppq);
             return new AttackPattern(id, ticks);
+        }
+
+        private static bool Matches(AttackPattern pattern, params int[] expectedTicks)
+        {
+            if (pattern == null || pattern.HitTicks.Count != expectedTicks.Length)
+                return false;
+            for (int i = 0; i < expectedTicks.Length; i++)
+            {
+                if (pattern.HitTicks[i] != expectedTicks[i])
+                    return false;
+            }
+            return true;
         }
 
         private static AttackPhrase Single(
@@ -322,7 +365,33 @@ namespace RhythmHunter.OtterAquariumPrototype
                 AttackKind.Triple,
                 2,
                 1,
+                2,
+                cue,
+                response);
+        }
+
+        private static AttackPhrase DoubleSingle(int bar, AttackPattern cue, AttackPattern response)
+        {
+            return new AttackPhrase(
+                bar,
+                "COMBO • X _ ×2",
+                AttackKind.DoubleSingle,
                 3,
+                1,
+                3,
+                cue,
+                response);
+        }
+
+        private static AttackPhrase TripleThenSingle(int bar, AttackPattern cue, AttackPattern response)
+        {
+            return new AttackPhrase(
+                bar,
+                "COMBO • TRIPLE → X _",
+                AttackKind.TripleThenSingle,
+                5,
+                1,
+                5,
                 cue,
                 response);
         }

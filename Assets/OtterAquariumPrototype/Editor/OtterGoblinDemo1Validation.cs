@@ -41,12 +41,18 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             TextMesh health = FindNamed<TextMesh>(scene, "Health");
             int singleCount = 0;
             int tripleCount = 0;
+            int doubleSingleCount = 0;
+            int tripleThenSingleCount = 0;
             foreach (OtterGoblinDemo1LevelData.AttackPhrase phrase in data.Phrases)
             {
                 if (phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Single)
                     singleCount++;
                 else if (phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.Triple)
                     tripleCount++;
+                else if (phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.DoubleSingle)
+                    doubleSingleCount++;
+                else if (phrase.Kind == OtterGoblinDemo1LevelData.AttackKind.TripleThenSingle)
+                    tripleThenSingleCount++;
             }
 
             bool valid = chartValid
@@ -57,19 +63,24 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && runner.LevelData == data
                 && input != null
                 && presenter != null
+                && presenter.AxeProjectilePrefab != null
+                && presenter.AxeProjectilePrefab.GetComponent<RhythmTimelineProjectile>() != null
                 && goblin != null
                 && goblin.sprite != null
-                && goblin.transform.position.x < 0f
+                && goblin.transform.position.x <= -4f
                 && otter != null
-                && otter.position.x > 0f
+                && otter.position.x >= 4f
+                && otter.position.x - goblin.transform.position.x >= 8f
                 && health != null
                 && data.OtterMaxHealth == 3
                 && data.DamagePerMiss == 1
                 && Mathf.Approximately(data.AuthoredBpm, 120f)
                 && data.TotalBars == 33
                 && data.Phrases.Count == 15
-                && singleCount == 11
-                && tripleCount == 4
+                && singleCount == 3
+                && tripleCount == 2
+                && doubleSingleCount == 5
+                && tripleThenSingleCount == 5
                 && data.GoodWindowMs >= data.PerfectWindowMs
                 && Mathf.Approximately(data.MusicVolume, 0.55f)
                 && data.MusicEventPath == "event:/ZooGoblinFight/BGM/Goblin Patrol"
@@ -88,7 +99,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Input={input != null}, Presenter={presenter != null}, Goblin={goblin != null}, "
                     + $"Otter={otter != null}, HealthHUD={health != null}, HP={data.OtterMaxHealth}, "
                     + $"Damage={data.DamagePerMiss}, Phrases={data.Phrases.Count}, "
-                    + $"Single={singleCount}, Triple={tripleCount}");
+                    + $"Single={singleCount}, Triple={tripleCount}, "
+                    + $"DoubleSingle={doubleSingleCount}, TripleThenSingle={tripleThenSingleCount}");
                 return false;
             }
 

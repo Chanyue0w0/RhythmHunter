@@ -179,8 +179,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100404752}
-  m_Text: "BAR 001/033  BEAT 1/4   \u2022   120 BPM\nP 00   G 00   M 00   EXTRA
-    00"
+  m_Text: "BAR 001/033  BEAT 1/4   \u2022   120 BPM\nP 00   G 00   M 00   EXTRA 00"
   m_OffsetZ: 0
   m_CharacterSize: 0.058
   m_LineSpacing: 1
@@ -1559,7 +1558,7 @@ Transform:
   m_GameObject: {fileID: 906780658}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.45, y: -1.25, z: 0}
+  m_LocalPosition: {x: -4.2, y: -1.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1955,7 +1954,7 @@ Transform:
   m_GameObject: {fileID: 1130419121}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.45, y: -1.5, z: 0}
+  m_LocalPosition: {x: 4.2, y: -1.5, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2307,7 +2306,7 @@ Transform:
   m_GameObject: {fileID: 1202706050}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.45, y: 0.65, z: 0}
+  m_LocalPosition: {x: 4.2, y: 0.65, z: 0}
   m_LocalScale: {x: 21.250002, y: 3.125, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2502,7 +2501,7 @@ Transform:
   m_GameObject: {fileID: 1482119475}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.45, y: 0.65, z: 0}
+  m_LocalPosition: {x: -4.2, y: 0.65, z: 0}
   m_LocalScale: {x: 21.250002, y: 3.125, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2778,6 +2777,7 @@ MonoBehaviour:
   - {fileID: -5380739489725017918, guid: 1338ba4e8403e6c43904ff957cc39ff9, type: 3}
   - {fileID: -3488042933814449837, guid: f1b9109fc1ed2064cb1d232c3939844a, type: 3}
   enemyAttackedFrame: {fileID: -3260786877400901070, guid: 8f5fca47372cad140a0a72ca5ff907c5, type: 3}
+  axeProjectilePrefab: {fileID: 135792365837547875, guid: d2c8796d0e4f4e14bbcd88d5a4710003, type: 3}
   otterRoot: {fileID: 1130419122}
   otterBody: {fileID: 384012221}
   shield: {fileID: 947752845}
@@ -2950,7 +2950,7 @@ Transform:
   m_GameObject: {fileID: 1718543868}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.45, y: 0.67, z: -0.2}
+  m_LocalPosition: {x: -4.2, y: 0.67, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3580,7 +3580,7 @@ Transform:
   m_GameObject: {fileID: 2073057351}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.45, y: 0.67, z: -0.2}
+  m_LocalPosition: {x: 4.2, y: 0.67, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

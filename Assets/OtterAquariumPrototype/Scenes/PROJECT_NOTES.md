@@ -29,11 +29,13 @@
 
 - Open `OtterZooGoblinDemo1.unity`, press Play, and defend with Space, Enter, left click, or gamepad south. Press R to restart.
 - FMOD music is `event:/ZooGoblinFight/BGM/Goblin Patrol`, authored at 120 BPM / 4-4 with its Tempo Marker at 0 ms. Gameplay resolves after 33 complete bars (66 seconds), leaving the final second as an audio tail.
-- Demo1 uses exactly two reactions: `X _ → X` and `X X X _ → X _ X _ X`. There are no alternate wait lengths or additional pattern types.
+- Demo1 uses two primitive reactions: `X _ → X'` and `X X X _ → X' _ X' _ X'`. Later phrases combine those same primitives without adding another input rule.
 - `Warning` plays on each enemy `X`; `AxeGoblin_NormalAttack` plays on `_`; a successful Perfect or Good block plays `BeatTapping`. Miss/result-specific SFX fields remain available for later production audio.
+- Goblin and otter stand at X=-4.2 and X=4.2. On `X`, the goblin holds `attack_3` (raised axe); on `_`, it switches to `attack_4` and spawns the rotating `GoblinFlyingAxe` prefab. Triple catches use alternating beats: `X' _ X' _ X'`.
+- Projectile motion uses the reusable `RhythmTimelineProjectile` component. Prefabs receive launch and target FMOD timeline positions rather than a hard-coded travel duration, so constant BPM and chart-target changes automatically retime their flight. Mid-song tempo maps remain a separate future feature.
 - Demo1 BGM volume is set to 55% in its level asset so warning and attack cues remain readable.
 - The otter has exactly 3 HP. Every unresolved attack is a Miss and deals exactly 1 damage; Perfect and Good block all damage, while Perfect also shows a counter response.
-- The Goblin Patrol chart contains 11 Single and 4 Triple phrases. Bars 1–4 are an intro; Triple phrases mark stronger transitions at bars 13, 21, 25, and 31, while bar 33 closes with a final Single before the audio tail. Edit `Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset` for later tuning.
+- The Goblin Patrol chart has 15 phrases. Bars 5–9 teach three Singles; bar 11 introduces two `X _` attacks in one measure; bar 13 introduces alternating-beat Triple catches; bars 17–31 alternate denser Double Single and Triple → Single combinations; bar 33 closes with a Triple before the audio tail. Victory waits until its final catch has been judged.
 - Rebuild, validate, or run the FMOD play test from `Rhythm Hunter > Otter Aquarium > ... Zoo Goblin Demo 1`.
 
 ## Aquarium area authoring
