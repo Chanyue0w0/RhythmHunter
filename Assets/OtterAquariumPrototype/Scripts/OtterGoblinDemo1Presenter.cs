@@ -27,6 +27,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private SpriteRenderer shield;
         [SerializeField] private SpriteRenderer dangerFlash;
 
+        [Header("Projectile Timing")]
+        [SerializeField, Min(0.25f)] private float tripleAxeVisualFlightBeats = 1f;
+
         [Header("HUD")]
         [SerializeField] private TextMesh phaseText;
         [SerializeField] private TextMesh phraseText;
@@ -48,6 +51,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private int idleFrame;
         private int currentBeat = 1;
         private int currentBar = 1;
+        private bool tripleAxesScheduled;
         private readonly List<double> pendingTargetTimes = new();
         private readonly List<RhythmTimelineProjectile> flyingAxes = new();
 
@@ -200,6 +204,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnPhraseStarted(int number, OtterGoblinDemo1LevelData.AttackPhrase phrase)
         {
+            tripleAxesScheduled = false;
             if (phraseText != null)
                 phraseText.text = $"#{number:00}  {phrase.Label}";
             if (patternText != null)
@@ -220,6 +225,15 @@ namespace RhythmHunter.OtterAquariumPrototype
                         "TWO X _ ATTACKS • THE NEXT WARNING FOLLOWS YOUR CATCH",
                     _ => "CATCH THREE AXES ON ALTERNATING BEATS • THEN PREPARE FOR X _"
                 };
+
+            if (phrase.Kind is OtterGoblinDemo1LevelData.AttackKind.Triple
+                or OtterGoblinDemo1LevelData.AttackKind.TripleThenSingle)
+            {
+                tripleAxesScheduled = ScheduleAxesForPendingTargets(
+                    3,
+                    tripleAxeVisualFlightBeats,
+                    "TripleFlyingAxe");
+            }
         }
 
         private void OnWarningCue(int index, int count, string patternId)
@@ -243,8 +257,10 @@ namespace RhythmHunter.OtterAquariumPrototype
                 judgementText.text = $"AXE  {index}/{count}";
                 judgementText.color = GoodGold;
             }
-            LaunchAxesForPendingTargets(projectileCount);
-            PlayOptional(runner.LevelData.AttackSoundEventPath);
+            if (projectileCount != 3 || !tripleAxesScheduled)
+                LaunchAxesForPendingTargets(projectileCount);
+            if (projectileCount != 3)
+                PlayOptional(runner.LevelData.AttackSoundEventPath);
         }
 
         private void OnAttackCue(int index, int count, string patternId)
@@ -450,11 +466,19 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void LaunchAxesForPendingTargets(int projectileCount)
         {
+            ScheduleAxesForPendingTargets(projectileCount, null, "FlyingAxe");
+        }
+
+        private bool ScheduleAxesForPendingTargets(
+            int projectileCount,
+            float? fixedFlightBeats,
+            string instancePrefix)
+        {
             if (axeProjectilePrefab == null || runner == null || runner.BeatClock == null
                 || enemyRoot == null || otterRoot == null
                 || !runner.BeatClock.TryGetTimelinePositionMs(out int launchTimelineMs))
             {
-                return;
+                return false;
             }
 
             runner.CopyPendingTargetTimelineMs(pendingTargetTimes);
@@ -468,7 +492,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             for (int i = 0; i < spawnCount; i++)
             {
                 GameObject instance = Instantiate(axeProjectilePrefab);
-                instance.name = $"FlyingAxe_{i + 1}";
+                instance.name = $"{instancePrefix}_{i + 1}";
                 RhythmTimelineProjectile axe = instance.GetComponent<RhythmTimelineProjectile>();
                 if (axe == null)
                 {
@@ -477,15 +501,20 @@ namespace RhythmHunter.OtterAquariumPrototype
                 }
 
                 float laneOffset = i * 0.22f;
+                double scheduledLaunchTimelineMs = fixedFlightBeats.HasValue
+                    ? pendingTargetTimes[i] - fixedFlightBeats.Value * runner.CurrentMillisecondsPerBeat
+                    : launchTimelineMs;
+                scheduledLaunchTimelineMs = System.Math.Max(launchTimelineMs, scheduledLaunchTimelineMs);
                 axe.Launch(
                     runner.BeatClock,
                     start + Vector3.up * (i * 0.08f),
                     end + Vector3.up * (i * 0.06f),
-                    launchTimelineMs,
+                    scheduledLaunchTimelineMs,
                     pendingTargetTimes[i],
                     laneOffset);
                 flyingAxes.Add(axe);
             }
+            return spawnCount > 0;
         }
 
         private void ResolveClosestAxe(OtterGoblinDemo1Runner.JudgementResult result)
@@ -533,6 +562,7 @@ namespace RhythmHunter.OtterAquariumPrototype
                     Destroy(axe.gameObject);
             }
             flyingAxes.Clear();
+            tripleAxesScheduled = false;
         }
 
         private static string FormatDelta(double deltaMs)

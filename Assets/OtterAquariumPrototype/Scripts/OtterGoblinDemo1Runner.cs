@@ -111,6 +111,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public long CurrentSongTick { get; private set; }
         public int CurrentBar => levelData == null ? 1 : Mathf.Max(1, (int)(CurrentSongTick / levelData.TicksPerBar) + 1);
         public int CurrentPhraseNumber => activePhrase ? phraseIndex + 1 : Mathf.Clamp(phraseIndex, 0, levelData != null ? levelData.Phrases.Count : 0);
+        public double CurrentMillisecondsPerBeat => MillisecondsPerBeat;
 
         public void Configure(FmodBeatClock clock, OtterGoblinDemo1LevelData data)
         {

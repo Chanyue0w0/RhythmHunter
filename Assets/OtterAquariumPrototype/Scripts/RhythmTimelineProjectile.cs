@@ -21,10 +21,10 @@ namespace RhythmHunter.OtterAquariumPrototype
         private Vector3 baseScale;
         private double launchTimelineMs;
         private double fallbackLaunchTime;
-        private double fallbackDurationSeconds;
         private float configuredArcHeight;
         private float resolvedAt;
-        private bool launched;
+        private bool configured;
+        private bool flightStarted;
         private bool resolved;
         private bool caught;
 
@@ -39,7 +39,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void Update()
         {
-            if (!launched)
+            if (!configured)
                 return;
 
             if (resolved)
@@ -49,6 +49,15 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
 
             double timelineMs = GetTimelineMs();
+            if (!flightStarted)
+            {
+                if (timelineMs < launchTimelineMs)
+                    return;
+                flightStarted = true;
+                spriteRenderer.enabled = true;
+                UpdateFlightPose(0f);
+            }
+
             float progress = Mathf.Clamp01((float)((timelineMs - launchTimelineMs)
                 / Mathf.Max(1f, (float)(ArrivalTimelineMs - launchTimelineMs))));
             UpdateFlightPose(progress);
@@ -71,13 +80,18 @@ namespace RhythmHunter.OtterAquariumPrototype
             launchTimelineMs = configuredLaunchTimelineMs;
             ArrivalTimelineMs = System.Math.Max(configuredLaunchTimelineMs + 1.0, configuredArrivalTimelineMs);
             configuredArcHeight = Mathf.Max(0f, arcHeight + laneArcOffset);
-            fallbackLaunchTime = Time.unscaledTimeAsDouble;
-            fallbackDurationSeconds = Mathf.Max(0.001f, (float)((ArrivalTimelineMs - launchTimelineMs) / 1000.0));
-            launched = true;
+            double currentTimelineMs = configuredLaunchTimelineMs;
+            if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int timelineMs))
+                currentTimelineMs = timelineMs;
+            fallbackLaunchTime = Time.unscaledTimeAsDouble
+                + System.Math.Max(0.0, configuredLaunchTimelineMs - currentTimelineMs) / 1000.0;
+            configured = true;
+            flightStarted = currentTimelineMs >= configuredLaunchTimelineMs;
             resolved = false;
             caught = false;
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.enabled = flightStarted;
             spriteRenderer.color = Color.white;
             transform.localScale = baseScale;
             UpdateFlightPose(0f);
@@ -88,6 +102,9 @@ namespace RhythmHunter.OtterAquariumPrototype
             if (resolved)
                 return;
 
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.enabled = true;
             UpdateFlightPose(1f);
             resolved = true;
             caught = wasCaught;
@@ -101,8 +118,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int timelineMs))
                 return timelineMs;
-            return launchTimelineMs + (Time.unscaledTimeAsDouble - fallbackLaunchTime)
-                / fallbackDurationSeconds * (ArrivalTimelineMs - launchTimelineMs);
+            return launchTimelineMs + (Time.unscaledTimeAsDouble - fallbackLaunchTime) * 1000.0;
         }
 
         private void UpdateFlightPose(float progress)
