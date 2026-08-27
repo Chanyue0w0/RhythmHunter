@@ -33,7 +33,7 @@ MonoBehaviour:
   blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
   perfectSoundEventPath: 
   goodSoundEventPath: 
-  missSoundEventPath: event:/SoundEffects/BeatMiss
+  missSoundEventPath: 
   phrases:
   - startBar: 3
     startOffsetTicks: 0

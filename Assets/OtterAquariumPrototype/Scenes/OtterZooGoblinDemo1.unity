@@ -2802,7 +2802,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d2a1e21bd51456496a0d698acf97ab4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterCombatAnimator
   runner: {fileID: 1636567133}
   visualRoot: {fileID: 384012222}

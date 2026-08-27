@@ -106,5 +106,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.RhythmTimelineProjectile
   arcHeight: 0.1
   rotateDuringFlight: 1
-  rotationTurns: 2.5
+  rotationTurns: 1.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
