@@ -136,8 +136,6 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(24)] private int ppq = DefaultPpq;
 
         [Header("Combat")]
-        [SerializeField, Min(1)] private int otterMaxHealth = 3;
-        [SerializeField, Min(1)] private int damagePerMiss = 1;
         [SerializeField, Min(1f)] private float perfectWindowMs = 70f;
         [SerializeField, Min(1f)] private float goodWindowMs = 140f;
         [SerializeField] private float judgementOffsetMs;
@@ -166,8 +164,6 @@ namespace RhythmHunter.OtterAquariumPrototype
         public int TotalBars => totalBars;
         public int Ppq => ppq;
         public int TicksPerBar => ppq * beatsPerBar;
-        public int OtterMaxHealth => otterMaxHealth;
-        public int DamagePerMiss => damagePerMiss;
         public float PerfectWindowMs => perfectWindowMs;
         public float GoodWindowMs => Mathf.Max(perfectWindowMs, goodWindowMs);
         public float JudgementOffsetMs => judgementOffsetMs;
@@ -194,8 +190,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             beatsPerBar = 4;
             totalBars = 33;
             ppq = DefaultPpq;
-            otterMaxHealth = 3;
-            damagePerMiss = 1;
             perfectWindowMs = 85f;
             goodWindowMs = 170f;
             judgementOffsetMs = 0f;
@@ -438,8 +432,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             beatsPerBar = Mathf.Max(1, beatsPerBar);
             totalBars = Mathf.Max(4, totalBars);
             ppq = Mathf.Max(24, ppq);
-            otterMaxHealth = Mathf.Max(1, otterMaxHealth);
-            damagePerMiss = Mathf.Max(1, damagePerMiss);
             perfectWindowMs = Mathf.Max(1f, perfectWindowMs);
             goodWindowMs = Mathf.Max(perfectWindowMs, goodWindowMs);
             extraInputStunBeats = Mathf.Max(0.25f, extraInputStunBeats);

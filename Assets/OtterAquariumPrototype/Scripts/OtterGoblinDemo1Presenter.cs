@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using FMODUnity;
 using RhythmHunter.RhythmDemo;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RhythmHunter.OtterAquariumPrototype
 {
@@ -36,8 +37,13 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private TextMesh patternText;
         [SerializeField] private TextMesh judgementText;
         [SerializeField] private TextMesh timingText;
-        [SerializeField] private TextMesh healthText;
+        [FormerlySerializedAs("healthText")]
+        [SerializeField] private TextMesh failureCountText;
         [SerializeField] private TextMesh statusText;
+
+        [Header("HUD Visibility (Edit or Play Mode)")]
+        [Tooltip("When disabled, the diagnostic HUD is hidden immediately in Edit Mode and starts hidden in Play Mode.")]
+        [SerializeField] private bool showDiagnosticHudOnStart = true;
 
         private Vector3 enemyBasePosition;
         private Vector3 otterBasePosition;
@@ -52,10 +58,14 @@ namespace RhythmHunter.OtterAquariumPrototype
         private int currentBeat = 1;
         private int currentBar = 1;
         private bool tripleAxesScheduled;
+        private bool diagnosticHudVisible;
+        private GameObject rhythmHudRoot;
+        private GameObject resultHudRoot;
         private readonly List<double> pendingTargetTimes = new();
         private readonly List<RhythmTimelineProjectile> flyingAxes = new();
 
         public GameObject AxeProjectilePrefab => axeProjectilePrefab;
+        public bool DiagnosticHudVisible => diagnosticHudVisible;
 
         public void Configure(
             OtterGoblinDemo1Runner configuredRunner,
@@ -74,7 +84,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             TextMesh configuredPatternText,
             TextMesh configuredJudgementText,
             TextMesh configuredTimingText,
-            TextMesh configuredHealthText,
+            TextMesh configuredFailureCountText,
             TextMesh configuredStatusText)
         {
             runner = configuredRunner;
@@ -93,16 +103,37 @@ namespace RhythmHunter.OtterAquariumPrototype
             patternText = configuredPatternText;
             judgementText = configuredJudgementText;
             timingText = configuredTimingText;
-            healthText = configuredHealthText;
+            failureCountText = configuredFailureCountText;
             statusText = configuredStatusText;
             CachePose();
+            CacheDiagnosticHudRoots();
+            SetDiagnosticHudVisible(showDiagnosticHudOnStart);
             RefreshHud();
         }
 
         private void Awake()
         {
             CachePose();
+            CacheDiagnosticHudRoots();
+            SetDiagnosticHudVisible(showDiagnosticHudOnStart);
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            UnityEditor.EditorApplication.delayCall -= ApplyEditorHudVisibility;
+            UnityEditor.EditorApplication.delayCall += ApplyEditorHudVisibility;
+        }
+
+        private void ApplyEditorHudVisibility()
+        {
+            if (this == null || Application.isPlaying)
+                return;
+
+            CacheDiagnosticHudRoots();
+            SetDiagnosticHudVisible(showDiagnosticHudOnStart);
+        }
+#endif
 
         private void Start()
         {
@@ -121,9 +152,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             runner.WaitCue += OnWaitCue;
             runner.AttackCue += OnAttackCue;
             runner.Judged += OnJudged;
-            runner.HealthChanged += OnHealthChanged;
+            runner.FailureCountChanged += OnFailureCountChanged;
             runner.BattleWon += OnBattleWon;
-            runner.BattleLost += OnBattleLost;
             runner.BattleError += OnBattleError;
         }
 
@@ -138,9 +168,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             runner.WaitCue -= OnWaitCue;
             runner.AttackCue -= OnAttackCue;
             runner.Judged -= OnJudged;
-            runner.HealthChanged -= OnHealthChanged;
+            runner.FailureCountChanged -= OnFailureCountChanged;
             runner.BattleWon -= OnBattleWon;
-            runner.BattleLost -= OnBattleLost;
             runner.BattleError -= OnBattleError;
             ClearFlyingAxes();
         }
@@ -314,16 +343,26 @@ namespace RhythmHunter.OtterAquariumPrototype
 
                 default:
                     hurtPulse = 1f;
-                    SetJudgement("MISS", MissRed, "-1 HP");
+                    if (result.ExtraInput)
+                    {
+                        SetJudgement(
+                            "EXTRA INPUT",
+                            MissRed,
+                            $"STUN {runner.LevelData.ExtraInputStunBeats:0.##} BEAT");
+                    }
+                    else
+                    {
+                        SetJudgement("MISS", MissRed, $"FAILURES {result.FailureCount}");
+                    }
                     PlayOptional(runner.LevelData.MissSoundEventPath);
                     break;
             }
             RefreshHud();
         }
 
-        private void OnHealthChanged(int health, int maxHealth)
+        private void OnFailureCountChanged(int failureCount)
         {
-            RefreshHealth(health, maxHealth);
+            RefreshFailureCount(failureCount);
         }
 
         private void OnBattleWon(OtterGoblinDemo1Runner.CombatSummary summary)
@@ -336,20 +375,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
             if (judgementText != null)
                 judgementText.text = $"ACCURACY  {summary.Accuracy * 100f:0}%";
-            if (timingText != null)
-                timingText.text = "PRESS R TO RESTART";
-        }
-
-        private void OnBattleLost()
-        {
-            ClearFlyingAxes();
-            if (phaseText != null)
-            {
-                phaseText.text = "OTTER DOWN";
-                phaseText.color = MissRed;
-            }
-            if (judgementText != null)
-                judgementText.text = "3 MISSES";
             if (timingText != null)
                 timingText.text = "PRESS R TO RESTART";
         }
@@ -377,7 +402,6 @@ namespace RhythmHunter.OtterAquariumPrototype
                 OtterGoblinDemo1Runner.CombatPhase.Gap => GoodGold,
                 OtterGoblinDemo1Runner.CombatPhase.Defend => MissRed,
                 OtterGoblinDemo1Runner.CombatPhase.Victory => PerfectGreen,
-                OtterGoblinDemo1Runner.CombatPhase.Defeat => MissRed,
                 _ => Color.white
             };
             phaseText.text = next switch
@@ -388,7 +412,6 @@ namespace RhythmHunter.OtterAquariumPrototype
                 OtterGoblinDemo1Runner.CombatPhase.Defend => "DEFEND",
                 OtterGoblinDemo1Runner.CombatPhase.Rest => "BREATHE",
                 OtterGoblinDemo1Runner.CombatPhase.Victory => "DEMO1 CLEAR",
-                OtterGoblinDemo1Runner.CombatPhase.Defeat => "OTTER DOWN",
                 _ => "FMOD ERROR"
             };
         }
@@ -432,16 +455,16 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (runner == null || runner.LevelData == null)
                 return;
-            RefreshHealth(runner.Health, runner.LevelData.OtterMaxHealth);
+            RefreshFailureCount(runner.FailureCount);
             RefreshStatus();
         }
 
-        private void RefreshHealth(int health, int maxHealth)
+        private void RefreshFailureCount(int failureCount)
         {
-            if (healthText == null)
+            if (failureCountText == null)
                 return;
-            healthText.text = $"OTTER HP   {Blocks(health)}{EmptyBlocks(maxHealth - health)}   {health}/{maxHealth}";
-            healthText.color = health <= 1 ? MissRed : Color.white;
+            failureCountText.text = $"FAILURES   {failureCount}";
+            failureCountText.color = failureCount > 0 ? MissRed : Color.white;
         }
 
         private void RefreshStatus()
@@ -462,6 +485,40 @@ namespace RhythmHunter.OtterAquariumPrototype
                 otterBasePosition = otterRoot.localPosition;
             if (shield != null)
                 shieldBaseScale = shield.transform.localScale;
+        }
+
+        public void ToggleDiagnosticHud()
+        {
+            SetDiagnosticHudVisible(!diagnosticHudVisible);
+        }
+
+        public void SetDiagnosticHudVisible(bool visible)
+        {
+            diagnosticHudVisible = visible;
+            SetHudRootActive(rhythmHudRoot, visible);
+            SetHudRootActive(resultHudRoot, visible);
+        }
+
+        private void CacheDiagnosticHudRoots()
+        {
+            rhythmHudRoot = FindSharedHudRoot(phaseText, phraseText, patternText);
+            resultHudRoot = FindSharedHudRoot(judgementText, timingText, statusText);
+        }
+
+        private static GameObject FindSharedHudRoot(params TextMesh[] labels)
+        {
+            foreach (TextMesh label in labels)
+            {
+                if (label != null && label.transform.parent != null)
+                    return label.transform.parent.gameObject;
+            }
+            return null;
+        }
+
+        private static void SetHudRootActive(GameObject root, bool active)
+        {
+            if (root != null && root.activeSelf != active)
+                root.SetActive(active);
         }
 
         private void LaunchAxesForPendingTargets(int projectileCount)
@@ -573,9 +630,6 @@ namespace RhythmHunter.OtterAquariumPrototype
                 ? $"EARLY {Mathf.Abs((float)deltaMs):0} ms"
                 : $"LATE {deltaMs:0} ms";
         }
-
-        private static string Blocks(int count) => new('■', Mathf.Max(0, count));
-        private static string EmptyBlocks(int count) => new('□', Mathf.Max(0, count));
 
         private static void PlayOptional(string eventPath)
         {

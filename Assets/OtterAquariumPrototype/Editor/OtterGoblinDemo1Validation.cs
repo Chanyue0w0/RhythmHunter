@@ -40,7 +40,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             SpriteRenderer goblin = FindNamed<SpriteRenderer>(scene, "GoblinSprite");
             Transform goblinRoot = FindNamedTransform(scene, "ZooGoblin");
             Transform otter = FindNamedTransform(scene, "Otter");
-            TextMesh health = FindNamed<TextMesh>(scene, "Health");
+            TextMesh failureCount = FindNamed<TextMesh>(scene, "FailureCount");
             int singleCount = 0;
             int tripleCount = 0;
             int doubleSingleCount = 0;
@@ -80,9 +80,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && otter.position.x >= 4.5f
                 && Mathf.Approximately(Mathf.Abs(otter.localScale.x), 0.72f)
                 && otter.position.x - goblin.transform.position.x >= 8f
-                && health != null
-                && data.OtterMaxHealth >= 1
-                && data.DamagePerMiss >= 1
+                && failureCount != null
                 && data.ExtraInputStunBeats >= 0.25f
                 && data.AuthoredBpm > 0f
                 && data.TotalBars >= 4
@@ -101,8 +99,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Chart={chartValid} ({chartError}), Clock={clock != null}, Runner={runner != null}, "
                     + $"Input={input != null}, Presenter={presenter != null}, Background={background != null}, "
                     + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
-                    + $"Otter={otter != null}, HealthHUD={health != null}, HP={data.OtterMaxHealth}, "
-                    + $"Damage={data.DamagePerMiss}, Stun={data.ExtraInputStunBeats:0.##} beats, "
+                    + $"Otter={otter != null}, FailureHUD={failureCount != null}, "
+                    + $"Stun={data.ExtraInputStunBeats:0.##} beats, "
                     + $"Phrases={data.Phrases.Count}, "
                     + $"Single={singleCount}, Triple={tripleCount}, "
                     + $"DoubleSingle={doubleSingleCount}, TripleThenSingle={tripleThenSingleCount}");

@@ -23,23 +23,22 @@ namespace RhythmHunter.OtterAquariumPrototype
             Defend,
             Rest,
             Victory,
-            Defeat,
             Error
         }
 
         public readonly struct JudgementResult
         {
-            public JudgementResult(Grade grade, double deltaMs, int health, bool extraInput)
+            public JudgementResult(Grade grade, double deltaMs, int failureCount, bool extraInput)
             {
                 Judgement = grade;
                 DeltaMs = deltaMs;
-                Health = health;
+                FailureCount = failureCount;
                 ExtraInput = extraInput;
             }
 
             public Grade Judgement { get; }
             public double DeltaMs { get; }
-            public int Health { get; }
+            public int FailureCount { get; }
             public bool ExtraInput { get; }
         }
 
@@ -98,15 +97,14 @@ namespace RhythmHunter.OtterAquariumPrototype
         public event Action<int, int, int> WaitCue;
         public event Action<int, int, string> AttackCue;
         public event Action<JudgementResult> Judged;
-        public event Action<int, int> HealthChanged;
+        public event Action<int> FailureCountChanged;
         public event Action<CombatSummary> BattleWon;
-        public event Action BattleLost;
         public event Action<string> BattleError;
 
         public FmodBeatClock BeatClock => beatClock;
         public OtterGoblinDemo1LevelData LevelData => levelData;
         public CombatPhase Phase => phase;
-        public int Health { get; private set; }
+        public int FailureCount => missCount;
         public bool HasEnded => ended;
         public long CurrentSongTick { get; private set; }
         public int CurrentBar => levelData == null ? 1 : Mathf.Max(1, (int)(CurrentSongTick / levelData.TicksPerBar) + 1);
@@ -164,11 +162,11 @@ namespace RhythmHunter.OtterAquariumPrototype
             if (!running || ended || levelData == null || beatClock == null
                 || !beatClock.TryGetTimelinePositionMs(out int timelineMs))
             {
-                return Publish(new JudgementResult(Grade.NotReady, 0.0, Health, false));
+                return Publish(new JudgementResult(Grade.NotReady, 0.0, FailureCount, false));
             }
 
             if (timelineMs < inputLockedUntilTimelineMs)
-                return Publish(new JudgementResult(Grade.NotReady, 0.0, Health, false));
+                return Publish(new JudgementResult(Grade.NotReady, 0.0, FailureCount, false));
 
             double evaluatedMs = timelineMs + levelData.JudgementOffsetMs;
             TargetState nearest = null;
@@ -195,13 +193,13 @@ namespace RhythmHunter.OtterAquariumPrototype
                     perfectCount++;
                 else
                     goodCount++;
-                return Publish(new JudgementResult(grade, nearestDelta, Health, false));
+                return Publish(new JudgementResult(grade, nearestDelta, FailureCount, false));
             }
 
             extraCount++;
             inputLockedUntilTimelineMs = timelineMs
                 + levelData.ExtraInputStunBeats * MillisecondsPerBeat;
-            return Publish(new JudgementResult(Grade.Miss, nearestDelta, Health, true));
+            return Publish(new JudgementResult(Grade.Miss, nearestDelta, FailureCount, true));
         }
 
         public CombatSummary GetSummary()
@@ -319,10 +317,12 @@ namespace RhythmHunter.OtterAquariumPrototype
 
                 target.Judged = true;
                 missCount++;
-                ApplyDamage();
-                Publish(new JudgementResult(Grade.Miss, evaluatedTimelineMs - TickToTimelineMs(target.Tick), Health, false));
-                if (ended)
-                    return;
+                FailureCountChanged?.Invoke(FailureCount);
+                Publish(new JudgementResult(
+                    Grade.Miss,
+                    evaluatedTimelineMs - TickToTimelineMs(target.Tick),
+                    FailureCount,
+                    false));
             }
 
             if (songTick < phraseEndTick || !AllTargetsJudged())
@@ -385,16 +385,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             };
         }
 
-        private void ApplyDamage()
-        {
-            int oldHealth = Health;
-            Health = Mathf.Max(0, Health - levelData.DamagePerMiss);
-            if (Health != oldHealth)
-                HealthChanged?.Invoke(Health, levelData.OtterMaxHealth);
-            if (Health <= 0)
-                LoseBattle();
-        }
-
         private void WinBattle()
         {
             if (ended)
@@ -402,15 +392,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             ended = true;
             ChangePhase(CombatPhase.Victory);
             BattleWon?.Invoke(GetSummary());
-        }
-
-        private void LoseBattle()
-        {
-            if (ended)
-                return;
-            ended = true;
-            ChangePhase(CombatPhase.Defeat);
-            BattleLost?.Invoke();
         }
 
         private void ResetState()
@@ -427,7 +408,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             missCount = 0;
             extraCount = 0;
             inputLockedUntilTimelineMs = double.NegativeInfinity;
-            Health = levelData != null ? levelData.OtterMaxHealth : 3;
         }
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)

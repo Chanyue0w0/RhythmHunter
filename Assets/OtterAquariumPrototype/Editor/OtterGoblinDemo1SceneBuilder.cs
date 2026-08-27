@@ -46,7 +46,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public TextMesh Pattern;
             public TextMesh Judgement;
             public TextMesh Timing;
-            public TextMesh Health;
+            public TextMesh FailureCount;
             public TextMesh Status;
         }
 
@@ -179,7 +179,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite("TitlePanelFill", titlePanel, shape, Ink, new Vector3(0f, 4.55f, 0f), new Vector2(18.6f, 1.15f), 90);
             Text("Title", titlePanel, font, "DEMO1  •  GOBLIN PATROL", Color.white,
                 new Vector3(-5.3f, 4.64f, -0.2f), 0.105f, FontStyle.Bold, 100, TextAnchor.MiddleLeft);
-            stage.Health = Text("Health", titlePanel, font, "OTTER HP   ■■■   3/3", Color.white,
+            stage.FailureCount = Text("FailureCount", titlePanel, font, "FAILURES   0", Color.white,
                 new Vector3(5.8f, 4.64f, -0.2f), 0.1f, FontStyle.Bold, 100, TextAnchor.MiddleRight);
 
             Transform rhythmPanel = Empty("RhythmPanel", root);
@@ -263,7 +263,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite("OtterLabelPlate", label, shape, new Color(0.025f, 0.16f, 0.18f, 0.9f),
                 new Vector3(OtterX, 0.1f, 0f), new Vector2(3.1f, 0.46f), 24);
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            Text("OtterName", label, font, "OTTER • 3 HP", Cyan,
+            Text("OtterName", label, font, "OTTER", Cyan,
                 new Vector3(OtterX, 0.12f, -0.2f), 0.068f, FontStyle.Bold, 30);
         }
 
@@ -278,7 +278,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             clock.Configure(data.MusicEventPath, data.MusicStartDelaySeconds, true, data.MusicVolume);
             runner.Configure(clock, data);
-            input.Configure(runner);
             presenter.Configure(
                 runner,
                 stage.EnemyRoot,
@@ -296,8 +295,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.Pattern,
                 stage.Judgement,
                 stage.Timing,
-                stage.Health,
+                stage.FailureCount,
                 stage.Status);
+            input.Configure(runner, presenter);
         }
 
         private static GameObject EnsureAxePrefab()

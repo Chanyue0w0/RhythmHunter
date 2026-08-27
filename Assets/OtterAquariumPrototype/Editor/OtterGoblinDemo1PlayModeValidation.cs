@@ -83,14 +83,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     OtterGoblinDemo1Runner.JudgementResult result = runner.SubmitInput();
                     bool passed = result.Judgement == OtterGoblinDemo1Runner.Grade.Perfect
                         && !result.ExtraInput
-                        && result.Health == runner.LevelData.OtterMaxHealth
+                        && result.FailureCount == 0
                         && Object.FindFirstObjectByType<RhythmTimelineProjectile>() != null
                         && runner.BeatClock.IsPlaying
                         && string.IsNullOrEmpty(runner.BeatClock.LastError);
                     SessionState.SetBool(PassedKey, passed);
                     SessionState.SetString(FailureKey, passed
                         ? string.Empty
-                        : $"Input={result.Judgement}, delta={result.DeltaMs:0.0}ms, HP={result.Health}, FMOD={runner.BeatClock.LastError}");
+                        : $"Input={result.Judgement}, delta={result.DeltaMs:0.0}ms, Failures={result.FailureCount}, FMOD={runner.BeatClock.LastError}");
                     EditorApplication.ExitPlaymode();
                     return;
                 }

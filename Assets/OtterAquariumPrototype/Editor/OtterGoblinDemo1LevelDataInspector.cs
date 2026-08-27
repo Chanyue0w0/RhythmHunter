@@ -31,8 +31,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private SerializedProperty beatsPerBar;
         private SerializedProperty totalBars;
         private SerializedProperty ppq;
-        private SerializedProperty otterMaxHealth;
-        private SerializedProperty damagePerMiss;
         private SerializedProperty perfectWindowMs;
         private SerializedProperty goodWindowMs;
         private SerializedProperty judgementOffsetMs;
@@ -64,8 +62,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             beatsPerBar = serializedObject.FindProperty("beatsPerBar");
             totalBars = serializedObject.FindProperty("totalBars");
             ppq = serializedObject.FindProperty("ppq");
-            otterMaxHealth = serializedObject.FindProperty("otterMaxHealth");
-            damagePerMiss = serializedObject.FindProperty("damagePerMiss");
             perfectWindowMs = serializedObject.FindProperty("perfectWindowMs");
             goodWindowMs = serializedObject.FindProperty("goodWindowMs");
             judgementOffsetMs = serializedObject.FindProperty("judgementOffsetMs");
@@ -146,8 +142,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             if (showCombat)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(otterMaxHealth, new GUIContent("海獺血量"));
-                EditorGUILayout.PropertyField(damagePerMiss, new GUIContent("Miss 傷害"));
                 EditorGUILayout.PropertyField(perfectWindowMs, new GUIContent("Perfect ±ms"));
                 EditorGUILayout.PropertyField(goodWindowMs, new GUIContent("Good ±ms"));
                 EditorGUILayout.PropertyField(judgementOffsetMs, new GUIContent("輸入校正 Offset（ms）"));

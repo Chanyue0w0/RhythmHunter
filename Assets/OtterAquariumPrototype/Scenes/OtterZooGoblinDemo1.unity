@@ -451,7 +451,7 @@ GameObject:
   - component: {fileID: 193556647}
   - component: {fileID: 193556646}
   m_Layer: 0
-  m_Name: Health
+  m_Name: FailureCount
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -465,7 +465,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 193556645}
-  m_Text: "OTTER HP   \u25A0\u25A0\u25A0   3/3"
+  m_Text: FAILURES   0
   m_OffsetZ: 0
   m_CharacterSize: 0.1
   m_LineSpacing: 1
@@ -1987,7 +1987,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1159743188
 Transform:
   m_ObjectHideFlags: 0
@@ -2782,13 +2782,15 @@ MonoBehaviour:
   otterBody: {fileID: 384012221}
   shield: {fileID: 947752845}
   dangerFlash: {fileID: 874976528}
+  tripleAxeVisualFlightBeats: 1
   phaseText: {fileID: 356862317}
   phraseText: {fileID: 1301047193}
   patternText: {fileID: 230699742}
   judgementText: {fileID: 1755917655}
   timingText: {fileID: 1776692980}
-  healthText: {fileID: 193556646}
+  failureCountText: {fileID: 193556646}
   statusText: {fileID: 100404753}
+  showDiagnosticHudOnStart: 0
 --- !u!114 &1636567132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2802,6 +2804,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1Input
   runner: {fileID: 1636567133}
+  presenter: {fileID: 0}
 --- !u!114 &1636567133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3500,7 +3503,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1904519077
 Transform:
   m_ObjectHideFlags: 0
@@ -3594,7 +3597,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2073057351}
-  m_Text: "OTTER \u2022 3 HP"
+  m_Text: OTTER
   m_OffsetZ: 0
   m_CharacterSize: 0.068
   m_LineSpacing: 1

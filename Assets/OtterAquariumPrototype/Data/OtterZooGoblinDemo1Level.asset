@@ -23,8 +23,6 @@ MonoBehaviour:
   beatsPerBar: 4
   totalBars: 33
   ppq: 480
-  otterMaxHealth: 3
-  damagePerMiss: 1
   perfectWindowMs: 85
   goodWindowMs: 170
   judgementOffsetMs: 0
