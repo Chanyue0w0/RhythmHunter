@@ -153,7 +153,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(1f)] private float perfectWindowMs = 70f;
         [SerializeField, Min(1f)] private float goodWindowMs = 140f;
         [SerializeField] private float judgementOffsetMs;
-        [SerializeField, Min(0.25f)] private float extraInputStunBeats = 1f;
+        [SerializeField, Min(0.25f)] private float extraInputStunBeats = 0.5f;
 
         [Header("FMOD Events")]
         [SerializeField] private string warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
@@ -207,7 +207,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             perfectWindowMs = 85f;
             goodWindowMs = 170f;
             judgementOffsetMs = 0f;
-            extraInputStunBeats = 1f;
+            extraInputStunBeats = 0.5f;
             warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
             attackSoundEventPath = "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
             blockSoundEventPath = "event:/ZooGoblinFight/SoundEffects/BeatTapping";
@@ -273,7 +273,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             perfectWindowMs = 85f;
             goodWindowMs = 170f;
             judgementOffsetMs = 0f;
-            extraInputStunBeats = 1f;
+            extraInputStunBeats = 0.5f;
             warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
             attackSoundEventPath = "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
             blockSoundEventPath = "event:/ZooGoblinFight/SoundEffects/BeatTapping";

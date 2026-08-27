@@ -15,7 +15,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity";
         public const string DataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset";
         public const string OtterVsDataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinOtterVsLevel.asset";
-        public const string AxePrefabPath = "Assets/OtterAquariumPrototype/Prefabs/GoblinFlyingAxe.prefab";
+        public const string AxePrefabPath = "Assets/OtterAquariumPrototype/Prefabs/BeatProjectiles/axe.prefab";
         private const string RemovedOtterVsScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinOtterVs.unity";
 
         public const string BackgroundPath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_fightingbackground.png";

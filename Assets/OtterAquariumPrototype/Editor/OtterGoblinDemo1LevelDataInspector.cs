@@ -278,7 +278,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             DrawProjectilePrefabSlots(projectilePrefabs, responseTicks, expectedCount);
 
             EditorGUILayout.HelpBox(
-                "點亮或關閉格點後，兩條可編輯軌都必須維持此類型規定的數量。每個接取拍可指定不同投擲物 Prefab；空白時沿用 GoblinFlyingAxe。旋轉設定保存在 Prefab 的 RhythmTimelineProjectile 元件。",
+                "點亮或關閉格點後，兩條可編輯軌都必須維持此類型規定的數量。每個接取拍可指定不同投擲物 Prefab；空白時使用 BeatProjectiles/axe。旋轉設定保存在 Prefab 的 RhythmTimelineProjectile 元件。",
                 MessageType.None);
             EditorGUILayout.EndVertical();
         }
@@ -364,7 +364,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 float catchBeat = 3f + responseTick / (float)Ppq;
                 GameObject current = prefabProperty.objectReferenceValue as GameObject;
                 GameObject selected = (GameObject)EditorGUILayout.ObjectField(
-                    new GUIContent($"#{i + 1:00}  接取 Beat {catchBeat:0.##}", "空白會使用 Presenter 的預設 GoblinFlyingAxe。"),
+                    new GUIContent($"#{i + 1:00}  接取 Beat {catchBeat:0.##}", "空白會使用 BeatProjectiles/axe 預設投擲物。"),
                     current,
                     typeof(GameObject),
                     false);

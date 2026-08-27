@@ -27,7 +27,7 @@ MonoBehaviour:
   perfectWindowMs: 85
   goodWindowMs: 170
   judgementOffsetMs: 0
-  extraInputStunBeats: 1
+  extraInputStunBeats: 0.5
   warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
   attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
   blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
