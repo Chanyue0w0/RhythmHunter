@@ -20,6 +20,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
         public const string BackgroundPath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_fightingbackground.png";
         private const string GoblinRoot = "Assets/OtterAquariumPrototype/Arts/Enemy/Goblin_Mercenary";
+        private const string OtterArtRoot = "Assets/OtterAquariumPrototype/Arts/Otter";
+        private const string OtterIdlePath = OtterArtRoot + "/Idle/idle.png";
+        private const string OtterAnimationUpgradeSessionKey = "RhythmHunter.Demo1OtterAnimationUpgrade.v1";
         private const string AxeSpritePath = GoblinRoot + "/Axe.png";
         private const float CharacterScale = 0.72f;
         private const float GoblinX = -4.65f;
@@ -28,8 +31,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static readonly Color Ink = new(0.025f, 0.045f, 0.055f, 0.96f);
         private static readonly Color Panel = new(0.04f, 0.12f, 0.14f, 0.93f);
         private static readonly Color Cyan = new(0.26f, 0.94f, 1f, 1f);
-        private static readonly Color OtterBrown = new(0.34f, 0.18f, 0.08f, 1f);
-        private static readonly Color OtterLight = new(0.82f, 0.62f, 0.38f, 1f);
 
         private sealed class Stage
         {
@@ -41,6 +42,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public GameObject AxeProjectilePrefab;
             public Transform OtterRoot;
             public SpriteRenderer OtterBody;
+            public OtterCombatAnimator OtterAnimator;
             public SpriteRenderer Shield;
             public SpriteRenderer DangerFlash;
             public TextMesh Title;
@@ -61,12 +63,128 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             EditorApplication.delayCall += TryInitialBuild;
             EditorApplication.delayCall += TryEnsureAxePrefab;
             EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
+            EditorApplication.delayCall += TryUpgradeSharedSceneOtterAnimation;
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
             if (state == PlayModeStateChange.EnteredEditMode)
+            {
                 EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
+                EditorApplication.delayCall += TryUpgradeSharedSceneOtterAnimation;
+            }
+        }
+
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Upgrade Shared Demo1 Otter Animation")]
+        public static void UpgradeSharedSceneOtterAnimation()
+        {
+            SessionState.EraseBool(OtterAnimationUpgradeSessionKey);
+            TryUpgradeSharedSceneOtterAnimation();
+        }
+
+        private static void TryUpgradeSharedSceneOtterAnimation()
+        {
+            if (SessionState.GetBool(OtterAnimationUpgradeSessionKey, false))
+                return;
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+            {
+                EditorApplication.delayCall += TryUpgradeSharedSceneOtterAnimation;
+                return;
+            }
+            if (EditorApplication.isPlayingOrWillChangePlaymode || Application.isBatchMode)
+                return;
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
+                return;
+
+            Sprite idle = LoadSprite(OtterIdlePath);
+            Sprite[] swimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
+            Sprite[] rolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
+            Sprite[] cracking = LoadNumberedSprites(OtterArtRoot + "/cracking/cracking_no stone_", 4);
+            if (idle == null || swimming.Any(sprite => sprite == null)
+                || rolling.Any(sprite => sprite == null)
+                || cracking.Any(sprite => sprite == null))
+            {
+                Debug.LogWarning("[OtterGoblinDemo1] Otter animation upgrade skipped because a required non-old frame is missing.");
+                return;
+            }
+
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            bool wasLoaded = scene.IsValid() && scene.isLoaded;
+            if (!wasLoaded)
+                scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+
+            Transform otter = FindNamedTransform(scene, "Otter");
+            OtterGoblinDemo1Presenter presenter = FindInScene<OtterGoblinDemo1Presenter>(scene);
+            OtterGoblinDemo1Runner runner = FindInScene<OtterGoblinDemo1Runner>(scene);
+            if (otter == null || presenter == null || runner == null)
+            {
+                if (!wasLoaded)
+                    EditorSceneManager.CloseScene(scene, true);
+                Debug.LogWarning("[OtterGoblinDemo1] Otter animation upgrade could not find the Otter, Presenter, or Runner.");
+                return;
+            }
+
+            OtterCombatAnimator existingAnimator = otter.GetComponent<OtterCombatAnimator>();
+            if (existingAnimator != null
+                && existingAnimator.HasRequiredFrames
+                && presenter.OtterAnimator == existingAnimator)
+            {
+                if (!wasLoaded)
+                    EditorSceneManager.CloseScene(scene, true);
+                SessionState.SetBool(OtterAnimationUpgradeSessionKey, true);
+                return;
+            }
+
+            if (wasLoaded && scene.isDirty)
+            {
+                Debug.LogWarning(
+                    "[OtterGoblinDemo1] Otter animation upgrade is waiting because the shared Scene has unsaved edits. "
+                    + "Save it, then run Rhythm Hunter > Otter Aquarium > Upgrade Shared Demo1 Otter Animation.");
+                return;
+            }
+
+            Transform visual = otter.Find("OtterSprite") ?? otter.Find("Body");
+            SpriteRenderer body;
+            if (visual == null)
+            {
+                GameObject visualObject = new("OtterSprite", typeof(SpriteRenderer));
+                visual = visualObject.transform;
+                visual.SetParent(otter, false);
+                body = visualObject.GetComponent<SpriteRenderer>();
+            }
+            else
+            {
+                visual.name = "OtterSprite";
+                body = visual.GetComponent<SpriteRenderer>();
+                if (body == null)
+                    body = visual.gameObject.AddComponent<SpriteRenderer>();
+            }
+
+            visual.localPosition = Vector3.zero;
+            visual.localRotation = Quaternion.identity;
+            visual.localScale = Vector3.one;
+            body.enabled = true;
+            body.sprite = idle;
+            body.color = Color.white;
+            body.sortingOrder = 20;
+
+            OtterCombatAnimator animator = existingAnimator;
+            if (animator == null)
+                animator = otter.gameObject.AddComponent<OtterCombatAnimator>();
+            animator.ConfigureVisuals(visual, body, swimming, rolling, idle, cracking);
+            animator.ConfigureRunner(runner);
+            presenter.ConfigureOtterAnimator(animator);
+
+            EditorUtility.SetDirty(body);
+            EditorUtility.SetDirty(animator);
+            EditorUtility.SetDirty(presenter);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            if (!wasLoaded)
+                EditorSceneManager.CloseScene(scene, true);
+
+            SessionState.SetBool(OtterAnimationUpgradeSessionKey, true);
+            Debug.Log("[OtterGoblinDemo1] Upgraded the shared Scene to beat-synced Swimming, Rolling, Idle, and Cracking animation frames.");
         }
 
         private static void TryRedirectRemovedOtterVsScene()
@@ -208,13 +326,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 LoadSprite($"{GoblinRoot}/attack/attack_4.png")
             };
             Sprite attacked = LoadSprite($"{GoblinRoot}/attacked_1.png");
+            Sprite otterIdle = LoadSprite(OtterIdlePath);
+            Sprite[] otterSwimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
+            Sprite[] otterRolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
+            Sprite[] otterCracking = LoadNumberedSprites(OtterArtRoot + "/cracking/cracking_no stone_", 4);
             GameObject axePrefab = EnsureAxePrefab();
 
             if (data == null || shape == null || background == null || font == null
                 || idle.Any(sprite => sprite == null) || attack.Any(sprite => sprite == null)
-                || attacked == null || axePrefab == null)
+                || attacked == null || axePrefab == null || otterIdle == null
+                || otterSwimming.Any(sprite => sprite == null)
+                || otterRolling.Any(sprite => sprite == null)
+                || otterCracking.Any(sprite => sprite == null))
             {
-                Debug.LogError("[OtterGoblinDemo1] Required data, font, background, or Goblin sprite is missing.");
+                Debug.LogError("[OtterGoblinDemo1] Required data, font, background, Goblin, or non-old Otter sprite is missing.");
                 return;
             }
 
@@ -238,6 +363,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 idle,
                 attack,
                 attacked,
+                otterIdle,
+                otterSwimming,
+                otterRolling,
+                otterCracking,
                 axePrefab,
                 GetSceneTitle(data),
                 data.TotalBars,
@@ -272,6 +401,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite[] idle,
             Sprite[] attack,
             Sprite attacked,
+            Sprite otterIdle,
+            Sprite[] otterSwimming,
+            Sprite[] otterRolling,
+            Sprite[] otterCracking,
             GameObject axePrefab,
             string sceneTitle,
             int totalBars,
@@ -314,7 +447,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 new Vector3(0f, 2.43f, -0.2f), 0.125f, FontStyle.Bold, 100);
 
             CreateGoblin(root, idle[0], stage);
-            CreateOtter(root, shape, stage);
+            CreateOtter(root, shape, stage, otterIdle, otterSwimming, otterRolling, otterCracking);
 
             Transform resultPanel = Empty("ResultPanel", root);
             Sprite("ResultPanelFill", resultPanel, shape, Ink, new Vector3(0f, -3.93f, 0f), new Vector2(18.6f, 1.7f), 90);
@@ -352,7 +485,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 new Vector3(GoblinX, 0.12f, -0.2f), 0.068f, FontStyle.Bold, 30);
         }
 
-        private static void CreateOtter(Transform parent, Sprite shape, Stage stage)
+        private static void CreateOtter(
+            Transform parent,
+            Sprite shape,
+            Stage stage,
+            Sprite idle,
+            Sprite[] swimming,
+            Sprite[] rolling,
+            Sprite[] cracking)
         {
             Transform otter = Empty("Otter", parent);
             otter.localPosition = new Vector3(OtterX, -1.9f, 0f);
@@ -361,29 +501,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             stage.Shield = Sprite("Shield", otter, shape, new Color(0.25f, 0.95f, 1f, 0f),
                 new Vector3(0.55f, 0.18f, 0.6f), new Vector2(3.2f, 3.2f), 34);
-            stage.OtterBody = Sprite("Body", otter, shape, OtterBrown,
-                new Vector3(0f, -0.15f, 0f), new Vector2(2.2f, 2.75f), 20);
-            Sprite("Belly", otter, shape, OtterLight,
-                new Vector3(0.15f, -0.28f, -0.15f), new Vector2(1.42f, 1.85f), 21);
-            Sprite("Head", otter, shape, OtterBrown,
-                new Vector3(-0.12f, 1.05f, -0.12f), new Vector2(1.72f, 1.45f), 22);
-            Sprite("Muzzle", otter, shape, OtterLight,
-                new Vector3(-0.35f, 0.87f, -0.25f), new Vector2(0.86f, 0.62f), 23);
-            Sprite("EarL", otter, shape, OtterLight,
-                new Vector3(-0.7f, 1.62f, 0f), new Vector2(0.48f, 0.48f), 21);
-            Sprite("EarR", otter, shape, OtterLight,
-                new Vector3(0.5f, 1.58f, 0f), new Vector2(0.45f, 0.45f), 21);
-            Sprite("EyeL", otter, shape, Color.black,
-                new Vector3(-0.55f, 1.18f, -0.35f), new Vector2(0.16f, 0.2f), 24);
-            Sprite("EyeR", otter, shape, Color.black,
-                new Vector3(0.12f, 1.18f, -0.35f), new Vector2(0.16f, 0.2f), 24);
-            Sprite("Nose", otter, shape, new Color(0.06f, 0.035f, 0.025f, 1f),
-                new Vector3(-0.48f, 0.98f, -0.4f), new Vector2(0.25f, 0.18f), 25);
-            SpriteRenderer arm = Sprite("GuardPaw", otter, shape, OtterBrown,
-                new Vector3(0.9f, 0.25f, -0.25f), new Vector2(0.62f, 1.55f), 24);
-            arm.transform.localRotation = Quaternion.Euler(0f, 0f, -25f);
-            Sprite("ShellGuard", otter, shape, new Color(0.2f, 0.64f, 0.7f, 1f),
-                new Vector3(0.75f, 0.18f, -0.4f), new Vector2(1.35f, 1.62f), 25);
+            GameObject visualObject = new("OtterSprite", typeof(SpriteRenderer));
+            visualObject.transform.SetParent(otter, false);
+            stage.OtterBody = visualObject.GetComponent<SpriteRenderer>();
+            stage.OtterBody.sprite = idle;
+            stage.OtterBody.color = Color.white;
+            stage.OtterBody.sortingOrder = 20;
+            stage.OtterAnimator = otter.gameObject.AddComponent<OtterCombatAnimator>();
+            stage.OtterAnimator.ConfigureVisuals(
+                visualObject.transform,
+                stage.OtterBody,
+                swimming,
+                rolling,
+                idle,
+                cracking);
 
             Transform label = Empty("OtterLabel", parent);
             Sprite("OtterLabelPlate", label, shape, new Color(0.025f, 0.16f, 0.18f, 0.9f),
@@ -414,6 +545,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.AxeProjectilePrefab,
                 stage.OtterRoot,
                 stage.OtterBody,
+                stage.OtterAnimator,
                 stage.Shield,
                 stage.DangerFlash,
                 stage.Title,
@@ -424,6 +556,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.Timing,
                 stage.FailureCount,
                 stage.Status);
+            stage.OtterAnimator.ConfigureRunner(runner);
             input.Configure(runner, presenter);
         }
 
@@ -444,6 +577,19 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 T component = root.GetComponentInChildren<T>(true);
                 if (component != null)
                     return component;
+            }
+            return null;
+        }
+
+        private static Transform FindNamedTransform(Scene scene, string objectName)
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (Transform transform in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (transform.name == objectName)
+                        return transform;
+                }
             }
             return null;
         }
@@ -619,6 +765,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static Sprite LoadSprite(string path)
         {
             return AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().FirstOrDefault();
+        }
+
+        private static Sprite[] LoadNumberedSprites(string pathPrefix, int count)
+        {
+            Sprite[] frames = new Sprite[count];
+            for (int i = 0; i < count; i++)
+                frames[i] = LoadSprite($"{pathPrefix}{i + 1}.png");
+            return frames;
         }
 
         private static void EnsureFolders()

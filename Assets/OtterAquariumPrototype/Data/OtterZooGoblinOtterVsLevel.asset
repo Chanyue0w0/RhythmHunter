@@ -19,15 +19,15 @@ MonoBehaviour:
   musicEventPath: event:/ZooGoblinFight/BGM/Otter vs
   musicStartDelaySeconds: 1
   musicVolume: 0.55
-  musicGridOffsetMs: -35
+  musicGridOffsetMs: 0
   authoredBpm: 120
   beatsPerBar: 4
   totalBars: 32
   ppq: 480
-  perfectWindowMs: 85
-  goodWindowMs: 170
+  perfectWindowMs: 60
+  goodWindowMs: 80
   judgementOffsetMs: 0
-  extraInputStunBeats: 0.5
+  extraInputStunBeats: 0
   warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
   attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
   blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping

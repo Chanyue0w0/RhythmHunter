@@ -10,15 +10,27 @@ namespace RhythmHunter.OtterAquariumPrototype
     [RequireComponent(typeof(SpriteRenderer))]
     public sealed class RhythmTimelineProjectile : MonoBehaviour
     {
+        public enum OtterReactionKind
+        {
+            Crack,
+            Food
+        }
+
         [SerializeField, Min(0f)] private float arcHeight = 0.8f;
         [SerializeField] private bool rotateDuringFlight = true;
         [SerializeField, Min(0f)] private float rotationTurns = 2.5f;
         [SerializeField, Min(0.01f)] private float resolveFadeSeconds = 0.14f;
 
+        [Header("Otter Interaction")]
+        [SerializeField] private OtterReactionKind otterReaction = OtterReactionKind.Crack;
+        [SerializeField, Min(0.01f)] private float heldScaleMultiplier = 1f;
+
         private FmodBeatClock beatClock;
         private SpriteRenderer spriteRenderer;
         private Vector3 launchPosition;
         private Vector3 arrivalPosition;
+        private Transform arrivalTarget;
+        private Vector3 arrivalTargetLocalOffset;
         private Vector3 baseScale;
         private double launchTimelineMs;
         private double fallbackLaunchTime;
@@ -28,10 +40,13 @@ namespace RhythmHunter.OtterAquariumPrototype
         private bool flightStarted;
         private bool resolved;
         private bool caught;
+        private bool captured;
 
         public double ArrivalTimelineMs { get; private set; }
         public bool IsResolved => resolved;
         public bool RotateDuringFlight => rotateDuringFlight;
+        public OtterReactionKind OtterReaction => otterReaction;
+        public float HeldScaleMultiplier => heldScaleMultiplier;
 
         public void ConfigureAppearance(bool shouldRotate)
         {
@@ -47,6 +62,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         private void Update()
         {
             if (!configured)
+                return;
+
+            if (captured)
                 return;
 
             if (resolved)
@@ -81,9 +99,55 @@ namespace RhythmHunter.OtterAquariumPrototype
             double configuredArrivalTimelineMs,
             float laneArcOffset)
         {
+            LaunchInternal(
+                configuredBeatClock,
+                from,
+                to,
+                null,
+                Vector3.zero,
+                configuredLaunchTimelineMs,
+                configuredArrivalTimelineMs,
+                laneArcOffset);
+        }
+
+        public void LaunchToTarget(
+            FmodBeatClock configuredBeatClock,
+            Vector3 from,
+            Transform configuredArrivalTarget,
+            Vector3 configuredArrivalLocalOffset,
+            double configuredLaunchTimelineMs,
+            double configuredArrivalTimelineMs,
+            float laneArcOffset)
+        {
+            Vector3 fallbackArrival = configuredArrivalTarget != null
+                ? configuredArrivalTarget.TransformPoint(configuredArrivalLocalOffset)
+                : from;
+            LaunchInternal(
+                configuredBeatClock,
+                from,
+                fallbackArrival,
+                configuredArrivalTarget,
+                configuredArrivalLocalOffset,
+                configuredLaunchTimelineMs,
+                configuredArrivalTimelineMs,
+                laneArcOffset);
+        }
+
+        private void LaunchInternal(
+            FmodBeatClock configuredBeatClock,
+            Vector3 from,
+            Vector3 to,
+            Transform configuredArrivalTarget,
+            Vector3 configuredArrivalLocalOffset,
+            double configuredLaunchTimelineMs,
+            double configuredArrivalTimelineMs,
+            float laneArcOffset)
+        {
             beatClock = configuredBeatClock;
             launchPosition = from;
             arrivalPosition = to;
+            arrivalTarget = configuredArrivalTarget;
+            arrivalTargetLocalOffset = configuredArrivalLocalOffset;
             launchTimelineMs = configuredLaunchTimelineMs;
             ArrivalTimelineMs = System.Math.Max(configuredLaunchTimelineMs + 1.0, configuredArrivalTimelineMs);
             configuredArcHeight = Mathf.Max(0f, arcHeight + laneArcOffset);
@@ -96,6 +160,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             flightStarted = currentTimelineMs >= configuredLaunchTimelineMs;
             resolved = false;
             caught = false;
+            captured = false;
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.enabled = flightStarted;
@@ -106,7 +171,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         public void Resolve(bool wasCaught)
         {
-            if (resolved)
+            if (resolved || captured)
                 return;
 
             if (spriteRenderer == null)
@@ -121,6 +186,37 @@ namespace RhythmHunter.OtterAquariumPrototype
                 : new Color(1f, 0.35f, 0.3f, 1f);
         }
 
+        public void CaptureForOtter()
+        {
+            if (captured)
+                return;
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
+
+            captured = true;
+            configured = true;
+            flightStarted = true;
+            resolved = true;
+            caught = true;
+            spriteRenderer.enabled = true;
+            spriteRenderer.color = Color.white;
+        }
+
+        public void SetCapturedPose(Vector3 worldPosition, float rotationDegrees, float scaleMultiplier)
+        {
+            if (!captured)
+                return;
+            transform.position = worldPosition;
+            transform.rotation = Quaternion.Euler(0f, 0f, rotationDegrees);
+            transform.localScale = baseScale * Mathf.Max(0.01f, scaleMultiplier);
+        }
+
+        public void FinishCaptured()
+        {
+            if (this != null)
+                Destroy(gameObject);
+        }
+
         private double GetTimelineMs()
         {
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int timelineMs))
@@ -130,7 +226,10 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void UpdateFlightPose(float progress)
         {
-            Vector3 position = Vector3.LerpUnclamped(launchPosition, arrivalPosition, progress);
+            Vector3 currentArrival = arrivalTarget != null
+                ? arrivalTarget.TransformPoint(arrivalTargetLocalOffset)
+                : arrivalPosition;
+            Vector3 position = Vector3.LerpUnclamped(launchPosition, currentArrival, progress);
             position.y += Mathf.Sin(progress * Mathf.PI) * configuredArcHeight;
             transform.position = position;
             transform.rotation = rotateDuringFlight

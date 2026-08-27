@@ -388,7 +388,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 111525290}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -960,7 +960,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 277259684}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -1453,7 +1453,7 @@ GameObject:
   - component: {fileID: 384012222}
   - component: {fileID: 384012221}
   m_Layer: 0
-  m_Name: Body
+  m_Name: OtterSprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1508,8 +1508,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 20
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 0.34, g: 0.18, b: 0.08, a: 1}
+  m_Sprite: {fileID: 2650676131703989029, guid: 59a3e69e8fc59454cbbc8bbfe6f025ef, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1527,8 +1527,8 @@ Transform:
   m_GameObject: {fileID: 384012220}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.15, z: 0}
-  m_LocalScale: {x: 13.750001, y: 17.1875, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1130419122}
@@ -2424,7 +2424,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1012392603}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -2515,7 +2515,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100477099}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -2697,7 +2697,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1113031488}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -2757,6 +2757,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1130419122}
+  - component: {fileID: 1130419123}
   m_Layer: 0
   m_Name: Otter
   m_TagString: Untagged
@@ -2774,7 +2775,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4.65, y: -1.9, z: 0}
-  m_LocalScale: {x: -0.72, y: 0.72, z: 0.72}
+  m_LocalScale: {x: 0.72, y: 0.72, z: 0.72}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 947752846}
@@ -2791,6 +2792,61 @@ Transform:
   - {fileID: 1012392604}
   m_Father: {fileID: 366934646}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1130419123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130419121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d2a1e21bd51456496a0d698acf97ab4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterCombatAnimator
+  runner: {fileID: 1636567133}
+  visualRoot: {fileID: 384012222}
+  spriteRenderer: {fileID: 384012221}
+  swimmingFrames:
+  - {fileID: -349949939203081874, guid: 48010f72618518c4fa339f90dbe29142, type: 3}
+  - {fileID: -7784914702732649941, guid: 0bafa0776ba31694f9bbbc092fad474d, type: 3}
+  - {fileID: 6505689090499539704, guid: 9b35295e07974274cb9eedd0d8058ef3, type: 3}
+  - {fileID: 2335110438516529369, guid: 11be37e1f13194b44940652f74a87793, type: 3}
+  rollingFrames:
+  - {fileID: -6007729549815641351, guid: e95a14777818d144e84ac57ab01628d0, type: 3}
+  - {fileID: 2164013572960245344, guid: f49e820dc96eca342827b55ed2312aa4, type: 3}
+  - {fileID: 637690743517256450, guid: 685f2d5507b2b9342b2e0e7fa1f98c9a, type: 3}
+  - {fileID: 3582823480833809610, guid: 8a56ede98f54ffb4b8f9934560961640, type: 3}
+  - {fileID: -8803623974028024453, guid: d5a743f0d4af2514f9b37d0a90d58d3b, type: 3}
+  - {fileID: 6769772338717975134, guid: e5287103786064a4b8f24ba12aa13886, type: 3}
+  - {fileID: -492159486167299044, guid: 26a90c01e4c06664c88f6d9ab2543e9d, type: 3}
+  - {fileID: 3903376096013327387, guid: bb72aab6ae60c4d4aa153428d99b4092, type: 3}
+  - {fileID: -2198918343221662750, guid: be467a6b7df903e4694bba7a7c402699, type: 3}
+  idleFrame: {fileID: 2650676131703989029, guid: 59a3e69e8fc59454cbbc8bbfe6f025ef, type: 3}
+  crackingFrames:
+  - {fileID: 2650676131703989029, guid: 02cc1a78094602342ac59ca01ec36b4f, type: 3}
+  - {fileID: -884731405996897397, guid: 517d3c9efabe4d440843d3cae1d280ae, type: 3}
+  - {fileID: 1771706717993485243, guid: d049dd400ea8aaf4d917422dca96b842, type: 3}
+  - {fileID: 1196033032626225509, guid: ddf730c16a50f4f43905656081299438, type: 3}
+  rollingDurationBeats: 2
+  idleReadyBeats: 2
+  swimmingFramesPerBeat: 4
+  swimmingLocalOffset: {x: 0, y: 0, z: 0}
+  swimmingScale: 1.15
+  rollingLocalOffset: {x: 0, y: 0, z: 0}
+  rollingScale: 0.72
+  idleLocalOffset: {x: 0, y: 0, z: 0}
+  idleScale: 1
+  crackingLocalOffset: {x: 0, y: 0, z: 0}
+  crackingScale: 1
+  idleBobAmplitude: 0.09
+  idleRockDegrees: 0.8
+  catchFrameBeats: 0.25
+  liftFrameBeats: 0.15
+  impactFrameBeats: 0.2
+  catchAnchor: {x: 1.1, y: 0.35, z: -0.2}
+  upperBellyAnchor: {x: 0.42, y: 0.05, z: -0.2}
+  impactAnchor: {x: 0.08, y: -0.13, z: -0.2}
 --- !u!1 &1159743187
 GameObject:
   m_ObjectHideFlags: 0
@@ -3048,7 +3104,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1165809462}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -3599,9 +3655,11 @@ MonoBehaviour:
   axeProjectilePrefab: {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   otterRoot: {fileID: 1130419122}
   otterBody: {fileID: 384012221}
+  otterAnimator: {fileID: 1130419123}
   shield: {fileID: 947752845}
   dangerFlash: {fileID: 874976528}
-  tripleAxeVisualFlightBeats: 1
+  showWarningDangerFlash: 0
+  tripleAxeVisualFlightBeats: 0.5
   titleText: {fileID: 293324304}
   phaseText: {fileID: 356862317}
   phraseText: {fileID: 1301047193}
@@ -3695,7 +3753,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1659979976}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -4587,7 +4645,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1848993441}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -4678,7 +4736,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1861885877}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -5214,7 +5272,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2094924509}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -5340,6 +5398,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!212 &1063781619148951135
 SpriteRenderer:
   serializedVersion: 2
@@ -5415,6 +5475,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!212 &1384853018764602325
 SpriteRenderer:
   serializedVersion: 2
@@ -5490,6 +5552,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!1 &1729352606291642180
 GameObject:
   m_ObjectHideFlags: 0
@@ -5524,6 +5588,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!1 &2327824033129300782
 GameObject:
   m_ObjectHideFlags: 0
@@ -5650,6 +5716,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!4 &3954171741407766315
 Transform:
   m_ObjectHideFlags: 0
@@ -5699,6 +5767,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!1 &4507652414283595599
 GameObject:
   m_ObjectHideFlags: 0
@@ -5784,6 +5854,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!212 &6101753305352446983
 SpriteRenderer:
   serializedVersion: 2
@@ -5951,6 +6023,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!4 &6629065440963013339
 Transform:
   m_ObjectHideFlags: 0
@@ -6071,6 +6145,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!1 &7937088209826924160
 GameObject:
   m_ObjectHideFlags: 0
@@ -6179,6 +6255,8 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1
 --- !u!212 &8899645663822044464
 SpriteRenderer:
   serializedVersion: 2

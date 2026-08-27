@@ -108,3 +108,5 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 1
+  heldScaleMultiplier: 1

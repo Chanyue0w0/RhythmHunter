@@ -9,14 +9,17 @@ EditorBuildSettings:
     path: Assets/OtterAquariumPrototype/Scenes/OtterAquarium.unity
     guid: 72d9685db07efdf409c01279752c1372
   - enabled: 1
-    path: Assets/OtterAquariumPrototype/Scenes/OtterAquariumCombat.unity
+    path: Assets/OtterAquariumPrototype/Scenes/old/OtterAquariumCombat.unity
     guid: aade6b3556baf7d4194c708efd2cf6eb
   - enabled: 1
-    path: Assets/OtterAquariumPrototype/Scenes/OtterShellBeatLab.unity
+    path: Assets/OtterAquariumPrototype/Scenes/old/OtterShellBeatLab.unity
     guid: 6dfc6c80a8dd9f1468c28e6355db8915
   - enabled: 1
     path: Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity
     guid: 5a1f2f4eaa201d14a9f73f109deb2423
+  - enabled: 1
+    path: Assets/OtterAquariumPrototype/Scenes/OtterShellBeatLab.unity
+    guid: 2a4c98089ff3ce643a12001baabda0b6
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -153,7 +153,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(1f)] private float perfectWindowMs = 70f;
         [SerializeField, Min(1f)] private float goodWindowMs = 140f;
         [SerializeField] private float judgementOffsetMs;
-        [SerializeField, Min(0.25f)] private float extraInputStunBeats = 0.5f;
+        [SerializeField, Min(0f)] private float extraInputStunBeats = 0.5f;
 
         [Header("FMOD Events")]
         [SerializeField] private string warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
@@ -181,7 +181,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public float PerfectWindowMs => perfectWindowMs;
         public float GoodWindowMs => Mathf.Max(perfectWindowMs, goodWindowMs);
         public float JudgementOffsetMs => judgementOffsetMs;
-        public float ExtraInputStunBeats => Mathf.Max(0.25f, extraInputStunBeats);
+        public float ExtraInputStunBeats => Mathf.Max(0f, extraInputStunBeats);
         public string WarningSoundEventPath => warningSoundEventPath;
         public string AttackSoundEventPath => attackSoundEventPath;
         public string BlockSoundEventPath => blockSoundEventPath;
@@ -534,7 +534,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             ppq = Mathf.Max(24, ppq);
             perfectWindowMs = Mathf.Max(1f, perfectWindowMs);
             goodWindowMs = Mathf.Max(perfectWindowMs, goodWindowMs);
-            extraInputStunBeats = Mathf.Max(0.25f, extraInputStunBeats);
+            extraInputStunBeats = Mathf.Max(0f, extraInputStunBeats);
             phrases?.Sort((left, right) =>
             {
                 int barOrder = left.StartBar.CompareTo(right.StartBar);
