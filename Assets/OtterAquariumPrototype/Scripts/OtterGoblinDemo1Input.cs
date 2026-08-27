@@ -12,6 +12,12 @@ namespace RhythmHunter.OtterAquariumPrototype
         private InputAction defendAction;
         private InputAction restartAction;
         private InputAction toggleDiagnosticHudAction;
+        private bool defendEnabled = true;
+
+        public void SetDefendEnabled(bool enabled)
+        {
+            defendEnabled = enabled;
+        }
 
         public void Configure(
             OtterGoblinDemo1Runner configuredRunner,
@@ -68,6 +74,8 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnDefend(InputAction.CallbackContext context)
         {
+            if (!defendEnabled)
+                return;
             runner?.SubmitInput();
         }
 

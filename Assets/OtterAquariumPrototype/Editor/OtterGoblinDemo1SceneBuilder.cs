@@ -100,9 +100,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite[] swimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
             Sprite[] rolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
             Sprite[] cracking = LoadNumberedSprites(OtterArtRoot + "/cracking/cracking_no stone_", 4);
+            Sprite[] rubbing = LoadNumberedSprites(OtterArtRoot + "/rubbing/rubbing_", 4);
             if (idle == null || swimming.Any(sprite => sprite == null)
                 || rolling.Any(sprite => sprite == null)
-                || cracking.Any(sprite => sprite == null))
+                || cracking.Any(sprite => sprite == null)
+                || rubbing.Any(sprite => sprite == null))
             {
                 Debug.LogWarning("[OtterGoblinDemo1] Otter animation upgrade skipped because a required non-old frame is missing.");
                 return;
@@ -171,7 +173,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             OtterCombatAnimator animator = existingAnimator;
             if (animator == null)
                 animator = otter.gameObject.AddComponent<OtterCombatAnimator>();
-            animator.ConfigureVisuals(visual, body, swimming, rolling, idle, cracking);
+            animator.ConfigureVisuals(visual, body, swimming, rolling, idle, cracking, rubbing);
             animator.ConfigureRunner(runner);
             presenter.ConfigureOtterAnimator(animator);
 
@@ -330,6 +332,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite[] otterSwimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
             Sprite[] otterRolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
             Sprite[] otterCracking = LoadNumberedSprites(OtterArtRoot + "/cracking/cracking_no stone_", 4);
+            Sprite[] otterRubbing = LoadNumberedSprites(OtterArtRoot + "/rubbing/rubbing_", 4);
             GameObject axePrefab = EnsureAxePrefab();
 
             if (data == null || shape == null || background == null || font == null
@@ -337,7 +340,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 || attacked == null || axePrefab == null || otterIdle == null
                 || otterSwimming.Any(sprite => sprite == null)
                 || otterRolling.Any(sprite => sprite == null)
-                || otterCracking.Any(sprite => sprite == null))
+                || otterCracking.Any(sprite => sprite == null)
+                || otterRubbing.Any(sprite => sprite == null))
             {
                 Debug.LogError("[OtterGoblinDemo1] Required data, font, background, Goblin, or non-old Otter sprite is missing.");
                 return;
@@ -354,7 +358,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 EditorSceneManager.CloseScene(previous, true);
 
             Transform root = new GameObject("OtterZooGoblinDemo1").transform;
-            CreateCamera(root);
+            Camera sceneCamera = CreateCamera(root);
             Stage stage = CreateStage(
                 root,
                 shape,
@@ -367,11 +371,12 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 otterSwimming,
                 otterRolling,
                 otterCracking,
+                otterRubbing,
                 axePrefab,
                 GetSceneTitle(data),
                 data.TotalBars,
                 data.AuthoredBpm);
-            CreateController(root, data, stage);
+            CreateController(root, data, stage, sceneCamera);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -405,6 +410,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite[] otterSwimming,
             Sprite[] otterRolling,
             Sprite[] otterCracking,
+            Sprite[] otterRubbing,
             GameObject axePrefab,
             string sceneTitle,
             int totalBars,
@@ -447,7 +453,15 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 new Vector3(0f, 2.43f, -0.2f), 0.125f, FontStyle.Bold, 100);
 
             CreateGoblin(root, idle[0], stage);
-            CreateOtter(root, shape, stage, otterIdle, otterSwimming, otterRolling, otterCracking);
+            CreateOtter(
+                root,
+                shape,
+                stage,
+                otterIdle,
+                otterSwimming,
+                otterRolling,
+                otterCracking,
+                otterRubbing);
 
             Transform resultPanel = Empty("ResultPanel", root);
             Sprite("ResultPanelFill", resultPanel, shape, Ink, new Vector3(0f, -3.93f, 0f), new Vector2(18.6f, 1.7f), 90);
@@ -492,7 +506,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite idle,
             Sprite[] swimming,
             Sprite[] rolling,
-            Sprite[] cracking)
+            Sprite[] cracking,
+            Sprite[] rubbing)
         {
             Transform otter = Empty("Otter", parent);
             otter.localPosition = new Vector3(OtterX, -1.9f, 0f);
@@ -514,7 +529,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 swimming,
                 rolling,
                 idle,
-                cracking);
+                cracking,
+                rubbing);
 
             Transform label = Empty("OtterLabel", parent);
             Sprite("OtterLabelPlate", label, shape, new Color(0.025f, 0.16f, 0.18f, 0.9f),
@@ -524,7 +540,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 new Vector3(OtterX, 0.12f, -0.2f), 0.068f, FontStyle.Bold, 30);
         }
 
-        private static void CreateController(Transform root, OtterGoblinDemo1LevelData data, Stage stage)
+        private static void CreateController(
+            Transform root,
+            OtterGoblinDemo1LevelData data,
+            Stage stage,
+            Camera sceneCamera)
         {
             GameObject controllerObject = new("Demo1CombatController");
             controllerObject.transform.SetParent(root, false);
@@ -532,6 +552,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             OtterGoblinDemo1Runner runner = controllerObject.AddComponent<OtterGoblinDemo1Runner>();
             OtterGoblinDemo1Input input = controllerObject.AddComponent<OtterGoblinDemo1Input>();
             OtterGoblinDemo1Presenter presenter = controllerObject.AddComponent<OtterGoblinDemo1Presenter>();
+            OtterGoblinDemo1CinematicDirector cinematicDirector =
+                controllerObject.AddComponent<OtterGoblinDemo1CinematicDirector>();
 
             clock.Configure(data.MusicEventPath, data.MusicStartDelaySeconds, true, data.MusicVolume);
             runner.Configure(clock, data);
@@ -558,6 +580,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.Status);
             stage.OtterAnimator.ConfigureRunner(runner);
             input.Configure(runner, presenter);
+            cinematicDirector.Configure(runner, clock, input, presenter, sceneCamera);
         }
 
         private static string GetSceneTitle(OtterGoblinDemo1LevelData data)
@@ -675,7 +698,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             return data;
         }
 
-        private static void CreateCamera(Transform parent)
+        private static Camera CreateCamera(Transform parent)
         {
             GameObject cameraObject = new("Main Camera", typeof(Camera), typeof(AudioListener), typeof(StudioListener));
             cameraObject.transform.SetParent(parent, false);
@@ -688,6 +711,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             camera.orthographicSize = 5.4f;
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 100f;
+            return camera;
         }
 
         private static SpriteRenderer Sprite(

@@ -12,6 +12,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             Intro,
             Idle,
+            Rubbing,
             Cracking
         }
 
@@ -25,6 +26,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private Sprite[] rollingFrames;
         [SerializeField] private Sprite idleFrame;
         [SerializeField] private Sprite[] crackingFrames;
+        [SerializeField] private Sprite[] rubbingFrames;
 
         [Header("Intro Timing (beats before first phrase)")]
         [SerializeField, Min(0.25f)] private float rollingDurationBeats = 2f;
@@ -53,6 +55,10 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(0.01f)] private float liftFrameBeats = 0.15f;
         [SerializeField, Min(0.01f)] private float impactFrameBeats = 0.20f;
 
+        [Header("Occasional Rubbing Idle")]
+        [SerializeField, Min(0.05f)] private float rubbingFrameSeconds = 0.16f;
+        [SerializeField] private Vector2 rubbingIntervalSeconds = new(6f, 12f);
+
         [Header("Held Item Anchors (local to Visual Root)")]
         [SerializeField] private Vector3 catchAnchor = new(1.1f, 0.35f, -0.2f);
         [SerializeField] private Vector3 upperBellyAnchor = new(0.42f, 0.05f, -0.2f);
@@ -63,6 +69,12 @@ namespace RhythmHunter.OtterAquariumPrototype
         private double crackingStartedTimelineMs;
         private double crackingStartedFallbackTime;
         private bool crackImpactSent;
+        private bool cinematicControl;
+        private bool skipTimelineIntro;
+        private float activeCrackingTimingScale = 1f;
+        private float activeCrackingCatchHoldBeats;
+        private double rubbingStartedTime;
+        private double nextRubbingTime;
 
         public event Action<RhythmTimelineProjectile, Vector3> CrackImpact;
 
@@ -73,7 +85,39 @@ namespace RhythmHunter.OtterAquariumPrototype
         public bool HasRequiredFrames => swimmingFrames is { Length: 4 }
             && rollingFrames is { Length: 9 }
             && idleFrame != null
-            && crackingFrames is { Length: 4 };
+            && crackingFrames is { Length: 4 }
+            && rubbingFrames is { Length: 4 };
+        public bool IsCracking => state == State.Cracking;
+
+        public void BeginCinematicControl()
+        {
+            cinematicControl = true;
+            state = State.Intro;
+            SetCinematicSwimming(0f, 0f);
+        }
+
+        public void SetCinematicSwimming(float journeyProgress, float elapsedSeconds)
+        {
+            state = State.Intro;
+            ApplySwimmingPose(
+                Mathf.Max(0f, elapsedSeconds) * swimmingFramesPerBeat * 2f,
+                Mathf.Clamp01(journeyProgress));
+        }
+
+        public void SetCinematicIdle()
+        {
+            state = State.Idle;
+            ApplyIdlePose();
+            ScheduleNextRubbing();
+        }
+
+        public void EndCinematicControl(bool shouldSkipTimelineIntro)
+        {
+            cinematicControl = false;
+            skipTimelineIntro = shouldSkipTimelineIntro;
+            state = State.Idle;
+            ApplyIdlePose();
+        }
 
         public void ConfigureRunner(OtterGoblinDemo1Runner configuredRunner)
         {
@@ -86,7 +130,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             Sprite[] configuredSwimmingFrames,
             Sprite[] configuredRollingFrames,
             Sprite configuredIdleFrame,
-            Sprite[] configuredCrackingFrames)
+            Sprite[] configuredCrackingFrames,
+            Sprite[] configuredRubbingFrames)
         {
             visualRoot = configuredVisualRoot;
             spriteRenderer = configuredRenderer;
@@ -94,11 +139,31 @@ namespace RhythmHunter.OtterAquariumPrototype
             rollingFrames = configuredRollingFrames;
             idleFrame = configuredIdleFrame;
             crackingFrames = configuredCrackingFrames;
+            rubbingFrames = configuredRubbingFrames;
             HideLegacyRenderers();
             ShowIdlePreview();
         }
 
         public void PlayCracking(RhythmTimelineProjectile projectile)
+        {
+            BeginCracking(projectile, 1f, 0f);
+        }
+
+        public void PlayCinematicCracking(
+            RhythmTimelineProjectile projectile,
+            float timingScale,
+            float catchHoldBeats)
+        {
+            BeginCracking(
+                projectile,
+                Mathf.Max(1f, timingScale),
+                Mathf.Max(0f, catchHoldBeats));
+        }
+
+        private void BeginCracking(
+            RhythmTimelineProjectile projectile,
+            float timingScale,
+            float catchHoldBeats)
         {
             FinishHeldProjectile();
             heldProjectile = projectile;
@@ -108,6 +173,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
 
             state = State.Cracking;
+            activeCrackingTimingScale = Mathf.Max(1f, timingScale);
+            activeCrackingCatchHoldBeats = Mathf.Max(0f, catchHoldBeats);
             crackingStartedFallbackTime = Time.unscaledTimeAsDouble;
             crackingStartedTimelineMs = TryGetTimelineMs(out double timelineMs) ? timelineMs : 0.0;
             crackImpactSent = false;
@@ -117,9 +184,21 @@ namespace RhythmHunter.OtterAquariumPrototype
         public void ResetToIdle()
         {
             FinishHeldProjectile();
+            activeCrackingTimingScale = 1f;
+            activeCrackingCatchHoldBeats = 0f;
             state = State.Idle;
             if (visualRoot != null && spriteRenderer != null)
                 ApplyIdlePose();
+            ScheduleNextRubbing();
+        }
+
+        public void InterruptIdleVariation()
+        {
+            if (state != State.Rubbing)
+                return;
+            state = State.Idle;
+            ApplyIdlePose();
+            ScheduleNextRubbing();
         }
 
         private void Awake()
@@ -127,6 +206,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             ResolveReferences();
             HideLegacyRenderers();
             state = State.Intro;
+            ScheduleNextRubbing();
         }
 
         private void OnEnable()
@@ -151,6 +231,11 @@ namespace RhythmHunter.OtterAquariumPrototype
             rollingScale = Mathf.Max(0.01f, rollingScale);
             idleScale = Mathf.Max(0.01f, idleScale);
             crackingScale = Mathf.Max(0.01f, crackingScale);
+            rubbingFrameSeconds = Mathf.Max(0.05f, rubbingFrameSeconds);
+            rubbingIntervalSeconds.x = Mathf.Max(0.5f, rubbingIntervalSeconds.x);
+            rubbingIntervalSeconds.y = Mathf.Max(
+                rubbingIntervalSeconds.x,
+                rubbingIntervalSeconds.y);
             ResolveReferences();
             if (!Application.isPlaying)
                 ShowIdlePreview();
@@ -174,15 +259,28 @@ namespace RhythmHunter.OtterAquariumPrototype
                 return;
             }
 
-            if (!TryApplyIntro())
+            if (cinematicControl)
+                return;
+
+            if (TryApplyIntro())
+                return;
+
+            if (state == State.Rubbing)
             {
-                state = State.Idle;
-                ApplyIdlePose();
+                UpdateRubbing();
+                return;
             }
+
+            state = State.Idle;
+            ApplyIdlePose();
+            TryStartRubbing();
         }
 
         private bool TryApplyIntro()
         {
+            if (skipTimelineIntro)
+                return false;
+
             if (runner == null || runner.LevelData == null || runner.LevelData.Phrases.Count == 0)
             {
                 ApplySwimmingPose((float)(Time.unscaledTimeAsDouble * 8.0), 0f);
@@ -233,9 +331,13 @@ namespace RhythmHunter.OtterAquariumPrototype
         private void UpdateCracking()
         {
             float elapsedBeats = GetCrackingElapsedBeats();
-            float liftStart = catchFrameBeats;
-            float impactStart = catchFrameBeats + liftFrameBeats;
-            float end = impactStart + impactFrameBeats;
+            float liftStart = catchFrameBeats * activeCrackingTimingScale
+                + activeCrackingCatchHoldBeats;
+            float impactStart = (catchFrameBeats + liftFrameBeats) * activeCrackingTimingScale
+                + activeCrackingCatchHoldBeats;
+            float end = (catchFrameBeats + liftFrameBeats + impactFrameBeats)
+                * activeCrackingTimingScale
+                + activeCrackingCatchHoldBeats;
 
             if (elapsedBeats < liftStart)
             {
@@ -272,8 +374,61 @@ namespace RhythmHunter.OtterAquariumPrototype
             }
 
             FinishHeldProjectile();
+            activeCrackingTimingScale = 1f;
+            activeCrackingCatchHoldBeats = 0f;
             state = State.Idle;
             ApplyIdlePose();
+            ScheduleNextRubbing();
+        }
+
+        private void TryStartRubbing()
+        {
+            if (rubbingFrames is not { Length: > 0 }
+                || Time.unscaledTimeAsDouble < nextRubbingTime
+                || runner == null
+                || runner.BeatClock == null
+                || !runner.BeatClock.IsPlaying
+                || runner.HasEnded
+                || runner.Phase is not (OtterGoblinDemo1Runner.CombatPhase.Intro
+                    or OtterGoblinDemo1Runner.CombatPhase.Rest))
+            {
+                return;
+            }
+
+            state = State.Rubbing;
+            rubbingStartedTime = Time.unscaledTimeAsDouble;
+            ApplyRubbingPose(0);
+        }
+
+        private void UpdateRubbing()
+        {
+            double elapsed = Time.unscaledTimeAsDouble - rubbingStartedTime;
+            int frameIndex = Mathf.FloorToInt((float)(elapsed / rubbingFrameSeconds));
+            if (rubbingFrames == null || frameIndex >= rubbingFrames.Length)
+            {
+                state = State.Idle;
+                ApplyIdlePose();
+                ScheduleNextRubbing();
+                return;
+            }
+
+            ApplyRubbingPose(frameIndex);
+        }
+
+        private void ApplyRubbingPose(int frameIndex)
+        {
+            ApplyPose(
+                GetFrame(rubbingFrames, frameIndex, idleFrame),
+                idleLocalOffset,
+                idleScale,
+                true);
+        }
+
+        private void ScheduleNextRubbing()
+        {
+            float minimum = Mathf.Max(0.5f, rubbingIntervalSeconds.x);
+            float maximum = Mathf.Max(minimum, rubbingIntervalSeconds.y);
+            nextRubbingTime = Time.unscaledTimeAsDouble + UnityEngine.Random.Range(minimum, maximum);
         }
 
         private float GetCrackingElapsedBeats()

@@ -72,6 +72,8 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private FmodBeatClock beatClock;
         [SerializeField] private OtterGoblinDemo1LevelData levelData;
 
+        private bool playbackGated;
+
         private readonly List<TargetState> activeTargets = new();
         private int phraseIndex;
         private int nextWarningIndex;
@@ -127,6 +129,12 @@ namespace RhythmHunter.OtterAquariumPrototype
             ResetState();
         }
 
+        public void SetPlaybackGated(bool gated)
+        {
+            playbackGated = gated;
+            SyncBeatClockConfiguration();
+        }
+
         public void SyncBeatClockConfiguration()
         {
             if (beatClock == null || levelData == null)
@@ -135,7 +143,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             beatClock.Configure(
                 levelData.MusicEventPath,
                 levelData.MusicStartDelaySeconds,
-                true,
+                !playbackGated,
                 levelData.MusicVolume);
         }
 

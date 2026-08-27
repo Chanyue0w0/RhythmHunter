@@ -54,6 +54,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             OtterGoblinDemo1Input input = Find<OtterGoblinDemo1Input>(scene);
             OtterGoblinDemo1Presenter presenter = Find<OtterGoblinDemo1Presenter>(scene);
             OtterCombatAnimator otterAnimator = Find<OtterCombatAnimator>(scene);
+            OtterGoblinDemo1CinematicDirector cinematicDirector =
+                Find<OtterGoblinDemo1CinematicDirector>(scene);
             SpriteRenderer background = FindNamed<SpriteRenderer>(scene, "ZooBackground");
             SpriteRenderer goblin = FindNamed<SpriteRenderer>(scene, "GoblinSprite");
             Transform goblinRoot = FindNamedTransform(scene, "ZooGoblin");
@@ -94,6 +96,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && otterAnimator.SwimmingEntryWorldOffset.x > 0f
                 && otterAnimator.SpriteRenderer != null
                 && IsCurrentOtterArt(otterAnimator.SpriteRenderer.sprite)
+                && cinematicDirector != null
                 && background != null
                 && background.sprite != null
                 && AssetDatabase.GetAssetPath(background.sprite) == OtterGoblinDemo1SceneBuilder.BackgroundPath
@@ -132,6 +135,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Chart={chartValid} ({chartError}), Clock={clock != null}, Runner={runner != null}, "
                     + $"Input={input != null}, Presenter={presenter != null}, Background={background != null}, "
                     + $"OtterAnimator={otterAnimator != null}, OtterFrames={otterAnimator != null && otterAnimator.HasRequiredFrames}, "
+                    + $"CinematicDirector={cinematicDirector != null}, Opening={cinematicDirector != null && cinematicDirector.HasOpeningContent}, "
                     + $"WarningRedFlash={presenter != null && presenter.WarningDangerFlashEnabled}, "
                     + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
                     + $"Otter={otter != null}, FailureHUD={failureCount != null}, "

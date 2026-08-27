@@ -2833,6 +2833,11 @@ MonoBehaviour:
   - {fileID: -884731405996897397, guid: 517d3c9efabe4d440843d3cae1d280ae, type: 3}
   - {fileID: 1771706717993485243, guid: d049dd400ea8aaf4d917422dca96b842, type: 3}
   - {fileID: 1196033032626225509, guid: ddf730c16a50f4f43905656081299438, type: 3}
+  rubbingFrames:
+  - {fileID: 2453285921092785645, guid: d4bcae20239799d45b846244d9d8c1bc, type: 3}
+  - {fileID: -3363416313563750357, guid: af26f6d923c738f429215bf1d15c7207, type: 3}
+  - {fileID: -7975058717024428863, guid: 5e310ce9b9007b7458693eea670cd743, type: 3}
+  - {fileID: 8236031950710973408, guid: 963e508e01de0144b878e93f7fc290f0, type: 3}
   rollingDurationBeats: 2
   idleReadyBeats: 2
   swimmingFramesPerBeat: 4
@@ -2850,6 +2855,8 @@ MonoBehaviour:
   catchFrameBeats: 0.25
   liftFrameBeats: 0.15
   impactFrameBeats: 0.2
+  rubbingFrameSeconds: 0.16
+  rubbingIntervalSeconds: {x: 1, y: 3}
   catchAnchor: {x: 1.1, y: 0.35, z: -0.2}
   upperBellyAnchor: {x: 0.42, y: 0.05, z: -0.2}
   impactAnchor: {x: 0.08, y: -0.13, z: -0.2}
@@ -3612,6 +3619,7 @@ GameObject:
   - component: {fileID: 1636567133}
   - component: {fileID: 1636567132}
   - component: {fileID: 1636567131}
+  - component: {fileID: 1636567135}
   m_Layer: 0
   m_Name: Demo1CombatController
   m_TagString: Untagged
@@ -3719,6 +3727,38 @@ MonoBehaviour:
   musicStartDelaySeconds: 1
   musicVolume: 0.55
   playOnStart: 1
+--- !u!114 &1636567135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1636567129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 922d7f6272d847c2b26c8e3f0013af40, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1CinematicDirector
+  enableCinematics: 1
+  playBuiltInOpening: 1
+  skipRhythmTimelineIntroAfterCinematic: 1
+  additionalOpeningTimeline: {fileID: 0}
+  endingTimeline: {fileID: 0}
+  runner: {fileID: 1636567133}
+  beatClock: {fileID: 1636567134}
+  combatInput: {fileID: 1636567132}
+  presenter: {fileID: 1636567131}
+  sceneCamera: {fileID: 1628976427}
+  otterSwimSeconds: 2.2
+  cameraPanSeconds: 0.85
+  dialogueAutoAdvanceSeconds: 2
+  axeSlowMotionScale: 0.28
+  axeTravelGameSeconds: 0.8
+  cinematicCrackingTimingScale: 2.5
+  cinematicCatchHoldBeats: 0.5
+  otterFocusSize: 3.1
+  goblinFocusSize: 2.8
+  axeFocusSize: 2.15
 --- !u!1 &1659979976
 GameObject:
   m_ObjectHideFlags: 0
@@ -5464,6 +5504,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!212 &1063781619148951135
 SpriteRenderer:
   serializedVersion: 2
@@ -5541,6 +5583,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!212 &1384853018764602325
 SpriteRenderer:
   serializedVersion: 2
@@ -5618,6 +5662,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!1 &1729352606291642180
 GameObject:
   m_ObjectHideFlags: 0
@@ -5654,6 +5700,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!1 &2327824033129300782
 GameObject:
   m_ObjectHideFlags: 0
@@ -5782,6 +5830,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!4 &3954171741407766315
 Transform:
   m_ObjectHideFlags: 0
@@ -5833,6 +5883,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!1 &4507652414283595599
 GameObject:
   m_ObjectHideFlags: 0
@@ -5920,6 +5972,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!212 &6101753305352446983
 SpriteRenderer:
   serializedVersion: 2
@@ -6089,6 +6143,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!4 &6629065440963013339
 Transform:
   m_ObjectHideFlags: 0
@@ -6211,6 +6267,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!1 &7937088209826924160
 GameObject:
   m_ObjectHideFlags: 0
@@ -6321,6 +6379,8 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 0
+  interferenceDurationBeats: 3
 --- !u!212 &8899645663822044464
 SpriteRenderer:
   serializedVersion: 2

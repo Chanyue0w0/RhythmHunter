@@ -69,6 +69,15 @@ namespace RhythmHunter.OtterAquariumPrototype
         private bool diagnosticHudVisible;
         private GameObject rhythmHudRoot;
         private GameObject resultHudRoot;
+        private GameObject titleHudRoot;
+        private bool cinematicMode;
+        private bool titleHudWasActive;
+        private bool rhythmHudWasActive;
+        private bool resultHudWasActive;
+        private GameObject goblinLabelRoot;
+        private GameObject otterLabelRoot;
+        private bool goblinLabelWasActive;
+        private bool otterLabelWasActive;
         private readonly List<double> pendingTargetTimes = new();
         private readonly List<RhythmTimelineProjectile> flyingAxes = new();
 
@@ -76,6 +85,70 @@ namespace RhythmHunter.OtterAquariumPrototype
         public bool DiagnosticHudVisible => diagnosticHudVisible;
         public bool WarningDangerFlashEnabled => showWarningDangerFlash;
         public OtterCombatAnimator OtterAnimator => otterAnimator;
+        public Transform EnemyRoot => enemyRoot;
+        public Transform OtterRoot => otterRoot;
+        public GameObject DefaultProjectilePrefab => axeProjectilePrefab;
+
+        public void SetCinematicMode(bool enabled)
+        {
+            CacheDiagnosticHudRoots();
+            if (enabled && !cinematicMode)
+            {
+                titleHudWasActive = titleHudRoot != null && titleHudRoot.activeSelf;
+                rhythmHudWasActive = rhythmHudRoot != null && rhythmHudRoot.activeSelf;
+                resultHudWasActive = resultHudRoot != null && resultHudRoot.activeSelf;
+                goblinLabelWasActive = goblinLabelRoot != null && goblinLabelRoot.activeSelf;
+                otterLabelWasActive = otterLabelRoot != null && otterLabelRoot.activeSelf;
+            }
+
+            cinematicMode = enabled;
+            if (enabled)
+            {
+                SetHudRootActive(titleHudRoot, false);
+                SetHudRootActive(rhythmHudRoot, false);
+                SetHudRootActive(resultHudRoot, false);
+                SetHudRootActive(goblinLabelRoot, false);
+                SetHudRootActive(otterLabelRoot, false);
+            }
+            else
+            {
+                SetHudRootActive(titleHudRoot, titleHudWasActive);
+                SetHudRootActive(rhythmHudRoot, rhythmHudWasActive);
+                SetHudRootActive(resultHudRoot, resultHudWasActive);
+                SetHudRootActive(goblinLabelRoot, goblinLabelWasActive);
+                SetHudRootActive(otterLabelRoot, otterLabelWasActive);
+            }
+        }
+
+        public void ShowCinematicEnemyRaisedAxe()
+        {
+            if (enemyRenderer != null && enemyAttackFrames is { Length: > 0 })
+                enemyRenderer.sprite = enemyAttackFrames[Mathf.Min(2, enemyAttackFrames.Length - 1)];
+        }
+
+        public void ShowCinematicEnemyThrow()
+        {
+            if (enemyRenderer != null && enemyAttackFrames is { Length: > 0 })
+                enemyRenderer.sprite = enemyAttackFrames[enemyAttackFrames.Length - 1];
+        }
+
+        public void ShowCinematicEnemyIdle()
+        {
+            if (enemyRenderer != null && enemyIdleFrames is { Length: > 0 })
+                enemyRenderer.sprite = enemyIdleFrames[0];
+        }
+
+        public void PlayCinematicAttackSound()
+        {
+            if (runner != null && runner.LevelData != null)
+                PlayOptional(runner.LevelData.AttackSoundEventPath);
+        }
+
+        public void PlayCinematicCatchSound()
+        {
+            if (runner != null && runner.LevelData != null)
+                PlayOptional(runner.LevelData.BlockSoundEventPath);
+        }
 
         public void Configure(
             OtterGoblinDemo1Runner configuredRunner,
@@ -198,6 +271,9 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void Update()
         {
+            if (cinematicMode)
+                return;
+
             float dt = Time.unscaledDeltaTime;
             warningPulse = Mathf.MoveTowards(warningPulse, 0f, dt * 4.8f);
             attackPulse = Mathf.MoveTowards(attackPulse, 0f, dt * 5.5f);
@@ -292,6 +368,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnWarningCue(int index, int count, string patternId)
         {
+            otterAnimator?.InterruptIdleVariation();
             warningPulse = 1f;
             enemyHoldingAxe = true;
             if (judgementText != null)
@@ -574,14 +651,31 @@ namespace RhythmHunter.OtterAquariumPrototype
         public void SetDiagnosticHudVisible(bool visible)
         {
             diagnosticHudVisible = visible;
+            if (cinematicMode)
+                return;
             SetHudRootActive(rhythmHudRoot, visible);
             SetHudRootActive(resultHudRoot, visible);
         }
 
         private void CacheDiagnosticHudRoots()
         {
+            titleHudRoot = titleText != null && titleText.transform.parent != null
+                ? titleText.transform.parent.gameObject
+                : null;
             rhythmHudRoot = FindSharedHudRoot(phaseText, phraseText, patternText);
             resultHudRoot = FindSharedHudRoot(judgementText, timingText, statusText);
+            goblinLabelRoot = FindNamedObject("GoblinLabel");
+            otterLabelRoot = FindNamedObject("OtterLabel");
+        }
+
+        private GameObject FindNamedObject(string objectName)
+        {
+            foreach (Transform candidate in transform.root.GetComponentsInChildren<Transform>(true))
+            {
+                if (candidate.name == objectName)
+                    return candidate.gameObject;
+            }
+            return null;
         }
 
         private static GameObject FindSharedHudRoot(params TextMesh[] labels)
