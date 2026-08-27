@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace RhythmHunter.OtterAquariumPrototype
 {
+    [DefaultExecutionOrder(100)]
     [ExecuteAlways]
     public sealed class OtterCombatAnimator : MonoBehaviour
     {
@@ -29,6 +30,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(0.25f)] private float rollingDurationBeats = 2f;
         [SerializeField, Min(0f)] private float idleReadyBeats = 2f;
         [SerializeField, Min(0.25f)] private float swimmingFramesPerBeat = 4f;
+
+        [Header("Intro Movement (world-space offset from the final pose)")]
+        [SerializeField] private Vector3 swimmingEntryWorldOffset = new(5.5f, 0.2f, 0f);
 
         [Header("State Pose")]
         [SerializeField] private Vector3 swimmingLocalOffset = Vector3.zero;
@@ -65,6 +69,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public Transform CatchTargetTransform => visualRoot != null ? visualRoot : transform;
         public Vector3 CatchAnchorLocal => catchAnchor;
         public SpriteRenderer SpriteRenderer => spriteRenderer;
+        public Vector3 SwimmingEntryWorldOffset => swimmingEntryWorldOffset;
         public bool HasRequiredFrames => swimmingFrames is { Length: 4 }
             && rollingFrames is { Length: 9 }
             && idleFrame != null
@@ -99,12 +104,6 @@ namespace RhythmHunter.OtterAquariumPrototype
             heldProjectile = projectile;
             if (heldProjectile != null)
             {
-                if (heldProjectile.OtterReaction == RhythmTimelineProjectile.OtterReactionKind.Food)
-                {
-                    heldProjectile.Resolve(true);
-                    heldProjectile = null;
-                    return;
-                }
                 heldProjectile.CaptureForOtter();
             }
 
@@ -186,13 +185,13 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (runner == null || runner.LevelData == null || runner.LevelData.Phrases.Count == 0)
             {
-                ApplySwimmingPose((float)(Time.unscaledTimeAsDouble * 8.0));
+                ApplySwimmingPose((float)(Time.unscaledTimeAsDouble * 8.0), 0f);
                 return true;
             }
 
             if (runner.BeatClock == null || !runner.BeatClock.HasTimingAnchor)
             {
-                ApplySwimmingPose((float)(Time.unscaledTimeAsDouble * 8.0));
+                ApplySwimmingPose((float)(Time.unscaledTimeAsDouble * 8.0), 0f);
                 return true;
             }
 
@@ -208,7 +207,10 @@ namespace RhythmHunter.OtterAquariumPrototype
             if (currentTick < rollStartTick)
             {
                 float beatPosition = currentTick / (float)runner.LevelData.Ppq;
-                ApplySwimmingPose(beatPosition * swimmingFramesPerBeat);
+                float journeyProgress = rollStartTick > 0L
+                    ? Mathf.Clamp01(currentTick / (float)rollStartTick)
+                    : 1f;
+                ApplySwimmingPose(beatPosition * swimmingFramesPerBeat, journeyProgress);
                 return true;
             }
 
@@ -260,7 +262,11 @@ namespace RhythmHunter.OtterAquariumPrototype
                 if (!crackImpactSent && progress >= 0.5f)
                 {
                     crackImpactSent = true;
-                    CrackImpact?.Invoke(heldProjectile, CatchTargetTransform.TransformPoint(impactAnchor));
+                    Vector3 impactWorld = CatchTargetTransform.TransformPoint(impactAnchor);
+                    heldProjectile?.ShatterAt(impactWorld, runner != null
+                        ? runner.CurrentMillisecondsPerBeat
+                        : 500.0);
+                    CrackImpact?.Invoke(heldProjectile, impactWorld);
                 }
                 return;
             }
@@ -284,10 +290,15 @@ namespace RhythmHunter.OtterAquariumPrototype
             return (float)(elapsedMs / millisecondsPerBeat);
         }
 
-        private void ApplySwimmingPose(float framePosition)
+        private void ApplySwimmingPose(float framePosition, float journeyProgress)
         {
             int index = LoopIndex(Mathf.FloorToInt(framePosition), swimmingFrames);
             ApplyPose(GetFrame(swimmingFrames, index, idleFrame), swimmingLocalOffset, swimmingScale, false);
+
+            Vector3 entryLocalOffset = visualRoot.parent != null
+                ? visualRoot.parent.InverseTransformVector(swimmingEntryWorldOffset)
+                : swimmingEntryWorldOffset;
+            visualRoot.localPosition += entryLocalOffset * (1f - Smooth(journeyProgress));
         }
 
         private void ApplyRollingPose(float progress)
@@ -319,6 +330,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             if (includeBeatFloat && runner != null && runner.LevelData != null && runner.LevelData.Ppq > 0)
             {
                 float beatPhase = Mathf.Repeat(runner.CurrentSongTick / (float)runner.LevelData.Ppq, 1f);
+                // The float reaches its highest point exactly on every authored beat.
                 bob = Mathf.Cos(beatPhase * Mathf.PI * 2f) * idleBobAmplitude;
                 rock = Mathf.Sin(beatPhase * Mathf.PI * 2f) * idleRockDegrees;
             }

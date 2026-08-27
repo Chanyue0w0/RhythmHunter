@@ -89,6 +89,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && presenter.AxeProjectilePrefab.GetComponent<RhythmTimelineProjectile>() != null
                 && otterAnimator != null
                 && otterAnimator.HasRequiredFrames
+                && otterAnimator.SwimmingEntryWorldOffset.x > 0f
                 && otterAnimator.SpriteRenderer != null
                 && IsCurrentOtterArt(otterAnimator.SpriteRenderer.sprite)
                 && background != null

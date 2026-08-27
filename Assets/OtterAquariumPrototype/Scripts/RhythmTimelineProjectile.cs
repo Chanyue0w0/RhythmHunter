@@ -41,6 +41,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private bool resolved;
         private bool caught;
         private bool captured;
+        private bool shattered;
 
         public double ArrivalTimelineMs { get; private set; }
         public bool IsResolved => resolved;
@@ -161,6 +162,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             resolved = false;
             caught = false;
             captured = false;
+            shattered = false;
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.enabled = flightStarted;
@@ -209,6 +211,29 @@ namespace RhythmHunter.OtterAquariumPrototype
             transform.position = worldPosition;
             transform.rotation = Quaternion.Euler(0f, 0f, rotationDegrees);
             transform.localScale = baseScale * Mathf.Max(0.01f, scaleMultiplier);
+        }
+
+        public bool ShatterAt(Vector3 impactWorldPosition, double millisecondsPerBeat)
+        {
+            if (shattered)
+                return false;
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null || spriteRenderer.sprite == null)
+                return false;
+
+            float lifetimeSeconds = Mathf.Clamp((float)(millisecondsPerBeat / 1000.0 * 1.25), 0.45f, 1.2f);
+            bool spawned = ProjectileSpriteShatter.Spawn(
+                spriteRenderer,
+                transform,
+                impactWorldPosition,
+                lifetimeSeconds);
+            if (!spawned)
+                return false;
+
+            shattered = true;
+            spriteRenderer.enabled = false;
+            return true;
         }
 
         public void FinishCaptured()

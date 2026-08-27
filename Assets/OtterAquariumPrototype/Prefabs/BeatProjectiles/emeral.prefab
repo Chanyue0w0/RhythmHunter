@@ -80,7 +80,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 38
+  m_SortingOrder: 21
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2999643072621092639, guid: 367fa268913a01d41a8aa35a4c8f835a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -108,3 +108,5 @@ MonoBehaviour:
   rotateDuringFlight: 0
   rotationTurns: 2.5
   resolveFadeSeconds: 0.14
+  otterReaction: 0
+  heldScaleMultiplier: 1

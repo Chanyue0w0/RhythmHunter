@@ -22,7 +22,7 @@ MonoBehaviour:
   musicGridOffsetMs: 0
   authoredBpm: 120
   beatsPerBar: 4
-  totalBars: 32
+  totalBars: 33
   ppq: 480
   perfectWindowMs: 60
   goodWindowMs: 80
@@ -369,9 +369,9 @@ MonoBehaviour:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
     projectilePrefabs:
-    - {fileID: 7431897994557742116, guid: d32bb09ba35762b468d38e176623d97b, type: 3}
-    - {fileID: 7431897994557742116, guid: d32bb09ba35762b468d38e176623d97b, type: 3}
-    - {fileID: 7431897994557742116, guid: d32bb09ba35762b468d38e176623d97b, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 29
     startOffsetTicks: 0
     label: "COMBO \u2022 TRIPLE \u2192 X _"
@@ -386,11 +386,11 @@ MonoBehaviour:
       id: triple-single-response
       hitTicks: 00000000e0010000c003000080070000
     projectilePrefabs:
-    - {fileID: 2621484660400176693, guid: f11333e2c0e88214db6f96befdd97271, type: 3}
-    - {fileID: 2621484660400176693, guid: f11333e2c0e88214db6f96befdd97271, type: 3}
-    - {fileID: 2621484660400176693, guid: f11333e2c0e88214db6f96befdd97271, type: 3}
-    - {fileID: 1467831096048104106, guid: 6fd399b6a6b9a544b8e16537d53c8fd1, type: 3}
-  - startBar: 30
+    - {fileID: 2563729766803057371, guid: e62614758c058b74ca906f67ab321a28, type: 3}
+    - {fileID: 2563729766803057371, guid: e62614758c058b74ca906f67ab321a28, type: 3}
+    - {fileID: 2563729766803057371, guid: e62614758c058b74ca906f67ab321a28, type: 3}
+    - {fileID: 1805174206057743298, guid: 342a92d5448cd644dbe1129f47bf5bc1, type: 3}
+  - startBar: 31
     startOffsetTicks: 1440
     label: "SINGLE \u2022 X _"
     kind: 0
@@ -405,20 +405,18 @@ MonoBehaviour:
       hitTicks: 00000000
     projectilePrefabs:
     - {fileID: 9061483596609172990, guid: fa3bd13a47627f14db6b109db393025a, type: 3}
-  - startBar: 31
+  - startBar: 32
     startOffsetTicks: 960
-    label: "SPECIAL \u2022 X X X _"
-    kind: 1
-    warningLengthBeats: 2
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
     responseDelayBeats: 1
-    attackLengthBeats: 2
+    attackLengthBeats: 1
     warningPattern:
-      id: triple-cue
-      hitTicks: 00000000f0000000e0010000
+      id: single-cue
+      hitTicks: 00000000
     pattern:
-      id: triple-response
-      hitTicks: 00000000e0010000c0030000
+      id: single-response
+      hitTicks: 00000000
     projectilePrefabs:
-    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
-    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
     - {fileID: 7820349421593117412, guid: c72e181f3a65b8b47a6bfca1625fe3a5, type: 3}
