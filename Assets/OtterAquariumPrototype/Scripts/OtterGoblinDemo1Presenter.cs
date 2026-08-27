@@ -32,6 +32,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(0.25f)] private float tripleAxeVisualFlightBeats = 1f;
 
         [Header("HUD")]
+        [SerializeField] private TextMesh titleText;
         [SerializeField] private TextMesh phaseText;
         [SerializeField] private TextMesh phraseText;
         [SerializeField] private TextMesh patternText;
@@ -79,6 +80,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             SpriteRenderer configuredOtterBody,
             SpriteRenderer configuredShield,
             SpriteRenderer configuredDangerFlash,
+            TextMesh configuredTitleText,
             TextMesh configuredPhaseText,
             TextMesh configuredPhraseText,
             TextMesh configuredPatternText,
@@ -98,6 +100,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             otterBody = configuredOtterBody;
             shield = configuredShield;
             dangerFlash = configuredDangerFlash;
+            titleText = configuredTitleText;
             phaseText = configuredPhaseText;
             phraseText = configuredPhraseText;
             patternText = configuredPatternText;
@@ -108,11 +111,12 @@ namespace RhythmHunter.OtterAquariumPrototype
             CachePose();
             CacheDiagnosticHudRoots();
             SetDiagnosticHudVisible(showDiagnosticHudOnStart);
-            RefreshHud();
+            RefreshLevelPresentation();
         }
 
         private void Awake()
         {
+            ResolveTitleText();
             CachePose();
             CacheDiagnosticHudRoots();
             SetDiagnosticHudVisible(showDiagnosticHudOnStart);
@@ -455,8 +459,43 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (runner == null || runner.LevelData == null)
                 return;
+            RefreshTitle();
             RefreshFailureCount(runner.FailureCount);
             RefreshStatus();
+        }
+
+        public void RefreshLevelPresentation()
+        {
+            ResolveTitleText();
+            RefreshHud();
+        }
+
+        private void RefreshTitle()
+        {
+            if (titleText == null || runner == null || runner.LevelData == null)
+                return;
+
+            string eventPath = runner.LevelData.MusicEventPath;
+            int separator = string.IsNullOrWhiteSpace(eventPath) ? -1 : eventPath.LastIndexOf('/');
+            string songName = separator >= 0 && separator + 1 < eventPath.Length
+                ? eventPath.Substring(separator + 1)
+                : runner.LevelData.DisplayName;
+            titleText.text = $"DEMO1  •  {songName.ToUpperInvariant()}";
+        }
+
+        private void ResolveTitleText()
+        {
+            if (titleText != null)
+                return;
+
+            Transform searchRoot = transform.root;
+            foreach (TextMesh textMesh in searchRoot.GetComponentsInChildren<TextMesh>(true))
+            {
+                if (textMesh.name != "Title")
+                    continue;
+                titleText = textMesh;
+                break;
+            }
         }
 
         private void RefreshFailureCount(int failureCount)

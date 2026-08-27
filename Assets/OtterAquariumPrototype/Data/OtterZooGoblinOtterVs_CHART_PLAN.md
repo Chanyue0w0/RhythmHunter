@@ -52,4 +52,4 @@
 | 23 | Bar 30 Beat 4 | Short | Pickup |
 | 24 | Bar 31 Beat 3 | Triple | Final attack; resolves during Bar 32 |
 
-All starts remain editable in `Rhythm Hunter > Otter Aquarium > Open Rhythm Level Editor` after selecting `OtterZooGoblinOtterVsLevel.asset`.
+All starts remain editable in `Rhythm Hunter > Otter Aquarium > Open Rhythm Level Editor` after selecting `OtterZooGoblinOtterVsLevel.asset`. Use `套用至共用 Demo1 Scene` to switch the shared `OtterZooGoblinDemo1.unity` to this song and chart; no separate Scene is required.

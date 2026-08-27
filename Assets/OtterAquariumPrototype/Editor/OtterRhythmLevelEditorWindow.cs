@@ -163,8 +163,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             EditorGUILayout.BeginHorizontal();
             if (combatLevel != null)
             {
-                if (GUILayout.Button("開啟 Demo1 Scene", GUILayout.Height(28f)))
-                    EditorSceneManager.OpenScene(OtterGoblinDemo1SceneBuilder.ScenePath, OpenSceneMode.Single);
+                if (GUILayout.Button("套用至共用 Demo1 Scene", GUILayout.Height(28f)))
+                    OtterGoblinDemo1SceneBuilder.ApplyLevelToSharedScene(combatLevel);
                 if (GUILayout.Button("在 Project 定位", GUILayout.Height(28f)))
                     EditorGUIUtility.PingObject(combatLevel);
             }

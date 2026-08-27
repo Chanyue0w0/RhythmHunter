@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace RhythmHunter.OtterAquariumPrototype
 {
+    [DefaultExecutionOrder(-100)]
     public sealed class OtterGoblinDemo1Runner : MonoBehaviour
     {
         public enum Grade
@@ -115,11 +116,32 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             beatClock = clock;
             levelData = data;
+            SyncBeatClockConfiguration();
             ResetState();
+        }
+
+        public void SetLevelData(OtterGoblinDemo1LevelData data)
+        {
+            levelData = data;
+            SyncBeatClockConfiguration();
+            ResetState();
+        }
+
+        public void SyncBeatClockConfiguration()
+        {
+            if (beatClock == null || levelData == null)
+                return;
+
+            beatClock.Configure(
+                levelData.MusicEventPath,
+                levelData.MusicStartDelaySeconds,
+                true,
+                levelData.MusicVolume);
         }
 
         private void Awake()
         {
+            SyncBeatClockConfiguration();
             ResetState();
         }
 

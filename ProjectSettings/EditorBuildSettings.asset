@@ -17,9 +17,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity
     guid: 5a1f2f4eaa201d14a9f73f109deb2423
-  - enabled: 1
-    path: Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinOtterVs.unity
-    guid: a350a9442e6166f488bb215352a2e110
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

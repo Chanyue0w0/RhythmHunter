@@ -1,13 +1,13 @@
 # Otter Aquarium Prototype scenes
 
 - Project startup is passive: legacy FightDemo, RhythmDemo, and PirateOcean scenes are no longer built, opened, validated, or played automatically. Their manual editor menu commands remain available.
-- Build Settings contains only the five scenes under `Assets/OtterAquariumPrototype/Scenes`.
+- Build Settings contains only the four scenes under `Assets/OtterAquariumPrototype/Scenes`.
 
 - `OtterAquarium.unity` is the top-down sea otter movement, surface transition, slide, and water VFX prototype.
 - `OtterAquariumCombat.unity` uses the PirateFightScene battle staging and its Cinemachine combat/boss camera transition.
 - `OtterShellBeatLab.unity` is a fixed-camera, one-button call-and-response playtest. The crab demonstrates a rhythm and the otter repeats it one bar later.
-- `OtterZooGoblinDemo1.unity` is the first music-authored battle demo for `Goblin Patrol`: the axe goblin gives one of two fixed beginner cues, then the otter responds.
-- `OtterZooGoblinOtterVs.unity` is an independent 120 BPM / 32-bar variant using `event:/ZooGoblinFight/BGM/Otter vs`; its chart is stored in `OtterZooGoblinOtterVsLevel.asset`, so editing it never changes Goblin Patrol.
+- `OtterZooGoblinDemo1.unity` is the shared music-authored battle Scene. Its characters, background, UI, input, SFX, and projectile presentation stay fixed while the selected Demo1 LevelData supplies the song and complete chart.
+- `OtterZooGoblinDemo1Level.asset` keeps the `Goblin Patrol` chart, while `OtterZooGoblinOtterVsLevel.asset` independently keeps the 120 BPM / 32-bar `event:/ZooGoblinFight/BGM/Otter vs` chart. Editing either asset never changes the other.
 - The combat scene intentionally removes pirate ocean waves, animated ocean surfaces, ship motion, and the ocean tuning panel.
 - `Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity` remains the source reference. Continue future scene work in this folder.
 
@@ -43,6 +43,7 @@
 - Pressing defend with no attack inside the Good window triggers `BeatMiss`, adds one Extra, and locks defend input for one full music beat. Inputs during that lock are ignored; the stray press itself deals no damage, but an incoming axe can still become a normal damaging Miss.
 - The Goblin Patrol chart has 24 phrases. Bars 3–9 teach the two bases; phrases connect continuously from Bar 10 through the end of Bar 26; Bars 27–28 are a full rest; Bars 29–33 increase pressure through short/triple combinations while preserving the same fixed reactions. Victory waits until the final catch has been judged.
 - `Rhythm Hunter > Otter Aquarium > Open Rhythm Level Editor` accepts both Shell Beat `OtterRhythmLevelData` and Demo1 `OtterGoblinDemo1LevelData`. Demo1 mode exposes level/combat/FMOD settings, Phrase start bar plus within-bar sixteenth offset, a fixed-pattern restore button, and a 120-tick three-lane stepper for warning `X`, fixed axe `_`, and player catch `X'`. Editable lanes must retain the attack type's required hit count.
+- Select either Demo1 LevelData and press `套用並開啟共用 Scene` in its Inspector, or `套用至共用 Demo1 Scene` in the rhythm editor. This updates the shared Scene's LevelData, FMOD event, volume, start delay, title, BPM/status display, and chart together. The Runner also resynchronizes FMOD before playback begins, preventing a new chart from playing against the previously selected song.
 - Rebuild, validate, or run the FMOD play test from `Rhythm Hunter > Otter Aquarium > ... Zoo Goblin Demo 1`.
 
 ## Aquarium area authoring

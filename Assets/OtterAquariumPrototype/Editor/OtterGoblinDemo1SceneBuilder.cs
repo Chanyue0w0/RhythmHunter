@@ -14,9 +14,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     {
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity";
         public const string DataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset";
-        public const string OtterVsScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinOtterVs.unity";
         public const string OtterVsDataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinOtterVsLevel.asset";
         public const string AxePrefabPath = "Assets/OtterAquariumPrototype/Prefabs/GoblinFlyingAxe.prefab";
+        private const string RemovedOtterVsScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinOtterVs.unity";
 
         public const string BackgroundPath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_fightingbackground.png";
         private const string GoblinRoot = "Assets/OtterAquariumPrototype/Arts/Enemy/Goblin_Mercenary";
@@ -43,6 +43,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public SpriteRenderer OtterBody;
             public SpriteRenderer Shield;
             public SpriteRenderer DangerFlash;
+            public TextMesh Title;
             public TextMesh Phase;
             public TextMesh Phrase;
             public TextMesh Pattern;
@@ -55,8 +56,42 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         [InitializeOnLoadMethod]
         private static void QueueInitialBuild()
         {
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             EditorApplication.delayCall += TryInitialBuild;
             EditorApplication.delayCall += TryEnsureAxePrefab;
+            EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
+                EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
+        }
+
+        private static void TryRedirectRemovedOtterVsScene()
+        {
+            if (EditorApplication.isCompiling)
+            {
+                EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
+                return;
+            }
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                return;
+
+            Scene activeScene = SceneManager.GetActiveScene();
+            if (!activeScene.IsValid() || activeScene.path != RemovedOtterVsScenePath)
+                return;
+            if (activeScene.isDirty)
+            {
+                Debug.LogWarning(
+                    "[OtterGoblinDemo1] The removed Otter vs scene still has unsaved changes. "
+                    + $"Apply its LevelData to the shared scene manually before closing it: {ScenePath}");
+                return;
+            }
+
+            EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            Debug.Log($"[OtterGoblinDemo1] Redirected the removed Otter vs scene to shared scene: {ScenePath}");
         }
 
         private static void TryEnsureAxePrefab()
@@ -87,22 +122,75 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         {
             EnsureFolders();
             OtterGoblinDemo1LevelData data = EnsureData();
-            BuildScene(ScenePath, data, "OtterZooGoblinDemo1", "DEMO1  •  GOBLIN PATROL");
+            BuildScene(data);
         }
 
-        [MenuItem("Rhythm Hunter/Otter Aquarium/Build Zoo Goblin Otter vs")]
-        public static void BuildOtterVsScene()
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Apply Goblin Patrol To Shared Demo1 Scene")]
+        public static void ApplyGoblinPatrolToSharedScene()
         {
             EnsureFolders();
-            OtterGoblinDemo1LevelData data = EnsureOtterVsData();
-            BuildScene(OtterVsScenePath, data, "OtterZooGoblinOtterVs", "DEMO1  •  OTTER VS");
+            ApplyLevelToSharedScene(EnsureData());
         }
 
-        private static void BuildScene(
-            string scenePath,
-            OtterGoblinDemo1LevelData data,
-            string sceneName,
-            string sceneTitle)
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Apply Otter vs To Shared Demo1 Scene")]
+        public static void ApplyOtterVsToSharedScene()
+        {
+            EnsureFolders();
+            ApplyLevelToSharedScene(EnsureOtterVsData());
+        }
+
+        public static bool ApplyLevelToSharedScene(OtterGoblinDemo1LevelData data)
+        {
+            if (data == null)
+            {
+                EditorUtility.DisplayDialog("關卡資料有錯誤", "找不到關卡資料。", "好");
+                return false;
+            }
+            if (!data.Validate(out string error))
+            {
+                EditorUtility.DisplayDialog("關卡資料有錯誤", error, "好");
+                return false;
+            }
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                return false;
+
+            Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            FmodBeatClock clock = FindInScene<FmodBeatClock>(scene);
+            OtterGoblinDemo1Runner runner = FindInScene<OtterGoblinDemo1Runner>(scene);
+            OtterGoblinDemo1Presenter presenter = FindInScene<OtterGoblinDemo1Presenter>(scene);
+            if (clock == null || runner == null || presenter == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "共用 Scene 不完整",
+                    "找不到 Demo1 Runner、FMOD Beat Clock 或 Presenter，請先執行 Build Zoo Goblin Demo 1。",
+                    "好");
+                return false;
+            }
+
+            Undo.RecordObjects(new Object[] { clock, runner, presenter }, "切換 Demo1 歌曲與譜面");
+            runner.Configure(clock, data);
+            presenter.RefreshLevelPresentation();
+            EditorUtility.SetDirty(clock);
+            EditorUtility.SetDirty(runner);
+            EditorUtility.SetDirty(presenter);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+
+            string dataPath = AssetDatabase.GetAssetPath(data);
+            bool valid = OtterGoblinDemo1Validation.ValidateScene(false, ScenePath, dataPath);
+            if (!valid)
+            {
+                EditorUtility.DisplayDialog("套用後驗證失敗", "請查看 Console 的 Demo1 驗證訊息。", "好");
+                return false;
+            }
+
+            Selection.activeObject = data;
+            Debug.Log($"[OtterGoblinDemo1] Applied '{data.DisplayName}' to shared scene: {ScenePath}");
+            return true;
+        }
+
+        private static void BuildScene(OtterGoblinDemo1LevelData data)
         {
             Sprite shape = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             Sprite background = LoadSprite(BackgroundPath);
@@ -131,16 +219,16 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             }
 
             Scene previous = SceneManager.GetActiveScene();
-            bool replacing = previous.IsValid() && previous.path == scenePath;
+            bool replacing = previous.IsValid() && previous.path == ScenePath;
             NewSceneMode mode = Application.isBatchMode ? NewSceneMode.Single : NewSceneMode.Additive;
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, mode);
-            scene.name = sceneName;
+            scene.name = "OtterZooGoblinDemo1";
             SceneManager.SetActiveScene(scene);
 
             if (!Application.isBatchMode && replacing)
                 EditorSceneManager.CloseScene(previous, true);
 
-            Transform root = new GameObject(sceneName).transform;
+            Transform root = new GameObject("OtterZooGoblinDemo1").transform;
             CreateCamera(root);
             Stage stage = CreateStage(
                 root,
@@ -151,20 +239,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 attack,
                 attacked,
                 axePrefab,
-                sceneTitle,
+                GetSceneTitle(data),
                 data.TotalBars,
                 data.AuthoredBpm);
             CreateController(root, data, stage);
 
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene, scenePath);
-            AddToBuildSettings(scenePath);
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            AddToBuildSettings(ScenePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             string dataPath = AssetDatabase.GetAssetPath(data);
-            if (!OtterGoblinDemo1Validation.ValidateScene(false, scenePath, dataPath))
-                Debug.LogError($"[OtterGoblinDemo1] Generated scene failed validation: {scenePath}");
+            if (!OtterGoblinDemo1Validation.ValidateScene(false, ScenePath, dataPath))
+                Debug.LogError($"[OtterGoblinDemo1] Generated scene failed validation: {ScenePath}");
 
             if (!Application.isBatchMode && !replacing && previous.IsValid() && previous.isLoaded && previous != scene)
             {
@@ -172,8 +260,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 EditorSceneManager.CloseScene(scene, true);
             }
 
-            Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-            Debug.Log($"[OtterGoblinDemo1] Scene created: {scenePath}");
+            Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
+            Debug.Log($"[OtterGoblinDemo1] Shared scene created: {ScenePath}");
         }
 
         private static Stage CreateStage(
@@ -211,7 +299,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             Transform titlePanel = Empty("TitlePanel", root);
             Sprite("TitlePanelFill", titlePanel, shape, Ink, new Vector3(0f, 4.55f, 0f), new Vector2(18.6f, 1.15f), 90);
-            Text("Title", titlePanel, font, sceneTitle, Color.white,
+            stage.Title = Text("Title", titlePanel, font, sceneTitle, Color.white,
                 new Vector3(-5.3f, 4.64f, -0.2f), 0.105f, FontStyle.Bold, 100, TextAnchor.MiddleLeft);
             stage.FailureCount = Text("FailureCount", titlePanel, font, "FAILURES   0", Color.white,
                 new Vector3(5.8f, 4.64f, -0.2f), 0.1f, FontStyle.Bold, 100, TextAnchor.MiddleRight);
@@ -328,6 +416,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.OtterBody,
                 stage.Shield,
                 stage.DangerFlash,
+                stage.Title,
                 stage.Phase,
                 stage.Phrase,
                 stage.Pattern,
@@ -336,6 +425,27 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.FailureCount,
                 stage.Status);
             input.Configure(runner, presenter);
+        }
+
+        private static string GetSceneTitle(OtterGoblinDemo1LevelData data)
+        {
+            string eventPath = data != null ? data.MusicEventPath : string.Empty;
+            int separator = string.IsNullOrWhiteSpace(eventPath) ? -1 : eventPath.LastIndexOf('/');
+            string songName = separator >= 0 && separator + 1 < eventPath.Length
+                ? eventPath.Substring(separator + 1)
+                : data != null ? data.DisplayName : "NO LEVEL";
+            return $"DEMO1  •  {songName.ToUpperInvariant()}";
+        }
+
+        private static T FindInScene<T>(Scene scene) where T : Component
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                T component = root.GetComponentInChildren<T>(true);
+                if (component != null)
+                    return component;
+            }
+            return null;
         }
 
         private static GameObject EnsureAxePrefab()

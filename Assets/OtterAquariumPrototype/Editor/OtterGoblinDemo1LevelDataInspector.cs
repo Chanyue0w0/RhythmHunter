@@ -98,13 +98,13 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("開啟對應 Scene", GUILayout.Height(26f)))
+            if (GUILayout.Button("套用並開啟共用 Scene", GUILayout.Height(26f)))
             {
-                string assetPath = AssetDatabase.GetAssetPath(target);
-                string scenePath = assetPath == OtterGoblinDemo1SceneBuilder.OtterVsDataPath
-                    ? OtterGoblinDemo1SceneBuilder.OtterVsScenePath
-                    : OtterGoblinDemo1SceneBuilder.ScenePath;
-                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(target);
+                AssetDatabase.SaveAssets();
+                OtterGoblinDemo1SceneBuilder.ApplyLevelToSharedScene(
+                    (OtterGoblinDemo1LevelData)target);
             }
             if (GUILayout.Button("儲存資產", GUILayout.Height(26f)))
             {
@@ -114,7 +114,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.HelpBox(
-                "三軌時間軸每格為十六分音符（120 tick）。提示 X 與接取 X' 可點擊微調；投斧 _ 由攻擊類型固定，確保音效、動畫與飛斧數量一致。",
+                "三軌時間軸每格為十六分音符（120 tick）。提示 X 與接取 X' 可點擊微調；投斧 _ 由攻擊類型固定。按「套用並開啟共用 Scene」會一起更換歌曲、BPM、校準與完整譜面。",
                 MessageType.Info);
         }
 

@@ -179,7 +179,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100404752}
-  m_Text: "BAR 001/033  BEAT 1/4   \u2022   120 BPM\nP 00   G 00   M 00   EXTRA 00"
+  m_Text: "BAR 001/32  BEAT 1/4   \u2022   120 BPM\nP 00   G 00   M 00   EXTRA 00"
   m_OffsetZ: 0
   m_CharacterSize: 0.058
   m_LineSpacing: 1
@@ -779,7 +779,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 293324302}
-  m_Text: "DEMO1  \u2022  GOBLIN PATROL"
+  m_Text: "DEMO1  \u2022  OTTER VS"
   m_OffsetZ: 0
   m_CharacterSize: 0.105
   m_LineSpacing: 1
@@ -2783,6 +2783,7 @@ MonoBehaviour:
   shield: {fileID: 947752845}
   dangerFlash: {fileID: 874976528}
   tripleAxeVisualFlightBeats: 1
+  titleText: {fileID: 293324304}
   phaseText: {fileID: 356862317}
   phraseText: {fileID: 1301047193}
   patternText: {fileID: 230699742}
@@ -2818,7 +2819,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1Runner
   beatClock: {fileID: 1636567134}
-  levelData: {fileID: 11400000, guid: 9e40ea999bb7afb44844214d566658a7, type: 2}
+  levelData: {fileID: 11400000, guid: dd0fc4a11a0ff594aa36ab89c5253e3e, type: 2}
 --- !u!114 &1636567134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2831,7 +2832,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3814f07b225d8f34084d9aed7684d7c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock
-  musicEventPath: event:/ZooGoblinFight/BGM/Goblin Patrol
+  musicEventPath: event:/ZooGoblinFight/BGM/Otter vs
   musicStartDelaySeconds: 1
   musicVolume: 0.55
   playOnStart: 1

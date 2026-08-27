@@ -9,27 +9,15 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 {
     public static class OtterGoblinDemo1Validation
     {
-        [MenuItem("Rhythm Hunter/Otter Aquarium/Validate Zoo Goblin Demo 1")]
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Validate Shared Zoo Goblin Demo 1 Scene")]
         public static void ValidateFromMenu()
         {
             ValidateScene(true);
         }
 
-        [MenuItem("Rhythm Hunter/Otter Aquarium/Validate Zoo Goblin Otter vs")]
-        public static void ValidateOtterVsFromMenu()
-        {
-            ValidateScene(
-                true,
-                OtterGoblinDemo1SceneBuilder.OtterVsScenePath,
-                OtterGoblinDemo1SceneBuilder.OtterVsDataPath);
-        }
-
         public static bool ValidateScene(bool logSuccess)
         {
-            return ValidateScene(
-                logSuccess,
-                OtterGoblinDemo1SceneBuilder.ScenePath,
-                OtterGoblinDemo1SceneBuilder.DataPath);
+            return ValidateScene(logSuccess, OtterGoblinDemo1SceneBuilder.ScenePath, null);
         }
 
         public static bool ValidateScene(
@@ -38,15 +26,12 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             string dataPath)
         {
             SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-            OtterGoblinDemo1LevelData data =
-                AssetDatabase.LoadAssetAtPath<OtterGoblinDemo1LevelData>(dataPath);
-            if (sceneAsset == null || data == null)
+            if (sceneAsset == null)
             {
-                Debug.LogError($"[OtterGoblinDemo1Validation] Missing scene or chart. Scene={sceneAsset != null}, Data={data != null}");
+                Debug.LogError($"[OtterGoblinDemo1Validation] Missing shared scene: {scenePath}");
                 return false;
             }
 
-            bool chartValid = data.Validate(out string chartError);
             Scene scene = SceneManager.GetSceneByPath(scenePath);
             bool wasLoaded = scene.IsValid() && scene.isLoaded;
             if (!wasLoaded)
@@ -54,6 +39,18 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             FmodBeatClock clock = Find<FmodBeatClock>(scene);
             OtterGoblinDemo1Runner runner = Find<OtterGoblinDemo1Runner>(scene);
+            OtterGoblinDemo1LevelData data = string.IsNullOrWhiteSpace(dataPath)
+                ? runner != null ? runner.LevelData : null
+                : AssetDatabase.LoadAssetAtPath<OtterGoblinDemo1LevelData>(dataPath);
+            if (data == null)
+            {
+                if (!wasLoaded)
+                    EditorSceneManager.CloseScene(scene, true);
+                Debug.LogError("[OtterGoblinDemo1Validation] The shared scene has no selected LevelData.");
+                return false;
+            }
+
+            bool chartValid = data.Validate(out string chartError);
             OtterGoblinDemo1Input input = Find<OtterGoblinDemo1Input>(scene);
             OtterGoblinDemo1Presenter presenter = Find<OtterGoblinDemo1Presenter>(scene);
             SpriteRenderer background = FindNamed<SpriteRenderer>(scene, "ZooBackground");
