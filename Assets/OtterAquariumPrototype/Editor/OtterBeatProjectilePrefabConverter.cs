@@ -10,7 +10,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     public static class OtterBeatProjectilePrefabConverter
     {
         public const string PrefabFolder = "Assets/OtterAquariumPrototype/Prefabs/BeatProjectiles";
-        private const int ExpectedItemCount = 26;
+        private const int ExpectedItemCount = 27;
 
         [InitializeOnLoadMethod]
         private static void QueueInitialConversion()
@@ -85,8 +85,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 renderer.sharedMaterial = sourceRenderer.sharedMaterial;
                 renderer.sortingLayerID = sourceRenderer.sortingLayerID;
                 renderer.sortingOrder = 38;
-                temporary.GetComponent<RhythmTimelineProjectile>()
-                    .ConfigureAppearance(DefaultShouldRotate(child.name));
+                RhythmTimelineProjectile projectile = temporary.GetComponent<RhythmTimelineProjectile>();
+                projectile.ConfigureAppearance(DefaultShouldRotate(child.name));
+                ConfigureDefaultInterference(projectile, child.name);
 
                 PrefabUtility.SaveAsPrefabAsset(temporary, prefabPath);
                 Object.DestroyImmediate(temporary);
@@ -173,6 +174,25 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 || value.Contains("sword")
                 || value.Contains("spear")
                 || value.Contains("shuriken");
+        }
+
+        private static void ConfigureDefaultInterference(
+            RhythmTimelineProjectile projectile,
+            string objectName)
+        {
+            string value = objectName.ToLowerInvariant();
+            if (value.Contains("dying_bottle"))
+            {
+                projectile.ConfigureScreenInterference(
+                    RhythmScreenInterference.InterferenceKind.OrangeInk,
+                    4f);
+            }
+            else if (value.Contains("save_icon"))
+            {
+                projectile.ConfigureScreenInterference(
+                    RhythmScreenInterference.InterferenceKind.SaveLoading,
+                    3f);
+            }
         }
     }
 }

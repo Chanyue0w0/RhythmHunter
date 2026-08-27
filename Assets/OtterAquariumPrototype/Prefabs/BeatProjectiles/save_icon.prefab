@@ -110,3 +110,5 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  screenInterference: 2
+  interferenceDurationBeats: 3

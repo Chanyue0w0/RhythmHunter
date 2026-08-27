@@ -25,6 +25,10 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private OtterReactionKind otterReaction = OtterReactionKind.Crack;
         [SerializeField, Min(0.01f)] private float heldScaleMultiplier = 1f;
 
+        [Header("Screen Interference")]
+        [SerializeField] private RhythmScreenInterference.InterferenceKind screenInterference;
+        [SerializeField, Min(0.25f)] private float interferenceDurationBeats = 3f;
+
         private FmodBeatClock beatClock;
         private SpriteRenderer spriteRenderer;
         private Vector3 launchPosition;
@@ -42,16 +46,27 @@ namespace RhythmHunter.OtterAquariumPrototype
         private bool caught;
         private bool captured;
         private bool shattered;
+        private bool interferenceTriggered;
 
         public double ArrivalTimelineMs { get; private set; }
         public bool IsResolved => resolved;
         public bool RotateDuringFlight => rotateDuringFlight;
         public OtterReactionKind OtterReaction => otterReaction;
         public float HeldScaleMultiplier => heldScaleMultiplier;
+        public RhythmScreenInterference.InterferenceKind ScreenInterference => screenInterference;
+        public float InterferenceDurationBeats => interferenceDurationBeats;
 
         public void ConfigureAppearance(bool shouldRotate)
         {
             rotateDuringFlight = shouldRotate;
+        }
+
+        public void ConfigureScreenInterference(
+            RhythmScreenInterference.InterferenceKind configuredInterference,
+            float durationBeats)
+        {
+            screenInterference = configuredInterference;
+            interferenceDurationBeats = Mathf.Max(0.25f, durationBeats);
         }
 
         private void Awake()
@@ -87,6 +102,9 @@ namespace RhythmHunter.OtterAquariumPrototype
             float progress = Mathf.Clamp01((float)((timelineMs - launchTimelineMs)
                 / Mathf.Max(1f, (float)(ArrivalTimelineMs - launchTimelineMs))));
             UpdateFlightPose(progress);
+
+            if (progress >= 1f)
+                TriggerScreenInterferenceOnce();
 
             if (timelineMs > ArrivalTimelineMs + 650.0)
                 Resolve(false);
@@ -163,6 +181,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             caught = false;
             captured = false;
             shattered = false;
+            interferenceTriggered = false;
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.enabled = flightStarted;
@@ -175,6 +194,8 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (resolved || captured)
                 return;
+
+            TriggerScreenInterferenceOnce();
 
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
@@ -192,6 +213,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (captured)
                 return;
+            TriggerScreenInterferenceOnce();
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -247,6 +269,23 @@ namespace RhythmHunter.OtterAquariumPrototype
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int timelineMs))
                 return timelineMs;
             return launchTimelineMs + (Time.unscaledTimeAsDouble - fallbackLaunchTime) * 1000.0;
+        }
+
+        private void TriggerScreenInterferenceOnce()
+        {
+            if (interferenceTriggered
+                || screenInterference == RhythmScreenInterference.InterferenceKind.None)
+                return;
+
+            interferenceTriggered = true;
+            double millisecondsPerBeat = beatClock != null ? beatClock.MillisecondsPerBeat : 0.0;
+            if (millisecondsPerBeat <= 0.0)
+                millisecondsPerBeat = 500.0;
+            float durationSeconds = Mathf.Max(
+                0.1f,
+                (float)(millisecondsPerBeat / 1000.0) * interferenceDurationBeats);
+            Sprite icon = spriteRenderer != null ? spriteRenderer.sprite : null;
+            RhythmScreenInterference.Trigger(screenInterference, durationSeconds, icon);
         }
 
         private void UpdateFlightPose(float progress)

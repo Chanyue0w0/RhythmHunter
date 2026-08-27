@@ -59,6 +59,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Transform goblinRoot = FindNamedTransform(scene, "ZooGoblin");
             Transform otter = FindNamedTransform(scene, "Otter");
             TextMesh failureCount = FindNamed<TextMesh>(scene, "FailureCount");
+            RhythmTimelineProjectile dyingBottle = LoadProjectilePrefab("dying_bottle");
+            RhythmTimelineProjectile saveIcon = LoadProjectilePrefab("save_icon");
             int singleCount = 0;
             int tripleCount = 0;
             int doubleSingleCount = 0;
@@ -112,7 +114,13 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && data.Phrases.Count > 0
                 && data.GoodWindowMs >= data.PerfectWindowMs
                 && !string.IsNullOrWhiteSpace(data.MusicEventPath)
-                && !string.IsNullOrWhiteSpace(data.MissSoundEventPath);
+                && !string.IsNullOrWhiteSpace(data.MissSoundEventPath)
+                && dyingBottle != null
+                && dyingBottle.ScreenInterference == RhythmScreenInterference.InterferenceKind.OrangeInk
+                && dyingBottle.InterferenceDurationBeats > 0f
+                && saveIcon != null
+                && saveIcon.ScreenInterference == RhythmScreenInterference.InterferenceKind.SaveLoading
+                && saveIcon.InterferenceDurationBeats > 0f;
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
@@ -127,6 +135,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"WarningRedFlash={presenter != null && presenter.WarningDangerFlashEnabled}, "
                     + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
                     + $"Otter={otter != null}, FailureHUD={failureCount != null}, "
+                    + $"DyingBottleInk={dyingBottle != null && dyingBottle.ScreenInterference == RhythmScreenInterference.InterferenceKind.OrangeInk}, "
+                    + $"SaveLoading={saveIcon != null && saveIcon.ScreenInterference == RhythmScreenInterference.InterferenceKind.SaveLoading}, "
                     + $"Stun={data.ExtraInputStunBeats:0.##} beats, "
                     + $"Phrases={data.Phrases.Count}, "
                     + $"Single={singleCount}, Triple={tripleCount}, "
@@ -145,6 +155,13 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 return false;
             string path = AssetDatabase.GetAssetPath(sprite).Replace('\\', '/');
             return path.Contains("/Arts/Otter/") && !path.Contains("/old/");
+        }
+
+        private static RhythmTimelineProjectile LoadProjectilePrefab(string prefabName)
+        {
+            string path = $"{OtterBeatProjectilePrefabConverter.PrefabFolder}/{prefabName}.prefab";
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            return prefab != null ? prefab.GetComponent<RhythmTimelineProjectile>() : null;
         }
 
         private static T Find<T>(Scene scene) where T : Component
