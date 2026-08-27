@@ -59,6 +59,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private int currentBeat = 1;
         private int currentBar = 1;
         private bool tripleAxesScheduled;
+        private OtterGoblinDemo1LevelData.AttackPhrase activePhrase;
         private bool diagnosticHudVisible;
         private GameObject rhythmHudRoot;
         private GameObject resultHudRoot;
@@ -237,6 +238,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnPhraseStarted(int number, OtterGoblinDemo1LevelData.AttackPhrase phrase)
         {
+            activePhrase = phrase;
             tripleAxesScheduled = false;
             if (phraseText != null)
                 phraseText.text = $"#{number:00}  {phrase.Label}";
@@ -265,7 +267,8 @@ namespace RhythmHunter.OtterAquariumPrototype
                 tripleAxesScheduled = ScheduleAxesForPendingTargets(
                     3,
                     tripleAxeVisualFlightBeats,
-                    "TripleFlyingAxe");
+                    "TripleFlyingProjectile",
+                    0);
             }
         }
 
@@ -290,8 +293,9 @@ namespace RhythmHunter.OtterAquariumPrototype
                 judgementText.text = $"AXE  {index}/{count}";
                 judgementText.color = GoodGold;
             }
+            int projectileStartIndex = GetWaitProjectileStartIndex(index);
             if (projectileCount != 3 || !tripleAxesScheduled)
-                LaunchAxesForPendingTargets(projectileCount);
+                LaunchProjectilesForPendingTargets(projectileCount, projectileStartIndex);
             if (projectileCount != 3)
                 PlayOptional(runner.LevelData.AttackSoundEventPath);
         }
@@ -560,17 +564,34 @@ namespace RhythmHunter.OtterAquariumPrototype
                 root.SetActive(active);
         }
 
-        private void LaunchAxesForPendingTargets(int projectileCount)
+        private int GetWaitProjectileStartIndex(int waitCueIndex)
         {
-            ScheduleAxesForPendingTargets(projectileCount, null, "FlyingAxe");
+            if (activePhrase == null)
+                return 0;
+            return activePhrase.Kind switch
+            {
+                OtterGoblinDemo1LevelData.AttackKind.DoubleSingle => Mathf.Max(0, waitCueIndex - 1),
+                OtterGoblinDemo1LevelData.AttackKind.TripleThenSingle when waitCueIndex > 1 => 3,
+                _ => 0
+            };
+        }
+
+        private void LaunchProjectilesForPendingTargets(int projectileCount, int projectileStartIndex)
+        {
+            ScheduleAxesForPendingTargets(
+                projectileCount,
+                null,
+                "FlyingProjectile",
+                projectileStartIndex);
         }
 
         private bool ScheduleAxesForPendingTargets(
             int projectileCount,
             float? fixedFlightBeats,
-            string instancePrefix)
+            string instancePrefix,
+            int projectileStartIndex)
         {
-            if (axeProjectilePrefab == null || runner == null || runner.BeatClock == null
+            if (runner == null || runner.BeatClock == null
                 || enemyRoot == null || otterRoot == null
                 || !runner.BeatClock.TryGetTimelinePositionMs(out int launchTimelineMs))
             {
@@ -585,10 +606,18 @@ namespace RhythmHunter.OtterAquariumPrototype
             Vector3 end = otterRoot.position
                 + new Vector3(-1.05f * otterScale, 0.38f * otterScale, -0.45f);
             int spawnCount = Mathf.Min(Mathf.Max(1, projectileCount), pendingTargetTimes.Count);
+            int spawnedCount = 0;
             for (int i = 0; i < spawnCount; i++)
             {
-                GameObject instance = Instantiate(axeProjectilePrefab);
-                instance.name = $"{instancePrefix}_{i + 1}";
+                int projectileIndex = projectileStartIndex + i;
+                GameObject projectilePrefab = activePhrase != null
+                    ? activePhrase.GetProjectilePrefab(projectileIndex, axeProjectilePrefab)
+                    : axeProjectilePrefab;
+                if (projectilePrefab == null)
+                    continue;
+
+                GameObject instance = Instantiate(projectilePrefab);
+                instance.name = $"{instancePrefix}_{projectileIndex + 1}_{projectilePrefab.name}";
                 RhythmTimelineProjectile axe = instance.GetComponent<RhythmTimelineProjectile>();
                 if (axe == null)
                 {
@@ -609,8 +638,9 @@ namespace RhythmHunter.OtterAquariumPrototype
                     pendingTargetTimes[i],
                     laneOffset);
                 flyingAxes.Add(axe);
+                spawnedCount++;
             }
-            return spawnCount > 0;
+            return spawnedCount > 0;
         }
 
         private void ResolveClosestAxe(OtterGoblinDemo1Runner.JudgementResult result)

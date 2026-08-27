@@ -48,6 +48,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 4
     startOffsetTicks: 0
     label: "SPECIAL \u2022 X X X _"
@@ -61,6 +63,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
   - startBar: 6
     startOffsetTicks: 0
     label: "SINGLE \u2022 X _"
@@ -74,6 +80,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 6
     startOffsetTicks: 1440
     label: "SINGLE \u2022 X _"
@@ -87,6 +95,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 7
     startOffsetTicks: 960
     label: "SPECIAL \u2022 X X X _"
@@ -100,6 +110,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
   - startBar: 8
     startOffsetTicks: 960
     label: "SINGLE \u2022 X _"
@@ -113,6 +127,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 9
     startOffsetTicks: 480
     label: "SINGLE \u2022 X _"
@@ -126,6 +142,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 10
     startOffsetTicks: 0
     label: "COMBO \u2022 X _ \xD72"
@@ -139,6 +157,9 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 11
     startOffsetTicks: 480
     label: "SPECIAL \u2022 X X X _"
@@ -152,6 +173,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 12
     startOffsetTicks: 480
     label: "SINGLE \u2022 X _"
@@ -165,6 +190,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 1467831096048104106, guid: 6fd399b6a6b9a544b8e16537d53c8fd1, type: 3}
   - startBar: 13
     startOffsetTicks: 0
     label: "COMBO \u2022 TRIPLE \u2192 X _"
@@ -178,6 +205,11 @@ MonoBehaviour:
     pattern:
       id: triple-single-response
       hitTicks: 00000000e0010000c003000080070000
+    projectilePrefabs:
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 14
     startOffsetTicks: 1440
     label: "SINGLE \u2022 X _"
@@ -191,6 +223,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 15
     startOffsetTicks: 960
     label: "SPECIAL \u2022 X X X _"
@@ -204,6 +238,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
   - startBar: 18
     startOffsetTicks: 0
     label: "COMBO \u2022 X _ \xD72"
@@ -217,6 +255,9 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs:
+    - {fileID: 3099361443190907117, guid: c5372e2a3ca282b478d57e9189feed8e, type: 3}
+    - {fileID: 3099361443190907117, guid: c5372e2a3ca282b478d57e9189feed8e, type: 3}
   - startBar: 19
     startOffsetTicks: 480
     label: "SPECIAL \u2022 X X X _"
@@ -230,6 +271,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 3540091050759601648, guid: dae54091e213ae24e8360288a815d925, type: 3}
+    - {fileID: 7531422793973856960, guid: 9a51b83df3631624ca0030d9f042c4df, type: 3}
+    - {fileID: 5481419422263724839, guid: 361683f1c3401e94e8fed0a1df0c671a, type: 3}
   - startBar: 20
     startOffsetTicks: 480
     label: "SINGLE \u2022 X _"
@@ -243,6 +288,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 8953958212136268432, guid: e2900614da0e5f2438b2889049ce6a68, type: 3}
   - startBar: 21
     startOffsetTicks: 0
     label: "SPECIAL \u2022 X X X _"
@@ -256,6 +303,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 677883121051813065, guid: 931733787b8a9b142869943a213790f5, type: 3}
+    - {fileID: 5041732444925082355, guid: 4f382aa3314aa3146a0d2eb2b99fdbed, type: 3}
+    - {fileID: 3920012736696045989, guid: fadfbbad010f1d847bd9f2ff3e604284, type: 3}
   - startBar: 25
     startOffsetTicks: 0
     label: "SPECIAL \u2022 X X X _"
@@ -269,6 +320,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 1670884283479364826, guid: fbed01928856a2d45a6bc5e018c3c875, type: 3}
+    - {fileID: 176589122921970181, guid: 28e316f8035b3164c9ab5c473feba37d, type: 3}
+    - {fileID: 8786029643558657692, guid: cb8a457168e50034fb7060475b8b24e0, type: 3}
   - startBar: 26
     startOffsetTicks: 0
     label: "COMBO \u2022 X _ \xD72"
@@ -282,6 +337,9 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs:
+    - {fileID: 8032924137921034117, guid: c60b8140e313b2c4d90cfb6a5fec0fac, type: 3}
+    - {fileID: 1342688863908251624, guid: e7ebd84a538ecf04b9709c4c60a405a0, type: 3}
   - startBar: 27
     startOffsetTicks: 480
     label: "SINGLE \u2022 X _"
@@ -295,6 +353,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 3748837939424080417, guid: 914241076390dcf4f8744878df5075f9, type: 3}
   - startBar: 28
     startOffsetTicks: 0
     label: "SPECIAL \u2022 X X X _"
@@ -308,6 +368,10 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 7431897994557742116, guid: d32bb09ba35762b468d38e176623d97b, type: 3}
+    - {fileID: 7431897994557742116, guid: d32bb09ba35762b468d38e176623d97b, type: 3}
+    - {fileID: 7431897994557742116, guid: d32bb09ba35762b468d38e176623d97b, type: 3}
   - startBar: 29
     startOffsetTicks: 0
     label: "COMBO \u2022 TRIPLE \u2192 X _"
@@ -321,6 +385,11 @@ MonoBehaviour:
     pattern:
       id: triple-single-response
       hitTicks: 00000000e0010000c003000080070000
+    projectilePrefabs:
+    - {fileID: 2621484660400176693, guid: f11333e2c0e88214db6f96befdd97271, type: 3}
+    - {fileID: 2621484660400176693, guid: f11333e2c0e88214db6f96befdd97271, type: 3}
+    - {fileID: 2621484660400176693, guid: f11333e2c0e88214db6f96befdd97271, type: 3}
+    - {fileID: 1467831096048104106, guid: 6fd399b6a6b9a544b8e16537d53c8fd1, type: 3}
   - startBar: 30
     startOffsetTicks: 1440
     label: "SINGLE \u2022 X _"
@@ -334,6 +403,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 9061483596609172990, guid: fa3bd13a47627f14db6b109db393025a, type: 3}
   - startBar: 31
     startOffsetTicks: 960
     label: "SPECIAL \u2022 X X X _"
@@ -347,3 +418,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs:
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
+    - {fileID: 7820349421593117412, guid: c72e181f3a65b8b47a6bfca1625fe3a5, type: 3}

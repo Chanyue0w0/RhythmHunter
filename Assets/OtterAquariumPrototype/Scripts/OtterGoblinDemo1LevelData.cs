@@ -69,6 +69,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             [SerializeField, Min(1)] private int attackLengthBeats = 1;
             [SerializeField] private AttackPattern warningPattern;
             [SerializeField] private AttackPattern pattern;
+            [SerializeField] private GameObject[] projectilePrefabs = Array.Empty<GameObject>();
 
             public int StartBar => startBar;
             public int StartOffsetTicks => Mathf.Max(0, startOffsetTicks);
@@ -80,7 +81,15 @@ namespace RhythmHunter.OtterAquariumPrototype
             public int AttackLengthBeats => attackLengthBeats;
             public AttackPattern WarningPattern => warningPattern;
             public AttackPattern Pattern => pattern;
+            public IReadOnlyList<GameObject> ProjectilePrefabs => projectilePrefabs ?? Array.Empty<GameObject>();
             public int TotalLengthBeats => ResponseDelayBeats + attackLengthBeats;
+
+            public GameObject GetProjectilePrefab(int projectileIndex, GameObject fallback)
+            {
+                if (projectilePrefabs == null || projectileIndex < 0 || projectileIndex >= projectilePrefabs.Length)
+                    return fallback;
+                return projectilePrefabs[projectileIndex] != null ? projectilePrefabs[projectileIndex] : fallback;
+            }
 
             public AttackPhrase(
                 int configuredStartBar,
@@ -102,11 +111,12 @@ namespace RhythmHunter.OtterAquariumPrototype
                 attackLengthBeats = Mathf.Max(1, configuredAttackBeats);
                 warningPattern = configuredWarningPattern?.Clone();
                 pattern = configuredAttackPattern?.Clone();
+                projectilePrefabs = new GameObject[pattern?.HitTicks.Count ?? 0];
             }
 
             public AttackPhrase Clone()
             {
-                return new AttackPhrase(
+                AttackPhrase clone = new AttackPhrase(
                     startBar,
                     label,
                     kind,
@@ -116,6 +126,10 @@ namespace RhythmHunter.OtterAquariumPrototype
                     warningPattern,
                     pattern,
                     startOffsetTicks);
+                clone.projectilePrefabs = projectilePrefabs == null
+                    ? Array.Empty<GameObject>()
+                    : (GameObject[])projectilePrefabs.Clone();
+                return clone;
             }
         }
 
@@ -384,6 +398,21 @@ namespace RhythmHunter.OtterAquariumPrototype
                 {
                     error = $"Phrase #{i + 1} does not follow the supported count/length rules.";
                     return false;
+                }
+
+                if (phrase.ProjectilePrefabs.Count != 0 && phrase.ProjectilePrefabs.Count != expectedCount)
+                {
+                    error = $"Phrase #{i + 1} has {phrase.ProjectilePrefabs.Count} projectile slots; expected {expectedCount}.";
+                    return false;
+                }
+                for (int projectileIndex = 0; projectileIndex < phrase.ProjectilePrefabs.Count; projectileIndex++)
+                {
+                    GameObject prefab = phrase.ProjectilePrefabs[projectileIndex];
+                    if (prefab != null && prefab.GetComponent<RhythmTimelineProjectile>() == null)
+                    {
+                        error = $"Phrase #{i + 1} projectile #{projectileIndex + 1} has no RhythmTimelineProjectile component.";
+                        return false;
+                    }
                 }
 
                 previousEndTick = startTick + (long)phrase.TotalLengthBeats * Ppq;

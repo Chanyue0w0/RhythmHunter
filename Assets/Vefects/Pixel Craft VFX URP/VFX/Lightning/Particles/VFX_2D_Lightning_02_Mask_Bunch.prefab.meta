@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f17d7031e91a80240af017cf8e2fc23a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308259
+  packageName: Pixel Craft VFX - URP
+  packageVersion: 1.0.02
+  assetPath: Assets/Vefects/Pixel Craft VFX URP/VFX/Lightning/Particles/VFX_Lightning_02_Mask_Bunch.prefab
+  uploadId: 771196

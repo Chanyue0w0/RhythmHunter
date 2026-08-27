@@ -114,7 +114,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.HelpBox(
-                "三軌時間軸每格為十六分音符（120 tick）。提示 X 與接取 X' 可點擊微調；投斧 _ 由攻擊類型固定。按「套用並開啟共用 Scene」會一起更換歌曲、BPM、校準與完整譜面。",
+                "三軌時間軸每格為十六分音符（120 tick）。提示 X 與接取 X' 可點擊微調；投擲 _ 由攻擊類型固定，每個接取拍可另外指定投擲物 Prefab。按「套用並開啟共用 Scene」會一起更換歌曲、BPM、校準與完整譜面。",
                 MessageType.Info);
         }
 
@@ -249,7 +249,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             SerializedProperty attackLength = phrase.FindPropertyRelative("attackLengthBeats");
             SerializedProperty warningTicks = phrase.FindPropertyRelative("warningPattern").FindPropertyRelative("hitTicks");
             SerializedProperty responseTicks = phrase.FindPropertyRelative("pattern").FindPropertyRelative("hitTicks");
+            SerializedProperty projectilePrefabs = phrase.FindPropertyRelative("projectilePrefabs");
             int expectedCount = ExpectedCount(newKind);
+            EnsureProjectileSlotCount(projectilePrefabs, expectedCount);
             int totalBeats = 2 + attackLength.intValue;
 
             EditorGUILayout.Space(4f);
@@ -263,7 +265,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 "X",
                 WarningColor,
                 expectedCount);
-            DrawAxeLane(newKind, totalBeats);
+            DrawProjectileLane(newKind, totalBeats);
             DrawEditableLane(
                 "接取 X'",
                 responseTicks,
@@ -273,9 +275,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 "X'",
                 CatchColor,
                 expectedCount);
+            DrawProjectilePrefabSlots(projectilePrefabs, responseTicks, expectedCount);
 
             EditorGUILayout.HelpBox(
-                "點亮或關閉格點後，兩條可編輯軌都必須維持此類型規定的數量。接取軌顯示的是 Phrase 絕對位置，資產內會自動扣除固定的兩拍回應起點。",
+                "點亮或關閉格點後，兩條可編輯軌都必須維持此類型規定的數量。每個接取拍可指定不同投擲物 Prefab；空白時沿用 GoblinFlyingAxe。旋轉設定保存在 Prefab 的 RhythmTimelineProjectile 元件。",
                 MessageType.None);
             EditorGUILayout.EndVertical();
         }
@@ -325,11 +328,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             EditorGUILayout.EndHorizontal();
         }
 
-        private static void DrawAxeLane(OtterGoblinDemo1LevelData.AttackKind kind, int totalBeats)
+        private static void DrawProjectileLane(OtterGoblinDemo1LevelData.AttackKind kind, int totalBeats)
         {
             HashSet<int> axeTicks = new(GetAxeTicks(kind));
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("投斧 _（固定）", GUILayout.Width(LaneLabelWidth));
+            GUILayout.Label("投擲 _（固定）", GUILayout.Width(LaneLabelWidth));
             int totalSteps = totalBeats * StepsPerBeat;
             for (int step = 0; step <= totalSteps; step++)
             {
@@ -343,6 +346,43 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 GUI.backgroundColor = previous;
             }
             EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawProjectilePrefabSlots(
+            SerializedProperty projectilePrefabs,
+            SerializedProperty responseTicks,
+            int expectedCount)
+        {
+            EditorGUILayout.Space(5f);
+            EditorGUILayout.LabelField("每個接取拍的投擲物", EditorStyles.boldLabel);
+            for (int i = 0; i < expectedCount; i++)
+            {
+                SerializedProperty prefabProperty = projectilePrefabs.GetArrayElementAtIndex(i);
+                int responseTick = i < responseTicks.arraySize
+                    ? responseTicks.GetArrayElementAtIndex(i).intValue
+                    : 0;
+                float catchBeat = 3f + responseTick / (float)Ppq;
+                GameObject current = prefabProperty.objectReferenceValue as GameObject;
+                GameObject selected = (GameObject)EditorGUILayout.ObjectField(
+                    new GUIContent($"#{i + 1:00}  接取 Beat {catchBeat:0.##}", "空白會使用 Presenter 的預設 GoblinFlyingAxe。"),
+                    current,
+                    typeof(GameObject),
+                    false);
+                if (selected != current)
+                    prefabProperty.objectReferenceValue = selected;
+                if (selected != null && selected.GetComponent<RhythmTimelineProjectile>() == null)
+                {
+                    EditorGUILayout.HelpBox(
+                        $"{selected.name} 缺少 RhythmTimelineProjectile，請選擇 BeatProjectiles 資料夾內的 Prefab。",
+                        MessageType.Error);
+                }
+            }
+        }
+
+        private static void EnsureProjectileSlotCount(SerializedProperty projectilePrefabs, int expectedCount)
+        {
+            if (projectilePrefabs != null && projectilePrefabs.arraySize != expectedCount)
+                projectilePrefabs.arraySize = expectedCount;
         }
 
         private void AddPhrase()
@@ -429,6 +469,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     SetPattern(response, "triple-single-response", 0, 480, 960, 1920);
                     break;
             }
+            EnsureProjectileSlotCount(
+                phrase.FindPropertyRelative("projectilePrefabs"),
+                ExpectedCount(kind));
         }
 
         private static void DrawFixedPatternPreset(

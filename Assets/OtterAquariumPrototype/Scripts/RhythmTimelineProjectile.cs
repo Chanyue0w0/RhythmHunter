@@ -11,6 +11,7 @@ namespace RhythmHunter.OtterAquariumPrototype
     public sealed class RhythmTimelineProjectile : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float arcHeight = 0.8f;
+        [SerializeField] private bool rotateDuringFlight = true;
         [SerializeField, Min(0f)] private float rotationTurns = 2.5f;
         [SerializeField, Min(0.01f)] private float resolveFadeSeconds = 0.14f;
 
@@ -30,6 +31,12 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         public double ArrivalTimelineMs { get; private set; }
         public bool IsResolved => resolved;
+        public bool RotateDuringFlight => rotateDuringFlight;
+
+        public void ConfigureAppearance(bool shouldRotate)
+        {
+            rotateDuringFlight = shouldRotate;
+        }
 
         private void Awake()
         {
@@ -126,7 +133,9 @@ namespace RhythmHunter.OtterAquariumPrototype
             Vector3 position = Vector3.LerpUnclamped(launchPosition, arrivalPosition, progress);
             position.y += Mathf.Sin(progress * Mathf.PI) * configuredArcHeight;
             transform.position = position;
-            transform.rotation = Quaternion.Euler(0f, 0f, -360f * rotationTurns * progress);
+            transform.rotation = rotateDuringFlight
+                ? Quaternion.Euler(0f, 0f, -360f * rotationTurns * progress)
+                : Quaternion.identity;
         }
 
         private void UpdateResolveEffect()

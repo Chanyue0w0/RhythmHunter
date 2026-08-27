@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1LevelData
   levelId: zoo-goblin-demo-1
   displayName: "Demo1\uFF1A\u52D5\u7269\u5712\u54E5\u5E03\u6797\u7BC0\u62CD\u6230"
-  authoringNotes: Fixed short and triple rhythms only. Density rises through phrase combinations, with a full rest at Bars 27-28.
+  authoringNotes: Fixed short and triple rhythms only. Density rises through phrase
+    combinations, with a full rest at Bars 27-28.
   musicEventPath: event:/ZooGoblinFight/BGM/Goblin Patrol
   musicStartDelaySeconds: 1
   musicVolume: 0.55
@@ -30,8 +31,8 @@ MonoBehaviour:
   warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
   attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
   blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
-  perfectSoundEventPath:
-  goodSoundEventPath:
+  perfectSoundEventPath: 
+  goodSoundEventPath: 
   missSoundEventPath: event:/SoundEffects/BeatMiss
   phrases:
   - startBar: 3
@@ -47,6 +48,8 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs:
+    - {fileID: 0}
   - startBar: 5
     startOffsetTicks: 0
     label: COMBO - SHORT x2
@@ -60,6 +63,7 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs: []
   - startBar: 7
     startOffsetTicks: 0
     label: SHORT - X _
@@ -73,6 +77,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 9
     startOffsetTicks: 0
     label: TRIPLE - FIXED
@@ -86,6 +91,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []
   - startBar: 10
     startOffsetTicks: 0
     label: SHORT - LINK 1
@@ -99,6 +105,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 10
     startOffsetTicks: 1440
     label: SHORT - LINK 2
@@ -112,6 +119,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 11
     startOffsetTicks: 960
     label: TRIPLE - FIXED
@@ -125,6 +133,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []
   - startBar: 12
     startOffsetTicks: 960
     label: COMBO - SHORT x2
@@ -138,6 +147,7 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs: []
   - startBar: 13
     startOffsetTicks: 1440
     label: COMBO - TRIPLE TO SHORT
@@ -151,6 +161,7 @@ MonoBehaviour:
     pattern:
       id: triple-single-response
       hitTicks: 00000000e0010000c003000080070000
+    projectilePrefabs: []
   - startBar: 15
     startOffsetTicks: 960
     label: SHORT - LINK 2
@@ -164,6 +175,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 16
     startOffsetTicks: 480
     label: TRIPLE - FIXED
@@ -177,6 +189,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []
   - startBar: 17
     startOffsetTicks: 480
     label: COMBO - SHORT x2
@@ -190,6 +203,7 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs: []
   - startBar: 18
     startOffsetTicks: 960
     label: COMBO - TRIPLE TO SHORT
@@ -203,6 +217,7 @@ MonoBehaviour:
     pattern:
       id: triple-single-response
       hitTicks: 00000000e0010000c003000080070000
+    projectilePrefabs: []
   - startBar: 20
     startOffsetTicks: 480
     label: SHORT - LINK 3
@@ -216,6 +231,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 21
     startOffsetTicks: 0
     label: COMBO - SHORT x2
@@ -229,6 +245,7 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs: []
   - startBar: 22
     startOffsetTicks: 480
     label: TRIPLE - FIXED
@@ -242,6 +259,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []
   - startBar: 23
     startOffsetTicks: 480
     label: COMBO - TRIPLE TO SHORT
@@ -255,6 +273,7 @@ MonoBehaviour:
     pattern:
       id: triple-single-response
       hitTicks: 00000000e0010000c003000080070000
+    projectilePrefabs: []
   - startBar: 25
     startOffsetTicks: 0
     label: COMBO - SHORT x2
@@ -268,6 +287,7 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs: []
   - startBar: 26
     startOffsetTicks: 480
     label: SHORT - INTO REST
@@ -281,6 +301,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 29
     startOffsetTicks: 0
     label: TRIPLE - FIXED
@@ -294,6 +315,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []
   - startBar: 30
     startOffsetTicks: 0
     label: SHORT - FINALE LINK
@@ -307,6 +329,7 @@ MonoBehaviour:
     pattern:
       id: single-response
       hitTicks: 00000000
+    projectilePrefabs: []
   - startBar: 30
     startOffsetTicks: 1440
     label: TRIPLE - FIXED
@@ -320,6 +343,7 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []
   - startBar: 31
     startOffsetTicks: 1440
     label: COMBO - SHORT x2
@@ -333,6 +357,7 @@ MonoBehaviour:
     pattern:
       id: double-single-response
       hitTicks: 00000000c0030000
+    projectilePrefabs: []
   - startBar: 33
     startOffsetTicks: 0
     label: TRIPLE - FIXED FINALE
@@ -346,3 +371,4 @@ MonoBehaviour:
     pattern:
       id: triple-response
       hitTicks: 00000000e0010000c0030000
+    projectilePrefabs: []

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ddc4de9d3d360b846b117ce17f1b23b9
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308259
+  packageName: Pixel Craft VFX - URP
+  packageVersion: 1.0.02
+  assetPath: Assets/Vefects/Pixel Craft VFX URP/VFX/Impact Sparks/Particles/Loop/VFX_Impact_Sparks_01_Color_Loop_Static.prefab
+  uploadId: 771196

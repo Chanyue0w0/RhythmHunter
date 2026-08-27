@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 918b752d1d14d5947af828bfb8dfc13d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308259
+  packageName: Pixel Craft VFX - URP
+  packageVersion: 1.0.02
+  assetPath: Assets/Vefects/Pixel Craft VFX URP/VFX/Projectile Wind/Particles/VFX_Projectile_Wind_01_Color_Static.prefab
+  uploadId: 771196

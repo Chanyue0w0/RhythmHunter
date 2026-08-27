@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 65a505d4868545b4c8a76b6fcecd9218
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308259
+  packageName: Pixel Craft VFX - URP
+  packageVersion: 1.0.02
+  assetPath: Assets/Vefects/Pixel Craft VFX URP/VFX/Lightning/Particles/VFX_Lightning_01_Color_Static.prefab
+  uploadId: 771196

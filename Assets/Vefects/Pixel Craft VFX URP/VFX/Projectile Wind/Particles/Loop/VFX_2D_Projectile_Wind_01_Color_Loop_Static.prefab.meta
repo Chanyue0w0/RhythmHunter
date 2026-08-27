@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: cac45b7d6a93c7d42a9592fef172e109
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308259
+  packageName: Pixel Craft VFX - URP
+  packageVersion: 1.0.02
+  assetPath: Assets/Vefects/Pixel Craft VFX URP/VFX/Projectile Wind/Particles/Loop/VFX_Projectile_Wind_01_Color_Loop_Static.prefab
+  uploadId: 771196
