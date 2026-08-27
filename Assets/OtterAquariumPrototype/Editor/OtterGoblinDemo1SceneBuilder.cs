@@ -14,6 +14,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
     {
         public const string ScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity";
         public const string DataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinDemo1Level.asset";
+        public const string OtterVsScenePath = "Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinOtterVs.unity";
+        public const string OtterVsDataPath = "Assets/OtterAquariumPrototype/Data/OtterZooGoblinOtterVsLevel.asset";
         public const string AxePrefabPath = "Assets/OtterAquariumPrototype/Prefabs/GoblinFlyingAxe.prefab";
 
         public const string BackgroundPath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_fightingbackground.png";
@@ -85,6 +87,23 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         {
             EnsureFolders();
             OtterGoblinDemo1LevelData data = EnsureData();
+            BuildScene(ScenePath, data, "OtterZooGoblinDemo1", "DEMO1  •  GOBLIN PATROL");
+        }
+
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Build Zoo Goblin Otter vs")]
+        public static void BuildOtterVsScene()
+        {
+            EnsureFolders();
+            OtterGoblinDemo1LevelData data = EnsureOtterVsData();
+            BuildScene(OtterVsScenePath, data, "OtterZooGoblinOtterVs", "DEMO1  •  OTTER VS");
+        }
+
+        private static void BuildScene(
+            string scenePath,
+            OtterGoblinDemo1LevelData data,
+            string sceneName,
+            string sceneTitle)
+        {
             Sprite shape = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             Sprite background = LoadSprite(BackgroundPath);
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -112,28 +131,40 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             }
 
             Scene previous = SceneManager.GetActiveScene();
-            bool replacing = previous.IsValid() && previous.path == ScenePath;
+            bool replacing = previous.IsValid() && previous.path == scenePath;
             NewSceneMode mode = Application.isBatchMode ? NewSceneMode.Single : NewSceneMode.Additive;
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, mode);
-            scene.name = "OtterZooGoblinDemo1";
+            scene.name = sceneName;
             SceneManager.SetActiveScene(scene);
 
             if (!Application.isBatchMode && replacing)
                 EditorSceneManager.CloseScene(previous, true);
 
-            Transform root = new GameObject("OtterZooGoblinDemo1").transform;
+            Transform root = new GameObject(sceneName).transform;
             CreateCamera(root);
-            Stage stage = CreateStage(root, shape, background, font, idle, attack, attacked, axePrefab);
+            Stage stage = CreateStage(
+                root,
+                shape,
+                background,
+                font,
+                idle,
+                attack,
+                attacked,
+                axePrefab,
+                sceneTitle,
+                data.TotalBars,
+                data.AuthoredBpm);
             CreateController(root, data, stage);
 
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene, ScenePath);
-            AddToBuildSettings(ScenePath);
+            EditorSceneManager.SaveScene(scene, scenePath);
+            AddToBuildSettings(scenePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            if (!OtterGoblinDemo1Validation.ValidateScene(false))
-                Debug.LogError("[OtterGoblinDemo1] Generated scene failed validation.");
+            string dataPath = AssetDatabase.GetAssetPath(data);
+            if (!OtterGoblinDemo1Validation.ValidateScene(false, scenePath, dataPath))
+                Debug.LogError($"[OtterGoblinDemo1] Generated scene failed validation: {scenePath}");
 
             if (!Application.isBatchMode && !replacing && previous.IsValid() && previous.isLoaded && previous != scene)
             {
@@ -141,8 +172,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 EditorSceneManager.CloseScene(scene, true);
             }
 
-            Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
-            Debug.Log($"[OtterGoblinDemo1] Scene created: {ScenePath}");
+            Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
+            Debug.Log($"[OtterGoblinDemo1] Scene created: {scenePath}");
         }
 
         private static Stage CreateStage(
@@ -153,7 +184,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite[] idle,
             Sprite[] attack,
             Sprite attacked,
-            GameObject axePrefab)
+            GameObject axePrefab,
+            string sceneTitle,
+            int totalBars,
+            float authoredBpm)
         {
             Stage stage = new()
             {
@@ -177,7 +211,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             Transform titlePanel = Empty("TitlePanel", root);
             Sprite("TitlePanelFill", titlePanel, shape, Ink, new Vector3(0f, 4.55f, 0f), new Vector2(18.6f, 1.15f), 90);
-            Text("Title", titlePanel, font, "DEMO1  •  GOBLIN PATROL", Color.white,
+            Text("Title", titlePanel, font, sceneTitle, Color.white,
                 new Vector3(-5.3f, 4.64f, -0.2f), 0.105f, FontStyle.Bold, 100, TextAnchor.MiddleLeft);
             stage.FailureCount = Text("FailureCount", titlePanel, font, "FAILURES   0", Color.white,
                 new Vector3(5.8f, 4.64f, -0.2f), 0.1f, FontStyle.Bold, 100, TextAnchor.MiddleRight);
@@ -200,7 +234,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 new Vector3(0f, -3.55f, -0.2f), 0.15f, FontStyle.Bold, 100);
             stage.Timing = Text("Timing", resultPanel, font, "LISTEN TO THE WARNING • REPEAT IT WHEN THE AXE SWINGS", Cyan,
                 new Vector3(0f, -4.02f, -0.2f), 0.075f, FontStyle.Normal, 100);
-            stage.Status = Text("Status", resultPanel, font, "BAR 001/033  BEAT 1/4   •   120 BPM\nP 00   G 00   M 00   EXTRA 00",
+            stage.Status = Text(
+                "Status",
+                resultPanel,
+                font,
+                $"BAR 001/{totalBars:000}  BEAT 1/4   •   {authoredBpm:0.##} BPM\nP 00   G 00   M 00   EXTRA 00",
                 new Color(0.72f, 0.84f, 0.84f, 1f), new Vector3(0f, -4.48f, -0.2f), 0.058f, FontStyle.Normal, 100);
 
             return stage;
@@ -355,6 +393,27 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 return null;
             }
             AssetDatabase.CreateAsset(data, DataPath);
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssets();
+            return data;
+        }
+
+        private static OtterGoblinDemo1LevelData EnsureOtterVsData()
+        {
+            OtterGoblinDemo1LevelData data =
+                AssetDatabase.LoadAssetAtPath<OtterGoblinDemo1LevelData>(OtterVsDataPath);
+            if (data != null)
+                return data;
+
+            data = ScriptableObject.CreateInstance<OtterGoblinDemo1LevelData>();
+            data.ConfigureOtterVsDefaults();
+            if (!data.Validate(out string error))
+            {
+                Debug.LogError($"[OtterGoblinDemo1] Otter vs chart is invalid: {error}");
+                Object.DestroyImmediate(data);
+                return null;
+            }
+            AssetDatabase.CreateAsset(data, OtterVsDataPath);
             EditorUtility.SetDirty(data);
             AssetDatabase.SaveAssets();
             return data;

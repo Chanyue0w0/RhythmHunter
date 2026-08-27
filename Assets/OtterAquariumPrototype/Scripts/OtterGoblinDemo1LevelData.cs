@@ -241,6 +241,77 @@ namespace RhythmHunter.OtterAquariumPrototype
             };
         }
 
+        public void ConfigureOtterVsDefaults()
+        {
+            levelId = "zoo-goblin-otter-vs";
+            displayName = "Demo1：Otter vs";
+            authoringNotes =
+                "Otter vs 使用與 Goblin Patrol 相同的固定短拍與三連拍語彙。"
+                + " Bar 16-17 與 22-24 保留段落呼吸，Bar 25 後進入終段加壓。";
+            musicEventPath = "event:/ZooGoblinFight/BGM/Otter vs";
+            musicStartDelaySeconds = 1f;
+            musicVolume = 0.55f;
+            musicGridOffsetMs = -35f;
+            authoredBpm = 120f;
+            beatsPerBar = 4;
+            totalBars = 32;
+            ppq = DefaultPpq;
+            perfectWindowMs = 85f;
+            goodWindowMs = 170f;
+            judgementOffsetMs = 0f;
+            extraInputStunBeats = 1f;
+            warningSoundEventPath = "event:/ZooGoblinFight/SoundEffects/Warning";
+            attackSoundEventPath = "event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack";
+            blockSoundEventPath = "event:/ZooGoblinFight/SoundEffects/BeatTapping";
+            perfectSoundEventPath = string.Empty;
+            goodSoundEventPath = string.Empty;
+            missSoundEventPath = "event:/SoundEffects/BeatMiss";
+
+            AttackPattern singleCue = Pattern("single-cue", 0f);
+            AttackPattern singleResponse = Pattern("single-response", 0f);
+            AttackPattern tripleCue = Pattern("triple-cue", 0f, 0.5f, 1f);
+            AttackPattern tripleResponse = Pattern("triple-response", 0f, 1f, 2f);
+            AttackPattern doubleSingleCue = Pattern("double-single-cue", 0f, 2f);
+            AttackPattern doubleSingleResponse = Pattern("double-single-response", 0f, 2f);
+            AttackPattern tripleThenSingleCue = Pattern("triple-single-cue", 0f, 0.5f, 1f, 4f);
+            AttackPattern tripleThenSingleResponse = Pattern("triple-single-response", 0f, 1f, 2f, 4f);
+
+            phrases = new List<AttackPhrase>
+            {
+                // Bars 1-5: intro, one short lesson, one triple lesson, then a breath.
+                Single(3, singleCue, singleResponse),
+                Triple(4, tripleCue, tripleResponse),
+
+                // Bars 6-15: connected phrases follow the first sustained groove.
+                Single(6, singleCue, singleResponse),
+                Single(6, singleCue, singleResponse, 3f),
+                Triple(7, tripleCue, tripleResponse, 2f),
+                Single(8, singleCue, singleResponse, 2f),
+                Single(9, singleCue, singleResponse, 1f),
+                DoubleSingle(10, doubleSingleCue, doubleSingleResponse),
+                Triple(11, tripleCue, tripleResponse, 1f),
+                Single(12, singleCue, singleResponse, 1f),
+                TripleThenSingle(13, tripleThenSingleCue, tripleThenSingleResponse),
+                Single(14, singleCue, singleResponse, 3f),
+                Triple(15, tripleCue, tripleResponse, 2f),
+
+                // Bars 16-17 breathe; Bars 18-21 answer with a compact second wave.
+                DoubleSingle(18, doubleSingleCue, doubleSingleResponse),
+                Triple(19, tripleCue, tripleResponse, 1f),
+                Single(20, singleCue, singleResponse, 1f),
+                Triple(21, tripleCue, tripleResponse),
+
+                // Bars 22-24 are the main breakdown; Bars 25-32 form the final climb and tail.
+                Triple(25, tripleCue, tripleResponse),
+                DoubleSingle(26, doubleSingleCue, doubleSingleResponse),
+                Single(27, singleCue, singleResponse, 1f),
+                Triple(28, tripleCue, tripleResponse),
+                TripleThenSingle(29, tripleThenSingleCue, tripleThenSingleResponse),
+                Single(30, singleCue, singleResponse, 3f),
+                Triple(31, tripleCue, tripleResponse, 2f)
+            };
+        }
+
         public bool Validate(out string error)
         {
             error = string.Empty;

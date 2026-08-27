@@ -1,12 +1,13 @@
 # Otter Aquarium Prototype scenes
 
 - Project startup is passive: legacy FightDemo, RhythmDemo, and PirateOcean scenes are no longer built, opened, validated, or played automatically. Their manual editor menu commands remain available.
-- Build Settings contains only the four scenes under `Assets/OtterAquariumPrototype/Scenes`.
+- Build Settings contains only the five scenes under `Assets/OtterAquariumPrototype/Scenes`.
 
 - `OtterAquarium.unity` is the top-down sea otter movement, surface transition, slide, and water VFX prototype.
 - `OtterAquariumCombat.unity` uses the PirateFightScene battle staging and its Cinemachine combat/boss camera transition.
 - `OtterShellBeatLab.unity` is a fixed-camera, one-button call-and-response playtest. The crab demonstrates a rhythm and the otter repeats it one bar later.
 - `OtterZooGoblinDemo1.unity` is the first music-authored battle demo for `Goblin Patrol`: the axe goblin gives one of two fixed beginner cues, then the otter responds.
+- `OtterZooGoblinOtterVs.unity` is an independent 120 BPM / 32-bar variant using `event:/ZooGoblinFight/BGM/Otter vs`; its chart is stored in `OtterZooGoblinOtterVsLevel.asset`, so editing it never changes Goblin Patrol.
 - The combat scene intentionally removes pirate ocean waves, animated ocean surfaces, ship motion, and the ocean tuning panel.
 - `Assets/PirateOceanPrototype/Scenes/PirateFightScene.unity` remains the source reference. Continue future scene work in this folder.
 

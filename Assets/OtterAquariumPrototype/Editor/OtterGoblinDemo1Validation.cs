@@ -15,11 +15,31 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             ValidateScene(true);
         }
 
+        [MenuItem("Rhythm Hunter/Otter Aquarium/Validate Zoo Goblin Otter vs")]
+        public static void ValidateOtterVsFromMenu()
+        {
+            ValidateScene(
+                true,
+                OtterGoblinDemo1SceneBuilder.OtterVsScenePath,
+                OtterGoblinDemo1SceneBuilder.OtterVsDataPath);
+        }
+
         public static bool ValidateScene(bool logSuccess)
         {
-            SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(OtterGoblinDemo1SceneBuilder.ScenePath);
+            return ValidateScene(
+                logSuccess,
+                OtterGoblinDemo1SceneBuilder.ScenePath,
+                OtterGoblinDemo1SceneBuilder.DataPath);
+        }
+
+        public static bool ValidateScene(
+            bool logSuccess,
+            string scenePath,
+            string dataPath)
+        {
+            SceneAsset sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
             OtterGoblinDemo1LevelData data =
-                AssetDatabase.LoadAssetAtPath<OtterGoblinDemo1LevelData>(OtterGoblinDemo1SceneBuilder.DataPath);
+                AssetDatabase.LoadAssetAtPath<OtterGoblinDemo1LevelData>(dataPath);
             if (sceneAsset == null || data == null)
             {
                 Debug.LogError($"[OtterGoblinDemo1Validation] Missing scene or chart. Scene={sceneAsset != null}, Data={data != null}");
@@ -27,10 +47,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             }
 
             bool chartValid = data.Validate(out string chartError);
-            Scene scene = SceneManager.GetSceneByPath(OtterGoblinDemo1SceneBuilder.ScenePath);
+            Scene scene = SceneManager.GetSceneByPath(scenePath);
             bool wasLoaded = scene.IsValid() && scene.isLoaded;
             if (!wasLoaded)
-                scene = EditorSceneManager.OpenScene(OtterGoblinDemo1SceneBuilder.ScenePath, OpenSceneMode.Additive);
+                scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
 
             FmodBeatClock clock = Find<FmodBeatClock>(scene);
             OtterGoblinDemo1Runner runner = Find<OtterGoblinDemo1Runner>(scene);
@@ -108,7 +128,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             }
 
             if (logSuccess)
-                Debug.Log("OTTER_GOBLIN_DEMO1_VALIDATION_PASS");
+                Debug.Log($"OTTER_GOBLIN_DEMO1_VALIDATION_PASS: {scenePath}");
             return true;
         }
 

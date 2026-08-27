@@ -98,8 +98,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("開啟 Demo1 Scene", GUILayout.Height(26f)))
-                EditorSceneManager.OpenScene(OtterGoblinDemo1SceneBuilder.ScenePath, OpenSceneMode.Single);
+            if (GUILayout.Button("開啟對應 Scene", GUILayout.Height(26f)))
+            {
+                string assetPath = AssetDatabase.GetAssetPath(target);
+                string scenePath = assetPath == OtterGoblinDemo1SceneBuilder.OtterVsDataPath
+                    ? OtterGoblinDemo1SceneBuilder.OtterVsScenePath
+                    : OtterGoblinDemo1SceneBuilder.ScenePath;
+                EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            }
             if (GUILayout.Button("儲存資產", GUILayout.Height(26f)))
             {
                 serializedObject.ApplyModifiedProperties();

@@ -1,0 +1,349 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0042429d4f5323c49b97ca91f44030af, type: 3}
+  m_Name: OtterZooGoblinOtterVsLevel
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1LevelData
+  levelId: zoo-goblin-otter-vs
+  displayName: "Demo1\uFF1AOtter vs"
+  authoringNotes: "Otter vs \u4F7F\u7528\u8207 Goblin Patrol \u76F8\u540C\u7684\u56FA\u5B9A\u77ED\u62CD\u8207\u4E09\u9023\u62CD\u8A9E\u5F59\u3002
+    Bar 16-17 \u8207 22-24 \u4FDD\u7559\u6BB5\u843D\u547C\u5438\uFF0CBar 25 \u5F8C\u9032\u5165\u7D42\u6BB5\u52A0\u58D3\u3002"
+  musicEventPath: event:/ZooGoblinFight/BGM/Otter vs
+  musicStartDelaySeconds: 1
+  musicVolume: 0.55
+  musicGridOffsetMs: -35
+  authoredBpm: 120
+  beatsPerBar: 4
+  totalBars: 32
+  ppq: 480
+  perfectWindowMs: 85
+  goodWindowMs: 170
+  judgementOffsetMs: 0
+  extraInputStunBeats: 1
+  warningSoundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
+  attackSoundEventPath: event:/ZooGoblinFight/SoundEffects/AxeGoblin_NormalAttack
+  blockSoundEventPath: event:/ZooGoblinFight/SoundEffects/BeatTapping
+  perfectSoundEventPath: 
+  goodSoundEventPath: 
+  missSoundEventPath: event:/SoundEffects/BeatMiss
+  phrases:
+  - startBar: 3
+    startOffsetTicks: 0
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 4
+    startOffsetTicks: 0
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 6
+    startOffsetTicks: 0
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 6
+    startOffsetTicks: 1440
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 7
+    startOffsetTicks: 960
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 8
+    startOffsetTicks: 960
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 9
+    startOffsetTicks: 480
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 10
+    startOffsetTicks: 0
+    label: "COMBO \u2022 X _ \xD72"
+    kind: 2
+    warningLengthBeats: 3
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: double-single-cue
+      hitTicks: 00000000c0030000
+    pattern:
+      id: double-single-response
+      hitTicks: 00000000c0030000
+  - startBar: 11
+    startOffsetTicks: 480
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 12
+    startOffsetTicks: 480
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 13
+    startOffsetTicks: 0
+    label: "COMBO \u2022 TRIPLE \u2192 X _"
+    kind: 3
+    warningLengthBeats: 5
+    responseDelayBeats: 1
+    attackLengthBeats: 5
+    warningPattern:
+      id: triple-single-cue
+      hitTicks: 00000000f0000000e001000080070000
+    pattern:
+      id: triple-single-response
+      hitTicks: 00000000e0010000c003000080070000
+  - startBar: 14
+    startOffsetTicks: 1440
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 15
+    startOffsetTicks: 960
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 18
+    startOffsetTicks: 0
+    label: "COMBO \u2022 X _ \xD72"
+    kind: 2
+    warningLengthBeats: 3
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: double-single-cue
+      hitTicks: 00000000c0030000
+    pattern:
+      id: double-single-response
+      hitTicks: 00000000c0030000
+  - startBar: 19
+    startOffsetTicks: 480
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 20
+    startOffsetTicks: 480
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 21
+    startOffsetTicks: 0
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 25
+    startOffsetTicks: 0
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 26
+    startOffsetTicks: 0
+    label: "COMBO \u2022 X _ \xD72"
+    kind: 2
+    warningLengthBeats: 3
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: double-single-cue
+      hitTicks: 00000000c0030000
+    pattern:
+      id: double-single-response
+      hitTicks: 00000000c0030000
+  - startBar: 27
+    startOffsetTicks: 480
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 28
+    startOffsetTicks: 0
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
+  - startBar: 29
+    startOffsetTicks: 0
+    label: "COMBO \u2022 TRIPLE \u2192 X _"
+    kind: 3
+    warningLengthBeats: 5
+    responseDelayBeats: 1
+    attackLengthBeats: 5
+    warningPattern:
+      id: triple-single-cue
+      hitTicks: 00000000f0000000e001000080070000
+    pattern:
+      id: triple-single-response
+      hitTicks: 00000000e0010000c003000080070000
+  - startBar: 30
+    startOffsetTicks: 1440
+    label: "SINGLE \u2022 X _"
+    kind: 0
+    warningLengthBeats: 1
+    responseDelayBeats: 1
+    attackLengthBeats: 1
+    warningPattern:
+      id: single-cue
+      hitTicks: 00000000
+    pattern:
+      id: single-response
+      hitTicks: 00000000
+  - startBar: 31
+    startOffsetTicks: 960
+    label: "SPECIAL \u2022 X X X _"
+    kind: 1
+    warningLengthBeats: 2
+    responseDelayBeats: 1
+    attackLengthBeats: 2
+    warningPattern:
+      id: triple-cue
+      hitTicks: 00000000f0000000e0010000
+    pattern:
+      id: triple-response
+      hitTicks: 00000000e0010000c0030000
