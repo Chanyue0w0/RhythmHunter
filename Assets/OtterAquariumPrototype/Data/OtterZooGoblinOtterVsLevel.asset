@@ -390,7 +390,7 @@ MonoBehaviour:
     - {fileID: 2563729766803057371, guid: e62614758c058b74ca906f67ab321a28, type: 3}
     - {fileID: 2563729766803057371, guid: e62614758c058b74ca906f67ab321a28, type: 3}
     - {fileID: 1805174206057743298, guid: 342a92d5448cd644dbe1129f47bf5bc1, type: 3}
-  - startBar: 31
+  - startBar: 30
     startOffsetTicks: 1440
     label: "SINGLE \u2022 X _"
     kind: 0
@@ -405,7 +405,7 @@ MonoBehaviour:
       hitTicks: 00000000
     projectilePrefabs:
     - {fileID: 9061483596609172990, guid: fa3bd13a47627f14db6b109db393025a, type: 3}
-  - startBar: 32
+  - startBar: 31
     startOffsetTicks: 960
     label: "SINGLE \u2022 X _"
     kind: 0
