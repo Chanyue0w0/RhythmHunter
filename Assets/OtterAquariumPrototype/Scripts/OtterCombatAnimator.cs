@@ -118,6 +118,12 @@ namespace RhythmHunter.OtterAquariumPrototype
             visualRoot.localScale = scale;
         }
 
+        public void SetCinematicRolling(float progress)
+        {
+            state = State.Intro;
+            ApplyRollingPose(Mathf.Clamp01(progress));
+        }
+
         public void SetCinematicIdle()
         {
             state = State.Idle;

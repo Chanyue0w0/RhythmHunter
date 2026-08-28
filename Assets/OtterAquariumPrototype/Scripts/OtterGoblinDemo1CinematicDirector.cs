@@ -1,8 +1,13 @@
 using System.Collections;
+using FMOD.Studio;
+using FMODUnity;
 using RhythmHunter.RhythmDemo;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace RhythmHunter.OtterAquariumPrototype
@@ -86,6 +91,14 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private PlayableDirector additionalOpeningTimeline;
         [SerializeField] private PlayableDirector endingTimeline;
 
+        [Header("Chapter Intro Card (editable)")]
+        [SerializeField] private bool showChapterIntroCard = true;
+        [SerializeField] private string chapterIntroTitle = "第一章　不速之客";
+        [SerializeField, TextArea(2, 5)] private string chapterIntroMessage =
+            "哥布林闖進了海獺的家！\n看準節奏，接住牠丟來的攻擊！";
+        [SerializeField, Min(0.1f)] private float chapterIntroDurationSeconds = 3f;
+        [SerializeField, Range(0f, 1f)] private float chapterIntroFadeOutSeconds = 0.35f;
+
         [Header("Built-in Ending")]
         [SerializeField] private Sprite heroicSpiritSprite;
         [SerializeField] private Vector3 heroicSpiritWorldPosition = new(-2.45f, 0.25f, -0.5f);
@@ -95,6 +108,13 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(0.01f)] private float flashInSeconds = 0.08f;
         [SerializeField, Min(0f)] private float flashHoldSeconds = 0.3f;
         [SerializeField, Min(0.01f)] private float flashFadeSeconds = 0.75f;
+
+        [Header("Ending Spiritual World Audio")]
+        [SerializeField] private string spiritualWorldAudioEventPath =
+            "event:/ZooGoblinFight/BGM/The Divine Bureaucracy";
+        [SerializeField, Min(0f)] private float spiritualWorldAudioDelaySeconds = 2f;
+        [SerializeField, Range(0f, 1f)] private float spiritualWorldAudioVolume = 1f;
+        [SerializeField] private bool stopBattleMusicInSpiritualWorld = true;
 
         [Header("Opening Dialogue (editable and reorderable)")]
         [SerializeField] private DialogueLine[] openingDialogue =
@@ -139,6 +159,10 @@ namespace RhythmHunter.OtterAquariumPrototype
             new("撲克臉"),
             new("發大財")
         };
+        [SerializeField] private bool showMenuButton = true;
+        [SerializeField] private string menuButtonLabel = "MENU";
+        [SerializeField] private string mainMenuScenePath =
+            "Assets/OtterAquariumPrototype/Scenes/OtterMainMenu.unity";
 
         [Header("Dependencies")]
         [SerializeField] private OtterGoblinDemo1Runner runner;
@@ -149,6 +173,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         [Header("Opening Timing")]
         [SerializeField, Min(0.1f)] private float otterSwimSeconds = 2.2f;
+        [SerializeField, Min(0.1f)] private float otterRollSeconds = 0.9f;
         [SerializeField, Min(0.1f)] private float cameraPanSeconds = 0.85f;
         [SerializeField, Min(0f)] private float dialogueInputLockSeconds = 0.15f;
         [SerializeField, Min(0f)] private float goblinRaisedAxeHoldSeconds = 0.38f;
@@ -160,6 +185,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [Header("Camera Framing")]
         [SerializeField, Min(0.5f)] private float otterFocusSize = 3.1f;
         [SerializeField, Min(0.5f)] private float goblinFocusSize = 2.8f;
+        [SerializeField] private float goblinFocusYOffset = 0.15f;
         [SerializeField, Min(0.5f)] private float axeFocusSize = 2.15f;
 
         private Vector3 defaultCameraPosition;
@@ -169,6 +195,8 @@ namespace RhythmHunter.OtterAquariumPrototype
         private bool endingRunning;
         private bool endingSequenceCompleted;
         private Canvas dialogueCanvas;
+        private Canvas chapterIntroCanvas;
+        private CanvasGroup chapterIntroCanvasGroup;
         private Canvas endingFlashCanvas;
         private Canvas demoEndCanvas;
         private Image endingFlashImage;
@@ -178,15 +206,22 @@ namespace RhythmHunter.OtterAquariumPrototype
         private Texture2D spiritualWorldTexture;
         private Sprite spiritualWorldSprite;
         private OtterCombatAnimator subscribedOtterAnimator;
+        private Coroutine spiritualWorldAudioRoutine;
+        private EventInstance spiritualWorldAudioInstance;
+        private bool returningToMenu;
 
         public bool EnableCinematics => enableCinematics;
-        public bool HasOpeningContent => playBuiltInOpening || additionalOpeningTimeline != null;
+        public bool HasOpeningContent => showChapterIntroCard || playBuiltInOpening || additionalOpeningTimeline != null;
+        public bool HasChapterIntroCard => showChapterIntroCard
+            && (!string.IsNullOrWhiteSpace(chapterIntroTitle) || !string.IsNullOrWhiteSpace(chapterIntroMessage));
         public bool HasEndingContent => (playBuiltInEnding && heroicSpiritSprite != null) || endingTimeline != null;
         public int OpeningDialogueCount => openingDialogue?.Length ?? 0;
         public int EndingDialogueCount => (preHeroEndingDialogue?.Length ?? 0)
             + (heroRevealDialogue?.Length ?? 0)
             + (postOtterExitDialogue?.Length ?? 0);
         public int FutureLevelCardCount => futureLevelCards?.Length ?? 0;
+        public bool HasSpiritualWorldAudio => !string.IsNullOrWhiteSpace(spiritualWorldAudioEventPath);
+        public bool HasMenuReturn => showMenuButton && !string.IsNullOrWhiteSpace(mainMenuScenePath);
 
         public void Configure(
             OtterGoblinDemo1Runner configuredRunner,
@@ -217,6 +252,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             combatInput?.SetDefendEnabled(false);
             presenter?.SetCinematicMode(true);
             presenter?.OtterAnimator?.BeginCinematicControl();
+            if (showChapterIntroCard)
+                CreateChapterIntroCard();
         }
 
         private void OnEnable()
@@ -232,6 +269,8 @@ namespace RhythmHunter.OtterAquariumPrototype
                 runner.BattleWon -= OnBattleWon;
             UnsubscribeFromCrackImpact();
             RestoreTimeScale();
+            StopSpiritualWorldAudio();
+            DestroyChapterIntroCard();
             DestroyDialogue();
             DestroyEndingFlash();
             DestroyHeroicSpirit();
@@ -247,6 +286,8 @@ namespace RhythmHunter.OtterAquariumPrototype
                 yield break;
 
             openingRunning = true;
+            if (showChapterIntroCard)
+                yield return RunChapterIntroCard();
             if (playBuiltInOpening)
                 yield return RunBuiltInOpening();
             if (additionalOpeningTimeline != null)
@@ -267,6 +308,84 @@ namespace RhythmHunter.OtterAquariumPrototype
             beatClock?.StartMusic();
             combatInput?.SetDefendEnabled(true);
             openingRunning = false;
+        }
+
+        private IEnumerator RunChapterIntroCard()
+        {
+            if (chapterIntroCanvas == null)
+                CreateChapterIntroCard();
+            if (chapterIntroCanvasGroup == null)
+                yield break;
+
+            chapterIntroCanvasGroup.alpha = 1f;
+            float fadeDuration = Mathf.Min(chapterIntroFadeOutSeconds, chapterIntroDurationSeconds);
+            float solidDuration = Mathf.Max(0f, chapterIntroDurationSeconds - fadeDuration);
+            if (solidDuration > 0f)
+                yield return new WaitForSecondsRealtime(solidDuration);
+
+            float elapsed = 0f;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = fadeDuration > 0f ? Mathf.Clamp01(elapsed / fadeDuration) : 1f;
+                chapterIntroCanvasGroup.alpha = 1f - Smooth(progress);
+                yield return null;
+            }
+
+            DestroyChapterIntroCard();
+        }
+
+        private void CreateChapterIntroCard()
+        {
+            DestroyChapterIntroCard();
+
+            GameObject root = new(
+                "Demo1 Chapter Intro Card",
+                typeof(Canvas),
+                typeof(CanvasScaler),
+                typeof(CanvasGroup));
+            chapterIntroCanvas = root.GetComponent<Canvas>();
+            chapterIntroCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            chapterIntroCanvas.sortingOrder = 31000;
+            chapterIntroCanvasGroup = root.GetComponent<CanvasGroup>();
+            chapterIntroCanvasGroup.alpha = 1f;
+            chapterIntroCanvasGroup.blocksRaycasts = true;
+            chapterIntroCanvasGroup.interactable = false;
+
+            CanvasScaler scaler = root.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+
+            RectTransform blackScreen = CreateRect("Black Screen", root.transform);
+            Stretch(blackScreen, Vector2.zero, Vector2.one);
+            Image blackImage = blackScreen.gameObject.AddComponent<Image>();
+            blackImage.color = Color.black;
+
+            Font font = CreateDialogueFont();
+            Text title = CreateText("Chapter Title", blackScreen, font, 42, FontStyle.Bold);
+            title.text = chapterIntroTitle;
+            title.alignment = TextAnchor.MiddleCenter;
+            title.color = new Color(0.76f, 0.8f, 0.84f, 1f);
+            title.horizontalOverflow = HorizontalWrapMode.Wrap;
+            title.verticalOverflow = VerticalWrapMode.Truncate;
+            Stretch(title.rectTransform, new Vector2(0.12f, 0.54f), new Vector2(0.88f, 0.64f));
+
+            Text message = CreateText("Chapter Event", blackScreen, font, 50, FontStyle.Normal);
+            message.text = chapterIntroMessage;
+            message.alignment = TextAnchor.MiddleCenter;
+            message.color = Color.white;
+            message.horizontalOverflow = HorizontalWrapMode.Wrap;
+            message.verticalOverflow = VerticalWrapMode.Truncate;
+            message.lineSpacing = 1.2f;
+            Stretch(message.rectTransform, new Vector2(0.1f, 0.34f), new Vector2(0.9f, 0.55f));
+        }
+
+        private void DestroyChapterIntroCard()
+        {
+            if (chapterIntroCanvas != null)
+                Destroy(chapterIntroCanvas.gameObject);
+            chapterIntroCanvas = null;
+            chapterIntroCanvasGroup = null;
         }
 
         private IEnumerator RunBuiltInOpening()
@@ -292,9 +411,17 @@ namespace RhythmHunter.OtterAquariumPrototype
                     Smooth(progress));
                 yield return null;
             }
+
+            elapsed = 0f;
+            while (elapsed < otterRollSeconds)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                otterAnimator.SetCinematicRolling(Mathf.Clamp01(elapsed / otterRollSeconds));
+                yield return null;
+            }
             otterAnimator.SetCinematicIdle();
 
-            Vector3 goblinFocus = CameraPositionFor(enemy.position + new Vector3(0f, 0.7f, 0f));
+            Vector3 goblinFocus = CameraPositionFor(enemy.position + new Vector3(0f, goblinFocusYOffset, 0f));
             yield return MoveCamera(goblinFocus, goblinFocusSize, cameraPanSeconds);
             yield return PlayDialogueSequence(openingDialogue);
 
@@ -523,9 +650,12 @@ namespace RhythmHunter.OtterAquariumPrototype
 
             if (presenter != null && presenter.EnemyRoot != null)
                 presenter.EnemyRoot.gameObject.SetActive(false);
+            if (stopBattleMusicInSpiritualWorld)
+                beatClock?.StopMusic();
             CreateSpiritualWorldBackdrop();
             yield return FadeEndingFlash(1f, 0f, flashFadeSeconds);
             DestroyEndingFlash();
+            spiritualWorldAudioRoutine = StartCoroutine(PlaySpiritualWorldAudioOnce());
 
             // The mysterious voice speaks while the otter is alone in the white world.
             yield return PlayDialogueSequence(preHeroEndingDialogue);
@@ -580,6 +710,80 @@ namespace RhythmHunter.OtterAquariumPrototype
             yield return PlayAndWait(endingTimeline);
             endingSequenceCompleted = true;
             endingRunning = false;
+        }
+
+        private IEnumerator PlaySpiritualWorldAudioOnce()
+        {
+            if (spiritualWorldAudioDelaySeconds > 0f)
+                yield return new WaitForSecondsRealtime(spiritualWorldAudioDelaySeconds);
+            if (string.IsNullOrWhiteSpace(spiritualWorldAudioEventPath))
+            {
+                spiritualWorldAudioRoutine = null;
+                yield break;
+            }
+
+            ReleaseSpiritualWorldAudioInstance(false);
+            spiritualWorldAudioInstance = RuntimeManager.CreateInstance(spiritualWorldAudioEventPath);
+            if (!spiritualWorldAudioInstance.isValid())
+            {
+                Debug.LogWarning(
+                    $"[Demo1 Cinematic] FMOD ending event was not found: {spiritualWorldAudioEventPath}",
+                    this);
+                spiritualWorldAudioRoutine = null;
+                yield break;
+            }
+
+            spiritualWorldAudioInstance.setVolume(spiritualWorldAudioVolume);
+            int eventLengthMs = 0;
+            if (spiritualWorldAudioInstance.getDescription(out EventDescription description) == FMOD.RESULT.OK)
+                description.getLength(out eventLengthMs);
+
+            FMOD.RESULT startResult = spiritualWorldAudioInstance.start();
+            if (startResult != FMOD.RESULT.OK)
+            {
+                Debug.LogWarning(
+                    $"[Demo1 Cinematic] FMOD ending event failed to start: {startResult}",
+                    this);
+                ReleaseSpiritualWorldAudioInstance(false);
+                spiritualWorldAudioRoutine = null;
+                yield break;
+            }
+
+            // FMOD metadata currently reports a non-looping 19.2 second event. The length
+            // cap also guarantees one pass if a loop region is accidentally added later.
+            float maximumPlaybackSeconds = eventLengthMs > 0 ? eventLengthMs / 1000f + 0.1f : 30f;
+            float elapsed = 0f;
+            while (elapsed < maximumPlaybackSeconds && spiritualWorldAudioInstance.isValid())
+            {
+                elapsed += Time.unscaledDeltaTime;
+                if (spiritualWorldAudioInstance.getPlaybackState(out PLAYBACK_STATE state) == FMOD.RESULT.OK
+                    && state == PLAYBACK_STATE.STOPPED)
+                {
+                    break;
+                }
+                yield return null;
+            }
+
+            ReleaseSpiritualWorldAudioInstance(true);
+            spiritualWorldAudioRoutine = null;
+        }
+
+        private void StopSpiritualWorldAudio()
+        {
+            if (spiritualWorldAudioRoutine != null)
+                StopCoroutine(spiritualWorldAudioRoutine);
+            spiritualWorldAudioRoutine = null;
+            ReleaseSpiritualWorldAudioInstance(true);
+        }
+
+        private void ReleaseSpiritualWorldAudioInstance(bool stopFirst)
+        {
+            if (!spiritualWorldAudioInstance.isValid())
+                return;
+            if (stopFirst)
+                spiritualWorldAudioInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+            spiritualWorldAudioInstance.release();
+            spiritualWorldAudioInstance.clearHandle();
         }
 
         private void CreateEndingFlash()
@@ -714,10 +918,15 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             DestroyDemoEndPanel();
 
-            GameObject root = new("Demo End Future Levels", typeof(Canvas), typeof(CanvasScaler));
+            GameObject root = new(
+                "Demo End Future Levels",
+                typeof(Canvas),
+                typeof(CanvasScaler),
+                typeof(GraphicRaycaster));
             demoEndCanvas = root.GetComponent<Canvas>();
             demoEndCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             demoEndCanvas.sortingOrder = 31500;
+            EnsureUiEventSystem(root.transform);
             CanvasScaler scaler = root.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -755,6 +964,55 @@ namespace RhythmHunter.OtterAquariumPrototype
                     : null;
                 CreateFutureLevelCard(panel, font, data, index);
             }
+
+            if (showMenuButton)
+                CreateMenuButton(panel, font);
+        }
+
+        private static void EnsureUiEventSystem(Transform parent)
+        {
+            if (EventSystem.current != null)
+                return;
+
+            GameObject eventSystemObject = new(
+                "Demo End EventSystem",
+                typeof(EventSystem),
+                typeof(InputSystemUIInputModule));
+            eventSystemObject.transform.SetParent(parent, false);
+        }
+
+        private void CreateMenuButton(RectTransform panel, Font font)
+        {
+            RectTransform buttonRect = CreateRect("MENU Button", panel);
+            Stretch(buttonRect, new Vector2(0.4f, 0.012f), new Vector2(0.6f, 0.075f));
+            Image buttonImage = buttonRect.gameObject.AddComponent<Image>();
+            buttonImage.color = new Color(0.1f, 0.55f, 0.68f, 1f);
+
+            Button button = buttonRect.gameObject.AddComponent<Button>();
+            button.targetGraphic = buttonImage;
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
+            colors.pressedColor = new Color(0.72f, 0.88f, 0.94f, 1f);
+            colors.selectedColor = colors.highlightedColor;
+            button.colors = colors;
+            button.onClick.AddListener(ReturnToMainMenu);
+
+            Text label = CreateText("Label", buttonRect, font, 30, FontStyle.Bold);
+            label.text = string.IsNullOrWhiteSpace(menuButtonLabel) ? "MENU" : menuButtonLabel;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.color = Color.white;
+            Stretch(label.rectTransform, Vector2.zero, Vector2.one);
+        }
+
+        private void ReturnToMainMenu()
+        {
+            if (returningToMenu || string.IsNullOrWhiteSpace(mainMenuScenePath))
+                return;
+            returningToMenu = true;
+            StopSpiritualWorldAudio();
+            SceneManager.LoadScene(mainMenuScenePath, LoadSceneMode.Single);
         }
 
         private static void CreateFutureLevelCard(
@@ -857,6 +1115,14 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnValidate()
         {
+            chapterIntroDurationSeconds = Mathf.Max(0.1f, chapterIntroDurationSeconds);
+            chapterIntroFadeOutSeconds = Mathf.Clamp(
+                chapterIntroFadeOutSeconds,
+                0f,
+                chapterIntroDurationSeconds);
+            spiritualWorldAudioDelaySeconds = Mathf.Max(0f, spiritualWorldAudioDelaySeconds);
+            spiritualWorldAudioVolume = Mathf.Clamp01(spiritualWorldAudioVolume);
+            otterRollSeconds = Mathf.Max(0.1f, otterRollSeconds);
             dialogueInputLockSeconds = Mathf.Max(0f, dialogueInputLockSeconds);
             goblinRaisedAxeHoldSeconds = Mathf.Max(0f, goblinRaisedAxeHoldSeconds);
             endingOtterSwimSeconds = Mathf.Max(0.1f, endingOtterSwimSeconds);

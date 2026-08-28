@@ -1968,7 +1968,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 20
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4753702385071775785, guid: f28cabfee1e06f44ab958cfe47b3ed05, type: 3}
+  m_Sprite: {fileID: -4753702385071775785, guid: cc4e0e4880e923244ab1b85196329ed0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -2200,8 +2200,8 @@ Transform:
   m_GameObject: {fileID: 906780658}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.65, y: -1.65, z: 0}
-  m_LocalScale: {x: 0.72, y: 0.72, z: 0.72}
+  m_LocalPosition: {x: -4.65, y: -0.45, z: 0}
+  m_LocalScale: {x: 0.765792, y: 0.765792, z: 0.765792}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 701676071}
@@ -2779,7 +2779,7 @@ Transform:
   m_GameObject: {fileID: 1130419121}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.65, y: -1.9, z: 0}
+  m_LocalPosition: {x: 4.65, y: -1.39, z: 0}
   m_LocalScale: {x: 0.72, y: 0.72, z: 0.72}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3658,14 +3658,27 @@ MonoBehaviour:
   enemyRoot: {fileID: 906780659}
   enemyRenderer: {fileID: 701676070}
   enemyIdleFrames:
-  - {fileID: -4753702385071775785, guid: f28cabfee1e06f44ab958cfe47b3ed05, type: 3}
-  - {fileID: -4357705645274307756, guid: 993f8b2d88188a349bd86569bfb5f237, type: 3}
+  - {fileID: -4753702385071775785, guid: cc4e0e4880e923244ab1b85196329ed0, type: 3}
+  - {fileID: -4357705645274307756, guid: b2762db69cbc36249a02bb975d7ea779, type: 3}
+  - {fileID: 2244847242733787956, guid: 3ef08adef2a8d9d4c84c46e2444703f3, type: 3}
   enemyAttackFrames:
   - {fileID: -3297650188656544483, guid: 7bde3f1ba61c513449ef56fb31a52a3e, type: 3}
   - {fileID: -8144534994874435676, guid: f0734b0702769ae40b75bdd59fed84b9, type: 3}
   - {fileID: -5380739489725017918, guid: 1338ba4e8403e6c43904ff957cc39ff9, type: 3}
   - {fileID: -3488042933814449837, guid: f1b9109fc1ed2064cb1d232c3939844a, type: 3}
-  enemyAttackedFrame: {fileID: -3260786877400901070, guid: 8f5fca47372cad140a0a72ca5ff907c5, type: 3}
+  enemySearchingFrames:
+  - {fileID: -6807443579299698160, guid: a32e1dba2e8e23c4da64e916b0dde31c, type: 3}
+  - {fileID: 3178439959266376966, guid: d03185f4504e62140831bb36a451ba1d, type: 3}
+  - {fileID: -8592002939297157744, guid: 06dd21310c92c834ea7b591965c02e41, type: 3}
+  - {fileID: -6202753022885463408, guid: 280aa00b7a02c9141aa5a96f6708508e, type: 3}
+  - {fileID: 917292340772664104, guid: 157591b6896b50b4a90c0b9ebb4cac26, type: 3}
+  - {fileID: 7801486939728000951, guid: 0127902777259a34fbddbf57ffbfed40, type: 3}
+  - {fileID: -8736455267345595022, guid: 2ccb05064ee975041a77ea1d24c98c0e, type: 3}
+  - {fileID: 5755246619270363123, guid: 2cd81db3aadeed1409dde626ab05a4e0, type: 3}
+  - {fileID: 3053076727985128833, guid: 92f1b6d0f8ca32a4a986fbad52cb8d68, type: 3}
+  enemyShockFrames:
+  - {fileID: -2037129747341479263, guid: c502780eca0065e41a9da510fe97754e, type: 3}
+  enemyAttackedFrame: {fileID: -2037129747341479263, guid: c502780eca0065e41a9da510fe97754e, type: 3}
   axeProjectilePrefab: {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   otterRoot: {fileID: 1130419122}
   otterBody: {fileID: 384012221}
@@ -3673,6 +3686,20 @@ MonoBehaviour:
   shield: {fileID: 947752845}
   dangerFlash: {fileID: 874976528}
   showWarningDangerFlash: 0
+  searchingStartBar: 17
+  searchingEndBar: 31
+  searchingFramesPerBeat: 2
+  searchingIntroFrameCount: 2
+  searchingStage1FirstFrame: 3
+  searchingStage1LastFrame: 5
+  searchingStage2StartBar: 22
+  searchingStage2FirstFrame: 6
+  searchingStage2LastFrame: 7
+  searchingStage3StartBar: 27
+  searchingStage3FirstFrame: 8
+  searchingStage3LastFrame: 9
+  shockHoldBeats: 0.75
+  shockFramesPerBeat: 4
   tripleAxeVisualFlightBeats: 0.5
   titleText: {fileID: 293324304}
   phaseText: {fileID: 356862317}
@@ -3745,7 +3772,12 @@ MonoBehaviour:
   skipRhythmTimelineIntroAfterCinematic: 1
   additionalOpeningTimeline: {fileID: 0}
   endingTimeline: {fileID: 0}
-  heroicSpiritSprite: {fileID: -5405164439530168626, guid: 812ec674c6b6c1e419a323409faae2d9, type: 3}
+  showChapterIntroCard: 1
+  chapterIntroTitle: "\u7B2C\u4E00\u7AE0\u3000\u4E0D\u901F\u4E4B\u5BA2"
+  chapterIntroMessage: "\u54E5\u5E03\u6797\u95D6\u9032\u4E86\u6D77\u737A\u7684\u5BB6\uFF01\n\u770B\u6E96\u7BC0\u594F\uFF0C\u63A5\u4F4F\u7260\u4E1F\u4F86\u7684\u653B\u64CA\uFF01"
+  chapterIntroDurationSeconds: 5
+  chapterIntroFadeOutSeconds: 0.35
+  heroicSpiritSprite: {fileID: -51938603553045877, guid: 660bb945ceb12b24798f144d0e4a7da3, type: 3}
   heroicSpiritWorldPosition: {x: -2.45, y: 0.25, z: -0.5}
   heroicSpiritScale: 1.05
   heroicSpiritBobAmplitude: 0.12
@@ -3753,9 +3785,13 @@ MonoBehaviour:
   flashInSeconds: 0.08
   flashHoldSeconds: 0.3
   flashFadeSeconds: 0.75
+  spiritualWorldAudioEventPath: event:/ZooGoblinFight/BGM/The Divine Bureaucracy
+  spiritualWorldAudioDelaySeconds: 2
+  spiritualWorldAudioVolume: 1
+  stopBattleMusicInSpiritualWorld: 1
   openingDialogue:
   - speaker: "\u65A7\u982D\u54E5\u5E03\u6797"
-    content: "\u65E2\u7136\u88AB\u4F60\u767C\u73FE\u4E86\uFF0C\u90A3\u5C31\u53EA\u597D\u89E3\u6C7A\u4F60\u4E86"
+    content: "\u53D7\u6B7B\u5427! \u5947\u602A\u7684\u751F\u7269!"
     autoAdvanceSeconds: 2
     allowInputAdvance: 1
   preHeroEndingDialogue:
@@ -3807,12 +3843,16 @@ MonoBehaviour:
     title: "\u64B2\u514B\u81C9"
   - image: {fileID: 9214351587515968990, guid: 9a2d76c1633af2d4592f1142fd876f47, type: 3}
     title: "\u767C\u5927\u8CA1"
+  showMenuButton: 1
+  menuButtonLabel: MENU
+  mainMenuScenePath: Assets/OtterAquariumPrototype/Scenes/OtterMainMenu.unity
   runner: {fileID: 1636567133}
   beatClock: {fileID: 1636567134}
   combatInput: {fileID: 1636567132}
   presenter: {fileID: 1636567131}
   sceneCamera: {fileID: 1628976427}
   otterSwimSeconds: 2.2
+  otterRollSeconds: 0.9
   cameraPanSeconds: 0.85
   dialogueInputLockSeconds: 0.15
   goblinRaisedAxeHoldSeconds: 0.38
@@ -3822,6 +3862,7 @@ MonoBehaviour:
   cinematicCatchHoldBeats: 0.5
   otterFocusSize: 3.1
   goblinFocusSize: 2.8
+  goblinFocusYOffset: 0.15
   axeFocusSize: 2.15
 --- !u!1 &1659979976
 GameObject:
@@ -4455,7 +4496,7 @@ Transform:
   m_GameObject: {fileID: 1757073839}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5049,7 +5090,7 @@ Transform:
   m_GameObject: {fileID: 1932851070}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.0699999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -185,6 +185,11 @@ namespace RhythmHunter.RhythmDemo
             playbackStarted = true;
         }
 
+        public void StopMusic()
+        {
+            ShutdownMusic();
+        }
+
         public bool TryGetTimelinePositionMs(out int timelinePositionMs)
         {
             timelinePositionMs = 0;

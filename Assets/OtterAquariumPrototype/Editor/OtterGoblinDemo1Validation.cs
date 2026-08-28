@@ -89,6 +89,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && input != null
                 && presenter != null
                 && !presenter.WarningDangerFlashEnabled
+                && presenter.HasRequiredGoblinAnimationFrames
                 && presenter.OtterAnimator == otterAnimator
                 && presenter.AxeProjectilePrefab != null
                 && presenter.AxeProjectilePrefab.GetComponent<RhythmTimelineProjectile>() != null
@@ -98,16 +99,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && otterAnimator.SpriteRenderer != null
                 && IsCurrentOtterArt(otterAnimator.SpriteRenderer.sprite)
                 && cinematicDirector != null
+                && cinematicDirector.HasChapterIntroCard
                 && cinematicDirector.HasEndingContent
                 && cinematicDirector.OpeningDialogueCount > 0
                 && cinematicDirector.EndingDialogueCount > 0
                 && cinematicDirector.FutureLevelCardCount >= 4
+                && cinematicDirector.HasSpiritualWorldAudio
+                && cinematicDirector.HasMenuReturn
                 && background != null
                 && background.sprite != null
                 && AssetDatabase.GetAssetPath(background.sprite) == OtterGoblinDemo1SceneBuilder.BackgroundPath
                 && background.color == Color.white
                 && goblin != null
                 && goblin.sprite != null
+                && IsCurrentGoblinArt(goblin.sprite)
                 && goblinRoot != null
                 && goblinRoot.position.x <= -4.5f
                 && Mathf.Approximately(goblinRoot.localScale.x, 0.72f)
@@ -143,11 +148,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Input={input != null}, Presenter={presenter != null}, Background={background != null}, "
                     + $"OtterAnimator={otterAnimator != null}, OtterFrames={otterAnimator != null && otterAnimator.HasRequiredFrames}, "
                     + $"CinematicDirector={cinematicDirector != null}, Opening={cinematicDirector != null && cinematicDirector.HasOpeningContent}, "
+                    + $"ChapterCard={cinematicDirector != null && cinematicDirector.HasChapterIntroCard}, "
                     + $"HeroEnding={cinematicDirector != null && cinematicDirector.HasEndingContent}, "
                     + $"Dialogue={cinematicDirector?.OpeningDialogueCount ?? 0}/{cinematicDirector?.EndingDialogueCount ?? 0}, "
                     + $"FutureCards={cinematicDirector?.FutureLevelCardCount ?? 0}, "
+                    + $"SpiritualAudio={cinematicDirector != null && cinematicDirector.HasSpiritualWorldAudio}, "
+                    + $"MenuReturn={cinematicDirector != null && cinematicDirector.HasMenuReturn}, "
                     + $"WarningRedFlash={presenter != null && presenter.WarningDangerFlashEnabled}, "
-                    + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
+                    + $"Goblin={goblin != null}, GoblinFrames={presenter != null && presenter.HasRequiredGoblinAnimationFrames}, GoblinRoot={goblinRoot != null}, "
                     + $"Otter={otter != null}, FailureHUD={failureCount != null}, "
                     + $"DyingBottleInk={dyingBottle != null && dyingBottle.ScreenInterference == RhythmScreenInterference.InterferenceKind.OrangeInk}, "
                     + $"SaveLoading={saveIcon != null && saveIcon.ScreenInterference == RhythmScreenInterference.InterferenceKind.SaveLoading}, "
@@ -170,6 +178,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 return false;
             string path = AssetDatabase.GetAssetPath(sprite).Replace('\\', '/');
             return path.Contains("/Arts/Otter/") && !path.Contains("/old/");
+        }
+
+        private static bool IsCurrentGoblinArt(Sprite sprite)
+        {
+            if (sprite == null)
+                return false;
+            string path = AssetDatabase.GetAssetPath(sprite).Replace('\\', '/');
+            return path.Contains("/Arts/Enemy/Goblin_Mercenary/") && !path.Contains("/old/");
         }
 
         private static RhythmTimelineProjectile LoadProjectilePrefab(string prefabName)

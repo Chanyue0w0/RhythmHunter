@@ -28,7 +28,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private const string FutureLevelPreview4Path = "Assets/OtterAquariumPrototype/Arts/FutureLevel/ChatGPT Image 2026年8月28日 下午12_39_14.png";
         private const string OtterIdlePath = OtterArtRoot + "/Idle/idle.png";
         private const string OtterAnimationUpgradeSessionKey = "RhythmHunter.Demo1OtterAnimationUpgrade.v1";
-        private const string AxeSpritePath = GoblinRoot + "/Axe.png";
+        private const string AxeSpritePath = GoblinRoot + "/old/Axe.png";
         private const float CharacterScale = 0.72f;
         private const float GoblinX = -4.65f;
         private const float OtterX = 4.65f;
@@ -43,6 +43,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public SpriteRenderer EnemyRenderer;
             public Sprite[] EnemyIdle;
             public Sprite[] EnemyAttack;
+            public Sprite[] EnemySearching;
+            public Sprite[] EnemyShock;
             public Sprite EnemyAttacked;
             public GameObject AxeProjectilePrefab;
             public Transform OtterRoot;
@@ -323,16 +325,13 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite[] idle =
             {
                 LoadSprite($"{GoblinRoot}/idle/idle_1.png"),
-                LoadSprite($"{GoblinRoot}/idle/idle_2.png")
+                LoadSprite($"{GoblinRoot}/idle/idle_2.png"),
+                LoadSprite($"{GoblinRoot}/idle/idle_3.png")
             };
-            Sprite[] attack =
-            {
-                LoadSprite($"{GoblinRoot}/attack/attack_1.png"),
-                LoadSprite($"{GoblinRoot}/attack/attack_2.png"),
-                LoadSprite($"{GoblinRoot}/attack/attack_3.png"),
-                LoadSprite($"{GoblinRoot}/attack/attack_4.png")
-            };
-            Sprite attacked = LoadSprite($"{GoblinRoot}/attacked_1.png");
+            Sprite[] attack = LoadNumberedSprites(GoblinRoot + "/old/attack/attack_", 4);
+            Sprite[] searching = LoadNumberedSprites(GoblinRoot + "/searching/searching_", 9);
+            Sprite[] shock = LoadNumberedSprites(GoblinRoot + "/shock/shock_", 1);
+            Sprite attacked = shock[0];
             Sprite otterIdle = LoadSprite(OtterIdlePath);
             Sprite[] otterSwimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
             Sprite[] otterRolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
@@ -342,6 +341,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
             if (data == null || shape == null || background == null || font == null
                 || idle.Any(sprite => sprite == null) || attack.Any(sprite => sprite == null)
+                || searching.Any(sprite => sprite == null) || shock.Any(sprite => sprite == null)
                 || attacked == null || axePrefab == null || otterIdle == null
                 || otterSwimming.Any(sprite => sprite == null)
                 || otterRolling.Any(sprite => sprite == null)
@@ -371,6 +371,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 font,
                 idle,
                 attack,
+                searching,
+                shock,
                 attacked,
                 otterIdle,
                 otterSwimming,
@@ -410,6 +412,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Font font,
             Sprite[] idle,
             Sprite[] attack,
+            Sprite[] searching,
+            Sprite[] shock,
             Sprite attacked,
             Sprite otterIdle,
             Sprite[] otterSwimming,
@@ -425,6 +429,8 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             {
                 EnemyIdle = idle,
                 EnemyAttack = attack,
+                EnemySearching = searching,
+                EnemyShock = shock,
                 EnemyAttacked = attacked,
                 AxeProjectilePrefab = axePrefab
             };
@@ -492,7 +498,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             stage.EnemyRoot = enemy;
             SpriteRenderer renderer = Sprite(
                 "GoblinSprite", enemy, initialSprite, Color.white,
-                Vector3.zero, new Vector2(3.8f, 3.8f), 20, true);
+                Vector3.zero, new Vector2(4.56f, 4f), 20, true);
             stage.EnemyRenderer = renderer;
 
             Transform label = Empty("GoblinLabel", parent);
@@ -582,7 +588,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.Judgement,
                 stage.Timing,
                 stage.FailureCount,
-                stage.Status);
+                stage.Status,
+                stage.EnemySearching,
+                stage.EnemyShock);
             stage.OtterAnimator.ConfigureRunner(runner);
             input.Configure(runner, presenter);
             cinematicDirector.Configure(

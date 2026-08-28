@@ -52,23 +52,6 @@ MonoBehaviour:
     - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 4
     startOffsetTicks: 0
-    label: "SPECIAL \u2022 X X X _"
-    kind: 1
-    warningLengthBeats: 2
-    responseDelayBeats: 1
-    attackLengthBeats: 2
-    warningPattern:
-      id: triple-cue
-      hitTicks: 00000000f0000000e0010000
-    pattern:
-      id: triple-response
-      hitTicks: 00000000e0010000c0030000
-    projectilePrefabs:
-    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
-    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
-    - {fileID: 3119435126387670406, guid: 5d64f369ae8272b418b4d9a0c7f5128d, type: 3}
-  - startBar: 6
-    startOffsetTicks: 0
     label: "SINGLE \u2022 X _"
     kind: 0
     warningLengthBeats: 1
@@ -81,6 +64,22 @@ MonoBehaviour:
       id: single-response
       hitTicks: 00000000
     projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
+  - startBar: 5
+    startOffsetTicks: 0
+    label: "COMBO \u2022 X _ \xD72"
+    kind: 2
+    warningLengthBeats: 3
+    responseDelayBeats: 1
+    attackLengthBeats: 3
+    warningPattern:
+      id: double-single-cue
+      hitTicks: 00000000c0030000
+    pattern:
+      id: double-single-response
+      hitTicks: 00000000c0030000
+    projectilePrefabs:
+    - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
     - {fileID: 5732830338060981370, guid: eb8f1427bec7f32469622e6991f4c090, type: 3}
   - startBar: 6
     startOffsetTicks: 1440

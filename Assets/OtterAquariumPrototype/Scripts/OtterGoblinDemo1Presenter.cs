@@ -21,6 +21,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private SpriteRenderer enemyRenderer;
         [SerializeField] private Sprite[] enemyIdleFrames;
         [SerializeField] private Sprite[] enemyAttackFrames;
+        [SerializeField] private Sprite[] enemySearchingFrames;
+        [SerializeField] private Sprite[] enemyShockFrames;
+        [Tooltip("Legacy fallback used only when no Shock frames are assigned.")]
         [SerializeField] private Sprite enemyAttackedFrame;
         [SerializeField] private GameObject axeProjectilePrefab;
         [SerializeField] private Transform otterRoot;
@@ -32,6 +35,26 @@ namespace RhythmHunter.OtterAquariumPrototype
         [Header("Combat Visuals")]
         [Tooltip("Only controls the full-screen red warning pulse. Miss/hurt feedback remains enabled.")]
         [SerializeField] private bool showWarningDangerFlash;
+
+        [Header("Goblin Animation Timing")]
+        [Tooltip("The searching/throwing loop begins on this authored bar.")]
+        [SerializeField, Min(1)] private int searchingStartBar = 17;
+        [Tooltip("The searching/throwing loop remains active through this authored bar.")]
+        [SerializeField, Min(1)] private int searchingEndBar = 31;
+        [SerializeField, Min(0.25f)] private float searchingFramesPerBeat = 2f;
+        [Tooltip("Frames 1..N play once when the searching section starts.")]
+        [SerializeField, Min(0)] private int searchingIntroFrameCount = 2;
+        [Header("Goblin Searching Stages")]
+        [SerializeField, Min(1)] private int searchingStage1FirstFrame = 3;
+        [SerializeField, Min(1)] private int searchingStage1LastFrame = 5;
+        [SerializeField, Min(1)] private int searchingStage2StartBar = 22;
+        [SerializeField, Min(1)] private int searchingStage2FirstFrame = 6;
+        [SerializeField, Min(1)] private int searchingStage2LastFrame = 7;
+        [SerializeField, Min(1)] private int searchingStage3StartBar = 27;
+        [SerializeField, Min(1)] private int searchingStage3FirstFrame = 8;
+        [SerializeField, Min(1)] private int searchingStage3LastFrame = 9;
+        [SerializeField, Min(0f)] private float shockHoldBeats = 0.75f;
+        [SerializeField, Min(0.25f)] private float shockFramesPerBeat = 4f;
 
         [Header("Projectile Timing")]
         [Tooltip("Each triple projectile appears this many beats before its own catch target.")]
@@ -53,6 +76,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField] private bool showDiagnosticHudOnStart = true;
 
         private Vector3 enemyBasePosition;
+        private Vector3 enemyRendererBaseLocalPosition;
         private Vector3 otterBasePosition;
         private Vector3 shieldBaseScale = Vector3.one;
         private float warningPulse;
@@ -61,6 +85,8 @@ namespace RhythmHunter.OtterAquariumPrototype
         private float hurtPulse;
         private float counterPulse;
         private bool enemyHoldingAxe;
+        private long shockStartSongTick = -1L;
+        private long shockUntilSongTick = -1L;
         private int idleFrame;
         private int currentBeat = 1;
         private int currentBar = 1;
@@ -88,6 +114,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         public Transform EnemyRoot => enemyRoot;
         public Transform OtterRoot => otterRoot;
         public GameObject DefaultProjectilePrefab => axeProjectilePrefab;
+        public bool HasRequiredGoblinAnimationFrames => enemyIdleFrames is { Length: >= 3 }
+            && enemySearchingFrames is { Length: >= 9 }
+            && enemyShockFrames is { Length: >= 1 };
 
         public void SetCinematicMode(bool enabled)
         {
@@ -123,19 +152,19 @@ namespace RhythmHunter.OtterAquariumPrototype
         public void ShowCinematicEnemyRaisedAxe()
         {
             if (enemyRenderer != null && enemyAttackFrames is { Length: > 0 })
-                enemyRenderer.sprite = enemyAttackFrames[Mathf.Min(2, enemyAttackFrames.Length - 1)];
+                SetEnemySprite(enemyAttackFrames[Mathf.Min(2, enemyAttackFrames.Length - 1)]);
         }
 
         public void ShowCinematicEnemyThrow()
         {
             if (enemyRenderer != null && enemyAttackFrames is { Length: > 0 })
-                enemyRenderer.sprite = enemyAttackFrames[enemyAttackFrames.Length - 1];
+                SetEnemySprite(enemyAttackFrames[enemyAttackFrames.Length - 1]);
         }
 
         public void ShowCinematicEnemyIdle()
         {
             if (enemyRenderer != null && enemyIdleFrames is { Length: > 0 })
-                enemyRenderer.sprite = enemyIdleFrames[0];
+                SetEnemySprite(enemyIdleFrames[0]);
         }
 
         public void PlayCinematicAttackSound()
@@ -170,7 +199,9 @@ namespace RhythmHunter.OtterAquariumPrototype
             TextMesh configuredJudgementText,
             TextMesh configuredTimingText,
             TextMesh configuredFailureCountText,
-            TextMesh configuredStatusText)
+            TextMesh configuredStatusText,
+            Sprite[] configuredSearchingFrames = null,
+            Sprite[] configuredShockFrames = null)
         {
             runner = configuredRunner;
             enemyRoot = configuredEnemyRoot;
@@ -178,6 +209,10 @@ namespace RhythmHunter.OtterAquariumPrototype
             enemyIdleFrames = configuredIdleFrames;
             enemyAttackFrames = configuredAttackFrames;
             enemyAttackedFrame = configuredAttackedFrame;
+            if (configuredSearchingFrames != null)
+                enemySearchingFrames = configuredSearchingFrames;
+            if (configuredShockFrames != null)
+                enemyShockFrames = configuredShockFrames;
             axeProjectilePrefab = configuredAxeProjectilePrefab;
             otterRoot = configuredOtterRoot;
             otterBody = configuredOtterBody;
@@ -216,6 +251,18 @@ namespace RhythmHunter.OtterAquariumPrototype
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            searchingFramesPerBeat = Mathf.Max(0.25f, searchingFramesPerBeat);
+            searchingStartBar = Mathf.Max(1, searchingStartBar);
+            searchingEndBar = Mathf.Max(searchingStartBar, searchingEndBar);
+            searchingStage2StartBar = Mathf.Clamp(searchingStage2StartBar, searchingStartBar, searchingEndBar);
+            searchingStage3StartBar = Mathf.Clamp(searchingStage3StartBar, searchingStage2StartBar, searchingEndBar);
+            int searchingFrameCount = enemySearchingFrames?.Length ?? 0;
+            searchingIntroFrameCount = Mathf.Clamp(searchingIntroFrameCount, 0, searchingFrameCount);
+            SanitizeFrameRange(ref searchingStage1FirstFrame, ref searchingStage1LastFrame, searchingFrameCount);
+            SanitizeFrameRange(ref searchingStage2FirstFrame, ref searchingStage2LastFrame, searchingFrameCount);
+            SanitizeFrameRange(ref searchingStage3FirstFrame, ref searchingStage3LastFrame, searchingFrameCount);
+            shockHoldBeats = Mathf.Max(0f, shockHoldBeats);
+            shockFramesPerBeat = Mathf.Max(0.25f, shockFramesPerBeat);
             UnityEditor.EditorApplication.delayCall -= ApplyEditorHudVisibility;
             UnityEditor.EditorApplication.delayCall += ApplyEditorHudVisibility;
         }
@@ -369,6 +416,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private void OnWarningCue(int index, int count, string patternId)
         {
             otterAnimator?.InterruptIdleVariation();
+            InterruptEnemyShock();
             warningPulse = 1f;
             enemyHoldingAxe = true;
             if (judgementText != null)
@@ -381,6 +429,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnWaitCue(int index, int count, int projectileCount)
         {
+            InterruptEnemyShock();
             attackPulse = 1f;
             enemyHoldingAxe = false;
             if (judgementText != null)
@@ -429,6 +478,7 @@ namespace RhythmHunter.OtterAquariumPrototype
                 or OtterGoblinDemo1Runner.Grade.Good;
             if (successfulCatch)
             {
+                BeginEnemyShock();
                 if (otterAnimator != null)
                     otterAnimator.PlayCracking(resolvedProjectile);
                 else
@@ -486,6 +536,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnBattleWon(OtterGoblinDemo1Runner.CombatSummary summary)
         {
+            InterruptEnemyShock();
             ClearFlyingAxes();
             otterAnimator?.ResetToIdle();
             if (phaseText != null)
@@ -501,6 +552,7 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void OnBattleError(string message)
         {
+            InterruptEnemyShock();
             ClearFlyingAxes();
             otterAnimator?.ResetToIdle();
             if (phaseText != null)
@@ -539,14 +591,19 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private void UpdateEnemyFrame()
         {
-            if (counterPulse > 0.25f && enemyAttackedFrame != null)
+            bool searchingThrowMode = IsSearchingBar(CurrentAnimationBar())
+                && enemySearchingFrames is { Length: > 0 };
+            if (searchingThrowMode)
             {
-                enemyRenderer.sprite = enemyAttackedFrame;
+                // From Bar 17 onward, rummaging is the throw animation itself.
+                // Warning/wait cues still launch projectiles, and successful catches never interrupt it with Shock.
+                SetEnemySprite(enemySearchingFrames[GetSearchingFrameIndex()]);
                 return;
             }
+
             if (enemyHoldingAxe && enemyAttackFrames != null && enemyAttackFrames.Length > 0)
             {
-                enemyRenderer.sprite = enemyAttackFrames[Mathf.Min(2, enemyAttackFrames.Length - 1)];
+                SetEnemySprite(enemyAttackFrames[Mathf.Min(2, enemyAttackFrames.Length - 1)]);
                 return;
             }
             if (attackPulse > 0f && enemyAttackFrames != null && enemyAttackFrames.Length > 0)
@@ -554,11 +611,150 @@ namespace RhythmHunter.OtterAquariumPrototype
                 int index = attackPulse > 0.55f
                     ? enemyAttackFrames.Length - 1
                     : Mathf.Min(1, enemyAttackFrames.Length - 1);
-                enemyRenderer.sprite = enemyAttackFrames[index];
+                SetEnemySprite(enemyAttackFrames[index]);
                 return;
             }
+
+            if (IsEnemyShockActive())
+            {
+                Sprite shockFrame = GetEnemyShockFrame();
+                if (shockFrame != null)
+                {
+                    SetEnemySprite(shockFrame);
+                    return;
+                }
+            }
+
             if (enemyIdleFrames != null && enemyIdleFrames.Length > 0)
-                enemyRenderer.sprite = enemyIdleFrames[Mathf.Abs(idleFrame) % enemyIdleFrames.Length];
+                SetEnemySprite(enemyIdleFrames[Mathf.Abs(idleFrame) % enemyIdleFrames.Length]);
+        }
+
+        private void BeginEnemyShock()
+        {
+            if (runner == null || runner.LevelData == null || shockHoldBeats <= 0f
+                || IsSearchingBar(CurrentAnimationBar()))
+                return;
+
+            shockStartSongTick = runner.CurrentSongTick;
+            long durationTicks = Mathf.Max(
+                1,
+                Mathf.RoundToInt(shockHoldBeats * runner.LevelData.Ppq));
+            shockUntilSongTick = shockStartSongTick + durationTicks;
+        }
+
+        private void InterruptEnemyShock()
+        {
+            shockStartSongTick = -1L;
+            shockUntilSongTick = -1L;
+        }
+
+        private bool IsEnemyShockActive()
+        {
+            return runner != null
+                && shockStartSongTick >= 0L
+                && runner.CurrentSongTick < shockUntilSongTick;
+        }
+
+        private Sprite GetEnemyShockFrame()
+        {
+            if (enemyShockFrames is not { Length: > 0 })
+                return enemyAttackedFrame;
+            if (runner == null || runner.LevelData == null || runner.LevelData.Ppq <= 0)
+                return enemyShockFrames[0];
+
+            float elapsedBeats = Mathf.Max(
+                0f,
+                (runner.CurrentSongTick - shockStartSongTick) / (float)runner.LevelData.Ppq);
+            int index = Mathf.Clamp(
+                Mathf.FloorToInt(elapsedBeats * shockFramesPerBeat),
+                0,
+                enemyShockFrames.Length - 1);
+            return enemyShockFrames[index];
+        }
+
+        private int CurrentAnimationBar()
+        {
+            return runner != null ? runner.CurrentBar : currentBar;
+        }
+
+        private bool IsSearchingBar(int bar)
+        {
+            return bar >= searchingStartBar && bar <= searchingEndBar;
+        }
+
+        private int GetSearchingFrameIndex()
+        {
+            if (enemySearchingFrames is not { Length: > 0 })
+                return 0;
+            if (runner == null || runner.LevelData == null || runner.LevelData.Ppq <= 0)
+                return Mathf.Abs(idleFrame) % enemySearchingFrames.Length;
+
+            long sequenceStartTick = (long)(searchingStartBar - 1) * runner.LevelData.TicksPerBar;
+            long relativeTick = System.Math.Max(0L, runner.CurrentSongTick - sequenceStartTick);
+            float elapsedBeats = relativeTick / (float)runner.LevelData.Ppq;
+            int framePosition = Mathf.Max(0, Mathf.FloorToInt(elapsedBeats * searchingFramesPerBeat));
+
+            int frameCount = enemySearchingFrames.Length;
+            int introCount = Mathf.Clamp(searchingIntroFrameCount, 0, frameCount);
+            if (framePosition < introCount)
+                return framePosition;
+
+            int currentAnimationBar = CurrentAnimationBar();
+            if (currentAnimationBar >= searchingStage3StartBar)
+            {
+                int stageFrame = FramePositionFromBar(searchingStage3StartBar);
+                return LoopSearchingFrame(searchingStage3FirstFrame, searchingStage3LastFrame, stageFrame);
+            }
+            if (currentAnimationBar >= searchingStage2StartBar)
+            {
+                int stageFrame = FramePositionFromBar(searchingStage2StartBar);
+                return LoopSearchingFrame(searchingStage2FirstFrame, searchingStage2LastFrame, stageFrame);
+            }
+            return LoopSearchingFrame(searchingStage1FirstFrame, searchingStage1LastFrame, framePosition - introCount);
+        }
+
+        private int FramePositionFromBar(int startBar)
+        {
+            long startTick = (long)(startBar - 1) * runner.LevelData.TicksPerBar;
+            long relativeTick = System.Math.Max(0L, runner.CurrentSongTick - startTick);
+            float elapsedBeats = relativeTick / (float)runner.LevelData.Ppq;
+            return Mathf.Max(0, Mathf.FloorToInt(elapsedBeats * searchingFramesPerBeat));
+        }
+
+        private int LoopSearchingFrame(int oneBasedFirstFrame, int oneBasedLastFrame, int framePosition)
+        {
+            int frameCount = enemySearchingFrames.Length;
+            int first = Mathf.Clamp(oneBasedFirstFrame - 1, 0, frameCount - 1);
+            int last = Mathf.Clamp(oneBasedLastFrame - 1, first, frameCount - 1);
+            int loopLength = last - first + 1;
+            return first + Mathf.Max(0, framePosition) % loopLength;
+        }
+
+        private static void SanitizeFrameRange(ref int firstFrame, ref int lastFrame, int frameCount)
+        {
+            int maximum = Mathf.Max(1, frameCount);
+            firstFrame = Mathf.Clamp(firstFrame, 1, maximum);
+            lastFrame = Mathf.Clamp(lastFrame, firstFrame, maximum);
+        }
+
+        private void SetEnemySprite(Sprite sprite)
+        {
+            if (enemyRenderer == null || sprite == null)
+                return;
+
+            enemyRenderer.sprite = sprite;
+            Texture2D texture = sprite.texture;
+            if (texture == null || sprite.pixelsPerUnit <= 0f)
+            {
+                enemyRenderer.transform.localPosition = enemyRendererBaseLocalPosition;
+                return;
+            }
+
+            Vector2 canvasOffsetPixels = sprite.rect.center
+                - new Vector2(texture.width * 0.5f, texture.height * 0.5f);
+            Vector2 canvasOffset = canvasOffsetPixels / sprite.pixelsPerUnit;
+            enemyRenderer.transform.localPosition = enemyRendererBaseLocalPosition
+                + new Vector3(canvasOffset.x, canvasOffset.y, 0f);
         }
 
         private void SetJudgement(string title, Color color, string detail)
@@ -637,6 +833,8 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (enemyRoot != null)
                 enemyBasePosition = enemyRoot.localPosition;
+            if (enemyRenderer != null)
+                enemyRendererBaseLocalPosition = enemyRenderer.transform.localPosition;
             if (otterRoot != null)
                 otterBasePosition = otterRoot.localPosition;
             if (shield != null)
