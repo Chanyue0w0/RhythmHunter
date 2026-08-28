@@ -11,7 +11,9 @@ namespace RhythmHunter.OtterAquariumPrototype
 
         private InputAction defendAction;
         private InputAction restartAction;
+        private InputAction returnToMenuAction;
         private InputAction toggleDiagnosticHudAction;
+        private OtterGoblinDemo1CinematicDirector cinematicDirector;
         private bool defendEnabled = true;
 
         public void SetDefendEnabled(bool enabled)
@@ -31,6 +33,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             if (presenter == null)
                 presenter = GetComponent<OtterGoblinDemo1Presenter>();
+            cinematicDirector = GetComponent<OtterGoblinDemo1CinematicDirector>();
 
             defendAction = new InputAction("Demo1Defend", InputActionType.Button);
             defendAction.AddBinding("<Keyboard>/space");
@@ -41,6 +44,9 @@ namespace RhythmHunter.OtterAquariumPrototype
             restartAction = new InputAction("Demo1Restart", InputActionType.Button);
             restartAction.AddBinding("<Keyboard>/r");
 
+            returnToMenuAction = new InputAction("Demo1ReturnToMenu", InputActionType.Button);
+            returnToMenuAction.AddBinding("<Keyboard>/escape");
+
             toggleDiagnosticHudAction = new InputAction("Demo1ToggleDiagnosticHud", InputActionType.Button);
             toggleDiagnosticHudAction.AddBinding("<Keyboard>/h");
         }
@@ -49,9 +55,11 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             defendAction.performed += OnDefend;
             restartAction.performed += OnRestart;
+            returnToMenuAction.performed += OnReturnToMenu;
             toggleDiagnosticHudAction.performed += OnToggleDiagnosticHud;
             defendAction.Enable();
             restartAction.Enable();
+            returnToMenuAction.Enable();
             toggleDiagnosticHudAction.Enable();
         }
 
@@ -59,9 +67,11 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             defendAction.performed -= OnDefend;
             restartAction.performed -= OnRestart;
+            returnToMenuAction.performed -= OnReturnToMenu;
             toggleDiagnosticHudAction.performed -= OnToggleDiagnosticHud;
             defendAction.Disable();
             restartAction.Disable();
+            returnToMenuAction.Disable();
             toggleDiagnosticHudAction.Disable();
         }
 
@@ -69,6 +79,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             defendAction?.Dispose();
             restartAction?.Dispose();
+            returnToMenuAction?.Dispose();
             toggleDiagnosticHudAction?.Dispose();
         }
 
@@ -84,6 +95,11 @@ namespace RhythmHunter.OtterAquariumPrototype
             Scene active = SceneManager.GetActiveScene();
             if (active.IsValid())
                 SceneManager.LoadScene(active.buildIndex >= 0 ? active.buildIndex : 0);
+        }
+
+        private void OnReturnToMenu(InputAction.CallbackContext context)
+        {
+            cinematicDirector?.ReturnToMainMenu();
         }
 
         private void OnToggleDiagnosticHud(InputAction.CallbackContext context)

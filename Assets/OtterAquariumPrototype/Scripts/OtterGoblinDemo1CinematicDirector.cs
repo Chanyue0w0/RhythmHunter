@@ -1006,7 +1006,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             Stretch(label.rectTransform, Vector2.zero, Vector2.one);
         }
 
-        private void ReturnToMainMenu()
+        public void ReturnToMainMenu()
         {
             if (returningToMenu || string.IsNullOrWhiteSpace(mainMenuScenePath))
                 return;
