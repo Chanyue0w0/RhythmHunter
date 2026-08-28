@@ -106,7 +106,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             Sprite idle = LoadSprite(OtterIdlePath);
             Sprite[] swimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
             Sprite[] rolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
-            Sprite[] cracking = LoadNumberedSprites(OtterArtRoot + "/cracking/cracking_no stone_", 4);
+            Sprite[] cracking = LoadCrackingFrames();
             Sprite[] rubbing = LoadNumberedSprites(OtterArtRoot + "/rubbing/rubbing_", 4);
             if (idle == null || swimming.Any(sprite => sprite == null)
                 || rolling.Any(sprite => sprite == null)
@@ -328,14 +328,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 LoadSprite($"{GoblinRoot}/idle/idle_2.png"),
                 LoadSprite($"{GoblinRoot}/idle/idle_3.png")
             };
-            Sprite[] attack = LoadNumberedSprites(GoblinRoot + "/old/attack/attack_", 4);
+            Sprite[] attack = LoadNumberedSprites(GoblinRoot + "/throwing/throwing_", 4);
             Sprite[] searching = LoadNumberedSprites(GoblinRoot + "/searching/searching_", 9);
             Sprite[] shock = LoadNumberedSprites(GoblinRoot + "/shock/shock_", 1);
             Sprite attacked = shock[0];
             Sprite otterIdle = LoadSprite(OtterIdlePath);
             Sprite[] otterSwimming = LoadNumberedSprites(OtterArtRoot + "/swimming/swimming_", 4);
             Sprite[] otterRolling = LoadNumberedSprites(OtterArtRoot + "/rolling/rolling_", 9);
-            Sprite[] otterCracking = LoadNumberedSprites(OtterArtRoot + "/cracking/cracking_no stone_", 4);
+            Sprite[] otterCracking = LoadCrackingFrames();
             Sprite[] otterRubbing = LoadNumberedSprites(OtterArtRoot + "/rubbing/rubbing_", 4);
             GameObject axePrefab = EnsureAxePrefab();
 
@@ -831,6 +831,18 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             for (int i = 0; i < count; i++)
                 frames[i] = LoadSprite($"{pathPrefix}{i + 1}.png");
             return frames;
+        }
+
+        private static Sprite[] LoadCrackingFrames()
+        {
+            string prefix = OtterArtRoot + "/cracking/cracking_no stone_";
+            return new[]
+            {
+                LoadSprite(prefix + "1.png"),
+                LoadSprite(prefix + "2_1.png"),
+                LoadSprite(prefix + "3.png"),
+                LoadSprite(prefix + "4.png")
+            };
         }
 
         private static void EnsureFolders()

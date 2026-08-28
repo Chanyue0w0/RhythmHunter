@@ -56,6 +56,12 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(0f)] private float shockHoldBeats = 0.75f;
         [SerializeField, Min(0.25f)] private float shockFramesPerBeat = 4f;
 
+        [Header("Goblin Throwing Timing")]
+        [Tooltip("Throwing frames advance from the warning cue using musical beat time.")]
+        [SerializeField, Min(0.25f)] private float throwingFramesPerBeat = 4f;
+        [Tooltip("How long the final release frame remains visible after the projectile is launched.")]
+        [SerializeField, Min(0f)] private float throwingReleaseHoldBeats = 0.5f;
+
         [Header("Projectile Timing")]
         [Tooltip("Each triple projectile appears this many beats before its own catch target.")]
         [SerializeField, Min(0.25f)] private float tripleAxeVisualFlightBeats = 0.5f;
@@ -84,7 +90,9 @@ namespace RhythmHunter.OtterAquariumPrototype
         private float shieldPulse;
         private float hurtPulse;
         private float counterPulse;
-        private bool enemyHoldingAxe;
+        private long throwingStartSongTick = -1L;
+        private long throwingReleaseSongTick = -1L;
+        private long throwingUntilSongTick = -1L;
         private long shockStartSongTick = -1L;
         private long shockUntilSongTick = -1L;
         private int idleFrame;
@@ -115,6 +123,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public Transform OtterRoot => otterRoot;
         public GameObject DefaultProjectilePrefab => axeProjectilePrefab;
         public bool HasRequiredGoblinAnimationFrames => enemyIdleFrames is { Length: >= 3 }
+            && enemyAttackFrames is { Length: >= 4 }
             && enemySearchingFrames is { Length: >= 9 }
             && enemyShockFrames is { Length: >= 1 };
 
@@ -263,6 +272,8 @@ namespace RhythmHunter.OtterAquariumPrototype
             SanitizeFrameRange(ref searchingStage3FirstFrame, ref searchingStage3LastFrame, searchingFrameCount);
             shockHoldBeats = Mathf.Max(0f, shockHoldBeats);
             shockFramesPerBeat = Mathf.Max(0.25f, shockFramesPerBeat);
+            throwingFramesPerBeat = Mathf.Max(0.25f, throwingFramesPerBeat);
+            throwingReleaseHoldBeats = Mathf.Max(0f, throwingReleaseHoldBeats);
             UnityEditor.EditorApplication.delayCall -= ApplyEditorHudVisibility;
             UnityEditor.EditorApplication.delayCall += ApplyEditorHudVisibility;
         }
@@ -313,6 +324,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             runner.FailureCountChanged -= OnFailureCountChanged;
             runner.BattleWon -= OnBattleWon;
             runner.BattleError -= OnBattleError;
+            ClearEnemyThrowAnimation();
             ClearFlyingAxes();
         }
 
@@ -418,7 +430,7 @@ namespace RhythmHunter.OtterAquariumPrototype
             otterAnimator?.InterruptIdleVariation();
             InterruptEnemyShock();
             warningPulse = 1f;
-            enemyHoldingAxe = true;
+            BeginEnemyThrowAnimation();
             if (judgementText != null)
             {
                 judgementText.text = $"WARNING  {index}/{count}";
@@ -431,7 +443,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         {
             InterruptEnemyShock();
             attackPulse = 1f;
-            enemyHoldingAxe = false;
+            ReleaseEnemyThrowAnimation();
             if (judgementText != null)
             {
                 judgementText.text = $"AXE  {index}/{count}";
@@ -537,6 +549,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private void OnBattleWon(OtterGoblinDemo1Runner.CombatSummary summary)
         {
             InterruptEnemyShock();
+            ClearEnemyThrowAnimation();
             ClearFlyingAxes();
             otterAnimator?.ResetToIdle();
             if (phaseText != null)
@@ -553,6 +566,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         private void OnBattleError(string message)
         {
             InterruptEnemyShock();
+            ClearEnemyThrowAnimation();
             ClearFlyingAxes();
             otterAnimator?.ResetToIdle();
             if (phaseText != null)
@@ -596,22 +610,16 @@ namespace RhythmHunter.OtterAquariumPrototype
             if (searchingThrowMode)
             {
                 // From Bar 17 onward, rummaging is the throw animation itself.
-                // Warning/wait cues still launch projectiles, and successful catches never interrupt it with Shock.
+                // It is the section's uninterrupted top-priority performance: warning/wait cues
+                // still launch projectiles, but neither Throwing nor Shock may replace these frames.
                 SetEnemySprite(enemySearchingFrames[GetSearchingFrameIndex()]);
                 return;
             }
 
-            if (enemyHoldingAxe && enemyAttackFrames != null && enemyAttackFrames.Length > 0)
+            Sprite throwingFrame = GetEnemyThrowFrame();
+            if (throwingFrame != null)
             {
-                SetEnemySprite(enemyAttackFrames[Mathf.Min(2, enemyAttackFrames.Length - 1)]);
-                return;
-            }
-            if (attackPulse > 0f && enemyAttackFrames != null && enemyAttackFrames.Length > 0)
-            {
-                int index = attackPulse > 0.55f
-                    ? enemyAttackFrames.Length - 1
-                    : Mathf.Min(1, enemyAttackFrames.Length - 1);
-                SetEnemySprite(enemyAttackFrames[index]);
+                SetEnemySprite(throwingFrame);
                 return;
             }
 
@@ -627,6 +635,69 @@ namespace RhythmHunter.OtterAquariumPrototype
 
             if (enemyIdleFrames != null && enemyIdleFrames.Length > 0)
                 SetEnemySprite(enemyIdleFrames[Mathf.Abs(idleFrame) % enemyIdleFrames.Length]);
+        }
+
+        private void BeginEnemyThrowAnimation()
+        {
+            if (runner == null)
+                return;
+
+            throwingStartSongTick = runner.CurrentSongTick;
+            throwingReleaseSongTick = -1L;
+            throwingUntilSongTick = -1L;
+        }
+
+        private void ReleaseEnemyThrowAnimation()
+        {
+            if (runner == null || runner.LevelData == null)
+                return;
+
+            if (throwingStartSongTick < 0L)
+                throwingStartSongTick = runner.CurrentSongTick;
+            throwingReleaseSongTick = runner.CurrentSongTick;
+            throwingUntilSongTick = throwingReleaseSongTick + Mathf.Max(
+                1,
+                Mathf.RoundToInt(throwingReleaseHoldBeats * runner.LevelData.Ppq));
+        }
+
+        private Sprite GetEnemyThrowFrame()
+        {
+            if (enemyAttackFrames is not { Length: > 0 }
+                || runner == null
+                || runner.LevelData == null
+                || runner.LevelData.Ppq <= 0
+                || throwingStartSongTick < 0L)
+            {
+                return null;
+            }
+
+            long currentTick = runner.CurrentSongTick;
+            if (throwingReleaseSongTick >= 0L)
+            {
+                if (currentTick >= throwingUntilSongTick)
+                {
+                    ClearEnemyThrowAnimation();
+                    return null;
+                }
+                return enemyAttackFrames[enemyAttackFrames.Length - 1];
+            }
+
+            int windupFrameCount = Mathf.Max(1, enemyAttackFrames.Length - 1);
+            float elapsedBeats = Mathf.Max(
+                0f,
+                (currentTick - throwingStartSongTick) / (float)runner.LevelData.Ppq);
+            int frameIndex = Mathf.Clamp(
+                Mathf.FloorToInt(elapsedBeats * throwingFramesPerBeat),
+                0,
+                windupFrameCount - 1);
+            return enemyAttackFrames[frameIndex];
+        }
+
+        private void ClearEnemyThrowAnimation()
+        {
+            throwingStartSongTick = -1L;
+            throwingReleaseSongTick = -1L;
+            throwingUntilSongTick = -1L;
         }
 
         private void BeginEnemyShock()

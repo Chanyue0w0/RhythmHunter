@@ -51,16 +51,20 @@ namespace RhythmHunter.OtterAquariumPrototype
         [SerializeField, Min(0f)] private float idleRockDegrees = 0.8f;
 
         [Header("Cracking Timing (beats)")]
-        [SerializeField, Min(0.01f)] private float catchFrameBeats = 0.25f;
-        [SerializeField, Min(0.01f)] private float liftFrameBeats = 0.15f;
-        [SerializeField, Min(0.01f)] private float impactFrameBeats = 0.20f;
+        [Tooltip("How long the visible raised-hand catch pose remains on cracking frame 2.")]
+        [SerializeField, Min(0.01f)] private float catchFrameBeats = 0.5f;
+        [Tooltip("Fast transition from the catch pose to the striking pose on cracking frame 3.")]
+        [SerializeField, Min(0.01f)] private float liftFrameBeats = 0.08f;
+        [Tooltip("Duration of the final strike on cracking frame 4. Shattering happens halfway through.")]
+        [SerializeField, Min(0.01f)] private float impactFrameBeats = 0.08f;
 
         [Header("Occasional Rubbing Idle")]
         [SerializeField, Min(0.05f)] private float rubbingFrameSeconds = 0.16f;
         [SerializeField] private Vector2 rubbingIntervalSeconds = new(6f, 12f);
 
         [Header("Held Item Anchors (local to Visual Root)")]
-        [SerializeField] private Vector3 catchAnchor = new(1.1f, 0.35f, -0.2f);
+        [Tooltip("Projectile arrival and raised-hand hold position. Edit this on the Otter's OtterCombatAnimator component.")]
+        [SerializeField] private Vector3 catchAnchor = new(1.3f, 0.65f, -0.2f);
         [SerializeField] private Vector3 upperBellyAnchor = new(0.42f, 0.05f, -0.2f);
         [SerializeField] private Vector3 impactAnchor = new(0.08f, -0.13f, -0.2f);
 
@@ -251,6 +255,9 @@ namespace RhythmHunter.OtterAquariumPrototype
             rollingScale = Mathf.Max(0.01f, rollingScale);
             idleScale = Mathf.Max(0.01f, idleScale);
             crackingScale = Mathf.Max(0.01f, crackingScale);
+            catchFrameBeats = Mathf.Max(0.01f, catchFrameBeats);
+            liftFrameBeats = Mathf.Max(0.01f, liftFrameBeats);
+            impactFrameBeats = Mathf.Max(0.01f, impactFrameBeats);
             rubbingFrameSeconds = Mathf.Max(0.05f, rubbingFrameSeconds);
             rubbingIntervalSeconds.x = Mathf.Max(0.5f, rubbingIntervalSeconds.x);
             rubbingIntervalSeconds.y = Mathf.Max(
@@ -259,6 +266,29 @@ namespace RhythmHunter.OtterAquariumPrototype
             ResolveReferences();
             if (!Application.isPlaying)
                 ShowIdlePreview();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            ResolveReferences();
+            if (visualRoot == null)
+                return;
+
+            Matrix4x4 previousMatrix = Gizmos.matrix;
+            Color previousColor = Gizmos.color;
+            Gizmos.matrix = visualRoot.localToWorldMatrix;
+
+            Gizmos.color = new Color(0.2f, 1f, 1f, 0.95f);
+            Gizmos.DrawWireSphere(catchAnchor, 0.11f);
+            Gizmos.DrawLine(catchAnchor, upperBellyAnchor);
+            Gizmos.color = new Color(1f, 0.8f, 0.15f, 0.95f);
+            Gizmos.DrawWireSphere(upperBellyAnchor, 0.09f);
+            Gizmos.DrawLine(upperBellyAnchor, impactAnchor);
+            Gizmos.color = new Color(1f, 0.25f, 0.2f, 0.95f);
+            Gizmos.DrawWireSphere(impactAnchor, 0.1f);
+
+            Gizmos.matrix = previousMatrix;
+            Gizmos.color = previousColor;
         }
 
         private void Update()

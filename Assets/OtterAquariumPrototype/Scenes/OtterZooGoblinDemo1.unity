@@ -2830,7 +2830,7 @@ MonoBehaviour:
   idleFrame: {fileID: 2650676131703989029, guid: 59a3e69e8fc59454cbbc8bbfe6f025ef, type: 3}
   crackingFrames:
   - {fileID: 2650676131703989029, guid: 02cc1a78094602342ac59ca01ec36b4f, type: 3}
-  - {fileID: -884731405996897397, guid: 517d3c9efabe4d440843d3cae1d280ae, type: 3}
+  - {fileID: -8082517300658543631, guid: 159b88d904504f54f82549973c89a12b, type: 3}
   - {fileID: 1771706717993485243, guid: d049dd400ea8aaf4d917422dca96b842, type: 3}
   - {fileID: 1196033032626225509, guid: ddf730c16a50f4f43905656081299438, type: 3}
   rubbingFrames:
@@ -2852,12 +2852,12 @@ MonoBehaviour:
   crackingScale: 1
   idleBobAmplitude: 0.09
   idleRockDegrees: 0.8
-  catchFrameBeats: 0.25
-  liftFrameBeats: 0.15
-  impactFrameBeats: 0.2
+  catchFrameBeats: 0.5
+  liftFrameBeats: 0.08
+  impactFrameBeats: 0.08
   rubbingFrameSeconds: 0.16
   rubbingIntervalSeconds: {x: 1, y: 3}
-  catchAnchor: {x: 1.1, y: 0.35, z: -0.2}
+  catchAnchor: {x: 1.3, y: 0.65, z: -0.2}
   upperBellyAnchor: {x: 0.42, y: 0.05, z: -0.2}
   impactAnchor: {x: 0.08, y: -0.13, z: -0.2}
 --- !u!1 &1159743187
@@ -3662,10 +3662,10 @@ MonoBehaviour:
   - {fileID: -4357705645274307756, guid: b2762db69cbc36249a02bb975d7ea779, type: 3}
   - {fileID: 2244847242733787956, guid: 3ef08adef2a8d9d4c84c46e2444703f3, type: 3}
   enemyAttackFrames:
-  - {fileID: -3297650188656544483, guid: 7bde3f1ba61c513449ef56fb31a52a3e, type: 3}
-  - {fileID: -8144534994874435676, guid: f0734b0702769ae40b75bdd59fed84b9, type: 3}
-  - {fileID: -5380739489725017918, guid: 1338ba4e8403e6c43904ff957cc39ff9, type: 3}
-  - {fileID: -3488042933814449837, guid: f1b9109fc1ed2064cb1d232c3939844a, type: 3}
+  - {fileID: -9191351389064499397, guid: 61637e2fe9d1fc140ad3a7334b21dd87, type: 3}
+  - {fileID: 4493231187590742247, guid: 56c7de7a552d0714a894ff5eb14d2355, type: 3}
+  - {fileID: 1386009046589618103, guid: 1fe1ab6ac5dffed409ac1abfb2ec65b1, type: 3}
+  - {fileID: -1019430332740548460, guid: 5a93a5cb8ec925d4ba1a8c185310175b, type: 3}
   enemySearchingFrames:
   - {fileID: -6807443579299698160, guid: a32e1dba2e8e23c4da64e916b0dde31c, type: 3}
   - {fileID: 3178439959266376966, guid: d03185f4504e62140831bb36a451ba1d, type: 3}
@@ -3700,6 +3700,8 @@ MonoBehaviour:
   searchingStage3LastFrame: 9
   shockHoldBeats: 0.75
   shockFramesPerBeat: 4
+  throwingFramesPerBeat: 4
+  throwingReleaseHoldBeats: 0.5
   tripleAxeVisualFlightBeats: 0.5
   titleText: {fileID: 293324304}
   phaseText: {fileID: 356862317}
