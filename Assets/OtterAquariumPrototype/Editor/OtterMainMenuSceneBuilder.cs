@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FMODUnity;
 using RhythmHunter.OtterAquariumPrototype;
 using RhythmHunter.RhythmDemo;
 using TMPro;
@@ -198,7 +199,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
 
         private static void CreateCamera(Transform parent)
         {
-            GameObject cameraObject = new("Main Camera", typeof(Camera), typeof(AudioListener));
+            GameObject cameraObject = new("Main Camera", typeof(Camera), typeof(AudioListener), typeof(StudioListener));
             cameraObject.transform.SetParent(parent, false);
             cameraObject.tag = "MainCamera";
             cameraObject.transform.localPosition = new Vector3(0f, 0f, -10f);
