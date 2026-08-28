@@ -8,7 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/OtterAquariumPrototype/Scenes/OtterMainMenu.unity
     guid: fd3050d20b1864a4d85ba4a67b23eda6
-  - enabled: 1
+  - enabled: 0
     path: Assets/OtterAquariumPrototype/Scenes/OtterAquarium.unity
     guid: 72d9685db07efdf409c01279752c1372
   - enabled: 0
