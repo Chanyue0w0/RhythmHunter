@@ -116,10 +116,10 @@ TextureImporter:
       name: floating_2_0
       rect:
         serializedVersion: 2
-        x: 41
-        y: 11
-        width: 272
-        height: 404
+        x: 0
+        y: 0
+        width: 348
+        height: 402
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
