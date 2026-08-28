@@ -104,6 +104,20 @@ namespace RhythmHunter.OtterAquariumPrototype
                 Mathf.Clamp01(journeyProgress));
         }
 
+        public void SetCinematicSwimmingPose(float elapsedSeconds, bool faceRight)
+        {
+            state = State.Intro;
+            ApplySwimmingPose(
+                Mathf.Max(0f, elapsedSeconds) * swimmingFramesPerBeat * 2f,
+                1f);
+            if (visualRoot == null)
+                return;
+
+            Vector3 scale = visualRoot.localScale;
+            scale.x = Mathf.Abs(scale.x) * (faceRight ? -1f : 1f);
+            visualRoot.localScale = scale;
+        }
+
         public void SetCinematicIdle()
         {
             state = State.Idle;

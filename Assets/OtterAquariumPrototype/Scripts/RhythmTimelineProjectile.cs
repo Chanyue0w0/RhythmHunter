@@ -24,6 +24,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         [Header("Otter Interaction")]
         [SerializeField] private OtterReactionKind otterReaction = OtterReactionKind.Crack;
         [SerializeField, Min(0.01f)] private float heldScaleMultiplier = 1f;
+        [SerializeField] private bool triggersHeroEnding;
 
         [Header("Screen Interference")]
         [SerializeField] private RhythmScreenInterference.InterferenceKind screenInterference;
@@ -53,6 +54,7 @@ namespace RhythmHunter.OtterAquariumPrototype
         public bool RotateDuringFlight => rotateDuringFlight;
         public OtterReactionKind OtterReaction => otterReaction;
         public float HeldScaleMultiplier => heldScaleMultiplier;
+        public bool TriggersHeroEnding => triggersHeroEnding;
         public RhythmScreenInterference.InterferenceKind ScreenInterference => screenInterference;
         public float InterferenceDurationBeats => interferenceDurationBeats;
 

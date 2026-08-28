@@ -21,6 +21,11 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         public const string BackgroundPath = "Assets/OtterAquariumPrototype/Arts/Background/zoo_fightingbackground.png";
         private const string GoblinRoot = "Assets/OtterAquariumPrototype/Arts/Enemy/Goblin_Mercenary";
         private const string OtterArtRoot = "Assets/OtterAquariumPrototype/Arts/Otter";
+        private const string HeroicSpiritPath = "Assets/OtterAquariumPrototype/Arts/heroic spirit/OtterHero.png";
+        private const string FutureLevelPreview1Path = "Assets/OtterAquariumPrototype/Arts/FutureLevel/ChatGPT Image 2026年8月26日 上午10_43_56.png";
+        private const string FutureLevelPreview2Path = "Assets/OtterAquariumPrototype/Arts/FutureLevel/ChatGPT Image 2026年8月26日 上午10_45_18.png";
+        private const string FutureLevelPreview3Path = "Assets/OtterAquariumPrototype/Arts/FutureLevel/ChatGPT Image 2026年8月26日 上午10_46_27.png";
+        private const string FutureLevelPreview4Path = "Assets/OtterAquariumPrototype/Arts/FutureLevel/ChatGPT Image 2026年8月28日 下午12_39_14.png";
         private const string OtterIdlePath = OtterArtRoot + "/Idle/idle.png";
         private const string OtterAnimationUpgradeSessionKey = "RhythmHunter.Demo1OtterAnimationUpgrade.v1";
         private const string AxeSpritePath = GoblinRoot + "/Axe.png";
@@ -580,7 +585,20 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 stage.Status);
             stage.OtterAnimator.ConfigureRunner(runner);
             input.Configure(runner, presenter);
-            cinematicDirector.Configure(runner, clock, input, presenter, sceneCamera);
+            cinematicDirector.Configure(
+                runner,
+                clock,
+                input,
+                presenter,
+                sceneCamera,
+                LoadLargestSprite(HeroicSpiritPath),
+                new[]
+                {
+                    LoadLargestSprite(FutureLevelPreview1Path),
+                    LoadLargestSprite(FutureLevelPreview2Path),
+                    LoadLargestSprite(FutureLevelPreview3Path),
+                    LoadLargestSprite(FutureLevelPreview4Path)
+                });
         }
 
         private static string GetSceneTitle(OtterGoblinDemo1LevelData data)
@@ -789,6 +807,14 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static Sprite LoadSprite(string path)
         {
             return AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().FirstOrDefault();
+        }
+
+        private static Sprite LoadLargestSprite(string path)
+        {
+            return AssetDatabase.LoadAllAssetsAtPath(path)
+                .OfType<Sprite>()
+                .OrderByDescending(sprite => sprite.rect.width * sprite.rect.height)
+                .FirstOrDefault();
         }
 
         private static Sprite[] LoadNumberedSprites(string pathPrefix, int count)

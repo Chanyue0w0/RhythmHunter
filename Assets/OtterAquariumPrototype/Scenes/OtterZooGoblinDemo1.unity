@@ -3737,13 +3737,76 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 922d7f6272d847c2b26c8e3f0013af40, type: 3}
-  m_Name: ''
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.OtterAquariumPrototype.OtterGoblinDemo1CinematicDirector
   enableCinematics: 1
   playBuiltInOpening: 1
+  playBuiltInEnding: 1
   skipRhythmTimelineIntroAfterCinematic: 1
   additionalOpeningTimeline: {fileID: 0}
   endingTimeline: {fileID: 0}
+  heroicSpiritSprite: {fileID: -5405164439530168626, guid: 812ec674c6b6c1e419a323409faae2d9, type: 3}
+  heroicSpiritWorldPosition: {x: -2.45, y: 0.25, z: -0.5}
+  heroicSpiritScale: 1.05
+  heroicSpiritBobAmplitude: 0.12
+  heroicSpiritBobCyclesPerSecond: 0.55
+  flashInSeconds: 0.08
+  flashHoldSeconds: 0.3
+  flashFadeSeconds: 0.75
+  openingDialogue:
+  - speaker: "\u65A7\u982D\u54E5\u5E03\u6797"
+    content: "\u65E2\u7136\u88AB\u4F60\u767C\u73FE\u4E86\uFF0C\u90A3\u5C31\u53EA\u597D\u89E3\u6C7A\u4F60\u4E86"
+    autoAdvanceSeconds: 2
+    allowInputAdvance: 1
+  preHeroEndingDialogue:
+  - speaker: "\uFF1F\uFF1F\uFF1F"
+    content: "\u5C11\u5E74\u2026\u2026"
+    autoAdvanceSeconds: 2.2
+    allowInputAdvance: 1
+  - speaker: "\uFF1F\uFF1F\uFF1F"
+    content: "\u4F60\u77E5\u9053\u5B8C\u7F8E\u7684\u8EAB\u6750\u662F\u600E\u9EBC\u4F86\u7684\u55CE\uFF1F"
+    autoAdvanceSeconds: 3.2
+    allowInputAdvance: 1
+  - speaker: "\u6D77\u737A"
+    content: "\u2026\u2026"
+    autoAdvanceSeconds: 2
+    allowInputAdvance: 1
+  - speaker: "\uFF1F\uFF1F\uFF1F"
+    content: "\u662F\u8CAC\u4EFB\u611F\u2026\u2026"
+    autoAdvanceSeconds: 2.8
+    allowInputAdvance: 1
+  heroRevealDialogue:
+  - speaker: "\u6D77\u737A\u4FE0"
+    content: "\u4E16\u754C\u7684\u548C\u5E73\u2026\u2026\u5C31\u5728\u4F60\u7684\u638C\u638C\u4E4B\u4E2D\u2026\u2026"
+    autoAdvanceSeconds: 3.5
+    allowInputAdvance: 1
+  - speaker: "\u6D77\u737A\u4FE0"
+    content: "\u6211\u77E5\u9053\u4F60\u4E00\u5B9A\u5F88\u597D\u5947\u6211\u662F\u8AB0\u2026\u2026"
+    autoAdvanceSeconds: 3.5
+    allowInputAdvance: 1
+  postOtterExitDialogue:
+  - speaker: "\u6D77\u737A\u4FE0"
+    content: "\u2026\u2026"
+    autoAdvanceSeconds: 3
+    allowInputAdvance: 1
+  - speaker: "\u6D77\u737A\u4FE0"
+    content: "\u771F\u662F\u4F4D\u5B64\u50B2\u7684\u82F1\u96C4\u963F..."
+    autoAdvanceSeconds: 3
+    allowInputAdvance: 1
+  endingOtterSwimSeconds: 2.1
+  endingOtterSwimDistance: 7.5
+  endingOtterSwimArcHeight: 0.22
+  showFutureLevelPanel: 1
+  futureLevelPanelTitle: "DEMO COMPLETE  \u2022  \u672A\u4F86\u95DC\u5361\u9810\u89BD"
+  futureLevelCards:
+  - image: {fileID: 5583239752967111230, guid: 790315791fbc5b84199ab32fd1cdea16, type: 3}
+    title: "\u6838\u80FD\u5371\u6A5F"
+  - image: {fileID: -1876090125485073673, guid: fb972d70799736245855328bb459dfa1, type: 3}
+    title: "\u5065\u58EF\u6D77\u737A"
+  - image: {fileID: 5628387296174470704, guid: 4b77486b5787591408986e0a53496c95, type: 3}
+    title: "\u64B2\u514B\u81C9"
+  - image: {fileID: 9214351587515968990, guid: 9a2d76c1633af2d4592f1142fd876f47, type: 3}
+    title: "\u767C\u5927\u8CA1"
   runner: {fileID: 1636567133}
   beatClock: {fileID: 1636567134}
   combatInput: {fileID: 1636567132}
@@ -3751,7 +3814,8 @@ MonoBehaviour:
   sceneCamera: {fileID: 1628976427}
   otterSwimSeconds: 2.2
   cameraPanSeconds: 0.85
-  dialogueAutoAdvanceSeconds: 2
+  dialogueInputLockSeconds: 0.15
+  goblinRaisedAxeHoldSeconds: 0.38
   axeSlowMotionScale: 0.28
   axeTravelGameSeconds: 0.8
   cinematicCrackingTimingScale: 2.5
@@ -4073,7 +4137,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1718543868}
-  m_Text: AXE GOBLIN
+  m_Text: GOBLIN
   m_OffsetZ: 0
   m_CharacterSize: 0.068
   m_LineSpacing: 1
@@ -5504,6 +5568,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!212 &1063781619148951135
@@ -5583,6 +5648,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!212 &1384853018764602325
@@ -5662,6 +5728,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!1 &1729352606291642180
@@ -5700,6 +5767,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!1 &2327824033129300782
@@ -5830,6 +5898,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!4 &3954171741407766315
@@ -5883,6 +5952,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!1 &4507652414283595599
@@ -5972,6 +6042,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!212 &6101753305352446983
@@ -6143,6 +6214,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!4 &6629065440963013339
@@ -6267,6 +6339,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!1 &7937088209826924160
@@ -6379,6 +6452,7 @@ MonoBehaviour:
   resolveFadeSeconds: 0.14
   otterReaction: 0
   heldScaleMultiplier: 1
+  triggersHeroEnding: 0
   screenInterference: 0
   interferenceDurationBeats: 3
 --- !u!212 &8899645663822044464

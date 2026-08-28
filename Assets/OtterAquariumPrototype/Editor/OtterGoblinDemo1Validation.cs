@@ -63,6 +63,7 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             TextMesh failureCount = FindNamed<TextMesh>(scene, "FailureCount");
             RhythmTimelineProjectile dyingBottle = LoadProjectilePrefab("dying_bottle");
             RhythmTimelineProjectile saveIcon = LoadProjectilePrefab("save_icon");
+            RhythmTimelineProjectile spiritGem = LoadProjectilePrefab("spirit_gem");
             int singleCount = 0;
             int tripleCount = 0;
             int doubleSingleCount = 0;
@@ -97,6 +98,10 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && otterAnimator.SpriteRenderer != null
                 && IsCurrentOtterArt(otterAnimator.SpriteRenderer.sprite)
                 && cinematicDirector != null
+                && cinematicDirector.HasEndingContent
+                && cinematicDirector.OpeningDialogueCount > 0
+                && cinematicDirector.EndingDialogueCount > 0
+                && cinematicDirector.FutureLevelCardCount >= 4
                 && background != null
                 && background.sprite != null
                 && AssetDatabase.GetAssetPath(background.sprite) == OtterGoblinDemo1SceneBuilder.BackgroundPath
@@ -123,7 +128,9 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                 && dyingBottle.InterferenceDurationBeats > 0f
                 && saveIcon != null
                 && saveIcon.ScreenInterference == RhythmScreenInterference.InterferenceKind.SaveLoading
-                && saveIcon.InterferenceDurationBeats > 0f;
+                && saveIcon.InterferenceDurationBeats > 0f
+                && spiritGem != null
+                && spiritGem.TriggersHeroEnding;
 
             if (!wasLoaded)
                 EditorSceneManager.CloseScene(scene, true);
@@ -136,11 +143,15 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
                     + $"Input={input != null}, Presenter={presenter != null}, Background={background != null}, "
                     + $"OtterAnimator={otterAnimator != null}, OtterFrames={otterAnimator != null && otterAnimator.HasRequiredFrames}, "
                     + $"CinematicDirector={cinematicDirector != null}, Opening={cinematicDirector != null && cinematicDirector.HasOpeningContent}, "
+                    + $"HeroEnding={cinematicDirector != null && cinematicDirector.HasEndingContent}, "
+                    + $"Dialogue={cinematicDirector?.OpeningDialogueCount ?? 0}/{cinematicDirector?.EndingDialogueCount ?? 0}, "
+                    + $"FutureCards={cinematicDirector?.FutureLevelCardCount ?? 0}, "
                     + $"WarningRedFlash={presenter != null && presenter.WarningDangerFlashEnabled}, "
                     + $"Goblin={goblin != null}, GoblinRoot={goblinRoot != null}, "
                     + $"Otter={otter != null}, FailureHUD={failureCount != null}, "
                     + $"DyingBottleInk={dyingBottle != null && dyingBottle.ScreenInterference == RhythmScreenInterference.InterferenceKind.OrangeInk}, "
                     + $"SaveLoading={saveIcon != null && saveIcon.ScreenInterference == RhythmScreenInterference.InterferenceKind.SaveLoading}, "
+                    + $"SpiritGemEnding={spiritGem != null && spiritGem.TriggersHeroEnding}, "
                     + $"Stun={data.ExtraInputStunBeats:0.##} beats, "
                     + $"Phrases={data.Phrases.Count}, "
                     + $"Single={singleCount}, Triple={tripleCount}, "
