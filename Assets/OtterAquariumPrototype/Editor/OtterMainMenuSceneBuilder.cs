@@ -51,6 +51,12 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             if (EditorApplication.isPlayingOrWillChangePlaymode || Application.isBatchMode)
                 return;
 
+            // Rhythm Arena is an isolated prototype and owns the active Build scene while present.
+            // Keep the legacy menu builder available without letting its reload hook re-enable Otter scenes.
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                    "Assets/Prototype/RhythmArena/Scenes/RhythmArenaPrototype.unity") != null)
+                return;
+
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
                 BuildSceneInternal();
             else

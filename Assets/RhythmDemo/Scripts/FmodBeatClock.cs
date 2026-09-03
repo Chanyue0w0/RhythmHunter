@@ -91,6 +91,7 @@ namespace RhythmHunter.RhythmDemo
         [SerializeField] private string musicEventPath = "event:/Combat soundtracks/Combat 01";
         [SerializeField, Min(0f)] private float musicStartDelaySeconds = 1f;
         [SerializeField, Range(0f, 1f)] private float musicVolume = 1f;
+        [SerializeField, Range(0.25f, 4f)] private float musicPitch = 1f;
         [SerializeField] private bool playOnStart = true;
 
         private readonly ConcurrentQueue<CallbackBeatData> pendingBeats = new();
@@ -111,6 +112,7 @@ namespace RhythmHunter.RhythmDemo
         public string MusicEventPath => musicEventPath;
         public float MusicStartDelaySeconds => musicStartDelaySeconds;
         public float MusicVolume => musicVolume;
+        public float MusicPitch => musicPitch;
         public bool IsReady => initialized && musicInstance.isValid();
         public bool IsPlaying => playbackStarted && musicInstance.isValid();
         public bool HasTimingAnchor => hasAnchor;
@@ -168,6 +170,17 @@ namespace RhythmHunter.RhythmDemo
             RESULT result = musicInstance.setVolume(musicVolume);
             if (result != RESULT.OK)
                 ReportError($"FMOD failed to set music volume for '{musicEventPath}': {result}");
+        }
+
+        public void SetPlaybackPitch(float pitch)
+        {
+            musicPitch = Mathf.Clamp(pitch, 0.25f, 4f);
+            if (!musicInstance.isValid())
+                return;
+
+            RESULT result = musicInstance.setPitch(musicPitch);
+            if (result != RESULT.OK)
+                ReportError($"FMOD failed to set music pitch for '{musicEventPath}': {result}");
         }
 
         public void StartMusic()
@@ -260,6 +273,15 @@ namespace RhythmHunter.RhythmDemo
             if (volumeResult != RESULT.OK)
             {
                 ReportError($"FMOD failed to set music volume for '{musicEventPath}': {volumeResult}");
+                musicInstance.release();
+                musicInstance.clearHandle();
+                return;
+            }
+
+            RESULT pitchResult = musicInstance.setPitch(musicPitch);
+            if (pitchResult != RESULT.OK)
+            {
+                ReportError($"FMOD failed to set music pitch for '{musicEventPath}': {pitchResult}");
                 musicInstance.release();
                 musicInstance.clearHandle();
                 return;
