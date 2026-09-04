@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Prototype/TopDownBeatCombat/Scenes/TopDownBeatCombatPrototype.unity
+    guid: 679ac78ed8297b349862ac42655fec3d
+  - enabled: 0
     path: Assets/Prototype/RhythmArena/Scenes/RhythmArenaPrototype.unity
     guid: ea6252c921ba6c4448d92ae0760c7ad6
   - enabled: 0

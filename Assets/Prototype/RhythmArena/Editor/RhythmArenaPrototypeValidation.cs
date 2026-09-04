@@ -24,7 +24,8 @@ namespace RhythmHunter.RhythmArenaEditor
 
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RhythmArenaPrototypeSceneBuilder.ScenePath) == null)
                 EditorApplication.delayCall += BuildMissingPrototypeScene;
-            else
+            else if (AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                         "Assets/Prototype/TopDownBeatCombat/Scenes/TopDownBeatCombatPrototype.unity") == null)
                 EditorApplication.delayCall += RhythmArenaPrototypeSceneBuilder.ApplyBuildSettings;
         }
 
