@@ -242,12 +242,13 @@ namespace RhythmHunter.TopDownBeatCombatEditor
             SetRect(trackBack.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(880f, 64f), new Vector2(0.5f, 0.5f));
             trackBack.gameObject.AddComponent<RectMask2D>();
 
-            RectTransform[] ticks = new RectTransform[11];
+            RectTransform[] ticks = new RectTransform[10];
             Image[] tickImages = new Image[ticks.Length];
             for (int i = 0; i < ticks.Length; i++)
             {
-                Image tick = CreateImage($"Beat Tick {i}", trackBack.transform, White);
-                SetRect(tick.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(7f, 36f), new Vector2(0.5f, 0.5f));
+                string side = (i & 1) == 0 ? "Left" : "Right";
+                Image tick = CreateImage($"Beat Pair {i / 2 + 1} {side}", trackBack.transform, White);
+                SetRect(tick.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(12f, 12f), new Vector2(0.5f, 0.5f));
                 ticks[i] = tick.rectTransform;
                 tickImages[i] = tick;
             }
@@ -255,7 +256,7 @@ namespace RhythmHunter.TopDownBeatCombatEditor
             Image hitLineImage = CreateImage("Center Hit Line", trackBack.transform, new Color(1f, 0.88f, 0.2f, 1f));
             SetRect(hitLineImage.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(8f, 58f), new Vector2(0.5f, 0.5f));
 
-            Text result = CreateUiText("Result", panel.transform, "ATTACK ON THE CENTER LINE", 22, FontStyle.Bold, White);
+            Text result = CreateUiText("Result", panel.transform, "ATTACK WHEN BOTH BEAT POINTS MERGE", 22, FontStyle.Bold, White);
             SetRect(result.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 25f), new Vector2(600f, 38f), new Vector2(0.5f, 0f));
 
             Text controls = CreateUiText(

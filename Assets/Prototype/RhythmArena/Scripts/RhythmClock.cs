@@ -23,7 +23,9 @@ namespace RhythmHunter.RhythmArena
         [SerializeField, Min(1f)] private float bpm = 100f;
         [SerializeField, Min(1f)] private float fmodAuthoredBpm = 100f;
         [SerializeField, Min(1)] private int beatsPerLoop = 4;
+        [Tooltip("Manual attack timing tolerance on either side of a beat, measured in beats.")]
         [SerializeField, Range(0.01f, 0.49f)] private float perfectWindowBeats = 0.10f;
+        [Tooltip("Manual attack timing tolerance on either side of a beat. Must be at least the Perfect window.")]
         [SerializeField, Range(0.01f, 0.49f)] private float goodWindowBeats = 0.25f;
 
         private double sourceOriginBeat;
@@ -48,6 +50,15 @@ namespace RhythmHunter.RhythmArena
         {
             enabledAtRealtime = Time.realtimeSinceStartup;
             ApplyFmodTempo();
+        }
+
+        private void OnValidate()
+        {
+            bpm = Mathf.Max(1f, bpm);
+            fmodAuthoredBpm = Mathf.Max(1f, fmodAuthoredBpm);
+            beatsPerLoop = Mathf.Max(1, beatsPerLoop);
+            perfectWindowBeats = Mathf.Clamp(perfectWindowBeats, 0.01f, 0.49f);
+            goodWindowBeats = Mathf.Clamp(Mathf.Max(perfectWindowBeats, goodWindowBeats), 0.01f, 0.49f);
         }
 
         private void Update()

@@ -8,7 +8,7 @@ namespace RhythmHunter.TopDownBeatCombat
     public sealed class BeatTrainingDummy : MonoBehaviour
     {
         [SerializeField, Min(1)] private int maxHp = 200;
-        [SerializeField, Min(0.1f)] private float respawnDelay = 1.2f;
+        [SerializeField, Min(0.1f)] private float recoveryDelaySeconds = 3f;
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Transform hpFill;
         [SerializeField, Min(0.1f)] private float hpFillWidth = 1.65f;
@@ -17,8 +17,12 @@ namespace RhythmHunter.TopDownBeatCombat
 
         private int currentHp;
         private Vector3 restPosition;
+        private float lastDamageAt;
+        private bool awaitingRecovery;
 
         public int CurrentHp => currentHp;
+        public int MaxHp => maxHp;
+        public float RecoveryDelaySeconds => recoveryDelaySeconds;
         public int LastDamage { get; private set; }
         public int HitCount { get; private set; }
 
@@ -26,6 +30,18 @@ namespace RhythmHunter.TopDownBeatCombat
         {
             restPosition = transform.position;
             ResetDummy();
+        }
+
+        private void Update()
+        {
+            if (!awaitingRecovery || Time.time - lastDamageAt < recoveryDelaySeconds)
+                return;
+
+            awaitingRecovery = false;
+            currentHp = maxHp;
+            UpdateReadout();
+            StopAllCoroutines();
+            StartCoroutine(PlayRecoveryFeedback());
         }
 
         public void Configure(SpriteRenderer visual, Transform fill, TextMesh hpLabel, TextMesh damageLabel)
@@ -38,12 +54,11 @@ namespace RhythmHunter.TopDownBeatCombat
 
         public void TakeDamage(int amount, RhythmClock.TimingGrade grade)
         {
-            if (currentHp <= 0)
-                return;
-
             LastDamage = Mathf.Max(0, amount);
             HitCount++;
-            currentHp = Mathf.Max(0, currentHp - LastDamage);
+            currentHp = Mathf.Max(1, currentHp - LastDamage);
+            lastDamageAt = Time.time;
+            awaitingRecovery = currentHp < maxHp;
             UpdateReadout();
 
             if (damageText != null)
@@ -55,7 +70,7 @@ namespace RhythmHunter.TopDownBeatCombat
             }
 
             StopAllCoroutines();
-            StartCoroutine(PlayHitFeedback(currentHp <= 0));
+            StartCoroutine(PlayHitFeedback());
         }
 
         public void ResetDummy()
@@ -64,6 +79,8 @@ namespace RhythmHunter.TopDownBeatCombat
             currentHp = maxHp;
             LastDamage = 0;
             HitCount = 0;
+            awaitingRecovery = false;
+            lastDamageAt = Time.time;
             transform.position = restPosition;
             if (spriteRenderer != null)
                 spriteRenderer.enabled = true;
@@ -72,7 +89,7 @@ namespace RhythmHunter.TopDownBeatCombat
             UpdateReadout();
         }
 
-        private IEnumerator PlayHitFeedback(bool knockedOut)
+        private IEnumerator PlayHitFeedback()
         {
             Vector3 start = restPosition;
             for (int i = 0; i < 2; i++)
@@ -90,14 +107,18 @@ namespace RhythmHunter.TopDownBeatCombat
             yield return new WaitForSecondsRealtime(0.45f);
             if (damageText != null)
                 damageText.text = string.Empty;
+        }
 
-            if (!knockedOut)
-                yield break;
-
-            if (spriteRenderer != null)
-                spriteRenderer.enabled = false;
-            yield return new WaitForSecondsRealtime(respawnDelay);
-            ResetDummy();
+        private IEnumerator PlayRecoveryFeedback()
+        {
+            if (damageText != null)
+            {
+                damageText.text = "FULL RECOVERY";
+                damageText.color = new Color(0.2f, 0.9f, 1f, 1f);
+            }
+            yield return new WaitForSecondsRealtime(0.8f);
+            if (damageText != null)
+                damageText.text = string.Empty;
         }
 
         private void UpdateReadout()

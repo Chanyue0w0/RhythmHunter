@@ -58,14 +58,17 @@ namespace RhythmHunter.TopDownBeatCombatEditor
 
         private static void ValidateStructure()
         {
+            SoundfallBeatHud hud = UnityEngine.Object.FindFirstObjectByType<SoundfallBeatHud>();
             if (UnityEngine.Object.FindFirstObjectByType<TopDownBeatPlayer>() == null ||
                 UnityEngine.Object.FindFirstObjectByType<TopDownBeatCamera>() == null ||
                 UnityEngine.Object.FindFirstObjectByType<BeatTrainingDummy>() == null ||
-                UnityEngine.Object.FindFirstObjectByType<SoundfallBeatHud>() == null ||
+                hud == null ||
                 UnityEngine.Object.FindFirstObjectByType<RhythmClock>() == null)
             {
                 throw new InvalidOperationException("Top Down Beat Combat scene is missing a required component.");
             }
+            if (hud.BeatPairCount < 4)
+                throw new InvalidOperationException("Beat HUD requires at least four converging beat pairs.");
 
             EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
             if (scenes.Length == 0 || !scenes[0].enabled || scenes[0].path != TopDownBeatCombatSceneBuilder.ScenePath)
@@ -111,6 +114,13 @@ namespace RhythmHunter.TopDownBeatCombatEditor
                     return;
                 }
 
+                dummy.TakeDamage(9999, RhythmClock.TimingGrade.Perfect);
+                if (dummy.CurrentHp != 1)
+                {
+                    Fail("Training dummy HP did not clamp at 1.");
+                    return;
+                }
+
                 player.SetTestMove(Vector2.up);
                 SessionState.SetFloat(YKey, player.transform.position.y);
                 if (!player.TryDodge())
@@ -132,6 +142,12 @@ namespace RhythmHunter.TopDownBeatCombatEditor
                     return;
                 }
 
+                SessionState.SetInt(StateKey, 2);
+                return;
+            }
+
+            if (state == 2 && dummy.CurrentHp == dummy.MaxHp)
+            {
                 SessionState.SetBool(PassedKey, true);
                 SessionState.SetString(FailureKey, string.Empty);
                 EditorApplication.ExitPlaymode();
