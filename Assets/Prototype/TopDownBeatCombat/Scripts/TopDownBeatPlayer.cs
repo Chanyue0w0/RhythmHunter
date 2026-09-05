@@ -9,6 +9,12 @@ namespace RhythmHunter.TopDownBeatCombat
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public sealed class TopDownBeatPlayer : MonoBehaviour
     {
+        public enum FacingControlMode
+        {
+            MovementDirection,
+            MousePointer
+        }
+
         public readonly struct AttackResult
         {
             public AttackResult(RhythmClock.TimingGrade grade, int damage, bool hit)
@@ -30,6 +36,8 @@ namespace RhythmHunter.TopDownBeatCombat
         [SerializeField] private Transform attackFlash;
 
         [Header("Four-direction Movement")]
+        [Tooltip("Movement Direction keeps the original controls. Mouse Pointer turns and attacks toward the nearest four-direction mouse sector.")]
+        [SerializeField] private FacingControlMode facingControlMode = FacingControlMode.MovementDirection;
         [SerializeField, Min(0.1f)] private float moveSpeed = 4.2f;
         [SerializeField] private Vector2 movementBounds = new(10f, 7f);
 
@@ -52,6 +60,7 @@ namespace RhythmHunter.TopDownBeatCombat
         private InputAction dodgeAction;
         private Vector2 moveInput;
         private Vector2 testMoveInput;
+        private Vector2 testAimInput;
         private Vector2 dodgeDirection;
         private float dodgeEndsAt;
         private float nextDodgeAt;
@@ -59,6 +68,7 @@ namespace RhythmHunter.TopDownBeatCombat
 
         public event Action<AttackResult> AttackPerformed;
 
+        public FacingControlMode ControlMode => facingControlMode;
         public Vector2 Facing { get; private set; } = Vector2.right;
         public bool IsDodging => Time.time < dodgeEndsAt;
         public Vector2 MoveInput => moveInput.sqrMagnitude > 0f ? moveInput : testMoveInput;
@@ -103,11 +113,13 @@ namespace RhythmHunter.TopDownBeatCombat
             if (desired.sqrMagnitude > 1f)
                 desired.Normalize();
 
-            if (!IsDodging && desired.sqrMagnitude > 0.01f)
-            {
-                Facing = PixelFourDirectionPresenter.Cardinalize(desired);
-                presenter?.SetFacing(Facing);
-            }
+            if (IsDodging)
+                return;
+
+            if (facingControlMode == FacingControlMode.MousePointer)
+                RefreshMouseFacing();
+            else if (desired.sqrMagnitude > 0.01f)
+                SetFacing(desired);
         }
 
         private void FixedUpdate()
@@ -146,10 +158,23 @@ namespace RhythmHunter.TopDownBeatCombat
             testMoveInput = Vector2.ClampMagnitude(input, 1f);
         }
 
+        public void SetFacingControlMode(FacingControlMode mode)
+        {
+            facingControlMode = mode;
+        }
+
+        public void SetTestAim(Vector2 direction)
+        {
+            testAimInput = Vector2.ClampMagnitude(direction, 1f);
+        }
+
         public bool TryAttack()
         {
             if (rhythmClock == null || !rhythmClock.IsReady || IsDodging || Time.time < nextAttackAt)
                 return false;
+
+            if (facingControlMode == FacingControlMode.MousePointer)
+                RefreshMouseFacing();
 
             nextAttackAt = Time.time + attackCooldown;
             RhythmClock.TimingGrade grade = rhythmClock.JudgeNow();
@@ -210,6 +235,34 @@ namespace RhythmHunter.TopDownBeatCombat
                 : new Vector3(0.18f, 0.8f, 1f);
             yield return new WaitForSecondsRealtime(0.09f);
             attackFlash.gameObject.SetActive(false);
+        }
+
+        private void RefreshMouseFacing()
+        {
+            Vector2 aim = testAimInput;
+            if (aim.sqrMagnitude <= 0.01f)
+            {
+                if (Mouse.current == null)
+                    return;
+
+                Camera worldCamera = Camera.main;
+                if (worldCamera == null)
+                    return;
+
+                Vector2 screenPosition = Mouse.current.position.ReadValue();
+                Vector3 worldPosition = worldCamera.ScreenToWorldPoint(
+                    new Vector3(screenPosition.x, screenPosition.y, -worldCamera.transform.position.z));
+                aim = (Vector2)worldPosition - body.position;
+            }
+
+            if (aim.sqrMagnitude > 0.01f)
+                SetFacing(aim);
+        }
+
+        private void SetFacing(Vector2 direction)
+        {
+            Facing = PixelFourDirectionPresenter.Cardinalize(direction);
+            presenter?.SetFacing(Facing);
         }
 
         private void CreateInputActions()

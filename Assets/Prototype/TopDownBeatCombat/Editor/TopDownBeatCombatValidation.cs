@@ -148,6 +148,30 @@ namespace RhythmHunter.TopDownBeatCombatEditor
 
             if (state == 2 && dummy.CurrentHp == dummy.MaxHp)
             {
+                player.SetFacingControlMode(TopDownBeatPlayer.FacingControlMode.MousePointer);
+                player.SetTestAim(Vector2.down);
+                SessionState.SetInt(StateKey, 3);
+                return;
+            }
+
+            if (state == 3)
+            {
+                if (player.ControlMode != TopDownBeatPlayer.FacingControlMode.MousePointer ||
+                    Vector2.Distance(player.Facing, Vector2.down) > 0.01f)
+                {
+                    Fail("Mouse pointer control mode did not update four-direction facing.");
+                    return;
+                }
+
+                dummy.transform.position = player.transform.position + (Vector3)(Vector2.down * 0.85f);
+                Physics2D.SyncTransforms();
+                int hitCount = dummy.HitCount;
+                if (!player.TryAttack() || dummy.HitCount != hitCount + 1)
+                {
+                    Fail("Mouse pointer control mode did not attack in its aimed direction.");
+                    return;
+                }
+
                 SessionState.SetBool(PassedKey, true);
                 SessionState.SetString(FailureKey, string.Empty);
                 EditorApplication.ExitPlaymode();
