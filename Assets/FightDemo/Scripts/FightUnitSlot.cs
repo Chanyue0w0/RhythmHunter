@@ -117,7 +117,13 @@ namespace RhythmHunter.FightDemo
         private void Update()
         {
             pulse = Mathf.MoveTowards(pulse, 0f, Time.deltaTime * 4f);
-            Transform visualRoot = actorInstance != null ? actorInstance.transform : placeholderVisual != null ? placeholderVisual.transform : null;
+            Transform visualRoot = actorInstance != null
+                ? actorInstance.transform
+                : actorRoot != null
+                    ? actorRoot
+                    : placeholderVisual != null
+                        ? placeholderVisual.transform
+                        : null;
             if (visualRoot != null)
                 visualRoot.localScale = Vector3.one * Mathf.Lerp(1f, 1.14f, pulse);
         }

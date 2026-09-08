@@ -19,6 +19,45 @@ namespace RhythmHunter.FightDemoEditor
         public const string ScenePath = "Assets/FightDemo/Scenes/FightScene.unity";
         public const string InputActionsPath = "Assets/InputActionMap/FightControl.inputactions";
 
+        private static readonly string[] PaladinIdlePaths =
+        {
+            "Assets/FightDemo/Arts/角色/Paladin/Idle/Idle1.png",
+            "Assets/FightDemo/Arts/角色/Paladin/Idle/Idle2.png",
+            "Assets/FightDemo/Arts/角色/Paladin/Idle/Idle3.png"
+        };
+
+        private static readonly string[] BardIdlePaths =
+        {
+            "Assets/FightDemo/Arts/角色/Bard/Idle/Idle1.png",
+            "Assets/FightDemo/Arts/角色/Bard/Idle/Idle2.png",
+            "Assets/FightDemo/Arts/角色/Bard/Idle/Idle3.png"
+        };
+
+        private static readonly string[] MageIdlePaths =
+        {
+            "Assets/FightDemo/Arts/角色/Mage/Idle/Idle1.png",
+            "Assets/FightDemo/Arts/角色/Mage/Idle/Idle2.png",
+            "Assets/FightDemo/Arts/角色/Mage/Idle/Idle3.png"
+        };
+
+        private static readonly string[] GoblinMageIdlePaths =
+        {
+            "Assets/FightDemo/Arts/敵人/Goblin_Mage/idle/idle_1.png",
+            "Assets/FightDemo/Arts/敵人/Goblin_Mage/idle/idle_2.png"
+        };
+
+        private static readonly string[] GoblinMercenaryIdlePaths =
+        {
+            "Assets/FightDemo/Arts/敵人/Goblin_Mercenary/idle/idle_1.png",
+            "Assets/FightDemo/Arts/敵人/Goblin_Mercenary/idle/idle_2.png"
+        };
+
+        private static readonly string[] GoblinShieldIdlePaths =
+        {
+            "Assets/FightDemo/Arts/敵人/Goblin_Shield/idle_Holding/holding_1.png",
+            "Assets/FightDemo/Arts/敵人/Goblin_Shield/idle_Holding/holding_2.png"
+        };
+
         private static readonly Color Navy = new(0.018f, 0.025f, 0.045f, 1f);
         private static readonly Color Panel = new(0.035f, 0.055f, 0.085f, 0.94f);
         private static readonly Color EnemyZone = new(0.18f, 0.045f, 0.065f, 0.72f);
@@ -42,6 +81,18 @@ namespace RhythmHunter.FightDemoEditor
 
             Sprite worldSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            Sprite[] goblinMageIdle = LoadSpriteSequence(GoblinMageIdlePaths);
+            Sprite[] goblinMercenaryIdle = LoadSpriteSequence(GoblinMercenaryIdlePaths);
+            Sprite[] goblinShieldIdle = LoadSpriteSequence(GoblinShieldIdlePaths);
+            Sprite[] paladinIdle = LoadSpriteSequence(PaladinIdlePaths);
+            Sprite[] bardIdle = LoadSpriteSequence(BardIdlePaths);
+            Sprite[] mageIdle = LoadSpriteSequence(MageIdlePaths);
+            if (new[] { goblinMageIdle, goblinMercenaryIdle, goblinShieldIdle, paladinIdle, bardIdle, mageIdle }
+                .Any(sequence => sequence.Length == 0))
+            {
+                Debug.LogError("[FightSceneBuilder] One or more required character idle sequences could not be loaded.");
+                return;
+            }
             Scene previousScene = SceneManager.GetActiveScene();
             NewSceneMode mode = Application.isBatchMode ? NewSceneMode.Single : NewSceneMode.Additive;
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, mode);
@@ -52,6 +103,7 @@ namespace RhythmHunter.FightDemoEditor
             CreateEventSystem();
             Transform battlefield = new GameObject("BattlefieldWorld").transform;
             CreateWorldSprite("WorldBackground", battlefield, worldSprite, Navy, new Vector3(0f, 0f, 4f), new Vector2(22f, 12f), -100);
+            CreateReplaceableBackground(battlefield, new Vector2(22f, 12f));
             CreateWorldSprite("EnemyField", battlefield, worldSprite, EnemyZone, new Vector3(-4.3f, 0.2f, 2f), new Vector2(7.3f, 4.4f), -20);
             CreateWorldSprite("HeroField", battlefield, worldSprite, HeroZone, new Vector3(4.3f, 0.2f, 2f), new Vector2(7.3f, 4.4f), -20);
             CreateWorldSprite("CenterLine", battlefield, worldSprite, new Color(1f, 1f, 1f, 0.18f), new Vector3(0f, 0.1f, 1f), new Vector2(0.06f, 4.1f), -10);
@@ -60,16 +112,16 @@ namespace RhythmHunter.FightDemoEditor
 
             FightUnitSlot[] enemySlots =
             {
-                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_1", "ENEMY 1", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 0, new Vector3(-5.8f, 0.15f, 0f), 80, 12, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 1"),
-                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_2", "ENEMY 2", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 1, new Vector3(-4.05f, 0.15f, 0f), 120, 18, new Color(0.85f, 0.2f, 0.25f, 1f), "ACTIVE"),
-                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_3", "ENEMY 3", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 2, new Vector3(-2.3f, 0.15f, 0f), 90, 14, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 3")
+                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinMage", "GOBLIN MAGE", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 0, new Vector3(-5.8f, 0.15f, 0f), 80, 12, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 1", goblinMageIdle, 1.65f),
+                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinMercenary", "GOBLIN MERCENARY", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 1, new Vector3(-4.05f, 0.15f, 0f), 120, 18, new Color(0.85f, 0.2f, 0.25f, 1f), "ACTIVE", goblinMercenaryIdle, 1.65f),
+                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinShield", "GOBLIN SHIELD", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 2, new Vector3(-2.3f, 0.15f, 0f), 90, 14, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 3", goblinShieldIdle, 1.65f)
             };
 
             FightUnitSlot[] heroSlots =
             {
-                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Tank", "TANK", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank, 0, new Vector3(2.3f, 0.15f, 0f), 120, 12, new Color(0.12f, 0.65f, 0.9f, 1f), "X / Q"),
-                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Support", "SUPPORT", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support, 1, new Vector3(4.05f, 0.15f, 0f), 85, 8, new Color(0.2f, 0.78f, 0.48f, 1f), "Y / W"),
-                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Damage", "DAMAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage, 2, new Vector3(5.8f, 0.15f, 0f), 75, 24, new Color(0.72f, 0.3f, 0.88f, 1f), "B / E")
+                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Paladin", "PALADIN", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank, 0, new Vector3(2.3f, 0.15f, 0f), 120, 12, new Color(0.12f, 0.65f, 0.9f, 1f), "X / Q", paladinIdle, 1.72f),
+                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Bard", "BARD", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support, 1, new Vector3(4.05f, 0.15f, 0f), 85, 8, new Color(0.2f, 0.78f, 0.48f, 1f), "Y / W", bardIdle, 1.72f),
+                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Mage", "MAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage, 2, new Vector3(5.8f, 0.15f, 0f), 75, 24, new Color(0.72f, 0.3f, 0.88f, 1f), "B / E", mageIdle, 1.72f)
             };
 
             SpriteRenderer tankShield = CreateWorldSprite(
@@ -80,15 +132,17 @@ namespace RhythmHunter.FightDemoEditor
                 new Vector3(0f, 0.05f, -0.5f), new Vector2(1.55f, 2.2f), 24);
 
             Canvas canvas = CreateCanvas();
-            Image topPanel = CreatePanel("TopHud", canvas.transform, new Vector2(0f, 475f), new Vector2(1500f, 105f), Panel);
+            RectTransform topUiRoot = CreateUiGroup("Top UI (Enable In Inspector)", canvas.transform);
+            RectTransform bottomUiRoot = CreateUiGroup("Bottom UI (Enable In Inspector)", canvas.transform);
+            Image topPanel = CreatePanel("TopHud", topUiRoot, new Vector2(0f, 475f), new Vector2(1500f, 105f), Panel);
             CreateText("Title", topPanel.transform, font, "RHYTHM HUNTER  •  WORLD-SPACE FIGHT PROTOTYPE", 25, FontStyle.Bold, Primary, new Vector2(0f, 23f), new Vector2(1300f, 40f));
             Text playback = CreateText("PlaybackStatus", topPanel.transform, font, "WAITING FOR FMOD BEAT CALLBACK...", 16, FontStyle.Bold, Gold, new Vector2(0f, -20f), new Vector2(1300f, 30f));
 
-            Text warning = CreateText("AttackWarning", canvas.transform, font, "ENEMY ATTACKS ON EVERY FOURTH BEAT", 24, FontStyle.Bold, Primary, new Vector2(0f, 355f), new Vector2(1450f, 44f));
-            Text result = CreateText("FightResult", canvas.transform, font, "GET READY", 42, FontStyle.Bold, Cyan, new Vector2(0f, -255f), new Vector2(900f, 60f));
-            Text detail = CreateText("FightDetail", canvas.transform, font, "Press X / Q on beat 4 to guard", 18, FontStyle.Bold, Secondary, new Vector2(0f, -300f), new Vector2(1100f, 36f));
+            Text warning = CreateText("AttackWarning", topUiRoot, font, "ENEMY ATTACKS ON EVERY FOURTH BEAT", 24, FontStyle.Bold, Primary, new Vector2(0f, 355f), new Vector2(1450f, 44f));
+            Text result = CreateText("FightResult", bottomUiRoot, font, "GET READY", 42, FontStyle.Bold, Cyan, new Vector2(0f, -255f), new Vector2(900f, 60f));
+            Text detail = CreateText("FightDetail", bottomUiRoot, font, "Press X / Q on beat 4 to guard", 18, FontStyle.Bold, Secondary, new Vector2(0f, -300f), new Vector2(1100f, 36f));
 
-            Image rhythmPanel = CreatePanel("RhythmHud", canvas.transform, new Vector2(0f, -420f), new Vector2(1500f, 160f), Panel);
+            Image rhythmPanel = CreatePanel("RhythmHud", bottomUiRoot, new Vector2(0f, -420f), new Vector2(1500f, 160f), Panel);
             Text cycle = CreateText("CycleReadout", rhythmPanel.transform, font, "BAR --  •  BEAT --/4", 20, FontStyle.Bold, Primary, new Vector2(-520f, 44f), new Vector2(380f, 38f));
             Image[] beatNodes = new Image[4];
             for (int i = 0; i < beatNodes.Length; i++)
@@ -105,7 +159,10 @@ namespace RhythmHunter.FightDemoEditor
             Text statistics = CreateText("Statistics", rhythmPanel.transform, font, "CALLS  PERFECT 00  MISS 00     DEFENSE  BLOCK 00  HIT 00", 16, FontStyle.Bold, Secondary, new Vector2(330f, 44f), new Vector2(700f, 36f));
             Text health = CreateText("TankHealth", rhythmPanel.transform, font, "TANK HP   120 / 120", 16, FontStyle.Bold, Primary, new Vector2(-500f, -38f), new Vector2(300f, 30f));
             Slider healthBar = CreateSlider("TankHealthBar", rhythmPanel.transform, new Vector2(-265f, -38f), new Vector2(220f, 15f), new Color(0.3f, 1f, 0.55f, 1f), new Color(0.08f, 0.12f, 0.18f, 1f));
-            CreateText("InputLegend", canvas.transform, font, "TANK  X / Q     SUPPORT  Y / W     DAMAGE  B / E     ULTIMATE  A / R  (REWORKING)", 16, FontStyle.Bold, Secondary, new Vector2(0f, -520f), new Vector2(1500f, 28f));
+            CreateText("InputLegend", bottomUiRoot, font, "TANK  X / Q     SUPPORT  Y / W     DAMAGE  B / E     ULTIMATE  A / R  (REWORKING)", 16, FontStyle.Bold, Secondary, new Vector2(0f, -520f), new Vector2(1500f, 28f));
+
+            topUiRoot.gameObject.SetActive(false);
+            bottomUiRoot.gameObject.SetActive(false);
 
             Image flash = CreateImage("DamageFlash", canvas.transform, new Color(1f, 0.25f, 0.3f, 0f));
             Stretch(flash.rectTransform);
@@ -125,6 +182,12 @@ namespace RhythmHunter.FightDemoEditor
             fight.Configure(clock, judge, input, heroSlots[0], enemySlots[1], 120, 18);
             hudPresenter.Configure(clock, judge, fight, playback, cycle, warning, result, detail, health, statistics, beatNodes, beatProgress, healthBar, flash);
             battlefieldPresenter.Configure(fight, enemySlots, heroSlots, tankShield, enemyTelegraph);
+            BeatSyncedIdleAnimator[] idleAnimators = battlefield.GetComponentsInChildren<BeatSyncedIdleAnimator>(true);
+            for (int i = 0; i < idleAnimators.Length; i++)
+            {
+                BeatSyncedIdleAnimator animator = idleAnimators[i];
+                animator.Configure(fight, animator.TargetRenderer, animator.Frames, animator.CyclesPerBeat, animator.PingPong, i * 0.04f);
+            }
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -155,7 +218,9 @@ namespace RhythmHunter.FightDemoEditor
             int hp,
             int attack,
             Color color,
-            string inputLabel)
+            string inputLabel,
+            IReadOnlyList<Sprite> idleFrames,
+            float actorHeight)
         {
             GameObject slotObject = new(objectName);
             slotObject.transform.SetParent(parent, false);
@@ -170,6 +235,19 @@ namespace RhythmHunter.FightDemoEditor
             CreateWorldSprite("Body", placeholder, sprite, new Color(color.r * 0.7f, color.g * 0.7f, color.b * 0.7f, 1f), new Vector3(0f, -0.05f, 0f), new Vector2(1.0f, 1.65f), 10);
             CreateWorldSprite("Core", placeholder, sprite, color, new Vector3(0f, 0.2f, -0.1f), new Vector2(0.58f, 0.72f), 11);
             CreateWorldText("PrefabLabel", placeholder, font, "PREFAB\nSLOT", new Color(1f, 1f, 1f, 0.82f), new Vector3(0f, 0.18f, -0.2f), 0.022f, FontStyle.Bold);
+            placeholder.gameObject.SetActive(false);
+
+            GameObject idleVisual = new("BeatSyncedIdle", typeof(SpriteRenderer), typeof(BeatSyncedIdleAnimator));
+            idleVisual.transform.SetParent(actorRoot, false);
+            idleVisual.transform.localPosition = new Vector3(0f, -0.15f, -0.2f);
+            SpriteRenderer actorRenderer = idleVisual.GetComponent<SpriteRenderer>();
+            actorRenderer.sprite = idleFrames[0];
+            actorRenderer.sortingOrder = 12;
+            actorRenderer.color = Color.white;
+            float sourceHeight = Mathf.Max(0.01f, idleFrames[0].bounds.size.y);
+            float actorScale = actorHeight / sourceHeight;
+            idleVisual.transform.localScale = new Vector3(actorScale, actorScale, 1f);
+            idleVisual.GetComponent<BeatSyncedIdleAnimator>().Configure(null, actorRenderer, idleFrames, 1f, false);
 
             Transform effectPoint = new GameObject("NormalAttackEffectSpawnPoint").transform;
             effectPoint.SetParent(slotObject.transform, false);
@@ -183,6 +261,24 @@ namespace RhythmHunter.FightDemoEditor
 
             slot.Configure(objectName, displayName, team, role, index, hp, attack, color, actorRoot, effectPoint, placeholder.gameObject, sprite, hpFill, hpLabel);
             return slot;
+        }
+
+        private static Sprite[] LoadSpriteSequence(IEnumerable<string> paths)
+        {
+            List<Sprite> sprites = new();
+            foreach (string path in paths)
+            {
+                Sprite sprite = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().FirstOrDefault();
+                if (sprite == null)
+                {
+                    Debug.LogError($"[FightSceneBuilder] Missing sprite frame: {path}");
+                    continue;
+                }
+
+                sprites.Add(sprite);
+            }
+
+            return sprites.ToArray();
         }
 
         private static void CreateCamera()
@@ -214,6 +310,15 @@ namespace RhythmHunter.FightDemoEditor
             return canvas;
         }
 
+        private static RectTransform CreateUiGroup(string name, Transform parent)
+        {
+            GameObject groupObject = new(name, typeof(RectTransform));
+            groupObject.transform.SetParent(parent, false);
+            RectTransform rect = groupObject.GetComponent<RectTransform>();
+            Stretch(rect);
+            return rect;
+        }
+
         private static SpriteRenderer CreateWorldSprite(string name, Transform parent, Sprite sprite, Color color, Vector3 localPosition, Vector2 size, int sortingOrder)
         {
             GameObject gameObject = new(name, typeof(SpriteRenderer));
@@ -224,6 +329,20 @@ namespace RhythmHunter.FightDemoEditor
             renderer.sprite = sprite;
             renderer.color = color;
             renderer.sortingOrder = sortingOrder;
+            return renderer;
+        }
+
+        private static SpriteRenderer CreateReplaceableBackground(Transform parent, Vector2 size)
+        {
+            GameObject backgroundObject = new("BattleBackground (Assign Sprite In Inspector)", typeof(SpriteRenderer));
+            backgroundObject.transform.SetParent(parent, false);
+            backgroundObject.transform.localPosition = new Vector3(0f, 0f, 3f);
+            SpriteRenderer renderer = backgroundObject.GetComponent<SpriteRenderer>();
+            renderer.sprite = null;
+            renderer.color = Color.white;
+            renderer.drawMode = SpriteDrawMode.Sliced;
+            renderer.size = size;
+            renderer.sortingOrder = -90;
             return renderer;
         }
 

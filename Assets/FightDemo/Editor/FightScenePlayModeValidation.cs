@@ -202,6 +202,37 @@ namespace RhythmHunter.FightDemoEditor
                 return false;
             }
 
+            BeatSyncedIdleAnimator[] idleAnimators = Object.FindObjectsByType<BeatSyncedIdleAnimator>(FindObjectsSortMode.None);
+            if (idleAnimators.Length != 6)
+            {
+                failure = $"Expected six beat-synced idle animators, found {idleAnimators.Length}.";
+                return false;
+            }
+
+            foreach (BeatSyncedIdleAnimator animator in idleAnimators)
+            {
+                if (animator.FrameCount < 2 || animator.TargetRenderer == null || animator.BeatSource == null)
+                {
+                    failure = $"{animator.name} has incomplete editable idle animation data.";
+                    return false;
+                }
+            }
+
+            Transform topUi = FindSceneTransform("Top UI (Enable In Inspector)");
+            Transform bottomUi = FindSceneTransform("Bottom UI (Enable In Inspector)");
+            if (topUi == null || bottomUi == null || topUi.gameObject.activeSelf || bottomUi.gameObject.activeSelf)
+            {
+                failure = "Top and bottom HUD groups must exist and be disabled by default.";
+                return false;
+            }
+
+            Transform background = FindSceneTransform("BattleBackground (Assign Sprite In Inspector)");
+            if (background == null || background.GetComponent<SpriteRenderer>() == null)
+            {
+                failure = "Replaceable battle background SpriteRenderer is missing.";
+                return false;
+            }
+
             FightCombatController fight = Object.FindFirstObjectByType<FightCombatController>();
             FightBattlefieldPresenter presenter = Object.FindFirstObjectByType<FightBattlefieldPresenter>();
             if (fight == null || presenter == null || fight.TankSlot != tank || presenter.HeroSlots?.Length != 3 ||
@@ -212,6 +243,18 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             return true;
+        }
+
+        private static Transform FindSceneTransform(string objectName)
+        {
+            Transform[] transforms = Resources.FindObjectsOfTypeAll<Transform>();
+            foreach (Transform candidate in transforms)
+            {
+                if (candidate.name == objectName && candidate.gameObject.scene.IsValid())
+                    return candidate;
+            }
+
+            return null;
         }
 
         private static bool HasBindings(
