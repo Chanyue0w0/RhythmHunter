@@ -89,7 +89,13 @@ namespace RhythmHunter.FightDemo
         private void Start()
         {
             OnPartyHealthChanged(fight != null ? fight.PartyHp : 0, fight != null ? fight.MaxPartyHp : 1);
-            SetResult("GET READY", Cyan, "Enemy attacks land on every fourth beat.", 2f);
+            SetResult(
+                "GET READY",
+                Cyan,
+                fight != null && fight.UsesFrontHeroControls
+                    ? "Q/X Light  •  W/Y Heavy  •  E/B Guard"
+                    : "Enemy attacks land on every fourth beat.",
+                2f);
             UpdateStatistics();
 
             if (screenFlash != null)
@@ -119,6 +125,26 @@ namespace RhythmHunter.FightDemo
         {
             currentBeat = beat.Beat;
 
+            if (fight != null && fight.UsesFrontHeroControls)
+            {
+                bool enemyAttackBeat = beat.GlobalBeat > 0 &&
+                                       beat.GlobalBeat % fight.EnemyAttackIntervalBeats == 0;
+                if (cycleText != null)
+                    cycleText.text = $"BAR {beat.Bar:00}  •  BEAT {beat.Beat}/4";
+                if (warningText != null)
+                {
+                    warningText.text = enemyAttackBeat
+                        ? "ENEMY ATTACK  •  E/B TO GUARD"
+                        : $"PLAYER MANA {fight.FrontHero.CurrentMana}/{fight.FrontHero.MaxMana}  •  " +
+                          $"BARD {fight.SecondHero.CurrentMana}/{fight.SecondHero.MaxMana}  •  " +
+                          $"MAGE {fight.ThirdHero.CurrentMana}/{fight.ThirdHero.MaxMana}";
+                    warningText.color = enemyAttackBeat ? Gold : Color.white;
+                }
+
+                UpdateBeatNodes(beat.Beat);
+                return;
+            }
+
             if (cycleText != null)
                 cycleText.text = beat.Beat == 4
                     ? $"BAR {beat.Bar:00}  •  BEAT 4  •  HEAVY"
@@ -136,25 +162,33 @@ namespace RhythmHunter.FightDemo
                 warningText.color = beat.Beat == 4 ? Gold : Color.white;
             }
 
-            if (beatNodes != null)
-            {
-                for (int i = 0; i < beatNodes.Length; i++)
-                {
-                    if (beatNodes[i] == null)
-                        continue;
-
-                    bool active = i == beat.Beat - 1;
-                    beatNodes[i].color = active ? (i == 3 ? Gold : Cyan) : Dim;
-                    beatNodes[i].rectTransform.localScale = active
-                        ? Vector3.one * (i == 3 ? 1.4f : 1.2f)
-                        : Vector3.one;
-                }
-            }
-
+            UpdateBeatNodes(beat.Beat);
         }
 
         private void OnHeroCalled(FightCombatController.HeroCallResult call)
         {
+            if (fight != null && fight.UsesFrontHeroControls)
+            {
+                if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
+                {
+                    perfectCalls++;
+                    string title = call.Command == FightInputRouter.HeroCommand.Damage
+                        ? "GUARD READY"
+                        : call.SkillActivated
+                            ? "SKILL"
+                            : call.IsHeavyBeat ? "HEAVY ATTACK" : "LIGHT ATTACK";
+                    SetResult(title, call.SkillActivated ? Gold : Green, call.Message, 1.2f);
+                }
+                else
+                {
+                    missCalls++;
+                    SetResult("MISS", Red, FormatDelta(call.RhythmResult.DeltaMs), 1.2f);
+                }
+
+                UpdateStatistics();
+                return;
+            }
+
             if (call.Command == FightInputRouter.HeroCommand.Ultimate)
             {
                 SetResult("ULTIMATE RESERVED", Purple, "A / R • redesign in progress", 1.5f);
@@ -203,7 +237,10 @@ namespace RhythmHunter.FightDemo
             {
                 receivedAttacks++;
                 flashTimer = 0.55f;
-                SetResult("PARTY HIT", Red, $"-{attack.Damage} HP • press X / Q on beat 4", 1.4f);
+                string guardHint = fight != null && fight.UsesFrontHeroControls
+                    ? "press E / B on the attack beat"
+                    : "press X / Q on beat 4";
+                SetResult("PARTY HIT", Red, $"-{attack.Damage} HP • {guardHint}", 1.4f);
             }
 
             UpdateStatistics();
@@ -305,6 +342,24 @@ namespace RhythmHunter.FightDemo
             statisticsText.text =
                 $"CALLS  PERFECT {perfectCalls:00}  MISS {missCalls:00}     " +
                 $"DEFENSE  BLOCK {blockedAttacks:00}  HIT {receivedAttacks:00}";
+        }
+
+        private void UpdateBeatNodes(int beat)
+        {
+            if (beatNodes == null)
+                return;
+
+            for (int i = 0; i < beatNodes.Length; i++)
+            {
+                if (beatNodes[i] == null)
+                    continue;
+
+                bool active = i == beat - 1;
+                beatNodes[i].color = active ? (i == 3 ? Gold : Cyan) : Dim;
+                beatNodes[i].rectTransform.localScale = active
+                    ? Vector3.one * (i == 3 ? 1.4f : 1.2f)
+                    : Vector3.one;
+            }
         }
 
         private static string FormatDelta(double deltaMs)

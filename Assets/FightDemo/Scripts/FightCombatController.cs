@@ -1,15 +1,126 @@
 using System;
+using System.Collections.Generic;
 using RhythmHunter.RhythmDemo;
 using UnityEngine;
 
 namespace RhythmHunter.FightDemo
 {
     /// <summary>
-    /// Minimal four-beat combat loop. The enemy telegraphs on beats 1-3 and attacks on beat 4.
-    /// A Perfect tank command on that heavy beat blocks the attack.
+    /// Runs the original fourth-beat guard prototype in FightScene and the front-hero
+    /// gameplay validation rules in FightScene2.
     /// </summary>
     public sealed class FightCombatController : MonoBehaviour
     {
+        [Serializable]
+        public sealed class HeroBeatSettings
+        {
+            [SerializeField] private string heroLabel = "Hero";
+            [SerializeField] private FightUnitSlot unitSlot;
+            [SerializeField] private bool playerControlled;
+
+            [Header("Attack Beat")]
+            [Tooltip("Number of musical beats between automatic attacks. The player-controlled hero attacks from input instead.")]
+            [SerializeField, Min(1)] private int attackIntervalBeats = 2;
+
+            [Header("Mana")]
+            [SerializeField, Min(1)] private int maxMana = 4;
+            [SerializeField, Min(0)] private int startingMana;
+            [Tooltip("Runtime mana. A successful light attack adds one point.")]
+            [SerializeField, Min(0)] private int currentMana;
+
+            [Header("Skill")]
+            [SerializeField] private string skillName = "Beat Skill";
+            [SerializeField, Min(0.1f)] private float lightAttackMultiplier = 1f;
+            [SerializeField, Min(0.1f)] private float heavyAttackMultiplier = 1.75f;
+            [SerializeField, Min(0.1f)] private float skillDamageMultiplier = 3f;
+            [Tooltip("Runtime count used for gameplay validation.")]
+            [SerializeField, Min(0)] private int skillActivationCount;
+
+            public HeroBeatSettings()
+            {
+            }
+
+            public HeroBeatSettings(
+                string label,
+                bool isPlayerControlled,
+                int intervalBeats,
+                int manaCapacity,
+                string abilityName,
+                float skillMultiplier)
+            {
+                heroLabel = label;
+                playerControlled = isPlayerControlled;
+                attackIntervalBeats = Mathf.Max(1, intervalBeats);
+                maxMana = Mathf.Max(1, manaCapacity);
+                skillName = abilityName;
+                skillDamageMultiplier = Mathf.Max(0.1f, skillMultiplier);
+            }
+
+            public string HeroLabel => heroLabel;
+            public FightUnitSlot UnitSlot => unitSlot;
+            public bool PlayerControlled => playerControlled;
+            public int AttackIntervalBeats => attackIntervalBeats;
+            public int MaxMana => maxMana;
+            public int CurrentMana => currentMana;
+            public string SkillName => skillName;
+            public bool SkillReady => currentMana >= maxMana;
+            public int SkillActivationCount => skillActivationCount;
+
+            internal void Initialize(FightUnitSlot fallbackSlot, bool resetMana)
+            {
+                if (unitSlot == null)
+                    unitSlot = fallbackSlot;
+
+                attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
+                maxMana = Mathf.Max(1, maxMana);
+                startingMana = Mathf.Clamp(startingMana, 0, maxMana);
+                currentMana = resetMana ? startingMana : Mathf.Clamp(currentMana, 0, maxMana);
+                if (resetMana)
+                    skillActivationCount = 0;
+                lightAttackMultiplier = Mathf.Max(0.1f, lightAttackMultiplier);
+                heavyAttackMultiplier = Mathf.Max(0.1f, heavyAttackMultiplier);
+                skillDamageMultiplier = Mathf.Max(0.1f, skillDamageMultiplier);
+            }
+
+            internal bool IsScheduledAttackBeat(long globalBeat)
+            {
+                return !playerControlled && globalBeat > 0 && globalBeat % attackIntervalBeats == 0;
+            }
+
+            internal int DamageFor(ActionType action)
+            {
+                if (unitSlot == null)
+                    return 0;
+
+                float multiplier = action switch
+                {
+                    ActionType.HeavyAttack => heavyAttackMultiplier,
+                    ActionType.Skill => skillDamageMultiplier,
+                    _ => lightAttackMultiplier
+                };
+                return Mathf.Max(1, Mathf.RoundToInt(unitSlot.AttackPower * multiplier));
+            }
+
+            internal void GainLightAttackMana()
+            {
+                currentMana = Mathf.Min(maxMana, currentMana + 1);
+            }
+
+            internal void ConsumeSkillMana()
+            {
+                currentMana = 0;
+                skillActivationCount++;
+            }
+        }
+
+        public enum ActionType
+        {
+            LightAttack,
+            HeavyAttack,
+            Guard,
+            Skill
+        }
+
         public readonly struct HeroCallResult
         {
             public HeroCallResult(
@@ -63,6 +174,18 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int enemyAttackDamage = 1;
         [SerializeField, Min(0f)] private float resolutionSafetyMs = 12f;
 
+        [Header("FightScene2 - Front Hero Controls")]
+        [Tooltip("Automatically activates in a scene named FightScene2. Disable this to compare against the original controls.")]
+        [SerializeField] private bool enableFrontHeroModeInFightScene2 = true;
+        [SerializeField, Min(1)] private int enemyAttackIntervalBeats = 4;
+        [SerializeField] private HeroBeatSettings frontHero =
+            new("Paladin - Player", true, 1, 4, "Radiant Smite", 3f);
+        [SerializeField] private HeroBeatSettings secondHero =
+            new("Bard - Auto", false, 2, 4, "Final Chorus", 2.5f);
+        [SerializeField] private HeroBeatSettings thirdHero =
+            new("Mage - Auto", false, 4, 3, "Arcane Burst", 3.5f);
+
+        private readonly List<FightUnitSlot> fightScene2Enemies = new();
         private int partyHp;
         private bool pendingEnemyAttack;
         private long pendingAttackGlobalBeat = long.MinValue;
@@ -87,6 +210,11 @@ namespace RhythmHunter.FightDemo
         public int ReceivedAttackCount => receivedAttackCount;
         public FightUnitSlot TankSlot => tankSlot;
         public FightUnitSlot ActiveEnemySlot => activeEnemySlot;
+        public bool UsesFrontHeroControls => enableFrontHeroModeInFightScene2 && gameObject.scene.name == "FightScene2";
+        public int EnemyAttackIntervalBeats => enemyAttackIntervalBeats;
+        public HeroBeatSettings FrontHero => frontHero;
+        public HeroBeatSettings SecondHero => secondHero;
+        public HeroBeatSettings ThirdHero => thirdHero;
 
         public void Configure(
             FmodBeatClock clock,
@@ -111,6 +239,9 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            if (UsesFrontHeroControls)
+                InitializeFrontHeroMode();
+
             maxPartyHp = tankSlot != null ? tankSlot.MaxHp : maxPartyHp;
             partyHp = maxPartyHp;
             if (tankSlot != null)
@@ -128,6 +259,9 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
+            if (UsesFrontHeroControls)
+                RefreshFightScene2Labels();
+
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
         }
 
@@ -150,6 +284,102 @@ namespace RhythmHunter.FightDemo
             if (battleEnded)
                 return;
 
+            if (UsesFrontHeroControls)
+            {
+                SubmitFrontHeroCommand(command);
+                return;
+            }
+
+            SubmitLegacyHeroCommand(command);
+        }
+
+        private void SubmitFrontHeroCommand(FightInputRouter.HeroCommand command)
+        {
+            if (command == FightInputRouter.HeroCommand.Ultimate || rhythmJudge == null)
+                return;
+
+            FmodRhythmJudge.Result judgement = rhythmJudge.JudgeNow();
+            if (judgement.Judgement != FmodRhythmJudge.Grade.Perfect)
+            {
+                HeroCalled?.Invoke(new HeroCallResult(command, judgement, false, false, judgement.Message));
+                return;
+            }
+
+            switch (command)
+            {
+                case FightInputRouter.HeroCommand.Tank:
+                    PerformHeroAttack(frontHero, ActionType.LightAttack, command, judgement);
+                    break;
+                case FightInputRouter.HeroCommand.Support:
+                    PerformHeroAttack(frontHero, ActionType.HeavyAttack, command, judgement);
+                    break;
+                case FightInputRouter.HeroCommand.Damage:
+                    guardedGlobalBeat = judgement.NearestBeat.GlobalBeat;
+                    HeroCalled?.Invoke(new HeroCallResult(
+                        command,
+                        judgement,
+                        false,
+                        false,
+                        $"Guard ready on beat {judgement.NearestBeat.Beat}."));
+                    break;
+            }
+        }
+
+        private void PerformHeroAttack(
+            HeroBeatSettings hero,
+            ActionType requestedAction,
+            FightInputRouter.HeroCommand command,
+            FmodRhythmJudge.Result judgement)
+        {
+            FightUnitSlot target = FindFrontLivingEnemy();
+            if (hero?.UnitSlot == null || target == null)
+                return;
+
+            ActionType resolvedAction = hero.SkillReady ? ActionType.Skill : requestedAction;
+            int damage = hero.DamageFor(resolvedAction);
+            hero.UnitSlot.PlayNormalAttack();
+            target.TakeDamage(damage);
+
+            if (resolvedAction == ActionType.Skill)
+                hero.ConsumeSkillMana();
+            else if (resolvedAction == ActionType.LightAttack)
+                hero.GainLightAttackMana();
+
+            activeEnemySlot = FindFrontLivingEnemy();
+            string actionName = resolvedAction == ActionType.Skill ? hero.SkillName : FormatAction(resolvedAction);
+            HeroCalled?.Invoke(new HeroCallResult(
+                command,
+                judgement,
+                requestedAction == ActionType.HeavyAttack,
+                resolvedAction == ActionType.Skill,
+                $"{actionName} dealt {damage}. Mana {hero.CurrentMana}/{hero.MaxMana}."));
+        }
+
+        private void PerformAutomaticAttack(HeroBeatSettings hero)
+        {
+            FightUnitSlot target = FindFrontLivingEnemy();
+            if (hero?.UnitSlot == null || target == null || hero.UnitSlot.CurrentHp <= 0)
+                return;
+
+            ActionType action = hero.SkillReady ? ActionType.Skill : ActionType.LightAttack;
+            int damage = hero.DamageFor(action);
+            hero.UnitSlot.PlayNormalAttack();
+            target.TakeDamage(damage);
+
+            if (action == ActionType.Skill)
+                hero.ConsumeSkillMana();
+            else
+                hero.GainLightAttackMana();
+
+            activeEnemySlot = FindFrontLivingEnemy();
+            Debug.Log(
+                $"[FightScene2] {hero.HeroLabel}: {(action == ActionType.Skill ? hero.SkillName : "Light Attack")} " +
+                $"dealt {damage}. Mana {hero.CurrentMana}/{hero.MaxMana}.",
+                this);
+        }
+
+        private void SubmitLegacyHeroCommand(FightInputRouter.HeroCommand command)
+        {
             if (command == FightInputRouter.HeroCommand.Ultimate)
             {
                 HeroCalled?.Invoke(new HeroCallResult(
@@ -187,37 +417,51 @@ namespace RhythmHunter.FightDemo
                         skillActivated = true;
                         message = "Tank Guard activated.";
                         break;
-
                     case FightInputRouter.HeroCommand.Support:
                         message = "Support skill placeholder.";
                         break;
-
                     case FightInputRouter.HeroCommand.Damage:
                         message = "Damage skill placeholder.";
                         break;
-
                     default:
                         message = string.Empty;
                         break;
                 }
             }
 
-            HeroCalled?.Invoke(new HeroCallResult(
-                command,
-                judgement,
-                heavyBeat,
-                skillActivated,
-                message));
+            HeroCalled?.Invoke(new HeroCallResult(command, judgement, heavyBeat, skillActivated, message));
         }
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
             FightBeat?.Invoke(beat);
 
-            if (battleEnded || beat.Beat != 4)
+            if (battleEnded)
                 return;
 
-            // Resolve after the late side of the Perfect window, so early and late inputs are fair.
+            if (UsesFrontHeroControls)
+            {
+                if (secondHero.IsScheduledAttackBeat(beat.GlobalBeat))
+                    PerformAutomaticAttack(secondHero);
+                if (thirdHero.IsScheduledAttackBeat(beat.GlobalBeat))
+                    PerformAutomaticAttack(thirdHero);
+
+                activeEnemySlot = FindFrontLivingEnemy();
+                if (activeEnemySlot != null && beat.GlobalBeat > 0 &&
+                    beat.GlobalBeat % Mathf.Max(1, enemyAttackIntervalBeats) == 0)
+                {
+                    QueueEnemyAttack(beat);
+                }
+
+                return;
+            }
+
+            if (beat.Beat == 4)
+                QueueEnemyAttack(beat);
+        }
+
+        private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
+        {
             pendingEnemyAttack = true;
             pendingAttackGlobalBeat = beat.GlobalBeat;
             pendingAttackBar = beat.Bar;
@@ -232,39 +476,35 @@ namespace RhythmHunter.FightDemo
                 return;
             }
 
-            float lateWindowMs = Mathf.Max(
-                0f,
-                rhythmJudge.PerfectWindowMs - rhythmJudge.JudgementOffsetMs);
-
+            float lateWindowMs = Mathf.Max(0f, rhythmJudge.PerfectWindowMs - rhythmJudge.JudgementOffsetMs);
             if (timelineMs < pendingAttackTimelineMs + lateWindowMs + resolutionSafetyMs)
                 return;
 
             bool blocked = guardedGlobalBeat == pendingAttackGlobalBeat;
-            int damage = blocked ? 0 : enemyAttackDamage;
+            int configuredDamage = UsesFrontHeroControls && activeEnemySlot != null
+                ? Mathf.Max(1, activeEnemySlot.AttackPower)
+                : enemyAttackDamage;
+            int damage = blocked ? 0 : configuredDamage;
 
             if (blocked)
                 blockedAttackCount++;
             else
                 receivedAttackCount++;
 
-            partyHp = tankSlot != null
-                ? tankSlot.CurrentHp
-                : Mathf.Max(0, partyHp - damage);
-
+            partyHp = tankSlot != null ? tankSlot.CurrentHp : Mathf.Max(0, partyHp - damage);
             if (!blocked && tankSlot != null)
             {
                 tankSlot.TakeDamage(damage);
                 partyHp = tankSlot.CurrentHp;
             }
-            pendingEnemyAttack = false;
 
+            pendingEnemyAttack = false;
             EnemyAttackResolved?.Invoke(new EnemyAttackResult(
                 pendingAttackGlobalBeat,
                 pendingAttackBar,
                 blocked,
                 damage,
                 partyHp));
-
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
 
             if (partyHp > 0)
@@ -273,5 +513,94 @@ namespace RhythmHunter.FightDemo
             battleEnded = true;
             BattleLost?.Invoke();
         }
+
+        private void InitializeFrontHeroMode()
+        {
+            FightUnitSlot[] allSlots = FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
+            List<FightUnitSlot> heroes = new();
+            fightScene2Enemies.Clear();
+
+            foreach (FightUnitSlot slot in allSlots)
+            {
+                if (slot.gameObject.scene != gameObject.scene)
+                    continue;
+
+                if (slot.Team == FightUnitSlot.UnitTeam.Hero)
+                    heroes.Add(slot);
+                else
+                    fightScene2Enemies.Add(slot);
+            }
+
+            heroes.Sort((left, right) => left.SlotIndex.CompareTo(right.SlotIndex));
+            fightScene2Enemies.Sort((left, right) => right.SlotIndex.CompareTo(left.SlotIndex));
+
+            frontHero.Initialize(SlotAt(heroes, 0), true);
+            secondHero.Initialize(SlotAt(heroes, 1), true);
+            thirdHero.Initialize(SlotAt(heroes, 2), true);
+            tankSlot = frontHero.UnitSlot;
+            activeEnemySlot = FindFrontLivingEnemy();
+            enemyAttackIntervalBeats = Mathf.Max(1, enemyAttackIntervalBeats);
+        }
+
+        private FightUnitSlot FindFrontLivingEnemy()
+        {
+            for (int i = 0; i < fightScene2Enemies.Count; i++)
+            {
+                FightUnitSlot slot = fightScene2Enemies[i];
+                if (slot != null && slot.CurrentHp > 0)
+                    return slot;
+            }
+
+            return null;
+        }
+
+        private void RefreshFightScene2Labels()
+        {
+            SetRoleLabel(frontHero.UnitSlot, "PLAYER  •  Q/X LIGHT  W/Y HEAVY  E/B GUARD");
+            SetRoleLabel(secondHero.UnitSlot, $"AUTO  •  EVERY {secondHero.AttackIntervalBeats} BEATS");
+            SetRoleLabel(thirdHero.UnitSlot, $"AUTO  •  EVERY {thirdHero.AttackIntervalBeats} BEATS");
+        }
+
+        private static void SetRoleLabel(FightUnitSlot slot, string value)
+        {
+            if (slot == null)
+                return;
+
+            TextMesh[] labels = slot.GetComponentsInChildren<TextMesh>(true);
+            foreach (TextMesh label in labels)
+            {
+                if (label.name == "RoleAndInput")
+                {
+                    label.text = value;
+                    return;
+                }
+            }
+        }
+
+        private static FightUnitSlot SlotAt(IReadOnlyList<FightUnitSlot> slots, int index)
+        {
+            return slots != null && index >= 0 && index < slots.Count ? slots[index] : null;
+        }
+
+        private static string FormatAction(ActionType action)
+        {
+            return action switch
+            {
+                ActionType.HeavyAttack => "Heavy Attack",
+                ActionType.Guard => "Guard",
+                ActionType.Skill => "Skill",
+                _ => "Light Attack"
+            };
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            enemyAttackIntervalBeats = Mathf.Max(1, enemyAttackIntervalBeats);
+            frontHero?.Initialize(frontHero.UnitSlot, false);
+            secondHero?.Initialize(secondHero.UnitSlot, false);
+            thirdHero?.Initialize(thirdHero.UnitSlot, false);
+        }
+#endif
     }
 }

@@ -17,6 +17,7 @@ namespace RhythmHunter.FightDemoEditor
     public static class FightSceneBuilder
     {
         public const string ScenePath = "Assets/FightDemo/Scenes/FightScene.unity";
+        public const string Scene2Path = "Assets/FightDemo/Scenes/FightScene2.unity";
         public const string InputActionsPath = "Assets/InputActionMap/FightControl.inputactions";
 
         private static readonly string[] PaladinIdlePaths =

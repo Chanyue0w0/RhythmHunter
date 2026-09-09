@@ -74,13 +74,30 @@ namespace RhythmHunter.FightDemo
 
         private void OnFightBeat(FmodBeatClock.BeatSnapshot beat)
         {
-            FightUnitSlot attacker = SlotAt(enemySlots, 1);
+            FightUnitSlot attacker = fight != null && fight.UsesFrontHeroControls
+                ? fight.ActiveEnemySlot
+                : SlotAt(enemySlots, 1);
             attacker?.Pulse();
-            telegraphTimer = beat.Beat == 4 ? 0.45f : 0.16f;
+            bool attackBeat = fight != null && fight.UsesFrontHeroControls
+                ? beat.GlobalBeat > 0 && beat.GlobalBeat % fight.EnemyAttackIntervalBeats == 0
+                : beat.Beat == 4;
+            telegraphTimer = attackBeat ? 0.45f : 0.16f;
         }
 
         private void OnHeroCalled(FightCombatController.HeroCallResult call)
         {
+            if (fight != null && fight.UsesFrontHeroControls)
+            {
+                if (call.Command == FightInputRouter.HeroCommand.Damage &&
+                    call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
+                {
+                    shieldTimer = 0.55f;
+                    fight.FrontHero.UnitSlot?.Pulse();
+                }
+
+                return;
+            }
+
             FightUnitSlot hero = SlotAt(heroSlots, HeroIndex(call.Command));
             hero?.Pulse();
 
@@ -93,7 +110,10 @@ namespace RhythmHunter.FightDemo
 
         private void OnEnemyAttackResolved(FightCombatController.EnemyAttackResult attack)
         {
-            SlotAt(enemySlots, 1)?.PlayNormalAttack();
+            FightUnitSlot attacker = fight != null && fight.UsesFrontHeroControls
+                ? fight.ActiveEnemySlot
+                : SlotAt(enemySlots, 1);
+            attacker?.PlayNormalAttack();
             if (attack.Blocked)
                 shieldTimer = 0.85f;
         }
