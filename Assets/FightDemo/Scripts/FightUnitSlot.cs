@@ -55,7 +55,12 @@ namespace RhythmHunter.FightDemo
         private GameObject actorInstance;
         private int currentHp;
         private float pulse;
+        private float pulseScaleBonus = 0.14f;
         private int normalAttackPlayCount;
+        private int lightAttackPlayCount;
+        private int heavyAttackPlayCount;
+        private int skillAttackPlayCount;
+        private int guardPlayCount;
 
         public event Action<FightUnitSlot, int, int> HealthChanged;
 
@@ -72,6 +77,10 @@ namespace RhythmHunter.FightDemo
         public Transform ActorRoot => actorRoot;
         public Transform NormalAttackEffectSpawnPoint => normalAttackEffectSpawnPoint;
         public int NormalAttackPlayCount => normalAttackPlayCount;
+        public int LightAttackPlayCount => lightAttackPlayCount;
+        public int HeavyAttackPlayCount => heavyAttackPlayCount;
+        public int SkillAttackPlayCount => skillAttackPlayCount;
+        public int GuardPlayCount => guardPlayCount;
 
         public void Configure(
             string id,
@@ -125,7 +134,7 @@ namespace RhythmHunter.FightDemo
                         ? placeholderVisual.transform
                         : null;
             if (visualRoot != null)
-                visualRoot.localScale = Vector3.one * Mathf.Lerp(1f, 1.14f, pulse);
+                visualRoot.localScale = Vector3.one * Mathf.Lerp(1f, 1f + pulseScaleBonus, pulse);
         }
 
         public void RestoreFullHealth()
@@ -147,15 +156,76 @@ namespace RhythmHunter.FightDemo
 
         public void Pulse()
         {
+            Pulse(0.14f);
+        }
+
+        public void Pulse(float scaleBonus)
+        {
             pulse = 1f;
+            pulseScaleBonus = Mathf.Max(0.02f, scaleBonus);
         }
 
         public void PlayNormalAttack()
         {
             normalAttackPlayCount++;
-            Pulse();
+            Pulse(0.14f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Normal, accentColor, 0f);
+        }
+
+        public void PlayLightAttack()
+        {
+            normalAttackPlayCount++;
+            lightAttackPlayCount++;
+            Pulse(0.16f);
+            Color lightColor = Color.Lerp(accentColor, new Color(0.2f, 0.95f, 1f, 1f), 0.72f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Light, lightColor, 0f);
+        }
+
+        public void PlayHeavyAttack()
+        {
+            normalAttackPlayCount++;
+            heavyAttackPlayCount++;
+            Pulse(0.34f);
+            Color heavyColor = new(1f, 0.3f, 0.06f, 1f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Heavy, heavyColor, -0.24f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Heavy, new Color(1f, 0.68f, 0.08f, 0.9f), 0f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Heavy, heavyColor, 0.24f);
+        }
+
+        public void PlaySkillAttack()
+        {
+            normalAttackPlayCount++;
+            skillAttackPlayCount++;
+            Pulse(0.42f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f);
+        }
+
+        public void PlayGuard()
+        {
+            guardPlayCount++;
+            Pulse(0.22f);
+            SpawnGuardLayer(new Color(0.2f, 1f, 0.58f, 0.72f), 0.75f, 0.7f, 1.8f, 220f, 0f);
+            SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
+        }
+
+        public void SetHealthDisplayVisible(bool visible)
+        {
+            SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
+            foreach (SpriteRenderer renderer in renderers)
+            {
+                if (renderer.name == "HealthBackground" || renderer.name == "HealthFill")
+                    renderer.gameObject.SetActive(visible);
+            }
+
+            if (hpLabel != null)
+                hpLabel.gameObject.SetActive(visible);
+        }
+
+        private void SpawnAttackEffect(FightAttackEffect.VisualStyle style, Color color, float verticalOffset)
+        {
             Transform spawn = normalAttackEffectSpawnPoint != null ? normalAttackEffectSpawnPoint : transform;
-            Vector3 position = spawn.position + attackEffectLocalOffset;
+            Vector3 position = spawn.position + attackEffectLocalOffset + Vector3.up * verticalOffset;
             GameObject effect;
 
             if (normalAttackEffectPrefab != null)
@@ -168,17 +238,36 @@ namespace RhythmHunter.FightDemo
                 effect.transform.position = position;
                 SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
                 renderer.sprite = fallbackEffectSprite;
-                renderer.color = accentColor;
+                renderer.color = color;
                 renderer.sortingOrder = 30;
-                effect.AddComponent<FightAttackEffect>();
             }
 
             effect.SetActive(true);
             Vector3 direction = team == UnitTeam.Hero ? Vector3.left : Vector3.right;
-            if (effect.TryGetComponent(out FightAttackEffect attackEffect))
-                attackEffect.Play(direction, attackEffectLifetime);
-            else
-                Destroy(effect, attackEffectLifetime);
+            FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();
+            if (attackEffect == null)
+                attackEffect = effect.AddComponent<FightAttackEffect>();
+            attackEffect.Play(direction, attackEffectLifetime, style, color);
+        }
+
+        private void SpawnGuardLayer(
+            Color color,
+            float duration,
+            float fromScale,
+            float toScale,
+            float rotationSpeed,
+            float startingRotation)
+        {
+            Transform root = actorRoot != null ? actorRoot : transform;
+            GameObject effect = new($"{displayName}_GuardVFX", typeof(SpriteRenderer), typeof(FightGuardEffect));
+            effect.transform.SetParent(root, false);
+            effect.transform.localPosition = new Vector3(0f, 0f, -0.45f);
+            effect.transform.localRotation = Quaternion.Euler(0f, 0f, startingRotation);
+            SpriteRenderer renderer = effect.GetComponent<SpriteRenderer>();
+            renderer.sprite = fallbackEffectSprite;
+            renderer.color = color;
+            renderer.sortingOrder = 31;
+            effect.GetComponent<FightGuardEffect>().Play(color, duration, fromScale, toScale, rotationSpeed);
         }
 
         private void SpawnActorPrefab()

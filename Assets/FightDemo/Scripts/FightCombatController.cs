@@ -177,6 +177,8 @@ namespace RhythmHunter.FightDemo
         [Header("FightScene2 - Front Hero Controls")]
         [Tooltip("Automatically activates in a scene named FightScene2. Disable this to compare against the original controls.")]
         [SerializeField] private bool enableFrontHeroModeInFightScene2 = true;
+        [Tooltip("Disabled for the current gameplay test. Attacks still resolve and play feedback without changing HP.")]
+        [SerializeField] private bool enableHealthSystemInFightScene2;
         [SerializeField, Min(1)] private int enemyAttackIntervalBeats = 4;
         [SerializeField] private HeroBeatSettings frontHero =
             new("Paladin - Player", true, 1, 4, "Radiant Smite", 3f);
@@ -211,6 +213,7 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot TankSlot => tankSlot;
         public FightUnitSlot ActiveEnemySlot => activeEnemySlot;
         public bool UsesFrontHeroControls => enableFrontHeroModeInFightScene2 && gameObject.scene.name == "FightScene2";
+        public bool HealthSystemEnabled => !UsesFrontHeroControls || enableHealthSystemInFightScene2;
         public int EnemyAttackIntervalBeats => enemyAttackIntervalBeats;
         public HeroBeatSettings FrontHero => frontHero;
         public HeroBeatSettings SecondHero => secondHero;
@@ -260,7 +263,10 @@ namespace RhythmHunter.FightDemo
         private void Start()
         {
             if (UsesFrontHeroControls)
+            {
                 RefreshFightScene2Labels();
+                RefreshFightScene2HealthVisibility();
+            }
 
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
         }
@@ -315,6 +321,7 @@ namespace RhythmHunter.FightDemo
                     break;
                 case FightInputRouter.HeroCommand.Damage:
                     guardedGlobalBeat = judgement.NearestBeat.GlobalBeat;
+                    frontHero.UnitSlot?.PlayGuard();
                     HeroCalled?.Invoke(new HeroCallResult(
                         command,
                         judgement,
@@ -337,8 +344,9 @@ namespace RhythmHunter.FightDemo
 
             ActionType resolvedAction = hero.SkillReady ? ActionType.Skill : requestedAction;
             int damage = hero.DamageFor(resolvedAction);
-            hero.UnitSlot.PlayNormalAttack();
-            target.TakeDamage(damage);
+            PlayActionVisual(hero.UnitSlot, resolvedAction);
+            if (HealthSystemEnabled)
+                target.TakeDamage(damage);
 
             if (resolvedAction == ActionType.Skill)
                 hero.ConsumeSkillMana();
@@ -347,12 +355,13 @@ namespace RhythmHunter.FightDemo
 
             activeEnemySlot = FindFrontLivingEnemy();
             string actionName = resolvedAction == ActionType.Skill ? hero.SkillName : FormatAction(resolvedAction);
+            string impact = HealthSystemEnabled ? $"dealt {damage}" : $"power {damage} (HP disabled)";
             HeroCalled?.Invoke(new HeroCallResult(
                 command,
                 judgement,
                 requestedAction == ActionType.HeavyAttack,
                 resolvedAction == ActionType.Skill,
-                $"{actionName} dealt {damage}. Mana {hero.CurrentMana}/{hero.MaxMana}."));
+                $"{actionName} {impact}. Mana {hero.CurrentMana}/{hero.MaxMana}."));
         }
 
         private void PerformAutomaticAttack(HeroBeatSettings hero)
@@ -363,8 +372,9 @@ namespace RhythmHunter.FightDemo
 
             ActionType action = hero.SkillReady ? ActionType.Skill : ActionType.LightAttack;
             int damage = hero.DamageFor(action);
-            hero.UnitSlot.PlayNormalAttack();
-            target.TakeDamage(damage);
+            PlayActionVisual(hero.UnitSlot, action);
+            if (HealthSystemEnabled)
+                target.TakeDamage(damage);
 
             if (action == ActionType.Skill)
                 hero.ConsumeSkillMana();
@@ -372,9 +382,10 @@ namespace RhythmHunter.FightDemo
                 hero.GainLightAttackMana();
 
             activeEnemySlot = FindFrontLivingEnemy();
+            string impact = HealthSystemEnabled ? $"dealt {damage}" : $"power {damage} (HP disabled)";
             Debug.Log(
                 $"[FightScene2] {hero.HeroLabel}: {(action == ActionType.Skill ? hero.SkillName : "Light Attack")} " +
-                $"dealt {damage}. Mana {hero.CurrentMana}/{hero.MaxMana}.",
+                $"{impact}. Mana {hero.CurrentMana}/{hero.MaxMana}.",
                 this);
         }
 
@@ -484,18 +495,25 @@ namespace RhythmHunter.FightDemo
             int configuredDamage = UsesFrontHeroControls && activeEnemySlot != null
                 ? Mathf.Max(1, activeEnemySlot.AttackPower)
                 : enemyAttackDamage;
-            int damage = blocked ? 0 : configuredDamage;
+            int damage = blocked || !HealthSystemEnabled ? 0 : configuredDamage;
 
             if (blocked)
                 blockedAttackCount++;
             else
                 receivedAttackCount++;
 
-            partyHp = tankSlot != null ? tankSlot.CurrentHp : Mathf.Max(0, partyHp - damage);
-            if (!blocked && tankSlot != null)
+            if (HealthSystemEnabled)
             {
-                tankSlot.TakeDamage(damage);
-                partyHp = tankSlot.CurrentHp;
+                partyHp = tankSlot != null ? tankSlot.CurrentHp : Mathf.Max(0, partyHp - damage);
+                if (!blocked && tankSlot != null)
+                {
+                    tankSlot.TakeDamage(damage);
+                    partyHp = tankSlot.CurrentHp;
+                }
+            }
+            else
+            {
+                partyHp = maxPartyHp;
             }
 
             pendingEnemyAttack = false;
@@ -506,6 +524,11 @@ namespace RhythmHunter.FightDemo
                 damage,
                 partyHp));
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
+
+            // FightScene2 is an open-ended gameplay lab. HP never ends the session,
+            // even if the health toggle is temporarily enabled for comparison.
+            if (UsesFrontHeroControls)
+                return;
 
             if (partyHp > 0)
                 return;
@@ -559,6 +582,45 @@ namespace RhythmHunter.FightDemo
             SetRoleLabel(frontHero.UnitSlot, "PLAYER  •  Q/X LIGHT  W/Y HEAVY  E/B GUARD");
             SetRoleLabel(secondHero.UnitSlot, $"AUTO  •  EVERY {secondHero.AttackIntervalBeats} BEATS");
             SetRoleLabel(thirdHero.UnitSlot, $"AUTO  •  EVERY {thirdHero.AttackIntervalBeats} BEATS");
+        }
+
+        private void RefreshFightScene2HealthVisibility()
+        {
+            FightUnitSlot[] slots = FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
+            foreach (FightUnitSlot slot in slots)
+            {
+                if (slot.gameObject.scene == gameObject.scene)
+                    slot.SetHealthDisplayVisible(enableHealthSystemInFightScene2);
+            }
+
+            Transform[] transforms = Resources.FindObjectsOfTypeAll<Transform>();
+            foreach (Transform candidate in transforms)
+            {
+                if (candidate.gameObject.scene != gameObject.scene)
+                    continue;
+
+                if (candidate.name == "TankHealth" || candidate.name == "TankHealthBar")
+                    candidate.gameObject.SetActive(enableHealthSystemInFightScene2);
+            }
+        }
+
+        private static void PlayActionVisual(FightUnitSlot slot, ActionType action)
+        {
+            if (slot == null)
+                return;
+
+            switch (action)
+            {
+                case ActionType.HeavyAttack:
+                    slot.PlayHeavyAttack();
+                    break;
+                case ActionType.Skill:
+                    slot.PlaySkillAttack();
+                    break;
+                default:
+                    slot.PlayLightAttack();
+                    break;
+            }
         }
 
         private static void SetRoleLabel(FightUnitSlot slot, string value)

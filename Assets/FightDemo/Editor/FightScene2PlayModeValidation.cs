@@ -161,12 +161,17 @@ namespace RhythmHunter.FightDemoEditor
                 bool passed = fight.FrontHero.UnitSlot != null &&
                               fight.SecondHero.UnitSlot != null &&
                               fight.ThirdHero.UnitSlot != null &&
+                              !fight.HealthSystemEnabled &&
+                              !fight.BattleEnded &&
                               fight.FrontHero.CurrentMana >= 1 &&
-                              fight.FrontHero.UnitSlot.NormalAttackPlayCount >= 2 &&
+                              fight.FrontHero.UnitSlot.LightAttackPlayCount >= 1 &&
+                              fight.FrontHero.UnitSlot.HeavyAttackPlayCount >= 1 &&
+                              fight.FrontHero.UnitSlot.GuardPlayCount >= 1 &&
                               fight.SecondHero.UnitSlot.NormalAttackPlayCount >= 5 &&
                               fight.SecondHero.SkillActivationCount >= 1 &&
+                              fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
                               fight.ThirdHero.UnitSlot.NormalAttackPlayCount >= 2 &&
-                              currentEnemyHp < initialEnemyHp &&
+                              currentEnemyHp == initialEnemyHp &&
                               clock.IsPlaying;
 
                 SessionState.SetBool(PassedKey, passed);
@@ -180,6 +185,7 @@ namespace RhythmHunter.FightDemoEditor
                           $"BardSkills={fight.SecondHero.SkillActivationCount}, " +
                           $"MageAttacks={fight.ThirdHero.UnitSlot?.NormalAttackPlayCount ?? 0}, " +
                           $"EnemyHP={currentEnemyHp}/{initialEnemyHp}, Blocks={fight.BlockedAttackCount}, " +
+                          $"HealthEnabled={fight.HealthSystemEnabled}, BattleEnded={fight.BattleEnded}, " +
                           $"ClockPlaying={clock.IsPlaying}.");
                 EditorApplication.ExitPlaymode();
                 return;

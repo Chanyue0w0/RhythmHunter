@@ -10152,6 +10152,7 @@ MonoBehaviour:
   enemyAttackDamage: 18
   resolutionSafetyMs: 12
   enableFrontHeroModeInFightScene2: 1
+  enableHealthSystemInFightScene2: 0
   enemyAttackIntervalBeats: 4
   frontHero:
     heroLabel: Paladin - Player
