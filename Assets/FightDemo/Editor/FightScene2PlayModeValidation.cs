@@ -40,6 +40,13 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             EditorSceneManager.OpenScene(FightSceneBuilder.Scene2Path);
+            if (!ValidateAllCharacterPrefabs(out string prefabFailure))
+            {
+                Debug.LogError($"FIGHT_SCENE2_SMOKE_TEST_FAIL: {prefabFailure}");
+                EditorApplication.Exit(1);
+                return;
+            }
+
             FightUnitSlot[] slots = Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
             if (slots.Length != 6)
             {
@@ -150,7 +157,7 @@ namespace RhythmHunter.FightDemoEditor
 
             if (clock != null && fight != null && clock.ReceivedBeatCount >= 1 &&
                 !SessionState.GetBool(LightAttemptedKey, false) &&
-                clock.LatestBeat.GlobalBeat % fight.EnemyAttackIntervalBeats != 0 &&
+                !fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
                 clock.TryGetBeatPhase(out float lightPhase) && lightPhase < 0.08f)
             {
                 SessionState.SetBool(LightAttemptedKey, true);
@@ -160,7 +167,7 @@ namespace RhythmHunter.FightDemoEditor
             if (clock != null && fight != null && clock.ReceivedBeatCount >= 2 &&
                 SessionState.GetBool(LightAttemptedKey, false) &&
                 !SessionState.GetBool(HeavyAttemptedKey, false) &&
-                clock.LatestBeat.GlobalBeat % fight.EnemyAttackIntervalBeats != 0 &&
+                !fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
                 clock.TryGetBeatPhase(out float heavyPhase) && heavyPhase < 0.08f)
             {
                 int attacksBefore = fight.FrontHero.UnitSlot?.NormalAttackPlayCount ?? 0;
@@ -171,8 +178,8 @@ namespace RhythmHunter.FightDemoEditor
 
             if (clock != null && fight != null && clock.ReceivedBeatCount >= 4 &&
                 !SessionState.GetBool(GuardAttemptedKey, false) &&
-                clock.LatestBeat.GlobalBeat % fight.EnemyAttackIntervalBeats == 0 &&
-                clock.TryGetBeatPhase(out float guardPhase) && guardPhase < 0.08f)
+                fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
+                clock.TryGetBeatPhase(out float guardPhase) && guardPhase < 0.12f)
             {
                 SessionState.SetBool(GuardAttemptedKey, true);
                 fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
@@ -192,6 +199,16 @@ namespace RhythmHunter.FightDemoEditor
                 int bardAttacks = fight.SecondHero.UnitSlot?.NormalAttackPlayCount ?? 0;
                 int bardSkills = fight.SecondHero.SkillActivationCount;
                 int mageAttacks = fight.ThirdHero.UnitSlot?.NormalAttackPlayCount ?? 0;
+                int enemyNormalAttacks = fight.ActiveEnemySlot?.NormalAttackPlayCount ?? 0;
+                int enemySkillAttacks = fight.ActiveEnemySlot?.SkillAttackPlayCount ?? 0;
+                int enemyMana = fight.EnemyCurrentMana;
+                bool scheduledBeatsAligned = fight.LastEnemyAttackGlobalBeat >= 0 &&
+                                             (fight.LastEnemyAttackGlobalBeat + 1) % fight.EnemyAttackIntervalBeats == 0 &&
+                                             fight.SecondHero.LastAutomaticAttackGlobalBeat >= 0 &&
+                                             (fight.SecondHero.LastAutomaticAttackGlobalBeat + 1) % fight.SecondHero.AttackIntervalBeats == 0 &&
+                                             fight.ThirdHero.LastAutomaticAttackGlobalBeat >= 0 &&
+                                             (fight.ThirdHero.LastAutomaticAttackGlobalBeat + 1) % fight.ThirdHero.AttackIntervalBeats == 0 &&
+                                             !fight.HasPendingEnemyAttack;
                 bool combatFlowPassed = fight.FrontHero.UnitSlot != null &&
                                         fight.SecondHero.UnitSlot != null &&
                                         fight.ThirdHero.UnitSlot != null &&
@@ -205,6 +222,10 @@ namespace RhythmHunter.FightDemoEditor
                                         bardSkills >= 1 &&
                                         fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
                                         mageAttacks >= 2 &&
+                                        enemyNormalAttacks >= 2 &&
+                                        enemySkillAttacks == 0 &&
+                                        enemyMana >= 1 &&
+                                        scheduledBeatsAligned &&
                                         currentEnemyHp == initialEnemyHp &&
                                         clock.IsPlaying;
                 FightCharacterDefinition[] singleEnemyRoster =
@@ -227,6 +248,8 @@ namespace RhythmHunter.FightDemoEditor
                         ? string.Empty
                         : $"Invalid flow. Mana={frontMana}, FrontAttacks={frontAttacks}, " +
                           $"BardAttacks={bardAttacks}, BardSkills={bardSkills}, MageAttacks={mageAttacks}, " +
+                          $"EnemyNormal={enemyNormalAttacks}, EnemySkills={enemySkillAttacks}, EnemyMana={enemyMana}, " +
+                          $"ScheduledBeatsAligned={scheduledBeatsAligned}, " +
                           $"EnemyHP={currentEnemyHp}/{initialEnemyHp}, Blocks={fight.BlockedAttackCount}, " +
                           $"SingleEnemyRoster={nullableRosterPassed}, " +
                           $"HealthEnabled={fight.HealthSystemEnabled}, BattleEnded={fight.BattleEnded}, " +
@@ -253,6 +276,43 @@ namespace RhythmHunter.FightDemoEditor
                     return false;
             }
 
+            return true;
+        }
+
+        private static bool ValidateAllCharacterPrefabs(out string failure)
+        {
+            string[] folders =
+            {
+                "Assets/FightDemo/Prefabs/Heroes",
+                "Assets/FightDemo/Prefabs/Enemies"
+            };
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", folders);
+            int characterCount = 0;
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                FightCharacterDefinition definition = prefab != null
+                    ? prefab.GetComponent<FightCharacterDefinition>()
+                    : null;
+                if (definition == null)
+                    continue;
+
+                characterCount++;
+                if (definition.AttackIntervalBeats < 1 || definition.IdleFrames.Count == 0)
+                {
+                    failure = $"{path} has invalid attack interval or idle frames.";
+                    return false;
+                }
+            }
+
+            if (characterCount != 6)
+            {
+                failure = $"Expected six character prefabs, found {characterCount}.";
+                return false;
+            }
+
+            failure = string.Empty;
             return true;
         }
 

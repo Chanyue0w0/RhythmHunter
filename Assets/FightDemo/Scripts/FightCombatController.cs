@@ -35,6 +35,8 @@ namespace RhythmHunter.FightDemo
             [SerializeField, Min(0.1f)] private float skillDamageMultiplier = 3f;
             [Tooltip("Runtime count used for gameplay validation.")]
             [SerializeField, Min(0)] private int skillActivationCount;
+            [Tooltip("Global beat of the latest scheduled automatic attack.")]
+            [SerializeField] private long lastAutomaticAttackGlobalBeat = -1;
 
             public HeroBeatSettings()
             {
@@ -69,6 +71,7 @@ namespace RhythmHunter.FightDemo
                 : skillName;
             public bool SkillReady => currentMana >= maxMana;
             public int SkillActivationCount => skillActivationCount;
+            public long LastAutomaticAttackGlobalBeat => lastAutomaticAttackGlobalBeat;
 
             internal void Initialize(FightUnitSlot fallbackSlot, bool resetMana)
             {
@@ -87,7 +90,10 @@ namespace RhythmHunter.FightDemo
                 startingMana = Mathf.Clamp(startingMana, 0, maxMana);
                 currentMana = resetMana ? startingMana : Mathf.Clamp(currentMana, 0, maxMana);
                 if (resetMana)
+                {
                     skillActivationCount = 0;
+                    lastAutomaticAttackGlobalBeat = -1;
+                }
                 lightAttackMultiplier = Mathf.Max(0.1f, lightAttackMultiplier);
                 heavyAttackMultiplier = Mathf.Max(0.1f, heavyAttackMultiplier);
                 skillDamageMultiplier = Mathf.Max(0.1f, skillDamageMultiplier);
@@ -95,7 +101,7 @@ namespace RhythmHunter.FightDemo
 
             internal bool IsScheduledAttackBeat(long globalBeat)
             {
-                return !playerControlled && globalBeat > 0 && globalBeat % AttackIntervalBeats == 0;
+                return !playerControlled && globalBeat >= 0 && (globalBeat + 1) % AttackIntervalBeats == 0;
             }
 
             internal int DamageFor(ActionType action)
@@ -123,6 +129,11 @@ namespace RhythmHunter.FightDemo
             {
                 currentMana = 0;
                 skillActivationCount++;
+            }
+
+            internal void MarkAutomaticAttack(long globalBeat)
+            {
+                lastAutomaticAttackGlobalBeat = globalBeat;
             }
         }
 
@@ -211,6 +222,7 @@ namespace RhythmHunter.FightDemo
         private bool battleEnded;
         private int blockedAttackCount;
         private int receivedAttackCount;
+        private long lastEnemyAttackGlobalBeat = -1;
 
         public event Action<FmodBeatClock.BeatSnapshot> FightBeat;
         public event Action<HeroCallResult> HeroCalled;
@@ -231,6 +243,9 @@ namespace RhythmHunter.FightDemo
         public int EnemyAttackIntervalBeats => UsesFrontHeroControls && activeEnemySlot != null
             ? activeEnemySlot.AttackIntervalBeats
             : enemyAttackIntervalBeats;
+        public int EnemyCurrentMana => activeEnemySlot != null ? activeEnemySlot.CurrentMana : 0;
+        public int EnemyMaxMana => activeEnemySlot != null ? activeEnemySlot.MaxMana : 0;
+        public long LastEnemyAttackGlobalBeat => lastEnemyAttackGlobalBeat;
         public FightRosterManager RosterManager => rosterManager;
         public HeroBeatSettings FrontHero => frontHero;
         public HeroBeatSettings SecondHero => secondHero;
@@ -260,6 +275,32 @@ namespace RhythmHunter.FightDemo
         public void ConfigureRoster(FightRosterManager manager)
         {
             rosterManager = manager;
+        }
+
+        public int GetEnemyBeatsUntilAttack(long globalBeat)
+        {
+            return GetBeatsUntilScheduledAttack(globalBeat, EnemyAttackIntervalBeats);
+        }
+
+        public bool IsEnemyAttackBeat(long globalBeat)
+        {
+            return IsScheduledAttackBeat(globalBeat, EnemyAttackIntervalBeats);
+        }
+
+        public bool IsScheduledAttackBeat(long globalBeat, int attackInterval)
+        {
+            int interval = Mathf.Max(1, attackInterval);
+            return globalBeat >= 0 && (globalBeat + 1) % interval == 0;
+        }
+
+        public int GetBeatsUntilScheduledAttack(long globalBeat, int attackInterval)
+        {
+            int interval = Mathf.Max(1, attackInterval);
+            if (globalBeat < 0)
+                return interval;
+
+            long songBeatNumber = globalBeat + 1;
+            return (int)((interval - songBeatNumber % interval) % interval);
         }
 
         private void Awake()
@@ -392,7 +433,7 @@ namespace RhythmHunter.FightDemo
                 $"{actionName} {impact}. Mana {hero.CurrentMana}/{hero.MaxMana}."));
         }
 
-        private void PerformAutomaticAttack(HeroBeatSettings hero)
+        private void PerformAutomaticAttack(HeroBeatSettings hero, long globalBeat)
         {
             FightUnitSlot target = FindFrontLivingEnemy();
             if (hero?.UnitSlot == null || target == null || hero.UnitSlot.CurrentHp <= 0)
@@ -408,6 +449,7 @@ namespace RhythmHunter.FightDemo
                 hero.ConsumeSkillMana();
             else
                 hero.GainLightAttackMana();
+            hero.MarkAutomaticAttack(globalBeat);
 
             activeEnemySlot = FindFrontLivingEnemy();
             string impact = HealthSystemEnabled ? $"dealt {damage}" : $"power {damage} (HP disabled)";
@@ -481,13 +523,12 @@ namespace RhythmHunter.FightDemo
             if (UsesFrontHeroControls)
             {
                 if (secondHero.IsScheduledAttackBeat(beat.GlobalBeat))
-                    PerformAutomaticAttack(secondHero);
+                    PerformAutomaticAttack(secondHero, beat.GlobalBeat);
                 if (thirdHero.IsScheduledAttackBeat(beat.GlobalBeat))
-                    PerformAutomaticAttack(thirdHero);
+                    PerformAutomaticAttack(thirdHero, beat.GlobalBeat);
 
                 activeEnemySlot = FindFrontLivingEnemy();
-                if (activeEnemySlot != null && beat.GlobalBeat > 0 &&
-                    beat.GlobalBeat % Mathf.Max(1, EnemyAttackIntervalBeats) == 0)
+                if (activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat))
                 {
                     QueueEnemyAttack(beat);
                 }
@@ -519,6 +560,14 @@ namespace RhythmHunter.FightDemo
             if (timelineMs < pendingAttackTimelineMs + lateWindowMs + resolutionSafetyMs)
                 return;
 
+            ResolvePendingEnemyAttack();
+        }
+
+        private void ResolvePendingEnemyAttack()
+        {
+            if (!pendingEnemyAttack)
+                return;
+
             bool blocked = guardedGlobalBeat == pendingAttackGlobalBeat;
             int configuredDamage = UsesFrontHeroControls && activeEnemySlot != null
                 ? Mathf.Max(1, activeEnemySlot.AttackPower)
@@ -529,6 +578,12 @@ namespace RhythmHunter.FightDemo
                 blockedAttackCount++;
             else
                 receivedAttackCount++;
+
+            // Enemy skills are intentionally controlled elsewhere. Scheduled enemy turns
+            // always remain normal attacks, but still bank one mana up to the prefab limit.
+            if (UsesFrontHeroControls && activeEnemySlot != null)
+                activeEnemySlot.GainMana();
+            lastEnemyAttackGlobalBeat = pendingAttackGlobalBeat;
 
             if (HealthSystemEnabled)
             {

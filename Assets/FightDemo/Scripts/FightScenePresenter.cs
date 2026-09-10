@@ -127,17 +127,16 @@ namespace RhythmHunter.FightDemo
 
             if (fight != null && fight.UsesFrontHeroControls)
             {
-                bool enemyAttackBeat = beat.GlobalBeat > 0 &&
-                                       beat.GlobalBeat % fight.EnemyAttackIntervalBeats == 0;
+                bool enemyAttackBeat = fight.IsEnemyAttackBeat(beat.GlobalBeat);
+                int beatsUntilEnemyAttack = fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat);
                 if (cycleText != null)
                     cycleText.text = $"BAR {beat.Bar:00}  •  BEAT {beat.Beat}/4";
                 if (warningText != null)
                 {
                     warningText.text = enemyAttackBeat
-                        ? "ENEMY ATTACK  •  E/B TO GUARD"
-                        : $"PLAYER MANA {fight.FrontHero.CurrentMana}/{fight.FrontHero.MaxMana}  •  " +
-                          $"BARD {fight.SecondHero.CurrentMana}/{fight.SecondHero.MaxMana}  •  " +
-                          $"MAGE {fight.ThirdHero.CurrentMana}/{fight.ThirdHero.MaxMana}";
+                        ? $"ENEMY NORMAL ATTACK  •  E/B TO GUARD  •  MANA {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}"
+                        : $"ENEMY ATTACK IN {beatsUntilEnemyAttack} BEAT{(beatsUntilEnemyAttack == 1 ? string.Empty : "S")}  •  " +
+                          $"MANA {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}";
                     warningText.color = enemyAttackBeat ? Gold : Color.white;
                 }
 
@@ -231,7 +230,11 @@ namespace RhythmHunter.FightDemo
             if (attack.Blocked)
             {
                 blockedAttacks++;
-                SetResult("BLOCKED", Green, "Tank absorbed the heavy attack", 1.4f);
+                SetResult(
+                    "BLOCKED",
+                    Green,
+                    $"Enemy normal attack blocked • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}",
+                    1.4f);
             }
             else
             {
@@ -240,7 +243,11 @@ namespace RhythmHunter.FightDemo
                 string guardHint = fight != null && fight.UsesFrontHeroControls
                     ? "press E / B on the attack beat"
                     : "press X / Q on beat 4";
-                SetResult("PARTY HIT", Red, $"-{attack.Damage} HP • {guardHint}", 1.4f);
+                SetResult(
+                    "PARTY HIT",
+                    Red,
+                    $"Enemy normal attack • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana} • {guardHint}",
+                    1.4f);
             }
 
             UpdateStatistics();

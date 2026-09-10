@@ -77,10 +77,22 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot attacker = fight != null && fight.UsesFrontHeroControls
                 ? fight.ActiveEnemySlot
                 : SlotAt(enemySlots, 1);
-            attacker?.Pulse();
             bool attackBeat = fight != null && fight.UsesFrontHeroControls
-                ? beat.GlobalBeat > 0 && beat.GlobalBeat % fight.EnemyAttackIntervalBeats == 0
+                ? fight.IsEnemyAttackBeat(beat.GlobalBeat)
                 : beat.Beat == 4;
+            if (fight != null && fight.UsesFrontHeroControls)
+            {
+                attacker?.PlayScheduledAttackCountdown(
+                    fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat),
+                    fight.EnemyAttackIntervalBeats,
+                    true);
+                if (attackBeat)
+                    attacker?.PlayImmediateNormalAttack();
+                PlayHeroCountdown(fight.SecondHero, beat.GlobalBeat);
+                PlayHeroCountdown(fight.ThirdHero, beat.GlobalBeat);
+            }
+            else
+                attacker?.Pulse(attackBeat ? 0.3f : 0.1f);
             telegraphTimer = attackBeat ? 0.45f : 0.16f;
         }
 
@@ -113,9 +125,21 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot attacker = fight != null && fight.UsesFrontHeroControls
                 ? fight.ActiveEnemySlot
                 : SlotAt(enemySlots, 1);
-            attacker?.PlayNormalAttack();
+            if (fight == null || !fight.UsesFrontHeroControls)
+                attacker?.PlayNormalAttack();
             if (attack.Blocked)
                 shieldTimer = 0.85f;
+        }
+
+        private void PlayHeroCountdown(FightCombatController.HeroBeatSettings hero, long globalBeat)
+        {
+            if (fight == null || hero?.UnitSlot == null || hero.PlayerControlled)
+                return;
+
+            hero.UnitSlot.PlayScheduledAttackCountdown(
+                fight.GetBeatsUntilScheduledAttack(globalBeat, hero.AttackIntervalBeats),
+                hero.AttackIntervalBeats,
+                false);
         }
 
         private static FightUnitSlot SlotAt(FightUnitSlot[] slots, int index)

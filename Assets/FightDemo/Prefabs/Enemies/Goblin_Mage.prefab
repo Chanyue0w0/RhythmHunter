@@ -135,7 +135,7 @@ MonoBehaviour:
   skillName: Goblin Hex
   skillDamage: 30
   skillEffectPrefab: {fileID: 8107342880664547989, guid: 7d26a3d9b838713459ca2ff3fbd5bae0, type: 3}
-  attackIntervalBeats: 3
+  attackIntervalBeats: 4
   maxMana: 4
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
   characterRenderer: {fileID: 5019543924416371218}

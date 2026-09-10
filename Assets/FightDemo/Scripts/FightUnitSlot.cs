@@ -37,6 +37,10 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;
 
+        [Header("Runtime Combat State")]
+        [Tooltip("Runtime mana. Enemy normal attacks add one point; reaching maximum does not auto-cast a skill.")]
+        [SerializeField, Min(0)] private int currentMana;
+
         [Header("Replaceable Prefab Hooks")]
         [Tooltip("Drop the final hero/enemy prefab here. It is instantiated under Actor Root at runtime.")]
         [SerializeField] private GameObject actorPrefab;
@@ -82,6 +86,8 @@ namespace RhythmHunter.FightDemo
         public int SkillDamage => skillDamage;
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
+        public int CurrentMana => currentMana;
+        public bool ManaFull => currentMana >= maxMana;
         public bool HasCharacter => hasCharacter;
         public FightCharacterDefinition CharacterDefinition => characterDefinition;
         public GameObject ActorPrefab => actorPrefab;
@@ -130,6 +136,7 @@ namespace RhythmHunter.FightDemo
             hpFill = healthFill;
             hpLabel = healthLabel;
             currentHp = maxHp;
+            currentMana = 0;
             hasCharacter = true;
             RefreshHealthVisuals();
         }
@@ -173,6 +180,7 @@ namespace RhythmHunter.FightDemo
             }
 
             currentHp = maxHp;
+            currentMana = 0;
             RefreshHealthVisuals();
         }
 
@@ -182,6 +190,7 @@ namespace RhythmHunter.FightDemo
             characterDefinition = null;
             actorPrefab = null;
             hasCharacter = false;
+            currentMana = 0;
             gameObject.SetActive(false);
         }
 
@@ -237,11 +246,53 @@ namespace RhythmHunter.FightDemo
             pulseScaleBonus = Mathf.Max(0.02f, scaleBonus);
         }
 
+        public void GainMana(int amount = 1)
+        {
+            currentMana = Mathf.Clamp(currentMana + Mathf.Max(0, amount), 0, maxMana);
+        }
+
+        public void PlayScheduledAttackCountdown(int beatsUntilAttack, int intervalBeats, bool enemy)
+        {
+            int interval = Mathf.Max(1, intervalBeats);
+            int remaining = Mathf.Clamp(beatsUntilAttack, 0, interval - 1);
+            bool attackBeat = remaining == 0;
+            float readiness = attackBeat ? 1f : 1f - remaining / (float)interval;
+            Pulse(attackBeat ? 0.34f : Mathf.Lerp(0.06f, 0.18f, readiness));
+
+            Color chargeColor = enemy
+                ? attackBeat
+                    ? new Color(1f, 0.12f, 0.05f, 0.9f)
+                    : Color.Lerp(new Color(1f, 0.72f, 0.08f, 0.35f), new Color(1f, 0.25f, 0.04f, 0.68f), readiness)
+                : attackBeat
+                    ? new Color(0.15f, 0.95f, 1f, 0.9f)
+                    : Color.Lerp(new Color(0.18f, 0.55f, 1f, 0.3f), new Color(0.2f, 1f, 0.75f, 0.65f), readiness);
+            SpawnAttackChargeLayer(chargeColor, attackBeat, enemy, 0f);
+            if (attackBeat)
+            {
+                Color accent = enemy
+                    ? new Color(1f, 0.78f, 0.12f, 0.72f)
+                    : new Color(0.72f, 1f, 1f, 0.72f);
+                SpawnAttackChargeLayer(accent, true, enemy, 35f);
+            }
+        }
+
         public void PlayNormalAttack()
         {
             normalAttackPlayCount++;
             Pulse(0.14f);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Normal, accentColor, 0f);
+        }
+
+        public void PlayImmediateNormalAttack()
+        {
+            normalAttackPlayCount++;
+            Pulse(0.28f);
+            SpawnAttackEffect(
+                FightAttackEffect.VisualStyle.Normal,
+                accentColor,
+                0f,
+                null,
+                Mathf.Min(attackEffectLifetime, 0.16f));
         }
 
         public void PlayLightAttack()
@@ -298,7 +349,8 @@ namespace RhythmHunter.FightDemo
             FightAttackEffect.VisualStyle style,
             Color color,
             float verticalOffset,
-            GameObject overridePrefab = null)
+            GameObject overridePrefab = null,
+            float lifetimeOverride = -1f)
         {
             Transform spawn = normalAttackEffectSpawnPoint != null ? normalAttackEffectSpawnPoint : transform;
             Vector3 position = spawn.position + attackEffectLocalOffset + Vector3.up * verticalOffset;
@@ -324,7 +376,8 @@ namespace RhythmHunter.FightDemo
             FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();
             if (attackEffect == null)
                 attackEffect = effect.AddComponent<FightAttackEffect>();
-            attackEffect.Play(direction, attackEffectLifetime, style, color);
+            float lifetime = lifetimeOverride > 0f ? lifetimeOverride : attackEffectLifetime;
+            attackEffect.Play(direction, lifetime, style, color);
         }
 
         private void SpawnGuardLayer(
@@ -345,6 +398,25 @@ namespace RhythmHunter.FightDemo
             renderer.color = color;
             renderer.sortingOrder = 31;
             effect.GetComponent<FightGuardEffect>().Play(color, duration, fromScale, toScale, rotationSpeed);
+        }
+
+        private void SpawnAttackChargeLayer(Color color, bool attackBeat, bool enemy, float startingRotation)
+        {
+            Transform root = actorRoot != null ? actorRoot : transform;
+            GameObject effect = new($"{displayName}_{(enemy ? "Enemy" : "Hero")}BeatVFX", typeof(SpriteRenderer), typeof(FightGuardEffect));
+            effect.transform.SetParent(root, false);
+            effect.transform.localPosition = new Vector3(0f, 0f, 0.35f);
+            effect.transform.localRotation = Quaternion.Euler(0f, 0f, startingRotation);
+            SpriteRenderer renderer = effect.GetComponent<SpriteRenderer>();
+            renderer.sprite = fallbackEffectSprite;
+            renderer.color = color;
+            renderer.sortingOrder = attackBeat ? 29 : 9;
+            effect.GetComponent<FightGuardEffect>().Play(
+                color,
+                attackBeat ? 0.5f : 0.28f,
+                attackBeat ? 0.72f : 0.42f,
+                attackBeat ? 2.2f : 1.15f,
+                attackBeat ? 260f : 90f);
         }
 
         private void SpawnActorPrefab()
@@ -376,6 +448,7 @@ namespace RhythmHunter.FightDemo
             skillDamage = definition.SkillDamage;
             attackIntervalBeats = definition.AttackIntervalBeats;
             maxMana = definition.MaxMana;
+            currentMana = Mathf.Clamp(currentMana, 0, maxMana);
             skillEffectPrefab = definition.SkillEffectPrefab;
             accentColor = definition.AccentColor;
         }
