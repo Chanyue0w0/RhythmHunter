@@ -48,6 +48,18 @@ namespace RhythmHunter.FightDemoEditor
                 return;
             }
 
+            foreach (FightUnitSlot slot in slots)
+            {
+                if (slot.ActorRoot != null &&
+                    slot.ActorRoot.GetComponentsInChildren<BeatSyncedIdleAnimator>(true).Length > 0)
+                {
+                    Debug.LogError(
+                        $"FIGHT_SCENE2_SMOKE_TEST_FAIL: {slot.name} still contains a scene-authored character.");
+                    EditorApplication.Exit(1);
+                    return;
+                }
+            }
+
             SessionState.SetBool(ActiveKey, true);
             SessionState.SetFloat(StartedAtKey, 0f);
             SessionState.SetBool(LightAttemptedKey, false);
@@ -124,7 +136,9 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             if (roster != null &&
-                (roster.ActiveHeroes.Count != 3 || roster.ActiveEnemies.Count != 3 || !HasValidPrefabData(roster)))
+                (roster.ActiveHeroes.Count < 1 || roster.ActiveHeroes.Count > 3 ||
+                 roster.ActiveEnemies.Count < 1 || roster.ActiveEnemies.Count > 3 ||
+                 !HasValidPrefabData(roster)))
             {
                 FailAndExit(
                     $"Default prefab roster is invalid. Heroes={roster.ActiveHeroes.Count}, Enemies={roster.ActiveEnemies.Count}.");

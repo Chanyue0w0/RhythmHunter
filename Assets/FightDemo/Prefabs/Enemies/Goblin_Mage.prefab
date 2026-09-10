@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
   beatSource: {fileID: 0}
   fallbackBpm: 120
@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
   characterId: Goblin_Mage
   displayName: GOBLIN MAGE
@@ -135,7 +135,7 @@ MonoBehaviour:
   skillName: Goblin Hex
   skillDamage: 30
   skillEffectPrefab: {fileID: 8107342880664547989, guid: 7d26a3d9b838713459ca2ff3fbd5bae0, type: 3}
-  attackIntervalBeats: 4
+  attackIntervalBeats: 3
   maxMana: 4
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
   characterRenderer: {fileID: 5019543924416371218}

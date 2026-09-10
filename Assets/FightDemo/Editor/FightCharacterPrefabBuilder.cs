@@ -87,6 +87,34 @@ namespace RhythmHunter.FightDemoEditor
             Debug.Log("FIGHT_CHARACTER_PREFABS_AND_ROSTER_BUILT");
         }
 
+        [MenuItem("Rhythm Hunter/Remove Scene-Authored FightScene2 Characters")]
+        public static void RemoveSceneAuthoredFightScene2Characters()
+        {
+            Scene scene = EditorSceneManager.OpenScene(FightSceneBuilder.Scene2Path, OpenSceneMode.Single);
+            FightUnitSlot[] slots = Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
+            int removedCount = 0;
+
+            foreach (FightUnitSlot slot in slots)
+            {
+                if (slot.gameObject.scene != scene || slot.ActorRoot == null)
+                    continue;
+
+                BeatSyncedIdleAnimator[] sceneCharacters =
+                    slot.ActorRoot.GetComponentsInChildren<BeatSyncedIdleAnimator>(true);
+                foreach (BeatSyncedIdleAnimator sceneCharacter in sceneCharacters)
+                {
+                    Object.DestroyImmediate(sceneCharacter.gameObject);
+                    removedCount++;
+                }
+
+                EditorUtility.SetDirty(slot);
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene, FightSceneBuilder.Scene2Path);
+            Debug.Log($"FIGHT_SCENE2_SCENE_CHARACTERS_REMOVED:{removedCount}");
+        }
+
         private static FightCharacterDefinition BuildCharacter(
             string id,
             string displayName,
