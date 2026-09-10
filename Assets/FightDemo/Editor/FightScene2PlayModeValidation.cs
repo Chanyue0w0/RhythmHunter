@@ -8,7 +8,7 @@ namespace RhythmHunter.FightDemoEditor
 {
     /// <summary>
     /// Batch-mode smoke test for FightScene2 front-hero input, ally auto-attacks,
-    /// mana gain, skill configuration, and beat guard timing.
+    /// mana gain, skill configuration, beat guard timing, prefab data, and nullable rosters.
     /// </summary>
     [InitializeOnLoad]
     public static class FightScene2PlayModeValidation
@@ -97,6 +97,7 @@ namespace RhythmHunter.FightDemoEditor
             FmodBeatClock clock = Object.FindFirstObjectByType<FmodBeatClock>();
             FightInputRouter input = Object.FindFirstObjectByType<FightInputRouter>();
             FightCombatController fight = Object.FindFirstObjectByType<FightCombatController>();
+            FightRosterManager roster = Object.FindFirstObjectByType<FightRosterManager>();
 
             if (clock != null && !string.IsNullOrEmpty(clock.LastError))
             {
@@ -113,6 +114,20 @@ namespace RhythmHunter.FightDemoEditor
             if (fight != null && !fight.UsesFrontHeroControls)
             {
                 FailAndExit("FightScene2 front-hero mode did not activate.");
+                return;
+            }
+
+            if (fight != null && roster == null)
+            {
+                FailAndExit("FightRosterManager is missing.");
+                return;
+            }
+
+            if (roster != null &&
+                (roster.ActiveHeroes.Count != 3 || roster.ActiveEnemies.Count != 3 || !HasValidPrefabData(roster)))
+            {
+                FailAndExit(
+                    $"Default prefab roster is invalid. Heroes={roster.ActiveHeroes.Count}, Enemies={roster.ActiveEnemies.Count}.");
                 return;
             }
 
@@ -158,33 +173,48 @@ namespace RhythmHunter.FightDemoEditor
             {
                 int initialEnemyHp = SessionState.GetInt(InitialEnemyHpKey, 0);
                 int currentEnemyHp = TotalEnemyHp();
-                bool passed = fight.FrontHero.UnitSlot != null &&
-                              fight.SecondHero.UnitSlot != null &&
-                              fight.ThirdHero.UnitSlot != null &&
-                              !fight.HealthSystemEnabled &&
-                              !fight.BattleEnded &&
-                              fight.FrontHero.CurrentMana >= 1 &&
-                              fight.FrontHero.UnitSlot.LightAttackPlayCount >= 1 &&
-                              fight.FrontHero.UnitSlot.HeavyAttackPlayCount >= 1 &&
-                              fight.FrontHero.UnitSlot.GuardPlayCount >= 1 &&
-                              fight.SecondHero.UnitSlot.NormalAttackPlayCount >= 5 &&
-                              fight.SecondHero.SkillActivationCount >= 1 &&
-                              fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
-                              fight.ThirdHero.UnitSlot.NormalAttackPlayCount >= 2 &&
-                              currentEnemyHp == initialEnemyHp &&
-                              clock.IsPlaying;
+                int frontMana = fight.FrontHero.CurrentMana;
+                int frontAttacks = fight.FrontHero.UnitSlot?.NormalAttackPlayCount ?? 0;
+                int bardAttacks = fight.SecondHero.UnitSlot?.NormalAttackPlayCount ?? 0;
+                int bardSkills = fight.SecondHero.SkillActivationCount;
+                int mageAttacks = fight.ThirdHero.UnitSlot?.NormalAttackPlayCount ?? 0;
+                bool combatFlowPassed = fight.FrontHero.UnitSlot != null &&
+                                        fight.SecondHero.UnitSlot != null &&
+                                        fight.ThirdHero.UnitSlot != null &&
+                                        !fight.HealthSystemEnabled &&
+                                        !fight.BattleEnded &&
+                                        frontMana >= 1 &&
+                                        fight.FrontHero.UnitSlot.LightAttackPlayCount >= 1 &&
+                                        fight.FrontHero.UnitSlot.HeavyAttackPlayCount >= 1 &&
+                                        fight.FrontHero.UnitSlot.GuardPlayCount >= 1 &&
+                                        bardAttacks >= 5 &&
+                                        bardSkills >= 1 &&
+                                        fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
+                                        mageAttacks >= 2 &&
+                                        currentEnemyHp == initialEnemyHp &&
+                                        clock.IsPlaying;
+                FightCharacterDefinition[] singleEnemyRoster =
+                {
+                    roster.EnemyPrefabs[0],
+                    null,
+                    null
+                };
+                roster.SetRoster(roster.HeroPrefabs, singleEnemyRoster);
+                bool nullableRosterPassed = roster.ActiveHeroes.Count == 3 &&
+                                            roster.ActiveEnemies.Count == 1 &&
+                                            fight.ActiveEnemySlot != null &&
+                                            fight.ActiveEnemySlot.HasCharacter;
+                bool passed = combatFlowPassed && nullableRosterPassed;
 
                 SessionState.SetBool(PassedKey, passed);
                 SessionState.SetString(
                     FailureKey,
                     passed
                         ? string.Empty
-                        : $"Invalid flow. Mana={fight.FrontHero.CurrentMana}, " +
-                          $"FrontAttacks={fight.FrontHero.UnitSlot?.NormalAttackPlayCount ?? 0}, " +
-                          $"BardAttacks={fight.SecondHero.UnitSlot?.NormalAttackPlayCount ?? 0}, " +
-                          $"BardSkills={fight.SecondHero.SkillActivationCount}, " +
-                          $"MageAttacks={fight.ThirdHero.UnitSlot?.NormalAttackPlayCount ?? 0}, " +
+                        : $"Invalid flow. Mana={frontMana}, FrontAttacks={frontAttacks}, " +
+                          $"BardAttacks={bardAttacks}, BardSkills={bardSkills}, MageAttacks={mageAttacks}, " +
                           $"EnemyHP={currentEnemyHp}/{initialEnemyHp}, Blocks={fight.BlockedAttackCount}, " +
+                          $"SingleEnemyRoster={nullableRosterPassed}, " +
                           $"HealthEnabled={fight.HealthSystemEnabled}, BattleEnded={fight.BattleEnded}, " +
                           $"ClockPlaying={clock.IsPlaying}.");
                 EditorApplication.ExitPlaymode();
@@ -193,6 +223,38 @@ namespace RhythmHunter.FightDemoEditor
 
             if (elapsed >= TimeoutSeconds)
                 EditorApplication.ExitPlaymode();
+        }
+
+        private static bool HasValidPrefabData(FightRosterManager roster)
+        {
+            foreach (FightUnitSlot slot in roster.ActiveHeroes)
+            {
+                if (!HasValidPrefabData(slot))
+                    return false;
+            }
+
+            foreach (FightUnitSlot slot in roster.ActiveEnemies)
+            {
+                if (!HasValidPrefabData(slot))
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static bool HasValidPrefabData(FightUnitSlot slot)
+        {
+            FightCharacterDefinition definition = slot != null ? slot.CharacterDefinition : null;
+            return slot != null &&
+                   slot.HasCharacter &&
+                   slot.ActorInstance != null &&
+                   definition != null &&
+                   definition.MaxHp > 0 &&
+                   definition.AttackPower >= 0 &&
+                   definition.SkillDamage >= 0 &&
+                   definition.SkillEffectPrefab != null &&
+                   definition.AttackIntervalBeats > 0 &&
+                   definition.IdleFrames.Count > 0;
         }
 
         private static int TotalEnemyHp()

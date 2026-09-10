@@ -33,12 +33,16 @@ namespace RhythmHunter.FightDemo
         [Header("Combat Data")]
         [SerializeField, Min(1)] private int maxHp = 100;
         [SerializeField, Min(0)] private int attackPower = 10;
+        [SerializeField, Min(0)] private int skillDamage = 30;
+        [SerializeField, Min(1)] private int attackIntervalBeats = 4;
+        [SerializeField, Min(1)] private int maxMana = 4;
 
         [Header("Replaceable Prefab Hooks")]
         [Tooltip("Drop the final hero/enemy prefab here. It is instantiated under Actor Root at runtime.")]
         [SerializeField] private GameObject actorPrefab;
         [Tooltip("Spawned when this unit performs a normal attack. A FightAttackEffect component is optional.")]
         [SerializeField] private GameObject normalAttackEffectPrefab;
+        [SerializeField] private GameObject skillEffectPrefab;
         [SerializeField] private Transform actorRoot;
         [SerializeField] private Transform normalAttackEffectSpawnPoint;
         [SerializeField] private Vector3 actorLocalOffset;
@@ -53,6 +57,9 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private TextMesh hpLabel;
 
         private GameObject actorInstance;
+        private Vector3 actorBaseScale = Vector3.one;
+        private FightCharacterDefinition characterDefinition;
+        private bool hasCharacter = true;
         private int currentHp;
         private float pulse;
         private float pulseScaleBonus = 0.14f;
@@ -72,8 +79,15 @@ namespace RhythmHunter.FightDemo
         public int MaxHp => maxHp;
         public int CurrentHp => currentHp;
         public int AttackPower => attackPower;
+        public int SkillDamage => skillDamage;
+        public int AttackIntervalBeats => attackIntervalBeats;
+        public int MaxMana => maxMana;
+        public bool HasCharacter => hasCharacter;
+        public FightCharacterDefinition CharacterDefinition => characterDefinition;
         public GameObject ActorPrefab => actorPrefab;
+        public GameObject ActorInstance => actorInstance;
         public GameObject NormalAttackEffectPrefab => normalAttackEffectPrefab;
+        public GameObject SkillEffectPrefab => skillEffectPrefab;
         public Transform ActorRoot => actorRoot;
         public Transform NormalAttackEffectSpawnPoint => normalAttackEffectSpawnPoint;
         public int NormalAttackPlayCount => normalAttackPlayCount;
@@ -105,6 +119,9 @@ namespace RhythmHunter.FightDemo
             slotIndex = Mathf.Max(0, index);
             maxHp = Mathf.Max(1, hp);
             attackPower = Mathf.Max(0, power);
+            skillDamage = Mathf.Max(0, power * 3);
+            attackIntervalBeats = 4;
+            maxMana = 4;
             accentColor = color;
             actorRoot = prefabRoot;
             normalAttackEffectSpawnPoint = effectSpawnPoint;
@@ -113,7 +130,59 @@ namespace RhythmHunter.FightDemo
             hpFill = healthFill;
             hpLabel = healthLabel;
             currentHp = maxHp;
+            hasCharacter = true;
             RefreshHealthVisuals();
+        }
+
+        public void SpawnCharacter(FightCharacterDefinition prefab, FightCombatController beatSource)
+        {
+            if (prefab == null)
+            {
+                ClearCharacter();
+                return;
+            }
+
+            RemoveSpawnedActor();
+            ApplyDefinition(prefab);
+            hasCharacter = true;
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);
+            if (actorRoot != null)
+                actorRoot.gameObject.SetActive(true);
+
+            DisableSceneIdleVisual();
+            SpawnActorPrefab();
+            characterDefinition = actorInstance != null
+                ? actorInstance.GetComponent<FightCharacterDefinition>()
+                : prefab;
+
+            BeatSyncedIdleAnimator animator = actorInstance != null
+                ? actorInstance.GetComponentInChildren<BeatSyncedIdleAnimator>(true)
+                : null;
+            FightCharacterDefinition runtimeDefinition = actorInstance != null
+                ? actorInstance.GetComponent<FightCharacterDefinition>()
+                : null;
+            if (animator != null && runtimeDefinition != null)
+            {
+                animator.Configure(
+                    beatSource,
+                    runtimeDefinition.CharacterRenderer,
+                    runtimeDefinition.IdleFrames,
+                    runtimeDefinition.IdleCyclesPerBeat,
+                    runtimeDefinition.IdlePingPong);
+            }
+
+            currentHp = maxHp;
+            RefreshHealthVisuals();
+        }
+
+        public void ClearCharacter()
+        {
+            RemoveSpawnedActor();
+            characterDefinition = null;
+            actorPrefab = null;
+            hasCharacter = false;
+            gameObject.SetActive(false);
         }
 
         private void Awake()
@@ -134,7 +203,10 @@ namespace RhythmHunter.FightDemo
                         ? placeholderVisual.transform
                         : null;
             if (visualRoot != null)
-                visualRoot.localScale = Vector3.one * Mathf.Lerp(1f, 1f + pulseScaleBonus, pulse);
+            {
+                Vector3 baseScale = actorInstance != null ? actorBaseScale : Vector3.one;
+                visualRoot.localScale = baseScale * Mathf.Lerp(1f, 1f + pulseScaleBonus, pulse);
+            }
         }
 
         public void RestoreFullHealth()
@@ -197,8 +269,8 @@ namespace RhythmHunter.FightDemo
             normalAttackPlayCount++;
             skillAttackPlayCount++;
             Pulse(0.42f);
-            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f);
-            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f, skillEffectPrefab);
+            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f, skillEffectPrefab);
         }
 
         public void PlayGuard()
@@ -222,15 +294,20 @@ namespace RhythmHunter.FightDemo
                 hpLabel.gameObject.SetActive(visible);
         }
 
-        private void SpawnAttackEffect(FightAttackEffect.VisualStyle style, Color color, float verticalOffset)
+        private void SpawnAttackEffect(
+            FightAttackEffect.VisualStyle style,
+            Color color,
+            float verticalOffset,
+            GameObject overridePrefab = null)
         {
             Transform spawn = normalAttackEffectSpawnPoint != null ? normalAttackEffectSpawnPoint : transform;
             Vector3 position = spawn.position + attackEffectLocalOffset + Vector3.up * verticalOffset;
             GameObject effect;
 
-            if (normalAttackEffectPrefab != null)
+            GameObject effectPrefab = overridePrefab != null ? overridePrefab : normalAttackEffectPrefab;
+            if (effectPrefab != null)
             {
-                effect = Instantiate(normalAttackEffectPrefab, position, spawn.rotation);
+                effect = Instantiate(effectPrefab, position, spawn.rotation);
             }
             else
             {
@@ -280,9 +357,53 @@ namespace RhythmHunter.FightDemo
             actorInstance.name = $"{actorPrefab.name} (Runtime)";
             actorInstance.transform.localPosition = actorLocalOffset;
             actorInstance.transform.localRotation = Quaternion.identity;
+            actorBaseScale = actorInstance.transform.localScale;
 
             if (placeholderVisual != null)
                 placeholderVisual.SetActive(false);
+        }
+
+        private void ApplyDefinition(FightCharacterDefinition definition)
+        {
+            characterDefinition = definition;
+            actorPrefab = definition.gameObject;
+            slotId = definition.CharacterId;
+            displayName = definition.DisplayName;
+            team = definition.Team;
+            role = definition.Role;
+            maxHp = definition.MaxHp;
+            attackPower = definition.AttackPower;
+            skillDamage = definition.SkillDamage;
+            attackIntervalBeats = definition.AttackIntervalBeats;
+            maxMana = definition.MaxMana;
+            skillEffectPrefab = definition.SkillEffectPrefab;
+            accentColor = definition.AccentColor;
+        }
+
+        private void DisableSceneIdleVisual()
+        {
+            if (actorRoot == null)
+                return;
+
+            for (int i = 0; i < actorRoot.childCount; i++)
+            {
+                Transform child = actorRoot.GetChild(i);
+                if (child.name == "BeatSyncedIdle")
+                    child.gameObject.SetActive(false);
+            }
+        }
+
+        private void RemoveSpawnedActor()
+        {
+            if (actorInstance == null)
+                return;
+
+            if (Application.isPlaying)
+                Destroy(actorInstance);
+            else
+                DestroyImmediate(actorInstance);
+            actorInstance = null;
+            actorBaseScale = Vector3.one;
         }
 
         private void RefreshHealthVisuals()
@@ -296,7 +417,7 @@ namespace RhythmHunter.FightDemo
             }
 
             if (hpLabel != null)
-                hpLabel.text = $"HP {currentHp}/{maxHp}  ATK {attackPower}";
+                hpLabel.text = $"HP {currentHp}/{maxHp}  ATK {attackPower}  SKILL {skillDamage}";
         }
     }
 }

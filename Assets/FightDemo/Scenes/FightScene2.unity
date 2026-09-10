@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   slotId: EnemySlot_GoblinShield
   displayName: GOBLIN SHIELD
@@ -178,8 +178,12 @@ MonoBehaviour:
   slotIndex: 2
   maxHp: 90
   attackPower: 14
+  skillDamage: 30
+  attackIntervalBeats: 4
+  maxMana: 4
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 986243845}
   normalAttackEffectSpawnPoint: {fileID: 819669274}
   actorLocalOffset: {x: 0, y: 0, z: 0}
@@ -1402,8 +1406,12 @@ MonoBehaviour:
   slotIndex: 1
   maxHp: 85
   attackPower: 8
+  skillDamage: 30
+  attackIntervalBeats: 4
+  maxMana: 4
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 213200706}
   normalAttackEffectSpawnPoint: {fileID: 184254596}
   actorLocalOffset: {x: 0, y: 0, z: 0}
@@ -3800,8 +3808,12 @@ MonoBehaviour:
   slotIndex: 0
   maxHp: 80
   attackPower: 12
+  skillDamage: 30
+  attackIntervalBeats: 4
+  maxMana: 4
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 221509334}
   normalAttackEffectSpawnPoint: {fileID: 547510897}
   actorLocalOffset: {x: 0, y: 0, z: 0}
@@ -3909,8 +3921,12 @@ MonoBehaviour:
   slotIndex: 1
   maxHp: 120
   attackPower: 18
+  skillDamage: 30
+  attackIntervalBeats: 4
+  maxMana: 4
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 2124323439}
   normalAttackEffectSpawnPoint: {fileID: 1913808006}
   actorLocalOffset: {x: 0, y: 0, z: 0}
@@ -4951,8 +4967,12 @@ MonoBehaviour:
   slotIndex: 2
   maxHp: 75
   attackPower: 24
+  skillDamage: 30
+  attackIntervalBeats: 4
+  maxMana: 4
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 1756861568}
   normalAttackEffectSpawnPoint: {fileID: 1678343433}
   actorLocalOffset: {x: 0, y: 0, z: 0}
@@ -10071,6 +10091,7 @@ GameObject:
   - component: {fileID: 2021200326}
   - component: {fileID: 2021200325}
   - component: {fileID: 2021200324}
+  - component: {fileID: 2021200331}
   m_Layer: 0
   m_Name: FightDemoController
   m_TagString: Untagged
@@ -10146,6 +10167,7 @@ MonoBehaviour:
   beatClock: {fileID: 2021200329}
   rhythmJudge: {fileID: 2021200328}
   inputRouter: {fileID: 2021200327}
+  rosterManager: {fileID: 2021200331}
   tankSlot: {fileID: 2037638511}
   activeEnemySlot: {fileID: 616141045}
   maxPartyHp: 120
@@ -10155,10 +10177,10 @@ MonoBehaviour:
   enableHealthSystemInFightScene2: 0
   enemyAttackIntervalBeats: 4
   frontHero:
-    heroLabel: Paladin - Player
+    heroLabel: PALADIN
     unitSlot: {fileID: 2037638511}
     playerControlled: 1
-    attackIntervalBeats: 1
+    attackIntervalBeats: 4
     maxMana: 4
     startingMana: 0
     currentMana: 0
@@ -10168,10 +10190,10 @@ MonoBehaviour:
     skillDamageMultiplier: 3
     skillActivationCount: 0
   secondHero:
-    heroLabel: Bard - Auto
+    heroLabel: BARD
     unitSlot: {fileID: 287245178}
     playerControlled: 0
-    attackIntervalBeats: 2
+    attackIntervalBeats: 4
     maxMana: 4
     startingMana: 0
     currentMana: 0
@@ -10181,11 +10203,11 @@ MonoBehaviour:
     skillDamageMultiplier: 2.5
     skillActivationCount: 0
   thirdHero:
-    heroLabel: Mage - Auto
+    heroLabel: MAGE
     unitSlot: {fileID: 828184398}
     playerControlled: 0
     attackIntervalBeats: 4
-    maxMana: 3
+    maxMana: 4
     startingMana: 0
     currentMana: 0
     skillName: Arcane Burst
@@ -10254,6 +10276,36 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2021200331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021200323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dd05245035e4803bc6e8ae3535f39c5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightRosterManager
+  fightController: {fileID: 2021200326}
+  beatClock: {fileID: 2021200329}
+  heroSpawnSlots:
+  - {fileID: 2037638511}
+  - {fileID: 287245178}
+  - {fileID: 828184398}
+  heroPrefabs:
+  - {fileID: 3784569928049564685, guid: 9f16534d1ed1f2041b9acfde4be33248, type: 3}
+  - {fileID: 2185465317251320045, guid: ab36c024dde0d8542935566c82a27a7e, type: 3}
+  - {fileID: 2019549635311070630, guid: fff96ffe89af76b458591b873dbbb71c, type: 3}
+  enemySpawnSlots:
+  - {fileID: 581508853}
+  - {fileID: 616141045}
+  - {fileID: 928599}
+  enemyPrefabs:
+  - {fileID: 2141003279719172301, guid: d5adcbbdd39b811438583527f5f2a2e5, type: 3}
+  - {fileID: 7770687602645176180, guid: 55ef24f5fa61faa44b0a70dce35c5f29, type: 3}
+  - {fileID: 860210294745740716, guid: fe607510bf4e19a4f970eb8eaa8b3460, type: 3}
 --- !u!1 &2028760521
 GameObject:
   m_ObjectHideFlags: 0
@@ -10405,8 +10457,12 @@ MonoBehaviour:
   slotIndex: 0
   maxHp: 120
   attackPower: 12
+  skillDamage: 30
+  attackIntervalBeats: 4
+  maxMana: 4
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 178498080}
   normalAttackEffectSpawnPoint: {fileID: 732383581}
   actorLocalOffset: {x: 0, y: 0, z: 0}

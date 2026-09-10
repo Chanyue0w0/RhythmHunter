@@ -59,10 +59,14 @@ namespace RhythmHunter.FightDemo
             public string HeroLabel => heroLabel;
             public FightUnitSlot UnitSlot => unitSlot;
             public bool PlayerControlled => playerControlled;
-            public int AttackIntervalBeats => attackIntervalBeats;
+            public int AttackIntervalBeats => unitSlot != null && unitSlot.HasCharacter
+                ? unitSlot.AttackIntervalBeats
+                : attackIntervalBeats;
             public int MaxMana => maxMana;
             public int CurrentMana => currentMana;
-            public string SkillName => skillName;
+            public string SkillName => unitSlot?.CharacterDefinition != null
+                ? unitSlot.CharacterDefinition.SkillName
+                : skillName;
             public bool SkillReady => currentMana >= maxMana;
             public int SkillActivationCount => skillActivationCount;
 
@@ -70,6 +74,13 @@ namespace RhythmHunter.FightDemo
             {
                 if (unitSlot == null)
                     unitSlot = fallbackSlot;
+
+                if (unitSlot != null && unitSlot.HasCharacter)
+                {
+                    heroLabel = unitSlot.DisplayName;
+                    attackIntervalBeats = unitSlot.AttackIntervalBeats;
+                    maxMana = unitSlot.MaxMana;
+                }
 
                 attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
                 maxMana = Mathf.Max(1, maxMana);
@@ -84,7 +95,7 @@ namespace RhythmHunter.FightDemo
 
             internal bool IsScheduledAttackBeat(long globalBeat)
             {
-                return !playerControlled && globalBeat > 0 && globalBeat % attackIntervalBeats == 0;
+                return !playerControlled && globalBeat > 0 && globalBeat % AttackIntervalBeats == 0;
             }
 
             internal int DamageFor(ActionType action)
@@ -98,6 +109,8 @@ namespace RhythmHunter.FightDemo
                     ActionType.Skill => skillDamageMultiplier,
                     _ => lightAttackMultiplier
                 };
+                if (action == ActionType.Skill && unitSlot.SkillDamage > 0)
+                    return unitSlot.SkillDamage;
                 return Mathf.Max(1, Mathf.RoundToInt(unitSlot.AttackPower * multiplier));
             }
 
@@ -166,6 +179,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FmodBeatClock beatClock;
         [SerializeField] private FmodRhythmJudge rhythmJudge;
         [SerializeField] private FightInputRouter inputRouter;
+        [SerializeField] private FightRosterManager rosterManager;
         [SerializeField] private FightUnitSlot tankSlot;
         [SerializeField] private FightUnitSlot activeEnemySlot;
 
@@ -214,7 +228,10 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot ActiveEnemySlot => activeEnemySlot;
         public bool UsesFrontHeroControls => enableFrontHeroModeInFightScene2 && gameObject.scene.name == "FightScene2";
         public bool HealthSystemEnabled => !UsesFrontHeroControls || enableHealthSystemInFightScene2;
-        public int EnemyAttackIntervalBeats => enemyAttackIntervalBeats;
+        public int EnemyAttackIntervalBeats => UsesFrontHeroControls && activeEnemySlot != null
+            ? activeEnemySlot.AttackIntervalBeats
+            : enemyAttackIntervalBeats;
+        public FightRosterManager RosterManager => rosterManager;
         public HeroBeatSettings FrontHero => frontHero;
         public HeroBeatSettings SecondHero => secondHero;
         public HeroBeatSettings ThirdHero => thirdHero;
@@ -240,6 +257,11 @@ namespace RhythmHunter.FightDemo
             partyHp = maxPartyHp;
         }
 
+        public void ConfigureRoster(FightRosterManager manager)
+        {
+            rosterManager = manager;
+        }
+
         private void Awake()
         {
             if (UsesFrontHeroControls)
@@ -258,6 +280,9 @@ namespace RhythmHunter.FightDemo
 
             if (inputRouter != null)
                 inputRouter.CommandStarted += SubmitHeroCommand;
+
+            if (rosterManager != null)
+                rosterManager.RosterChanged += OnRosterChanged;
         }
 
         private void Start()
@@ -283,6 +308,9 @@ namespace RhythmHunter.FightDemo
 
             if (inputRouter != null)
                 inputRouter.CommandStarted -= SubmitHeroCommand;
+
+            if (rosterManager != null)
+                rosterManager.RosterChanged -= OnRosterChanged;
         }
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
@@ -459,7 +487,7 @@ namespace RhythmHunter.FightDemo
 
                 activeEnemySlot = FindFrontLivingEnemy();
                 if (activeEnemySlot != null && beat.GlobalBeat > 0 &&
-                    beat.GlobalBeat % Mathf.Max(1, enemyAttackIntervalBeats) == 0)
+                    beat.GlobalBeat % Mathf.Max(1, EnemyAttackIntervalBeats) == 0)
                 {
                     QueueEnemyAttack(beat);
                 }
@@ -539,19 +567,27 @@ namespace RhythmHunter.FightDemo
 
         private void InitializeFrontHeroMode()
         {
-            FightUnitSlot[] allSlots = FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
             List<FightUnitSlot> heroes = new();
             fightScene2Enemies.Clear();
 
-            foreach (FightUnitSlot slot in allSlots)
+            if (rosterManager != null)
             {
-                if (slot.gameObject.scene != gameObject.scene)
-                    continue;
+                heroes.AddRange(rosterManager.ActiveHeroes);
+                fightScene2Enemies.AddRange(rosterManager.ActiveEnemies);
+            }
+            else
+            {
+                FightUnitSlot[] allSlots = FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
+                foreach (FightUnitSlot slot in allSlots)
+                {
+                    if (slot.gameObject.scene != gameObject.scene || !slot.HasCharacter)
+                        continue;
 
-                if (slot.Team == FightUnitSlot.UnitTeam.Hero)
-                    heroes.Add(slot);
-                else
-                    fightScene2Enemies.Add(slot);
+                    if (slot.Team == FightUnitSlot.UnitTeam.Hero)
+                        heroes.Add(slot);
+                    else
+                        fightScene2Enemies.Add(slot);
+                }
             }
 
             heroes.Sort((left, right) => left.SlotIndex.CompareTo(right.SlotIndex));
@@ -563,6 +599,19 @@ namespace RhythmHunter.FightDemo
             tankSlot = frontHero.UnitSlot;
             activeEnemySlot = FindFrontLivingEnemy();
             enemyAttackIntervalBeats = Mathf.Max(1, enemyAttackIntervalBeats);
+        }
+
+        private void OnRosterChanged()
+        {
+            if (!UsesFrontHeroControls)
+                return;
+
+            InitializeFrontHeroMode();
+            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(1, maxPartyHp);
+            partyHp = maxPartyHp;
+            RefreshFightScene2Labels();
+            RefreshFightScene2HealthVisibility();
+            PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
         }
 
         private FightUnitSlot FindFrontLivingEnemy()
