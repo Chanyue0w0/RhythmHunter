@@ -520,7 +520,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: 3274462911295270183}
   cacheVersion: 131860
-  cacheTime: 639235284119915129
+  cacheTime: 639244658106218264
   SerializableEventsDict:
   - key: event:/SoundEffects/InCombat/Paladin_NormalParry
     index: 0
@@ -799,7 +799,7 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639235284119915129
+  lastModified: 639244658106218264
   FileSizes:
   - Name: Desktop
     Value: 2602
@@ -1027,7 +1027,7 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639235284119874910
+  lastModified: 639244658106188280
   FileSizes:
   - Name: Desktop
     Value: 12240096
