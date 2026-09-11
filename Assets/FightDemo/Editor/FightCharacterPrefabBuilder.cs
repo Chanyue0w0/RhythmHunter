@@ -371,6 +371,7 @@ namespace RhythmHunter.FightDemoEditor
                 manager = fight.gameObject.AddComponent<FightRosterManager>();
             manager.Configure(fight, clock, heroes, heroPrefabs, enemies, enemyPrefabs);
             fight.ConfigureRoster(manager);
+            fight.SetCombatMode(FightCombatController.CombatMode.FrontHero);
 
             EditorUtility.SetDirty(manager);
             EditorUtility.SetDirty(fight);

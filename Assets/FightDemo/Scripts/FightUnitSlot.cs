@@ -257,6 +257,11 @@ namespace RhythmHunter.FightDemo
             currentMana = Mathf.Clamp(currentMana + Mathf.Max(0, amount), 0, maxMana);
         }
 
+        public void ResetMana(int amount = 0)
+        {
+            currentMana = Mathf.Clamp(amount, 0, maxMana);
+        }
+
         public bool PlayCombatAnimation(
             FightCharacterCombatAnimator.CombatAnimation animation,
             Action onWarning,

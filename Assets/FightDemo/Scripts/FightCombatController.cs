@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using RhythmHunter.RhythmDemo;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RhythmHunter.FightDemo
 {
@@ -18,21 +19,9 @@ namespace RhythmHunter.FightDemo
             [SerializeField] private FightUnitSlot unitSlot;
             [SerializeField] private bool playerControlled;
 
-            [Header("Attack Beat")]
-            [Tooltip("Number of musical beats between automatic attacks. The player-controlled hero attacks from input instead.")]
-            [SerializeField, Min(1)] private int attackIntervalBeats = 2;
-
-            [Header("Mana")]
-            [SerializeField, Min(1)] private int maxMana = 4;
-            [SerializeField, Min(0)] private int startingMana;
-            [Tooltip("Runtime mana. A successful light attack adds one point.")]
-            [SerializeField, Min(0)] private int currentMana;
-
-            [Header("Skill")]
-            [SerializeField] private string skillName = "Beat Skill";
+            [Header("Action Rules")]
             [SerializeField, Min(0.1f)] private float lightAttackMultiplier = 1f;
             [SerializeField, Min(0.1f)] private float heavyAttackMultiplier = 1.75f;
-            [SerializeField, Min(0.1f)] private float skillDamageMultiplier = 3f;
             [Tooltip("Runtime count used for gameplay validation.")]
             [SerializeField, Min(0)] private int skillActivationCount;
             [Tooltip("Global beat of the latest scheduled automatic attack.")]
@@ -44,18 +33,10 @@ namespace RhythmHunter.FightDemo
 
             public HeroBeatSettings(
                 string label,
-                bool isPlayerControlled,
-                int intervalBeats,
-                int manaCapacity,
-                string abilityName,
-                float skillMultiplier)
+                bool isPlayerControlled)
             {
                 heroLabel = label;
                 playerControlled = isPlayerControlled;
-                attackIntervalBeats = Mathf.Max(1, intervalBeats);
-                maxMana = Mathf.Max(1, manaCapacity);
-                skillName = abilityName;
-                skillDamageMultiplier = Mathf.Max(0.1f, skillMultiplier);
             }
 
             public string HeroLabel => heroLabel;
@@ -63,13 +44,13 @@ namespace RhythmHunter.FightDemo
             public bool PlayerControlled => playerControlled;
             public int AttackIntervalBeats => unitSlot != null && unitSlot.HasCharacter
                 ? unitSlot.AttackIntervalBeats
-                : attackIntervalBeats;
-            public int MaxMana => maxMana;
-            public int CurrentMana => currentMana;
+                : 1;
+            public int MaxMana => unitSlot != null && unitSlot.HasCharacter ? unitSlot.MaxMana : 1;
+            public int CurrentMana => unitSlot != null && unitSlot.HasCharacter ? unitSlot.CurrentMana : 0;
             public string SkillName => unitSlot?.CharacterDefinition != null
                 ? unitSlot.CharacterDefinition.SkillName
-                : skillName;
-            public bool SkillReady => currentMana >= maxMana;
+                : "Beat Skill";
+            public bool SkillReady => unitSlot != null && unitSlot.HasCharacter && unitSlot.ManaFull;
             public int SkillActivationCount => skillActivationCount;
             public long LastAutomaticAttackGlobalBeat => lastAutomaticAttackGlobalBeat;
 
@@ -82,24 +63,16 @@ namespace RhythmHunter.FightDemo
             internal void RefreshRuntimeValues(bool resetRuntime)
             {
                 if (unitSlot != null && unitSlot.HasCharacter)
-                {
                     heroLabel = unitSlot.DisplayName;
-                    attackIntervalBeats = unitSlot.AttackIntervalBeats;
-                    maxMana = unitSlot.MaxMana;
-                }
 
-                attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
-                maxMana = Mathf.Max(1, maxMana);
-                startingMana = Mathf.Clamp(startingMana, 0, maxMana);
-                currentMana = resetRuntime ? startingMana : Mathf.Clamp(currentMana, 0, maxMana);
                 if (resetRuntime)
                 {
+                    unitSlot?.ResetMana();
                     skillActivationCount = 0;
                     lastAutomaticAttackGlobalBeat = -1;
                 }
                 lightAttackMultiplier = Mathf.Max(0.1f, lightAttackMultiplier);
                 heavyAttackMultiplier = Mathf.Max(0.1f, heavyAttackMultiplier);
-                skillDamageMultiplier = Mathf.Max(0.1f, skillDamageMultiplier);
             }
 
             internal bool IsScheduledAttackBeat(long globalBeat)
@@ -112,25 +85,25 @@ namespace RhythmHunter.FightDemo
                 if (unitSlot == null)
                     return 0;
 
+                if (action == ActionType.Skill)
+                    return Mathf.Max(0, unitSlot.SkillDamage);
+
                 float multiplier = action switch
                 {
                     ActionType.HeavyAttack => heavyAttackMultiplier,
-                    ActionType.Skill => skillDamageMultiplier,
                     _ => lightAttackMultiplier
                 };
-                if (action == ActionType.Skill && unitSlot.SkillDamage > 0)
-                    return unitSlot.SkillDamage;
                 return Mathf.Max(1, Mathf.RoundToInt(unitSlot.AttackPower * multiplier));
             }
 
             internal void GainLightAttackMana()
             {
-                currentMana = Mathf.Min(maxMana, currentMana + 1);
+                unitSlot?.GainMana();
             }
 
             internal void ConsumeSkillMana()
             {
-                currentMana = 0;
+                unitSlot?.ResetMana();
                 skillActivationCount++;
             }
 
@@ -146,6 +119,12 @@ namespace RhythmHunter.FightDemo
             HeavyAttack,
             Guard,
             Skill
+        }
+
+        public enum CombatMode
+        {
+            LegacyFourthBeatGuard,
+            FrontHero
         }
 
         public readonly struct HeroCallResult
@@ -202,18 +181,19 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int enemyAttackDamage = 1;
         [SerializeField, Min(0f)] private float resolutionSafetyMs = 12f;
 
-        [Header("FightScene2 - Front Hero Controls")]
-        [Tooltip("Automatically activates in a scene named FightScene2. Disable this to compare against the original controls.")]
-        [SerializeField] private bool enableFrontHeroModeInFightScene2 = true;
+        [Header("Combat Mode")]
+        [FormerlySerializedAs("enableFrontHeroModeInFightScene2")]
+        [SerializeField] private CombatMode combatMode;
         [Tooltip("Disabled for the current gameplay test. Attacks still resolve and play feedback without changing HP.")]
-        [SerializeField] private bool enableHealthSystemInFightScene2;
+        [FormerlySerializedAs("enableHealthSystemInFightScene2")]
+        [SerializeField] private bool enableHealthSystemInFrontHeroMode;
         [SerializeField, Min(1)] private int enemyAttackIntervalBeats = 4;
         [SerializeField] private HeroBeatSettings frontHero =
-            new("Paladin - Player", true, 1, 4, "Radiant Smite", 3f);
+            new("Paladin - Player", true);
         [SerializeField] private HeroBeatSettings secondHero =
-            new("Bard - Auto", false, 2, 4, "Final Chorus", 2.5f);
+            new("Bard - Auto", false);
         [SerializeField] private HeroBeatSettings thirdHero =
-            new("Mage - Auto", false, 4, 3, "Arcane Burst", 3.5f);
+            new("Mage - Auto", false);
 
         private readonly List<FightUnitSlot> fightScene2Enemies = new();
         private FmodBeatClock subscribedBeatClock;
@@ -250,8 +230,9 @@ namespace RhythmHunter.FightDemo
         public int ReceivedAttackCount => receivedAttackCount;
         public FightUnitSlot TankSlot => tankSlot;
         public FightUnitSlot ActiveEnemySlot => activeEnemySlot;
-        public bool UsesFrontHeroControls => enableFrontHeroModeInFightScene2 && gameObject.scene.name == "FightScene2";
-        public bool HealthSystemEnabled => !UsesFrontHeroControls || enableHealthSystemInFightScene2;
+        public CombatMode Mode => combatMode;
+        public bool UsesFrontHeroControls => combatMode == CombatMode.FrontHero;
+        public bool HealthSystemEnabled => !UsesFrontHeroControls || enableHealthSystemInFrontHeroMode;
         public int EnemyAttackIntervalBeats => UsesFrontHeroControls && activeEnemySlot != null
             ? activeEnemySlot.AttackIntervalBeats
             : enemyAttackIntervalBeats;
@@ -291,6 +272,11 @@ namespace RhythmHunter.FightDemo
             UnsubscribeDependencies();
             rosterManager = manager;
             SubscribeDependencies();
+        }
+
+        public void SetCombatMode(CombatMode mode)
+        {
+            combatMode = mode;
         }
 
         public int GetEnemyBeatsUntilAttack(long globalBeat)
@@ -803,7 +789,7 @@ namespace RhythmHunter.FightDemo
             foreach (FightUnitSlot slot in slots)
             {
                 if (slot.gameObject.scene == gameObject.scene)
-                    slot.SetHealthDisplayVisible(enableHealthSystemInFightScene2);
+                    slot.SetHealthDisplayVisible(enableHealthSystemInFrontHeroMode);
             }
 
             Transform[] transforms = Resources.FindObjectsOfTypeAll<Transform>();
@@ -813,7 +799,7 @@ namespace RhythmHunter.FightDemo
                     continue;
 
                 if (candidate.name == "TankHealth" || candidate.name == "TankHealthBar")
-                    candidate.gameObject.SetActive(enableHealthSystemInFightScene2);
+                    candidate.gameObject.SetActive(enableHealthSystemInFrontHeroMode);
             }
         }
 
