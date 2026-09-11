@@ -109,11 +109,13 @@ MonoBehaviour:
   displayName: MAGE
   team: 1
   role: 3
-  maxHp: 75
-  attackPower: 24
+  maxHp: 4
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
+  attackPower: 1
   skillName: Arcane Burst
-  skillBehavior: 0
-  skillPower: 84
+  skillBehavior: 3
+  skillPower: 1
   skillEffectPrefab: {fileID: 1533513433225352677, guid: 4b90ddde63a4da7469b9e61591b39fea, type: 3}
   attackIntervalBeats: 4
   maxMana: 3

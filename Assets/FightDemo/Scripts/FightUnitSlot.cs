@@ -33,11 +33,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private int slotIndex;
 
         [Header("Combat Data")]
-        [SerializeField, Min(1)] private int maxHp = 100;
-        [SerializeField, Min(0)] private int attackPower = 10;
+        [SerializeField, Min(0.5f)] private float maxHp = 4f;
+        [SerializeField] private FightCharacterDefinition.AbilityBehavior normalAbilityBehavior;
+        [SerializeField, Min(0)] private float normalAbilityPower = 1f;
+        [SerializeField, Min(0.5f)] private float attackPower = 1f;
         [FormerlySerializedAs("skillDamage")]
-        [SerializeField, Min(0)] private int skillPower = 30;
-        [SerializeField] private FightCharacterDefinition.SkillBehavior skillBehavior;
+        [SerializeField, Min(0)] private float skillPower = 1f;
+        [SerializeField] private FightCharacterDefinition.AbilityBehavior skillBehavior;
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;
 
@@ -78,7 +80,7 @@ namespace RhythmHunter.FightDemo
         private FightCharacterDefinition characterDefinition;
         private FightCharacterCombatAnimator combatAnimator;
         private bool hasCharacter = true;
-        private int currentHp;
+        private float currentHp;
         private int normalAttackPlayCount;
         private int lightAttackPlayCount;
         private int heavyAttackPlayCount;
@@ -90,19 +92,20 @@ namespace RhythmHunter.FightDemo
         private Transform inputFeedbackTarget;
         private Vector3 inputFeedbackOrigin;
 
-        public event Action<FightUnitSlot, int, int> HealthChanged;
+        public event Action<FightUnitSlot, float, float> HealthChanged;
 
         public string SlotId => slotId;
         public string DisplayName => displayName;
         public UnitTeam Team => team;
         public UnitRole Role => role;
         public int SlotIndex => slotIndex;
-        public int MaxHp => maxHp;
-        public int CurrentHp => currentHp;
-        public int AttackPower => attackPower;
-        public int SkillPower => skillPower;
-        public int SkillDamage => skillPower;
-        public FightCharacterDefinition.SkillBehavior SkillBehavior => skillBehavior;
+        public float MaxHp => maxHp;
+        public float CurrentHp => currentHp;
+        public FightCharacterDefinition.AbilityBehavior NormalAbilityBehavior => normalAbilityBehavior;
+        public float NormalAbilityPower => normalAbilityPower;
+        public float AttackPower => attackPower;
+        public float SkillPower => skillPower;
+        public FightCharacterDefinition.AbilityBehavior SkillBehavior => skillBehavior;
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
         public int CurrentMana => currentMana;
@@ -142,8 +145,8 @@ namespace RhythmHunter.FightDemo
             UnitTeam unitTeam,
             UnitRole unitRole,
             int index,
-            int hp,
-            int power,
+            float hp,
+            float power,
             Color color,
             Transform prefabRoot,
             Transform effectSpawnPoint,
@@ -157,9 +160,10 @@ namespace RhythmHunter.FightDemo
             team = unitTeam;
             role = unitRole;
             slotIndex = Mathf.Max(0, index);
-            maxHp = Mathf.Max(1, hp);
-            attackPower = Mathf.Max(0, power);
-            skillPower = Mathf.Max(0, power * 3);
+            maxHp = QuantizePositive(hp);
+            attackPower = QuantizePositive(power);
+            normalAbilityPower = attackPower;
+            skillPower = QuantizePositive(power * 3f);
             attackIntervalBeats = 4;
             maxMana = 4;
             accentColor = color;
@@ -240,18 +244,18 @@ namespace RhythmHunter.FightDemo
             HealthChanged?.Invoke(this, currentHp, maxHp);
         }
 
-        public int TakeDamage(int amount)
+        public float TakeDamage(float amount)
         {
-            int applied = Mathf.Clamp(amount, 0, currentHp);
+            float applied = Mathf.Clamp(QuantizeNonNegative(amount), 0f, currentHp);
             currentHp -= applied;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;
         }
 
-        public int Heal(int amount)
+        public float Heal(float amount)
         {
-            int applied = Mathf.Clamp(Mathf.Max(0, amount), 0, maxHp - currentHp);
+            float applied = Mathf.Clamp(QuantizeNonNegative(amount), 0f, maxHp - currentHp);
             currentHp += applied;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
@@ -431,12 +435,17 @@ namespace RhythmHunter.FightDemo
 
         public void SetHealthDisplayVisible(bool visible)
         {
+            SetHealthDisplayMode(visible, visible);
+        }
+
+        public void SetHealthDisplayMode(bool showBar, bool showNumber)
+        {
             if (hpBackground != null)
-                hpBackground.gameObject.SetActive(visible);
+                hpBackground.gameObject.SetActive(showBar);
             if (hpFill != null)
-                hpFill.gameObject.SetActive(visible);
+                hpFill.gameObject.SetActive(showBar);
             if (hpLabel != null)
-                hpLabel.gameObject.SetActive(visible);
+                hpLabel.gameObject.SetActive(showNumber);
         }
 
         public void SetRoleLabel(string value)
@@ -546,6 +555,8 @@ namespace RhythmHunter.FightDemo
             team = definition.Team;
             role = definition.Role;
             maxHp = definition.MaxHp;
+            normalAbilityBehavior = definition.NormalAbilityType;
+            normalAbilityPower = definition.NormalAbilityPower;
             attackPower = definition.AttackPower;
             skillPower = definition.SkillPower;
             skillBehavior = definition.SkillType;
@@ -595,13 +606,21 @@ namespace RhythmHunter.FightDemo
 
             if (hpLabel != null)
             {
+                if (team == UnitTeam.Enemy)
+                {
+                    hpLabel.text = $"{currentHp:0.#} / {maxHp:0.#}";
+                    return;
+                }
+
                 string skillSummary = skillBehavior switch
                 {
-                    FightCharacterDefinition.SkillBehavior.Guard => "GUARD",
-                    FightCharacterDefinition.SkillBehavior.HealParty => $"HEAL {skillPower}",
-                    _ => $"DMG {skillPower}"
+                    FightCharacterDefinition.AbilityBehavior.Guard => "GUARD",
+                    FightCharacterDefinition.AbilityBehavior.HealParty => $"HEAL {skillPower:0.#}",
+                    FightCharacterDefinition.AbilityBehavior.DamageAll => $"ALL {skillPower:0.#}",
+                    FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront => $"GUARD+DMG {skillPower:0.#}",
+                    _ => $"DMG {skillPower:0.#}"
                 };
-                hpLabel.text = $"HP {currentHp}/{maxHp}  ATK {attackPower}  SKILL {skillSummary}";
+                hpLabel.text = $"HP {currentHp:0.#}/{maxHp:0.#}  SKILL {skillSummary}";
             }
         }
 
@@ -614,7 +633,25 @@ namespace RhythmHunter.FightDemo
             missShakeStrength = Mathf.Max(0f, missShakeStrength);
             missShakeDuration = Mathf.Max(0.01f, missShakeDuration);
             missShakeFrequency = Mathf.Max(1f, missShakeFrequency);
+            maxHp = QuantizePositive(maxHp);
+            normalAbilityPower = normalAbilityBehavior == FightCharacterDefinition.AbilityBehavior.Guard
+                ? 0f
+                : QuantizePositive(normalAbilityPower);
+            attackPower = QuantizePositive(attackPower);
+            skillPower = skillBehavior == FightCharacterDefinition.AbilityBehavior.Guard
+                ? 0f
+                : QuantizePositive(skillPower);
         }
 #endif
+
+        private static float QuantizePositive(float value)
+        {
+            return Mathf.Max(0.5f, Mathf.Round(value * 2f) * 0.5f);
+        }
+
+        private static float QuantizeNonNegative(float value)
+        {
+            return value <= 0f ? 0f : QuantizePositive(value);
+        }
     }
 }

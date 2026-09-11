@@ -84,19 +84,19 @@ namespace RhythmHunter.FightDemo
             if (fight == null || !fight.UsesFrontHeroControls)
                 return;
 
-            fight.FrontHero.UnitSlot?.SetRoleLabel("FRONT  •  X / Q  •  BEAT 4 GUARD");
-            fight.SecondHero.UnitSlot?.SetRoleLabel("MIDDLE  •  Y / W  •  BEAT 4 HEAL");
-            fight.ThirdHero.UnitSlot?.SetRoleLabel("BACK  •  B / E  •  BEAT 4 DAMAGE");
-            SetHealthVisibility(heroSlots, fight.HealthSystemEnabled);
-            SetHealthVisibility(enemySlots, fight.HealthSystemEnabled);
+            fight.FrontHero.UnitSlot?.SetRoleLabel("X / Q  •  GUARD  •  BEAT 4 COUNTER");
+            fight.SecondHero.UnitSlot?.SetRoleLabel("Y / W  •  HEAL 0.5  •  BEAT 4 HEAL 1");
+            fight.ThirdHero.UnitSlot?.SetRoleLabel("B / E  •  FRONT -1  •  BEAT 4 ALL -1");
+            SetHealthDisplayMode(heroSlots, false, false);
+            SetHealthDisplayMode(enemySlots, false, fight.HealthSystemEnabled);
         }
 
-        private static void SetHealthVisibility(FightUnitSlot[] slots, bool visible)
+        private static void SetHealthDisplayMode(FightUnitSlot[] slots, bool showBar, bool showNumber)
         {
             if (slots == null)
                 return;
             foreach (FightUnitSlot slot in slots)
-                slot?.SetHealthDisplayVisible(visible);
+                slot?.SetHealthDisplayMode(showBar, showNumber);
         }
 
         private void Update()

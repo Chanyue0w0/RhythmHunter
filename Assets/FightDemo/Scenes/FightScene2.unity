@@ -433,7 +433,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 46506980}
-  m_Text: HP 75/75  ATK 24
+  m_Text: HP 4/4
   m_OffsetZ: 0
   m_CharacterSize: 0.015
   m_LineSpacing: 1
@@ -1080,7 +1080,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267799629}
-  m_Text: HP 90/90  ATK 14
+  m_Text: 20 / 20
   m_OffsetZ: 0
   m_CharacterSize: 0.015
   m_LineSpacing: 1
@@ -1712,7 +1712,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: TANK HP   120 / 120
+  m_Text: PLAYER HP   4 / 4
 --- !u!1 &370051506
 GameObject:
   m_ObjectHideFlags: 0
@@ -3042,7 +3042,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 517797250}
-  m_Text: HP 80/80  ATK 12
+  m_Text: 20 / 20
   m_OffsetZ: 0
   m_CharacterSize: 0.015
   m_LineSpacing: 1
@@ -3775,7 +3775,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: X/Y/B (Q/W/E) control heroes 1/2/3 • Beat 4 activates skills
+  m_Text: X/Y/B (Q/W/E) = Guard / Heal / Damage • Beat 4 activates skills
 --- !u!1 &669889341
 GameObject:
   m_ObjectHideFlags: 0
@@ -3923,7 +3923,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707206170}
-  m_Text: HP 120/120  ATK 12
+  m_Text: HP 4/4
   m_OffsetZ: 0
   m_CharacterSize: 0.015
   m_LineSpacing: 1
@@ -5148,7 +5148,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961970722}
-  m_Text: "BACK  \u2022  B / E  \u2022  BEAT 4 DAMAGE"
+  m_Text: "B / E  \u2022  FRONT -1  \u2022  BEAT 4 ALL -1"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -6151,7 +6151,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1252487853}
-  m_Text: HP 85/85  ATK 8
+  m_Text: HP 4/4
   m_OffsetZ: 0
   m_CharacterSize: 0.015
   m_LineSpacing: 1
@@ -7158,7 +7158,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1462401100}
-  m_Text: "FRONT  \u2022  X / Q  \u2022  BEAT 4 GUARD"
+  m_Text: "X / Q  \u2022  GUARD  \u2022  BEAT 4 COUNTER"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -7337,7 +7337,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1486828709}
-  m_Text: HP 120/120  ATK 18
+  m_Text: 20 / 20
   m_OffsetZ: 0
   m_CharacterSize: 0.015
   m_LineSpacing: 1
@@ -7570,7 +7570,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: HERO 1  X / Q     HERO 2  Y / W     HERO 3  B / E     BEAT 4 = SKILL
+  m_Text: 'PALADIN X/Q: GUARD   BARD Y/W: HEAL   MAGE B/E: DAMAGE   BEAT 4 = SKILL'
 --- !u!222 &1562105383
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7724,7 +7724,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1567002021}
-  m_Text: "MIDDLE  \u2022  Y / W  \u2022  BEAT 4 HEAL"
+  m_Text: "Y / W  \u2022  HEAL 0.5  \u2022  BEAT 4 HEAL 1"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -9499,8 +9499,8 @@ MonoBehaviour:
   rosterManager: {fileID: 2021200331}
   tankSlot: {fileID: 2037638511}
   activeEnemySlot: {fileID: 0}
-  maxPartyHp: 120
-  enemyAttackDamage: 18
+  maxPartyHp: 4
+  enemyAttackDamage: 1
   resolutionSafetyMs: 12
   enableFrontHeroModeInFightScene2: 1
   enableHealthSystemInFightScene2: 1

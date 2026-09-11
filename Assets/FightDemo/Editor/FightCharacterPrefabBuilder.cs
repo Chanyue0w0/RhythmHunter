@@ -28,7 +28,8 @@ namespace RhythmHunter.FightDemoEditor
 
             FightCharacterDefinition paladin = BuildCharacter(
                 "Paladin", "PALADIN", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank,
-                120, 12, "Aegis Guard", FightCharacterDefinition.SkillBehavior.Guard, 0, 1, 4,
+                4f, FightCharacterDefinition.AbilityBehavior.Guard, 0f, 1f,
+                "Aegis Counter", FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront, 1f, 1, 4,
                 new Color(0.12f, 0.65f, 0.9f, 1f), 1.72f,
                 new[]
                 {
@@ -38,7 +39,8 @@ namespace RhythmHunter.FightDemoEditor
                 }, fallbackEffectSprite, HeroRoot);
             FightCharacterDefinition bard = BuildCharacter(
                 "Bard", "BARD", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support,
-                85, 8, "Healing Chorus", FightCharacterDefinition.SkillBehavior.HealParty, 20, 2, 4,
+                4f, FightCharacterDefinition.AbilityBehavior.HealParty, 0.5f, 1f,
+                "Healing Chorus", FightCharacterDefinition.AbilityBehavior.HealParty, 1f, 2, 4,
                 new Color(0.2f, 0.78f, 0.48f, 1f), 1.72f,
                 new[]
                 {
@@ -48,7 +50,8 @@ namespace RhythmHunter.FightDemoEditor
                 }, fallbackEffectSprite, HeroRoot);
             FightCharacterDefinition mage = BuildCharacter(
                 "Mage", "MAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage,
-                75, 24, "Arcane Burst", FightCharacterDefinition.SkillBehavior.Damage, 84, 4, 3,
+                4f, FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 1f,
+                "Arcane Burst", FightCharacterDefinition.AbilityBehavior.DamageAll, 1f, 4, 3,
                 new Color(0.72f, 0.3f, 0.88f, 1f), 1.72f,
                 new[]
                 {
@@ -59,7 +62,8 @@ namespace RhythmHunter.FightDemoEditor
 
             FightCharacterDefinition goblinMage = BuildCharacter(
                 "Goblin_Mage", "GOBLIN MAGE", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy,
-                80, 12, "Goblin Hex", FightCharacterDefinition.SkillBehavior.Damage, 30, 4, 4,
+                20f, FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 1f,
+                "Goblin Hex", FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 4, 4,
                 new Color(0.55f, 0.16f, 0.2f, 1f), 1.65f,
                 new[]
                 {
@@ -68,7 +72,8 @@ namespace RhythmHunter.FightDemoEditor
                 }, fallbackEffectSprite, EnemyRoot);
             FightCharacterDefinition goblinMercenary = BuildCharacter(
                 "Goblin_Mercenary", "GOBLIN MERCENARY", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy,
-                120, 18, "Mercenary Cleave", FightCharacterDefinition.SkillBehavior.Damage, 45, 4, 4,
+                20f, FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 1f,
+                "Mercenary Cleave", FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 4, 4,
                 new Color(0.85f, 0.2f, 0.25f, 1f), 1.65f,
                 new[]
                 {
@@ -77,7 +82,8 @@ namespace RhythmHunter.FightDemoEditor
                 }, fallbackEffectSprite, EnemyRoot);
             FightCharacterDefinition goblinShield = BuildCharacter(
                 "Goblin_Shield", "GOBLIN SHIELD", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy,
-                90, 14, "Shield Crash", FightCharacterDefinition.SkillBehavior.Damage, 28, 4, 4,
+                20f, FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 1f,
+                "Shield Crash", FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 4, 4,
                 new Color(0.55f, 0.16f, 0.2f, 1f), 1.65f,
                 new[]
                 {
@@ -163,11 +169,13 @@ namespace RhythmHunter.FightDemoEditor
             string displayName,
             FightUnitSlot.UnitTeam team,
             FightUnitSlot.UnitRole role,
-            int hp,
-            int attack,
+            float hp,
+            FightCharacterDefinition.AbilityBehavior normalBehavior,
+            float normalPower,
+            float attack,
             string skillName,
-            FightCharacterDefinition.SkillBehavior skillBehavior,
-            int skillDamage,
+            FightCharacterDefinition.AbilityBehavior skillBehavior,
+            float skillDamage,
             int attackIntervalBeats,
             int maxMana,
             Color accent,
@@ -203,6 +211,8 @@ namespace RhythmHunter.FightDemoEditor
                 team,
                 role,
                 hp,
+                normalBehavior,
+                normalPower,
                 attack,
                 skillName,
                 skillBehavior,

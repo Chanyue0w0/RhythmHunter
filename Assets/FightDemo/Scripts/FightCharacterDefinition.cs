@@ -10,11 +10,13 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightCharacterDefinition : MonoBehaviour
     {
-        public enum SkillBehavior
+        public enum AbilityBehavior
         {
-            Damage,
+            DamageFront,
             Guard,
-            HealParty
+            HealParty,
+            DamageAll,
+            GuardAndDamageFront
         }
 
         [Header("Identity")]
@@ -24,13 +26,16 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightUnitSlot.UnitRole role;
 
         [Header("Base Combat Information")]
-        [SerializeField, Min(1)] private int maxHp = 100;
-        [SerializeField, Min(0)] private int attackPower = 10;
+        [SerializeField, Min(0.5f)] private float maxHp = 4f;
+        [Tooltip("Gameplay behavior activated on beats 1-3.")]
+        [SerializeField] private AbilityBehavior normalAbilityBehavior;
+        [SerializeField, Min(0)] private float normalAbilityPower = 1f;
+        [SerializeField, Min(0.5f)] private float attackPower = 1f;
         [SerializeField] private string skillName = "Beat Skill";
         [Tooltip("Gameplay behavior activated when this character is called on beat 4.")]
-        [SerializeField] private SkillBehavior skillBehavior;
+        [SerializeField] private AbilityBehavior skillBehavior;
         [FormerlySerializedAs("skillDamage")]
-        [SerializeField, Min(0)] private int skillPower = 30;
+        [SerializeField, Min(0)] private float skillPower = 1f;
         [Tooltip("Optional replaceable VFX prefab spawned when this character uses its skill.")]
         [SerializeField] private GameObject skillEffectPrefab;
         [Tooltip("AI attack interval. Player-controlled party members ignore this value.")]
@@ -44,12 +49,13 @@ namespace RhythmHunter.FightDemo
         public string DisplayName => displayName;
         public FightUnitSlot.UnitTeam Team => team;
         public FightUnitSlot.UnitRole Role => role;
-        public int MaxHp => maxHp;
-        public int AttackPower => attackPower;
+        public float MaxHp => maxHp;
+        public AbilityBehavior NormalAbilityType => normalAbilityBehavior;
+        public float NormalAbilityPower => normalAbilityPower;
+        public float AttackPower => attackPower;
         public string SkillName => skillName;
-        public SkillBehavior SkillType => skillBehavior;
-        public int SkillPower => skillPower;
-        public int SkillDamage => skillPower;
+        public AbilityBehavior SkillType => skillBehavior;
+        public float SkillPower => skillPower;
         public GameObject SkillEffectPrefab => skillEffectPrefab;
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
@@ -60,11 +66,13 @@ namespace RhythmHunter.FightDemo
             string shownName,
             FightUnitSlot.UnitTeam unitTeam,
             FightUnitSlot.UnitRole unitRole,
-            int hp,
-            int attack,
+            float hp,
+            AbilityBehavior normalBehavior,
+            float normalPower,
+            float attack,
             string abilityName,
-            SkillBehavior abilityBehavior,
-            int abilityDamage,
+            AbilityBehavior abilityBehavior,
+            float abilityDamage,
             GameObject abilityEffect,
             int intervalBeats,
             int manaCapacity,
@@ -74,11 +82,17 @@ namespace RhythmHunter.FightDemo
             displayName = shownName;
             team = unitTeam;
             role = unitRole;
-            maxHp = Mathf.Max(1, hp);
-            attackPower = Mathf.Max(0, attack);
+            maxHp = QuantizePositive(hp);
+            normalAbilityBehavior = normalBehavior;
+            normalAbilityPower = normalBehavior == AbilityBehavior.Guard
+                ? 0f
+                : QuantizePositive(normalPower);
+            attackPower = QuantizePositive(attack);
             skillName = abilityName;
             skillBehavior = abilityBehavior;
-            skillPower = Mathf.Max(0, abilityDamage);
+            skillPower = abilityBehavior == AbilityBehavior.Guard
+                ? 0f
+                : QuantizePositive(abilityDamage);
             skillEffectPrefab = abilityEffect;
             attackIntervalBeats = Mathf.Max(1, intervalBeats);
             maxMana = Mathf.Max(1, manaCapacity);
@@ -88,12 +102,22 @@ namespace RhythmHunter.FightDemo
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            maxHp = Mathf.Max(1, maxHp);
-            attackPower = Mathf.Max(0, attackPower);
-            skillPower = Mathf.Max(0, skillPower);
+            maxHp = QuantizePositive(maxHp);
+            normalAbilityPower = normalAbilityBehavior == AbilityBehavior.Guard
+                ? 0f
+                : QuantizePositive(normalAbilityPower);
+            attackPower = QuantizePositive(attackPower);
+            skillPower = skillBehavior == AbilityBehavior.Guard
+                ? 0f
+                : QuantizePositive(skillPower);
             attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
             maxMana = Mathf.Max(1, maxMana);
         }
 #endif
+
+        private static float QuantizePositive(float value)
+        {
+            return Mathf.Max(0.5f, Mathf.Round(value * 2f) * 0.5f);
+        }
     }
 }

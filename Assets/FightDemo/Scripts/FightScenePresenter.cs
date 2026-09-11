@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using RhythmHunter.RhythmDemo;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,6 +43,9 @@ namespace RhythmHunter.FightDemo
         private int blockedAttacks;
         private int receivedAttacks;
         private FightCombatController subscribedFight;
+        private RectTransform pixelHeartRoot;
+        private readonly List<Image[]> pixelHearts = new();
+        private readonly List<bool[]> pixelHeartLeftHalves = new();
 
         public void Configure(
             FmodBeatClock clock,
@@ -100,15 +104,17 @@ namespace RhythmHunter.FightDemo
         {
             bool showHealth = fight == null || fight.HealthSystemEnabled;
             if (healthText != null)
-                healthText.gameObject.SetActive(showHealth);
+                healthText.gameObject.SetActive(showHealth && (fight == null || !fight.UsesFrontHeroControls));
             if (healthBar != null)
-                healthBar.gameObject.SetActive(showHealth);
-            OnPartyHealthChanged(fight != null ? fight.PartyHp : 0, fight != null ? fight.MaxPartyHp : 1);
+                healthBar.gameObject.SetActive(showHealth && (fight == null || !fight.UsesFrontHeroControls));
+            if (fight != null && fight.UsesFrontHeroControls)
+                BuildPixelHeartUi(Mathf.CeilToInt(fight.MaxPartyHp));
+            OnPartyHealthChanged(fight != null ? fight.PartyHp : 0f, fight != null ? fight.MaxPartyHp : 1f);
             SetResult(
                 "GET READY",
                 Cyan,
                 fight != null && fight.UsesFrontHeroControls
-                    ? "X/Y/B = Heroes 1/2/3  •  Keyboard Q/W/E  •  Beat 4 = Skill"
+                    ? "X/Y/B = Guard / Heal / Damage  •  Keyboard Q/W/E  •  Beat 4 = Skill"
                     : "Enemy attacks land on every fourth beat.",
                 2f);
             UpdateStatistics();
@@ -270,13 +276,109 @@ namespace RhythmHunter.FightDemo
             UpdateStatistics();
         }
 
-        private void OnPartyHealthChanged(int current, int maximum)
+        private void OnPartyHealthChanged(float current, float maximum)
         {
             if (healthText != null)
-                healthText.text = $"TANK HP   {current} / {maximum}";
+                healthText.text = $"PLAYER HP   {current:0.#} / {maximum:0.#}";
 
             if (healthBar != null)
-                healthBar.SetValueWithoutNotify(maximum > 0 ? (float)current / maximum : 0f);
+                healthBar.SetValueWithoutNotify(maximum > 0f ? current / maximum : 0f);
+
+            UpdatePixelHearts(current);
+        }
+
+        private void BuildPixelHeartUi(int heartCount)
+        {
+            if (pixelHeartRoot != null || healthText == null || healthText.canvas == null)
+                return;
+
+            GameObject root = new("PixelHeartHealth", typeof(RectTransform));
+            pixelHeartRoot = root.GetComponent<RectTransform>();
+            pixelHeartRoot.SetParent(healthText.canvas.transform, false);
+            pixelHeartRoot.anchorMin = Vector2.one;
+            pixelHeartRoot.anchorMax = Vector2.one;
+            pixelHeartRoot.pivot = Vector2.one;
+            pixelHeartRoot.anchoredPosition = new Vector2(-32f, -28f);
+            pixelHeartRoot.sizeDelta = new Vector2(260f, 76f);
+
+            GameObject labelObject = new("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            RectTransform labelRect = labelObject.GetComponent<RectTransform>();
+            labelRect.SetParent(pixelHeartRoot, false);
+            labelRect.anchorMin = new Vector2(0f, 1f);
+            labelRect.anchorMax = new Vector2(1f, 1f);
+            labelRect.pivot = new Vector2(1f, 1f);
+            labelRect.anchoredPosition = Vector2.zero;
+            labelRect.sizeDelta = new Vector2(0f, 22f);
+            Text label = labelObject.GetComponent<Text>();
+            label.font = healthText.font;
+            label.fontSize = 15;
+            label.fontStyle = FontStyle.Bold;
+            label.alignment = TextAnchor.UpperRight;
+            label.color = Color.white;
+            label.text = "PLAYER HP";
+
+            string[] pattern =
+            {
+                ".XX.XX.",
+                "XXXXXXX",
+                "XXXXXXX",
+                ".XXXXX.",
+                "..XXX..",
+                "...X..."
+            };
+            const float pixel = 7f;
+            const float heartWidth = 49f;
+            const float spacing = 9f;
+            int count = Mathf.Max(1, heartCount);
+            float totalWidth = count * heartWidth + (count - 1) * spacing;
+            float startX = 260f - totalWidth;
+            for (int heartIndex = 0; heartIndex < count; heartIndex++)
+            {
+                List<Image> pixels = new();
+                List<bool> leftHalf = new();
+                for (int y = 0; y < pattern.Length; y++)
+                {
+                    for (int x = 0; x < pattern[y].Length; x++)
+                    {
+                        if (pattern[y][x] != 'X')
+                            continue;
+
+                        GameObject pixelObject = new($"Heart{heartIndex + 1}_Pixel{x}_{y}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                        RectTransform pixelRect = pixelObject.GetComponent<RectTransform>();
+                        pixelRect.SetParent(pixelHeartRoot, false);
+                        pixelRect.anchorMin = new Vector2(0f, 1f);
+                        pixelRect.anchorMax = new Vector2(0f, 1f);
+                        pixelRect.pivot = new Vector2(0f, 1f);
+                        pixelRect.anchoredPosition = new Vector2(
+                            startX + heartIndex * (heartWidth + spacing) + x * pixel,
+                            -26f - y * pixel);
+                        pixelRect.sizeDelta = new Vector2(pixel, pixel);
+                        Image image = pixelObject.GetComponent<Image>();
+                        image.raycastTarget = false;
+                        pixels.Add(image);
+                        leftHalf.Add(x <= 2);
+                    }
+                }
+
+                pixelHearts.Add(pixels.ToArray());
+                pixelHeartLeftHalves.Add(leftHalf.ToArray());
+            }
+        }
+
+        private void UpdatePixelHearts(float current)
+        {
+            Color filled = new(1f, 0.16f, 0.24f, 1f);
+            Color empty = new(0.2f, 0.05f, 0.08f, 0.9f);
+            for (int heartIndex = 0; heartIndex < pixelHearts.Count; heartIndex++)
+            {
+                float remaining = current - heartIndex;
+                bool full = remaining >= 1f;
+                bool half = !full && remaining >= 0.5f;
+                Image[] pixels = pixelHearts[heartIndex];
+                bool[] leftHalf = pixelHeartLeftHalves[heartIndex];
+                for (int pixelIndex = 0; pixelIndex < pixels.Length; pixelIndex++)
+                    pixels[pixelIndex].color = full || (half && leftHalf[pixelIndex]) ? filled : empty;
+            }
         }
 
         private void OnBattleLost()

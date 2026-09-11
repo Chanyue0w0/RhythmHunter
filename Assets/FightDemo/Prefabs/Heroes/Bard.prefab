@@ -109,11 +109,13 @@ MonoBehaviour:
   displayName: BARD
   team: 1
   role: 2
-  maxHp: 85
-  attackPower: 8
+  maxHp: 4
+  normalAbilityBehavior: 2
+  normalAbilityPower: 0.5
+  attackPower: 1
   skillName: Healing Chorus
   skillBehavior: 2
-  skillPower: 20
+  skillPower: 1
   skillEffectPrefab: {fileID: 8051251566155585380, guid: 5dbd5598d6ff1ab4c8915e39f9f6fa53, type: 3}
   attackIntervalBeats: 2
   maxMana: 4

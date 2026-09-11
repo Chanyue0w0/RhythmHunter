@@ -109,11 +109,13 @@ MonoBehaviour:
   displayName: PALADIN
   team: 1
   role: 1
-  maxHp: 120
-  attackPower: 12
-  skillName: Aegis Guard
-  skillBehavior: 1
-  skillPower: 0
+  maxHp: 4
+  normalAbilityBehavior: 1
+  normalAbilityPower: 0
+  attackPower: 1
+  skillName: Aegis Counter
+  skillBehavior: 4
+  skillPower: 1
   skillEffectPrefab: {fileID: 5273961539278508256, guid: 6251f2ae3febbff47ba2d5ed0c7fd63f, type: 3}
   attackIntervalBeats: 1
   maxMana: 4

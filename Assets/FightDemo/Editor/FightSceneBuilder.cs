@@ -113,16 +113,16 @@ namespace RhythmHunter.FightDemoEditor
 
             FightUnitSlot[] enemySlots =
             {
-                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinMage", "GOBLIN MAGE", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 0, new Vector3(-5.8f, 0.15f, 0f), 80, 12, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 1", goblinMageIdle, 1.65f),
-                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinMercenary", "GOBLIN MERCENARY", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 1, new Vector3(-4.05f, 0.15f, 0f), 120, 18, new Color(0.85f, 0.2f, 0.25f, 1f), "ACTIVE", goblinMercenaryIdle, 1.65f),
-                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinShield", "GOBLIN SHIELD", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 2, new Vector3(-2.3f, 0.15f, 0f), 90, 14, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 3", goblinShieldIdle, 1.65f)
+                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinMage", "GOBLIN MAGE", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 0, new Vector3(-5.8f, 0.15f, 0f), 20f, 1f, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 1", goblinMageIdle, 1.65f),
+                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinMercenary", "GOBLIN MERCENARY", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 1, new Vector3(-4.05f, 0.15f, 0f), 20f, 1f, new Color(0.85f, 0.2f, 0.25f, 1f), "ACTIVE", goblinMercenaryIdle, 1.65f),
+                CreateUnitSlot(battlefield, worldSprite, font, "EnemySlot_GoblinShield", "GOBLIN SHIELD", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy, 2, new Vector3(-2.3f, 0.15f, 0f), 20f, 1f, new Color(0.55f, 0.16f, 0.2f, 1f), "SLOT 3", goblinShieldIdle, 1.65f)
             };
 
             FightUnitSlot[] heroSlots =
             {
-                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Paladin", "PALADIN", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank, 0, new Vector3(2.3f, 0.15f, 0f), 120, 12, new Color(0.12f, 0.65f, 0.9f, 1f), "X / Q • BEAT 4 GUARD", paladinIdle, 1.72f),
-                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Bard", "BARD", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support, 1, new Vector3(4.05f, 0.15f, 0f), 85, 8, new Color(0.2f, 0.78f, 0.48f, 1f), "Y / W • BEAT 4 HEAL", bardIdle, 1.72f),
-                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Mage", "MAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage, 2, new Vector3(5.8f, 0.15f, 0f), 75, 24, new Color(0.72f, 0.3f, 0.88f, 1f), "B / E • BEAT 4 DAMAGE", mageIdle, 1.72f)
+                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Paladin", "PALADIN", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank, 0, new Vector3(2.3f, 0.15f, 0f), 4f, 1f, new Color(0.12f, 0.65f, 0.9f, 1f), "X/Q • GUARD • BEAT 4 COUNTER", paladinIdle, 1.72f),
+                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Bard", "BARD", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support, 1, new Vector3(4.05f, 0.15f, 0f), 4f, 1f, new Color(0.2f, 0.78f, 0.48f, 1f), "Y/W • HEAL .5 • BEAT 4 HEAL 1", bardIdle, 1.72f),
+                CreateUnitSlot(battlefield, worldSprite, font, "HeroSlot_Mage", "MAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage, 2, new Vector3(5.8f, 0.15f, 0f), 4f, 1f, new Color(0.72f, 0.3f, 0.88f, 1f), "B/E • FRONT -1 • BEAT 4 ALL -1", mageIdle, 1.72f)
             };
 
             SpriteRenderer tankShield = CreateWorldSprite(
@@ -141,7 +141,7 @@ namespace RhythmHunter.FightDemoEditor
 
             Text warning = CreateText("AttackWarning", topUiRoot, font, "ENEMY ATTACKS ON EVERY FOURTH BEAT", 24, FontStyle.Bold, Primary, new Vector2(0f, 355f), new Vector2(1450f, 44f));
             Text result = CreateText("FightResult", bottomUiRoot, font, "GET READY", 42, FontStyle.Bold, Cyan, new Vector2(0f, -255f), new Vector2(900f, 60f));
-            Text detail = CreateText("FightDetail", bottomUiRoot, font, "X/Y/B (Q/W/E) control heroes 1/2/3 • Beat 4 activates skills", 18, FontStyle.Bold, Secondary, new Vector2(0f, -300f), new Vector2(1100f, 36f));
+            Text detail = CreateText("FightDetail", bottomUiRoot, font, "X/Y/B (Q/W/E) = Guard / Heal / Damage • Beat 4 activates skills", 18, FontStyle.Bold, Secondary, new Vector2(0f, -300f), new Vector2(1100f, 36f));
 
             Image rhythmPanel = CreatePanel("RhythmHud", bottomUiRoot, new Vector2(0f, -420f), new Vector2(1500f, 160f), Panel);
             Text cycle = CreateText("CycleReadout", rhythmPanel.transform, font, "BAR --  •  BEAT --/4", 20, FontStyle.Bold, Primary, new Vector2(-520f, 44f), new Vector2(380f, 38f));
@@ -158,9 +158,9 @@ namespace RhythmHunter.FightDemoEditor
 
             Slider beatProgress = CreateSlider("BeatProgress", rhythmPanel.transform, new Vector2(150f, -28f), new Vector2(610f, 15f), Cyan, new Color(0.08f, 0.12f, 0.18f, 1f));
             Text statistics = CreateText("Statistics", rhythmPanel.transform, font, "PARTY INPUT  PERFECT 00  MISS 00     ENEMY HITS 00", 16, FontStyle.Bold, Secondary, new Vector2(330f, 44f), new Vector2(700f, 36f));
-            Text health = CreateText("TankHealth", rhythmPanel.transform, font, "TANK HP   120 / 120", 16, FontStyle.Bold, Primary, new Vector2(-500f, -38f), new Vector2(300f, 30f));
+            Text health = CreateText("TankHealth", rhythmPanel.transform, font, "PLAYER HP   4 / 4", 16, FontStyle.Bold, Primary, new Vector2(-500f, -38f), new Vector2(300f, 30f));
             Slider healthBar = CreateSlider("TankHealthBar", rhythmPanel.transform, new Vector2(-265f, -38f), new Vector2(220f, 15f), new Color(0.3f, 1f, 0.55f, 1f), new Color(0.08f, 0.12f, 0.18f, 1f));
-            CreateText("InputLegend", bottomUiRoot, font, "HERO 1  X / Q     HERO 2  Y / W     HERO 3  B / E     BEAT 4 = SKILL", 16, FontStyle.Bold, Secondary, new Vector2(0f, -520f), new Vector2(1500f, 28f));
+            CreateText("InputLegend", bottomUiRoot, font, "PALADIN X/Q: GUARD   BARD Y/W: HEAL   MAGE B/E: DAMAGE   BEAT 4 = SKILL", 16, FontStyle.Bold, Secondary, new Vector2(0f, -520f), new Vector2(1500f, 28f));
 
             topUiRoot.gameObject.SetActive(false);
             bottomUiRoot.gameObject.SetActive(false);
@@ -180,7 +180,7 @@ namespace RhythmHunter.FightDemoEditor
             clock.Configure("event:/Combat soundtracks/Combat 01", 1f, true);
             judge.Configure(clock, 120f, 30f);
             input.Configure(controls);
-            fight.Configure(clock, judge, input, heroSlots[0], enemySlots[1], 120, 18);
+            fight.Configure(clock, judge, input, heroSlots[0], enemySlots[1], 4f, 1f);
             hudPresenter.Configure(clock, judge, fight, playback, cycle, warning, result, detail, health, statistics, beatNodes, beatProgress, healthBar, flash);
             battlefieldPresenter.Configure(fight, enemySlots, heroSlots, tankShield, enemyTelegraph);
             FightCharacterCombatAnimator[] idleAnimators = battlefield.GetComponentsInChildren<FightCharacterCombatAnimator>(true);
@@ -216,8 +216,8 @@ namespace RhythmHunter.FightDemoEditor
             FightUnitSlot.UnitRole role,
             int index,
             Vector3 position,
-            int hp,
-            int attack,
+            float hp,
+            float attack,
             Color color,
             string inputLabel,
             IReadOnlyList<Sprite> idleFrames,
@@ -258,7 +258,7 @@ namespace RhythmHunter.FightDemoEditor
             TextMesh roleLabel = CreateWorldText("RoleAndInput", slotObject.transform, font, $"{role.ToString().ToUpperInvariant()}  •  {inputLabel}", color, new Vector3(0f, -1.92f, 0f), 0.017f, FontStyle.Bold);
             SpriteRenderer hpBackground = CreateWorldSprite("HealthBackground", slotObject.transform, sprite, new Color(0.03f, 0.04f, 0.06f, 1f), new Vector3(0f, 1.34f, 0f), new Vector2(1.25f, 0.12f), 15);
             SpriteRenderer hpFill = CreateWorldSprite("HealthFill", slotObject.transform, sprite, new Color(0.3f, 1f, 0.55f, 1f), new Vector3(0f, 1.34f, -0.1f), new Vector2(1.2f, 0.075f), 16);
-            TextMesh hpLabel = CreateWorldText("Stats", slotObject.transform, font, $"HP {hp}/{hp}  ATK {attack}", Secondary, new Vector3(0f, 1.63f, 0f), 0.015f, FontStyle.Normal);
+            TextMesh hpLabel = CreateWorldText("Stats", slotObject.transform, font, $"HP {hp:0.#}/{hp:0.#}", Secondary, new Vector3(0f, 1.63f, 0f), 0.015f, FontStyle.Normal);
 
             slot.Configure(objectName, displayName, team, role, index, hp, attack, color, actorRoot, effectPoint, placeholder.gameObject, sprite, hpFill, hpLabel);
             slot.ConfigurePresentation(roleLabel, hpBackground);
