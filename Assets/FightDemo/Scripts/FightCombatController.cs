@@ -73,11 +73,14 @@ namespace RhythmHunter.FightDemo
             public int SkillActivationCount => skillActivationCount;
             public long LastAutomaticAttackGlobalBeat => lastAutomaticAttackGlobalBeat;
 
-            internal void Initialize(FightUnitSlot fallbackSlot, bool resetMana)
+            internal void BindUnitSlot(FightUnitSlot slot, bool resetRuntime)
             {
-                if (unitSlot == null)
-                    unitSlot = fallbackSlot;
+                unitSlot = slot;
+                RefreshRuntimeValues(resetRuntime);
+            }
 
+            internal void RefreshRuntimeValues(bool resetRuntime)
+            {
                 if (unitSlot != null && unitSlot.HasCharacter)
                 {
                     heroLabel = unitSlot.DisplayName;
@@ -88,8 +91,8 @@ namespace RhythmHunter.FightDemo
                 attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
                 maxMana = Mathf.Max(1, maxMana);
                 startingMana = Mathf.Clamp(startingMana, 0, maxMana);
-                currentMana = resetMana ? startingMana : Mathf.Clamp(currentMana, 0, maxMana);
-                if (resetMana)
+                currentMana = resetRuntime ? startingMana : Mathf.Clamp(currentMana, 0, maxMana);
+                if (resetRuntime)
                 {
                     skillActivationCount = 0;
                     lastAutomaticAttackGlobalBeat = -1;
@@ -213,10 +216,14 @@ namespace RhythmHunter.FightDemo
             new("Mage - Auto", false, 4, 3, "Arcane Burst", 3.5f);
 
         private readonly List<FightUnitSlot> fightScene2Enemies = new();
+        private int rosterVersion;
+        private long nextActionId;
         private int partyHp;
         private bool pendingEnemyAttack;
         private bool pendingEnemyAnimationDriven;
         private FightUnitSlot pendingEnemyAttacker;
+        private int pendingAttackRosterVersion = -1;
+        private long pendingEnemyActionId = long.MinValue;
         private long pendingAttackGlobalBeat = long.MinValue;
         private int pendingAttackBar;
         private int pendingAttackTimelineMs;
@@ -308,7 +315,7 @@ namespace RhythmHunter.FightDemo
         private void Awake()
         {
             if (UsesFrontHeroControls)
-                InitializeFrontHeroMode();
+                RebuildRosterAndResetCombat();
 
             maxPartyHp = tankSlot != null ? tankSlot.MaxHp : maxPartyHp;
             partyHp = maxPartyHp;
@@ -554,6 +561,8 @@ namespace RhythmHunter.FightDemo
 
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
         {
+            pendingEnemyActionId = ++nextActionId;
+            pendingAttackRosterVersion = rosterVersion;
             pendingEnemyAttack = true;
             pendingAttackGlobalBeat = beat.GlobalBeat;
             pendingAttackBar = beat.Bar;
@@ -574,11 +583,13 @@ namespace RhythmHunter.FightDemo
             pendingEnemyAnimationDriven = hasSequence;
             if (hasSequence)
             {
+                int attackRosterVersion = pendingAttackRosterVersion;
+                long actionId = pendingEnemyActionId;
                 bool started = attacker.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.NormalAttack,
-                    () => attacker.PlayAttackFrameWarning(true),
-                    attacker.PlayImmediateNormalAttack,
-                    ResolvePendingEnemyAttack);
+                    () => PlayEnemyAttackWarning(attackRosterVersion, actionId, attacker),
+                    () => PlayEnemyAttackEffect(attackRosterVersion, actionId, attacker),
+                    () => ResolvePendingEnemyAttack(attackRosterVersion, actionId, attacker));
                 if (started)
                     return;
 
@@ -600,12 +611,15 @@ namespace RhythmHunter.FightDemo
             if (timelineMs < pendingAttackTimelineMs + lateWindowMs + resolutionSafetyMs)
                 return;
 
-            ResolvePendingEnemyAttack();
+            ResolvePendingEnemyAttack(pendingAttackRosterVersion, pendingEnemyActionId, pendingEnemyAttacker);
         }
 
-        private void ResolvePendingEnemyAttack()
+        private void ResolvePendingEnemyAttack(
+            int expectedRosterVersion,
+            long expectedActionId,
+            FightUnitSlot expectedAttacker)
         {
-            if (!pendingEnemyAttack)
+            if (!IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, expectedAttacker))
                 return;
 
             bool blocked = guardedGlobalBeat == pendingAttackGlobalBeat;
@@ -648,6 +662,8 @@ namespace RhythmHunter.FightDemo
             pendingEnemyAttack = false;
             pendingEnemyAnimationDriven = false;
             pendingEnemyAttacker = null;
+            pendingAttackRosterVersion = -1;
+            pendingEnemyActionId = long.MinValue;
             EnemyAttackResolved?.Invoke(new EnemyAttackResult(
                 pendingAttackGlobalBeat,
                 pendingAttackBar,
@@ -668,7 +684,7 @@ namespace RhythmHunter.FightDemo
             BattleLost?.Invoke();
         }
 
-        private void InitializeFrontHeroMode()
+        private void RebuildRosterAndResetCombat()
         {
             List<FightUnitSlot> heroes = new();
             fightScene2Enemies.Clear();
@@ -696,12 +712,36 @@ namespace RhythmHunter.FightDemo
             heroes.Sort((left, right) => left.SlotIndex.CompareTo(right.SlotIndex));
             fightScene2Enemies.Sort((left, right) => right.SlotIndex.CompareTo(left.SlotIndex));
 
-            frontHero.Initialize(SlotAt(heroes, 0), true);
-            secondHero.Initialize(SlotAt(heroes, 1), true);
-            thirdHero.Initialize(SlotAt(heroes, 2), true);
+            rosterVersion++;
+            frontHero.BindUnitSlot(SlotAt(heroes, 0), true);
+            secondHero.BindUnitSlot(SlotAt(heroes, 1), true);
+            thirdHero.BindUnitSlot(SlotAt(heroes, 2), true);
             tankSlot = frontHero.UnitSlot;
             activeEnemySlot = FindFrontLivingEnemy();
             enemyAttackIntervalBeats = Mathf.Max(1, enemyAttackIntervalBeats);
+            ResetBattleStateForRoster();
+        }
+
+        private void ResetBattleStateForRoster()
+        {
+            pendingEnemyAttack = false;
+            pendingEnemyAnimationDriven = false;
+            pendingEnemyAttacker = null;
+            pendingAttackRosterVersion = -1;
+            pendingEnemyActionId = long.MinValue;
+            pendingAttackGlobalBeat = long.MinValue;
+            pendingAttackBar = 0;
+            pendingAttackTimelineMs = 0;
+            guardedGlobalBeat = long.MinValue;
+            battleEnded = false;
+            blockedAttackCount = 0;
+            receivedAttackCount = 0;
+            lastEnemyAttackGlobalBeat = -1;
+
+            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(1, maxPartyHp);
+            if (tankSlot != null)
+                tankSlot.RestoreFullHealth();
+            partyHp = maxPartyHp;
         }
 
         private void OnRosterChanged()
@@ -709,9 +749,7 @@ namespace RhythmHunter.FightDemo
             if (!UsesFrontHeroControls)
                 return;
 
-            InitializeFrontHeroMode();
-            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(1, maxPartyHp);
-            partyHp = maxPartyHp;
+            RebuildRosterAndResetCombat();
             RefreshFightScene2Labels();
             RefreshFightScene2HealthVisibility();
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
@@ -775,6 +813,80 @@ namespace RhythmHunter.FightDemo
             }
         }
 
+        private void PlayHeroAttackWarning(int expectedRosterVersion, FightUnitSlot attacker)
+        {
+            if (IsCurrentHero(expectedRosterVersion, attacker))
+                attacker.PlayAttackFrameWarning(false);
+        }
+
+        private void PlayHeroActionVisual(
+            int expectedRosterVersion,
+            FightUnitSlot attacker,
+            ActionType action)
+        {
+            if (IsCurrentHero(expectedRosterVersion, attacker))
+                PlayActionVisual(attacker, action);
+        }
+
+        private void PlayEnemyAttackWarning(
+            int expectedRosterVersion,
+            long expectedActionId,
+            FightUnitSlot attacker)
+        {
+            if (IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, attacker))
+                attacker.PlayAttackFrameWarning(true);
+        }
+
+        private void PlayEnemyAttackEffect(
+            int expectedRosterVersion,
+            long expectedActionId,
+            FightUnitSlot attacker)
+        {
+            if (IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, attacker))
+                attacker.PlayImmediateNormalAttack();
+        }
+
+        private bool IsCurrentHeroAction(
+            int expectedRosterVersion,
+            FightUnitSlot attacker,
+            FightUnitSlot target)
+        {
+            return IsCurrentHero(expectedRosterVersion, attacker) &&
+                   target != null &&
+                   target.HasCharacter &&
+                   fightScene2Enemies.Contains(target);
+        }
+
+        private bool IsCurrentHero(int expectedRosterVersion, FightUnitSlot attacker)
+        {
+            return expectedRosterVersion == rosterVersion &&
+                   attacker != null &&
+                   attacker.HasCharacter &&
+                   (frontHero.UnitSlot == attacker ||
+                    secondHero.UnitSlot == attacker ||
+                    thirdHero.UnitSlot == attacker);
+        }
+
+        private bool IsCurrentPendingEnemyAttack(
+            int expectedRosterVersion,
+            long expectedActionId,
+            FightUnitSlot expectedAttacker)
+        {
+            if (!pendingEnemyAttack ||
+                expectedRosterVersion != rosterVersion ||
+                expectedRosterVersion != pendingAttackRosterVersion ||
+                expectedActionId != pendingEnemyActionId ||
+                expectedAttacker != pendingEnemyAttacker)
+            {
+                return false;
+            }
+
+            return !UsesFrontHeroControls ||
+                   (expectedAttacker != null &&
+                    expectedAttacker.HasCharacter &&
+                    fightScene2Enemies.Contains(expectedAttacker));
+        }
+
         private void PlayAnimatedHeroAction(
             FightUnitSlot attacker,
             FightUnitSlot target,
@@ -790,20 +902,28 @@ namespace RhythmHunter.FightDemo
                 ActionType.Skill => FightCharacterCombatAnimator.CombatAnimation.Skill,
                 _ => FightCharacterCombatAnimator.CombatAnimation.LightAttack
             };
+            int actionRosterVersion = rosterVersion;
             bool animated = attacker.PlayCombatAnimation(
                 animation,
-                () => attacker.PlayAttackFrameWarning(false),
-                () => PlayActionVisual(attacker, action),
-                () => ApplyHeroDamage(target, damage));
+                () => PlayHeroAttackWarning(actionRosterVersion, attacker),
+                () => PlayHeroActionVisual(actionRosterVersion, attacker, action),
+                () => ApplyHeroDamage(actionRosterVersion, attacker, target, damage));
             if (animated)
                 return;
 
             PlayActionVisual(attacker, action);
-            ApplyHeroDamage(target, damage);
+            ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
         }
 
-        private void ApplyHeroDamage(FightUnitSlot target, int damage)
+        private void ApplyHeroDamage(
+            int expectedRosterVersion,
+            FightUnitSlot attacker,
+            FightUnitSlot target,
+            int damage)
         {
+            if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
+                return;
+
             if (HealthSystemEnabled && target != null && target.HasCharacter)
             {
                 target.TakeDamage(damage);
@@ -852,9 +972,9 @@ namespace RhythmHunter.FightDemo
         private void OnValidate()
         {
             enemyAttackIntervalBeats = Mathf.Max(1, enemyAttackIntervalBeats);
-            frontHero?.Initialize(frontHero.UnitSlot, false);
-            secondHero?.Initialize(secondHero.UnitSlot, false);
-            thirdHero?.Initialize(thirdHero.UnitSlot, false);
+            frontHero?.RefreshRuntimeValues(false);
+            secondHero?.RefreshRuntimeValues(false);
+            thirdHero?.RefreshRuntimeValues(false);
         }
 #endif
     }
