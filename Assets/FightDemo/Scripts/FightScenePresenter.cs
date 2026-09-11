@@ -41,6 +41,7 @@ namespace RhythmHunter.FightDemo
         private int missCalls;
         private int blockedAttacks;
         private int receivedAttacks;
+        private FightCombatController subscribedFight;
 
         public void Configure(
             FmodBeatClock clock,
@@ -58,6 +59,7 @@ namespace RhythmHunter.FightDemo
             Slider hpBar,
             Image flash)
         {
+            Unsubscribe();
             beatClock = clock;
             rhythmJudge = judge;
             fight = controller;
@@ -72,18 +74,26 @@ namespace RhythmHunter.FightDemo
             beatProgress = progress;
             healthBar = hpBar;
             screenFlash = flash;
+            Subscribe();
         }
 
         private void OnEnable()
         {
-            if (fight == null)
+            Subscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (!isActiveAndEnabled || fight == null)
                 return;
 
-            fight.FightBeat += OnFightBeat;
-            fight.HeroCalled += OnHeroCalled;
-            fight.EnemyAttackResolved += OnEnemyAttackResolved;
-            fight.PartyHealthChanged += OnPartyHealthChanged;
-            fight.BattleLost += OnBattleLost;
+            Unsubscribe();
+            subscribedFight = fight;
+            subscribedFight.FightBeat += OnFightBeat;
+            subscribedFight.HeroCalled += OnHeroCalled;
+            subscribedFight.EnemyAttackResolved += OnEnemyAttackResolved;
+            subscribedFight.PartyHealthChanged += OnPartyHealthChanged;
+            subscribedFight.BattleLost += OnBattleLost;
         }
 
         private void Start()
@@ -104,14 +114,20 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
-            if (fight == null)
+            Unsubscribe();
+        }
+
+        private void Unsubscribe()
+        {
+            if (subscribedFight == null)
                 return;
 
-            fight.FightBeat -= OnFightBeat;
-            fight.HeroCalled -= OnHeroCalled;
-            fight.EnemyAttackResolved -= OnEnemyAttackResolved;
-            fight.PartyHealthChanged -= OnPartyHealthChanged;
-            fight.BattleLost -= OnBattleLost;
+            subscribedFight.FightBeat -= OnFightBeat;
+            subscribedFight.HeroCalled -= OnHeroCalled;
+            subscribedFight.EnemyAttackResolved -= OnEnemyAttackResolved;
+            subscribedFight.PartyHealthChanged -= OnPartyHealthChanged;
+            subscribedFight.BattleLost -= OnBattleLost;
+            subscribedFight = null;
         }
 
         private void Update()

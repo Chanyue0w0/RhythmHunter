@@ -30,6 +30,14 @@ namespace RhythmHunter.FightDemo
         private InputAction supportAction;
         private InputAction damageAction;
         private InputAction ultimateAction;
+        private InputAction subscribedTankAction;
+        private InputAction subscribedSupportAction;
+        private InputAction subscribedDamageAction;
+        private InputAction subscribedUltimateAction;
+        private bool enabledTankAction;
+        private bool enabledSupportAction;
+        private bool enabledDamageAction;
+        private bool enabledUltimateAction;
 
         public event Action<HeroCommand> CommandStarted;
 
@@ -39,8 +47,11 @@ namespace RhythmHunter.FightDemo
 
         public void Configure(InputActionAsset controls)
         {
+            Unsubscribe();
             fightControls = controls;
             CacheActions();
+            if (isActiveAndEnabled)
+                Subscribe();
         }
 
         private void Awake()
@@ -51,16 +62,21 @@ namespace RhythmHunter.FightDemo
         private void OnEnable()
         {
             CacheActions();
-            Subscribe(true);
+            Subscribe();
         }
 
         private void OnDisable()
         {
-            Subscribe(false);
+            Unsubscribe();
         }
 
         private void CacheActions()
         {
+            tankAction = null;
+            supportAction = null;
+            damageAction = null;
+            ultimateAction = null;
+
             if (fightControls == null)
                 return;
 
@@ -80,33 +96,62 @@ namespace RhythmHunter.FightDemo
                 Debug.LogError("[FightInputRouter] FightControl action names do not match Beats and Bard.", this);
         }
 
-        private void Subscribe(bool subscribe)
+        private void Subscribe()
         {
-            if (!IsConfigured)
+            Unsubscribe();
+            subscribedTankAction = tankAction;
+            subscribedSupportAction = supportAction;
+            subscribedDamageAction = damageAction;
+            subscribedUltimateAction = ultimateAction;
+            SubscribeAction(subscribedTankAction, OnTank, ref enabledTankAction);
+            SubscribeAction(subscribedSupportAction, OnSupport, ref enabledSupportAction);
+            SubscribeAction(subscribedDamageAction, OnDamage, ref enabledDamageAction);
+            SubscribeAction(subscribedUltimateAction, OnUltimate, ref enabledUltimateAction);
+        }
+
+        private void Unsubscribe()
+        {
+            UnsubscribeAction(subscribedTankAction, OnTank, ref enabledTankAction);
+            UnsubscribeAction(subscribedSupportAction, OnSupport, ref enabledSupportAction);
+            UnsubscribeAction(subscribedDamageAction, OnDamage, ref enabledDamageAction);
+            UnsubscribeAction(subscribedUltimateAction, OnUltimate, ref enabledUltimateAction);
+            subscribedTankAction = null;
+            subscribedSupportAction = null;
+            subscribedDamageAction = null;
+            subscribedUltimateAction = null;
+        }
+
+        private static void SubscribeAction(
+            InputAction action,
+            Action<InputAction.CallbackContext> callback,
+            ref bool enabledByRouter)
+        {
+            enabledByRouter = false;
+            if (action == null)
                 return;
 
-            if (subscribe)
+            action.started -= callback;
+            action.started += callback;
+            if (!action.enabled)
             {
-                tankAction.started += OnTank;
-                supportAction.started += OnSupport;
-                damageAction.started += OnDamage;
-                ultimateAction.started += OnUltimate;
-                tankAction.Enable();
-                supportAction.Enable();
-                damageAction.Enable();
-                ultimateAction.Enable();
+                action.Enable();
+                enabledByRouter = true;
             }
-            else
+        }
+
+        private static void UnsubscribeAction(
+            InputAction action,
+            Action<InputAction.CallbackContext> callback,
+            ref bool enabledByRouter)
+        {
+            if (action != null)
             {
-                tankAction.started -= OnTank;
-                supportAction.started -= OnSupport;
-                damageAction.started -= OnDamage;
-                ultimateAction.started -= OnUltimate;
-                tankAction.Disable();
-                supportAction.Disable();
-                damageAction.Disable();
-                ultimateAction.Disable();
+                action.started -= callback;
+                if (enabledByRouter && action.enabled)
+                    action.Disable();
             }
+
+            enabledByRouter = false;
         }
 
         private void OnTank(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Tank);

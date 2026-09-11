@@ -16,6 +16,7 @@ namespace RhythmHunter.FightDemo
 
         private float shieldTimer;
         private float telegraphTimer;
+        private FightCombatController subscribedFight;
 
         public FightUnitSlot[] EnemySlots => enemySlots;
         public FightUnitSlot[] HeroSlots => heroSlots;
@@ -27,21 +28,30 @@ namespace RhythmHunter.FightDemo
             SpriteRenderer shield,
             SpriteRenderer telegraph)
         {
+            Unsubscribe();
             fight = controller;
             enemySlots = enemies;
             heroSlots = heroes;
             tankShield = shield;
             enemyTelegraph = telegraph;
+            Subscribe();
         }
 
         private void OnEnable()
         {
-            if (fight == null)
+            Subscribe();
+        }
+
+        private void Subscribe()
+        {
+            if (!isActiveAndEnabled || fight == null)
                 return;
 
-            fight.FightBeat += OnFightBeat;
-            fight.HeroCalled += OnHeroCalled;
-            fight.EnemyAttackResolved += OnEnemyAttackResolved;
+            Unsubscribe();
+            subscribedFight = fight;
+            subscribedFight.FightBeat += OnFightBeat;
+            subscribedFight.HeroCalled += OnHeroCalled;
+            subscribedFight.EnemyAttackResolved += OnEnemyAttackResolved;
         }
 
         private void Start()
@@ -52,12 +62,18 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
-            if (fight == null)
+            Unsubscribe();
+        }
+
+        private void Unsubscribe()
+        {
+            if (subscribedFight == null)
                 return;
 
-            fight.FightBeat -= OnFightBeat;
-            fight.HeroCalled -= OnHeroCalled;
-            fight.EnemyAttackResolved -= OnEnemyAttackResolved;
+            subscribedFight.FightBeat -= OnFightBeat;
+            subscribedFight.HeroCalled -= OnHeroCalled;
+            subscribedFight.EnemyAttackResolved -= OnEnemyAttackResolved;
+            subscribedFight = null;
         }
 
         private void Update()

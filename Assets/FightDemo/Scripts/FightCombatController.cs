@@ -216,6 +216,9 @@ namespace RhythmHunter.FightDemo
             new("Mage - Auto", false, 4, 3, "Arcane Burst", 3.5f);
 
         private readonly List<FightUnitSlot> fightScene2Enemies = new();
+        private FmodBeatClock subscribedBeatClock;
+        private FightInputRouter subscribedInputRouter;
+        private FightRosterManager subscribedRosterManager;
         private int rosterVersion;
         private long nextActionId;
         private int partyHp;
@@ -269,6 +272,7 @@ namespace RhythmHunter.FightDemo
             int partyHealth = 5,
             int attackDamage = 1)
         {
+            UnsubscribeDependencies();
             beatClock = clock;
             rhythmJudge = judge;
             inputRouter = router;
@@ -279,11 +283,14 @@ namespace RhythmHunter.FightDemo
                 ? Mathf.Max(1, activeEnemySlot.AttackPower)
                 : Mathf.Max(1, attackDamage);
             partyHp = maxPartyHp;
+            SubscribeDependencies();
         }
 
         public void ConfigureRoster(FightRosterManager manager)
         {
+            UnsubscribeDependencies();
             rosterManager = manager;
+            SubscribeDependencies();
         }
 
         public int GetEnemyBeatsUntilAttack(long globalBeat)
@@ -325,14 +332,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnEnable()
         {
-            if (beatClock != null)
-                beatClock.Beat += OnBeat;
-
-            if (inputRouter != null)
-                inputRouter.CommandStarted += SubmitHeroCommand;
-
-            if (rosterManager != null)
-                rosterManager.RosterChanged += OnRosterChanged;
+            SubscribeDependencies();
         }
 
         private void Start()
@@ -353,14 +353,37 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
-            if (beatClock != null)
-                beatClock.Beat -= OnBeat;
+            UnsubscribeDependencies();
+        }
 
-            if (inputRouter != null)
-                inputRouter.CommandStarted -= SubmitHeroCommand;
+        private void SubscribeDependencies()
+        {
+            if (!isActiveAndEnabled)
+                return;
 
-            if (rosterManager != null)
-                rosterManager.RosterChanged -= OnRosterChanged;
+            UnsubscribeDependencies();
+            subscribedBeatClock = beatClock;
+            subscribedInputRouter = inputRouter;
+            subscribedRosterManager = rosterManager;
+            if (subscribedBeatClock != null)
+                subscribedBeatClock.Beat += OnBeat;
+            if (subscribedInputRouter != null)
+                subscribedInputRouter.CommandStarted += SubmitHeroCommand;
+            if (subscribedRosterManager != null)
+                subscribedRosterManager.RosterChanged += OnRosterChanged;
+        }
+
+        private void UnsubscribeDependencies()
+        {
+            if (subscribedBeatClock != null)
+                subscribedBeatClock.Beat -= OnBeat;
+            if (subscribedInputRouter != null)
+                subscribedInputRouter.CommandStarted -= SubmitHeroCommand;
+            if (subscribedRosterManager != null)
+                subscribedRosterManager.RosterChanged -= OnRosterChanged;
+            subscribedBeatClock = null;
+            subscribedInputRouter = null;
+            subscribedRosterManager = null;
         }
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
