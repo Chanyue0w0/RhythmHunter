@@ -3775,7 +3775,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Press X / Q on beat 4 to guard
+  m_Text: X/Y/B (Q/W/E) control heroes 1/2/3 • Beat 4 activates skills
 --- !u!1 &669889341
 GameObject:
   m_ObjectHideFlags: 0
@@ -5148,7 +5148,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961970722}
-  m_Text: "DAMAGE  \u2022  B / E"
+  m_Text: "BACK  \u2022  B / E  \u2022  BEAT 4 DAMAGE"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -5425,7 +5425,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: CALLS  PERFECT 00  MISS 00     DEFENSE  BLOCK 00  HIT 00
+  m_Text: PARTY INPUT  PERFECT 00  MISS 00     ENEMY HITS 00
 --- !u!1 &1119591241
 GameObject:
   m_ObjectHideFlags: 0
@@ -7158,7 +7158,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1462401100}
-  m_Text: "TANK  \u2022  X / Q"
+  m_Text: "FRONT  \u2022  X / Q  \u2022  BEAT 4 GUARD"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -7570,7 +7570,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: TANK  X / Q     SUPPORT  Y / W     DAMAGE  B / E     ULTIMATE  A / R  (REWORKING)
+  m_Text: HERO 1  X / Q     HERO 2  Y / W     HERO 3  B / E     BEAT 4 = SKILL
 --- !u!222 &1562105383
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7724,7 +7724,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1567002021}
-  m_Text: "SUPPORT  \u2022  Y / W"
+  m_Text: "MIDDLE  \u2022  Y / W  \u2022  BEAT 4 HEAL"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -9503,7 +9503,7 @@ MonoBehaviour:
   enemyAttackDamage: 18
   resolutionSafetyMs: 12
   enableFrontHeroModeInFightScene2: 1
-  enableHealthSystemInFightScene2: 0
+  enableHealthSystemInFightScene2: 1
   enemyAttackIntervalBeats: 4
   frontHero:
     heroLabel: PALADIN

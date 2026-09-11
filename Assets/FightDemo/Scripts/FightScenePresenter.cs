@@ -108,7 +108,7 @@ namespace RhythmHunter.FightDemo
                 "GET READY",
                 Cyan,
                 fight != null && fight.UsesFrontHeroControls
-                    ? "Q/X Light  •  W/Y Heavy  •  E/B Guard"
+                    ? "X/Y/B = Heroes 1/2/3  •  Keyboard Q/W/E  •  Beat 4 = Skill"
                     : "Enemy attacks land on every fourth beat.",
                 2f);
             UpdateStatistics();
@@ -155,8 +155,8 @@ namespace RhythmHunter.FightDemo
                 if (warningText != null)
                 {
                     warningText.text = enemyAttackBeat
-                        ? $"ENEMY NORMAL ATTACK  •  E/B TO GUARD  •  MANA {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}"
-                        : $"ENEMY ATTACK IN {beatsUntilEnemyAttack} BEAT{(beatsUntilEnemyAttack == 1 ? string.Empty : "S")}  •  " +
+                        ? $"HEAVY BEAT  •  HERO SKILLS  •  ENEMY ATTACK  •  MANA {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}"
+                        : $"NORMAL ABILITIES  •  ENEMY ATTACK IN {beatsUntilEnemyAttack} BEAT{(beatsUntilEnemyAttack == 1 ? string.Empty : "S")}  •  " +
                           $"MANA {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}";
                     warningText.color = enemyAttackBeat ? Gold : Color.white;
                 }
@@ -192,11 +192,7 @@ namespace RhythmHunter.FightDemo
                 if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
                 {
                     perfectCalls++;
-                    string title = call.Command == FightInputRouter.HeroCommand.Damage
-                        ? "GUARD READY"
-                        : call.SkillActivated
-                            ? "SKILL"
-                            : call.IsHeavyBeat ? "HEAVY ATTACK" : "LIGHT ATTACK";
+                    string title = call.SkillActivated ? "SKILL" : "NORMAL ABILITY";
                     SetResult(title, call.SkillActivated ? Gold : Green, call.Message, 1.2f);
                 }
                 else
@@ -262,7 +258,7 @@ namespace RhythmHunter.FightDemo
                 receivedAttacks++;
                 flashTimer = 0.55f;
                 string guardHint = fight != null && fight.UsesFrontHeroControls
-                    ? "press E / B on the attack beat"
+                    ? "beat 4 activates hero skills"
                     : "press X / Q on beat 4";
                 SetResult(
                     "PARTY HIT",
@@ -367,9 +363,10 @@ namespace RhythmHunter.FightDemo
             if (statisticsText == null)
                 return;
 
-            statisticsText.text =
-                $"CALLS  PERFECT {perfectCalls:00}  MISS {missCalls:00}     " +
-                $"DEFENSE  BLOCK {blockedAttacks:00}  HIT {receivedAttacks:00}";
+            statisticsText.text = fight != null && fight.UsesFrontHeroControls
+                ? $"PARTY INPUT  PERFECT {perfectCalls:00}  MISS {missCalls:00}     ENEMY HITS {receivedAttacks:00}"
+                : $"CALLS  PERFECT {perfectCalls:00}  MISS {missCalls:00}     " +
+                  $"DEFENSE  BLOCK {blockedAttacks:00}  HIT {receivedAttacks:00}";
         }
 
         private void UpdateBeatNodes(int beat)

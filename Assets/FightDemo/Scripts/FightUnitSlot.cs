@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RhythmHunter.FightDemo
 {
@@ -33,7 +35,9 @@ namespace RhythmHunter.FightDemo
         [Header("Combat Data")]
         [SerializeField, Min(1)] private int maxHp = 100;
         [SerializeField, Min(0)] private int attackPower = 10;
-        [SerializeField, Min(0)] private int skillDamage = 30;
+        [FormerlySerializedAs("skillDamage")]
+        [SerializeField, Min(0)] private int skillPower = 30;
+        [SerializeField] private FightCharacterDefinition.SkillBehavior skillBehavior;
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;
 
@@ -63,6 +67,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private TextMesh hpLabel;
         [SerializeField] private TextMesh roleLabel;
 
+        [Header("Input Feedback")]
+        [SerializeField, Min(0f)] private float onBeatJumpHeight = 0.22f;
+        [SerializeField, Min(0.01f)] private float onBeatJumpDuration = 0.18f;
+        [SerializeField, Min(0f)] private float missShakeStrength = 0.12f;
+        [SerializeField, Min(0.01f)] private float missShakeDuration = 0.16f;
+        [SerializeField, Min(1f)] private float missShakeFrequency = 60f;
+
         private GameObject actorInstance;
         private FightCharacterDefinition characterDefinition;
         private FightCharacterCombatAnimator combatAnimator;
@@ -73,6 +84,11 @@ namespace RhythmHunter.FightDemo
         private int heavyAttackPlayCount;
         private int skillAttackPlayCount;
         private int guardPlayCount;
+        private int onBeatFeedbackPlayCount;
+        private int missFeedbackPlayCount;
+        private Coroutine inputFeedbackRoutine;
+        private Transform inputFeedbackTarget;
+        private Vector3 inputFeedbackOrigin;
 
         public event Action<FightUnitSlot, int, int> HealthChanged;
 
@@ -84,7 +100,9 @@ namespace RhythmHunter.FightDemo
         public int MaxHp => maxHp;
         public int CurrentHp => currentHp;
         public int AttackPower => attackPower;
-        public int SkillDamage => skillDamage;
+        public int SkillPower => skillPower;
+        public int SkillDamage => skillPower;
+        public FightCharacterDefinition.SkillBehavior SkillBehavior => skillBehavior;
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
         public int CurrentMana => currentMana;
@@ -103,6 +121,8 @@ namespace RhythmHunter.FightDemo
         public int HeavyAttackPlayCount => heavyAttackPlayCount;
         public int SkillAttackPlayCount => skillAttackPlayCount;
         public int GuardPlayCount => guardPlayCount;
+        public int OnBeatFeedbackPlayCount => onBeatFeedbackPlayCount;
+        public int MissFeedbackPlayCount => missFeedbackPlayCount;
 
         private FightUnitEffects EffectPlayer
         {
@@ -139,7 +159,7 @@ namespace RhythmHunter.FightDemo
             slotIndex = Mathf.Max(0, index);
             maxHp = Mathf.Max(1, hp);
             attackPower = Mathf.Max(0, power);
-            skillDamage = Mathf.Max(0, power * 3);
+            skillPower = Mathf.Max(0, power * 3);
             attackIntervalBeats = 4;
             maxMana = 4;
             accentColor = color;
@@ -208,6 +228,11 @@ namespace RhythmHunter.FightDemo
             RefreshHealthVisuals();
         }
 
+        private void OnDisable()
+        {
+            ResetInputFeedback();
+        }
+
         public void RestoreFullHealth()
         {
             currentHp = maxHp;
@@ -219,6 +244,15 @@ namespace RhythmHunter.FightDemo
         {
             int applied = Mathf.Clamp(amount, 0, currentHp);
             currentHp -= applied;
+            RefreshHealthVisuals();
+            HealthChanged?.Invoke(this, currentHp, maxHp);
+            return applied;
+        }
+
+        public int Heal(int amount)
+        {
+            int applied = Mathf.Clamp(Mathf.Max(0, amount), 0, maxHp - currentHp);
+            currentHp += applied;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;
@@ -327,6 +361,72 @@ namespace RhythmHunter.FightDemo
             guardPlayCount++;
             SpawnGuardLayer(new Color(0.2f, 1f, 0.58f, 0.72f), 0.75f, 0.7f, 1.8f, 220f, 0f);
             SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
+        }
+
+        public void PlayInputFeedback(bool onBeat)
+        {
+            if (onBeat)
+                onBeatFeedbackPlayCount++;
+            else
+                missFeedbackPlayCount++;
+            ResetInputFeedback();
+            inputFeedbackTarget = actorInstance != null ? actorInstance.transform : actorRoot;
+            if (inputFeedbackTarget == null)
+                return;
+
+            inputFeedbackOrigin = inputFeedbackTarget.localPosition;
+            inputFeedbackRoutine = StartCoroutine(onBeat ? PlayOnBeatJump() : PlayMissShake());
+        }
+
+        private IEnumerator PlayOnBeatJump()
+        {
+            float elapsed = 0f;
+            float duration = Mathf.Max(0.01f, onBeatJumpDuration);
+            while (elapsed < duration && inputFeedbackTarget != null)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = Mathf.Clamp01(elapsed / duration);
+                float height = Mathf.Sin(progress * Mathf.PI) * onBeatJumpHeight;
+                inputFeedbackTarget.localPosition = inputFeedbackOrigin + Vector3.up * height;
+                yield return null;
+            }
+
+            CompleteInputFeedback();
+        }
+
+        private IEnumerator PlayMissShake()
+        {
+            float elapsed = 0f;
+            float duration = Mathf.Max(0.01f, missShakeDuration);
+            while (elapsed < duration && inputFeedbackTarget != null)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = Mathf.Clamp01(elapsed / duration);
+                float damping = 1f - progress;
+                float offset = Mathf.Sin(elapsed * missShakeFrequency) * missShakeStrength * damping;
+                inputFeedbackTarget.localPosition = inputFeedbackOrigin + Vector3.right * offset;
+                yield return null;
+            }
+
+            CompleteInputFeedback();
+        }
+
+        private void CompleteInputFeedback()
+        {
+            if (inputFeedbackTarget != null)
+                inputFeedbackTarget.localPosition = inputFeedbackOrigin;
+            inputFeedbackRoutine = null;
+            inputFeedbackTarget = null;
+        }
+
+        private void ResetInputFeedback()
+        {
+            if (inputFeedbackRoutine != null)
+                StopCoroutine(inputFeedbackRoutine);
+            if (inputFeedbackTarget != null)
+                inputFeedbackTarget.localPosition = inputFeedbackOrigin;
+            inputFeedbackRoutine = null;
+            inputFeedbackTarget = null;
         }
 
         public void SetHealthDisplayVisible(bool visible)
@@ -447,7 +547,8 @@ namespace RhythmHunter.FightDemo
             role = definition.Role;
             maxHp = definition.MaxHp;
             attackPower = definition.AttackPower;
-            skillDamage = definition.SkillDamage;
+            skillPower = definition.SkillPower;
+            skillBehavior = definition.SkillType;
             attackIntervalBeats = definition.AttackIntervalBeats;
             maxMana = definition.MaxMana;
             currentMana = Mathf.Clamp(currentMana, 0, maxMana);
@@ -470,6 +571,7 @@ namespace RhythmHunter.FightDemo
 
         private void RemoveSpawnedActor()
         {
+            ResetInputFeedback();
             if (actorInstance == null)
                 return;
 
@@ -492,13 +594,26 @@ namespace RhythmHunter.FightDemo
             }
 
             if (hpLabel != null)
-                hpLabel.text = $"HP {currentHp}/{maxHp}  ATK {attackPower}  SKILL {skillDamage}";
+            {
+                string skillSummary = skillBehavior switch
+                {
+                    FightCharacterDefinition.SkillBehavior.Guard => "GUARD",
+                    FightCharacterDefinition.SkillBehavior.HealParty => $"HEAL {skillPower}",
+                    _ => $"DMG {skillPower}"
+                };
+                hpLabel.text = $"HP {currentHp}/{maxHp}  ATK {attackPower}  SKILL {skillSummary}";
+            }
         }
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
             CacheLegacyPresentationReferences();
+            onBeatJumpHeight = Mathf.Max(0f, onBeatJumpHeight);
+            onBeatJumpDuration = Mathf.Max(0.01f, onBeatJumpDuration);
+            missShakeStrength = Mathf.Max(0f, missShakeStrength);
+            missShakeDuration = Mathf.Max(0.01f, missShakeDuration);
+            missShakeFrequency = Mathf.Max(1f, missShakeFrequency);
         }
 #endif
     }

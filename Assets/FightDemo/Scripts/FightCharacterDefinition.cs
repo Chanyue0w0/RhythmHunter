@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RhythmHunter.FightDemo
 {
@@ -9,6 +10,13 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightCharacterDefinition : MonoBehaviour
     {
+        public enum SkillBehavior
+        {
+            Damage,
+            Guard,
+            HealParty
+        }
+
         [Header("Identity")]
         [SerializeField] private string characterId = "character";
         [SerializeField] private string displayName = "CHARACTER";
@@ -19,10 +27,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int maxHp = 100;
         [SerializeField, Min(0)] private int attackPower = 10;
         [SerializeField] private string skillName = "Beat Skill";
-        [SerializeField, Min(0)] private int skillDamage = 30;
+        [Tooltip("Gameplay behavior activated when this character is called on beat 4.")]
+        [SerializeField] private SkillBehavior skillBehavior;
+        [FormerlySerializedAs("skillDamage")]
+        [SerializeField, Min(0)] private int skillPower = 30;
         [Tooltip("Optional replaceable VFX prefab spawned when this character uses its skill.")]
         [SerializeField] private GameObject skillEffectPrefab;
-        [Tooltip("Number of musical beats between automatic attacks.")]
+        [Tooltip("AI attack interval. Player-controlled party members ignore this value.")]
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;
 
@@ -36,7 +47,9 @@ namespace RhythmHunter.FightDemo
         public int MaxHp => maxHp;
         public int AttackPower => attackPower;
         public string SkillName => skillName;
-        public int SkillDamage => skillDamage;
+        public SkillBehavior SkillType => skillBehavior;
+        public int SkillPower => skillPower;
+        public int SkillDamage => skillPower;
         public GameObject SkillEffectPrefab => skillEffectPrefab;
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
@@ -50,6 +63,7 @@ namespace RhythmHunter.FightDemo
             int hp,
             int attack,
             string abilityName,
+            SkillBehavior abilityBehavior,
             int abilityDamage,
             GameObject abilityEffect,
             int intervalBeats,
@@ -63,7 +77,8 @@ namespace RhythmHunter.FightDemo
             maxHp = Mathf.Max(1, hp);
             attackPower = Mathf.Max(0, attack);
             skillName = abilityName;
-            skillDamage = Mathf.Max(0, abilityDamage);
+            skillBehavior = abilityBehavior;
+            skillPower = Mathf.Max(0, abilityDamage);
             skillEffectPrefab = abilityEffect;
             attackIntervalBeats = Mathf.Max(1, intervalBeats);
             maxMana = Mathf.Max(1, manaCapacity);
@@ -75,7 +90,7 @@ namespace RhythmHunter.FightDemo
         {
             maxHp = Mathf.Max(1, maxHp);
             attackPower = Mathf.Max(0, attackPower);
-            skillDamage = Mathf.Max(0, skillDamage);
+            skillPower = Mathf.Max(0, skillPower);
             attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
             maxMana = Mathf.Max(1, maxMana);
         }

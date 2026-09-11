@@ -84,9 +84,9 @@ namespace RhythmHunter.FightDemo
             if (fight == null || !fight.UsesFrontHeroControls)
                 return;
 
-            fight.FrontHero.UnitSlot?.SetRoleLabel("PLAYER  •  Q/X LIGHT  W/Y HEAVY  E/B GUARD");
-            fight.SecondHero.UnitSlot?.SetRoleLabel($"AUTO  •  EVERY {fight.SecondHero.AttackIntervalBeats} BEATS");
-            fight.ThirdHero.UnitSlot?.SetRoleLabel($"AUTO  •  EVERY {fight.ThirdHero.AttackIntervalBeats} BEATS");
+            fight.FrontHero.UnitSlot?.SetRoleLabel("FRONT  •  X / Q  •  BEAT 4 GUARD");
+            fight.SecondHero.UnitSlot?.SetRoleLabel("MIDDLE  •  Y / W  •  BEAT 4 HEAL");
+            fight.ThirdHero.UnitSlot?.SetRoleLabel("BACK  •  B / E  •  BEAT 4 DAMAGE");
             SetHealthVisibility(heroSlots, fight.HealthSystemEnabled);
             SetHealthVisibility(enemySlots, fight.HealthSystemEnabled);
         }
@@ -125,8 +125,6 @@ namespace RhythmHunter.FightDemo
                     fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat),
                     fight.EnemyAttackIntervalBeats,
                     true);
-                PlayHeroCountdown(fight.SecondHero, beat.GlobalBeat);
-                PlayHeroCountdown(fight.ThirdHero, beat.GlobalBeat);
             }
             telegraphTimer = attackBeat ? 0.45f : 0.16f;
         }
@@ -135,12 +133,8 @@ namespace RhythmHunter.FightDemo
         {
             if (fight != null && fight.UsesFrontHeroControls)
             {
-                if (call.Command == FightInputRouter.HeroCommand.Damage &&
-                    call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
-                {
-                    shieldTimer = 0.55f;
-                }
-
+                if (call.Command == FightInputRouter.HeroCommand.Tank && call.SkillActivated)
+                    shieldTimer = 0.75f;
                 return;
             }
 
@@ -162,17 +156,6 @@ namespace RhythmHunter.FightDemo
                 attacker?.PlayNormalAttack();
             if (attack.Blocked)
                 shieldTimer = 0.85f;
-        }
-
-        private void PlayHeroCountdown(FightCombatController.HeroBeatSettings hero, long globalBeat)
-        {
-            if (fight == null || hero?.UnitSlot == null || hero.PlayerControlled)
-                return;
-
-            hero.UnitSlot.PlayScheduledAttackCountdown(
-                fight.GetBeatsUntilScheduledAttack(globalBeat, hero.AttackIntervalBeats),
-                hero.AttackIntervalBeats,
-                false);
         }
 
         private static FightUnitSlot SlotAt(FightUnitSlot[] slots, int index)

@@ -7,8 +7,8 @@ using UnityEngine;
 namespace RhythmHunter.FightDemoEditor
 {
     /// <summary>
-    /// Batch-mode smoke test for FightScene2 front-hero input, ally auto-attacks,
-    /// mana gain, skill configuration, beat guard timing, prefab data, and nullable rosters.
+    /// Batch-mode smoke test for FightScene2 three-hero input, fourth-beat skills,
+    /// enemy scheduling, prefab data, and nullable rosters.
     /// </summary>
     [InitializeOnLoad]
     public static class FightScene2PlayModeValidation
@@ -17,9 +17,15 @@ namespace RhythmHunter.FightDemoEditor
         private const string Prefix = "FightScene2.Validation.";
         private const string ActiveKey = Prefix + "Active";
         private const string StartedAtKey = Prefix + "StartedAt";
-        private const string LightAttemptedKey = Prefix + "LightAttempted";
-        private const string HeavyAttemptedKey = Prefix + "HeavyAttempted";
-        private const string GuardAttemptedKey = Prefix + "GuardAttempted";
+        private const string Hero1AttemptedKey = Prefix + "Hero1Attempted";
+        private const string Hero2AttemptedKey = Prefix + "Hero2Attempted";
+        private const string Hero3AttemptedKey = Prefix + "Hero3Attempted";
+        private const string PaladinSkillAttemptedKey = Prefix + "PaladinSkillAttempted";
+        private const string BardSkillAttemptedKey = Prefix + "BardSkillAttempted";
+        private const string MageSkillAttemptedKey = Prefix + "MageSkillAttempted";
+        private const string MissAttemptedKey = Prefix + "MissAttempted";
+        private const string LastInputBeatKey = Prefix + "LastInputBeat";
+        private const string BardHpBeforeHealKey = Prefix + "BardHpBeforeHeal";
         private const string InitialEnemyHpKey = Prefix + "InitialEnemyHp";
         private const string PassedKey = Prefix + "Passed";
         private const string FailureKey = Prefix + "Failure";
@@ -69,9 +75,15 @@ namespace RhythmHunter.FightDemoEditor
 
             SessionState.SetBool(ActiveKey, true);
             SessionState.SetFloat(StartedAtKey, 0f);
-            SessionState.SetBool(LightAttemptedKey, false);
-            SessionState.SetBool(HeavyAttemptedKey, false);
-            SessionState.SetBool(GuardAttemptedKey, false);
+            SessionState.SetBool(Hero1AttemptedKey, false);
+            SessionState.SetBool(Hero2AttemptedKey, false);
+            SessionState.SetBool(Hero3AttemptedKey, false);
+            SessionState.SetBool(PaladinSkillAttemptedKey, false);
+            SessionState.SetBool(BardSkillAttemptedKey, false);
+            SessionState.SetBool(MageSkillAttemptedKey, false);
+            SessionState.SetBool(MissAttemptedKey, false);
+            SessionState.SetInt(LastInputBeatKey, -1);
+            SessionState.SetInt(BardHpBeforeHealKey, 0);
             SessionState.SetInt(InitialEnemyHpKey, 0);
             SessionState.SetBool(PassedKey, false);
             SessionState.SetString(FailureKey, "FightScene2 validation timed out.");
@@ -142,10 +154,16 @@ namespace RhythmHunter.FightDemoEditor
                 return;
             }
 
+            if (clock != null && clock.ReceivedBeatCount > 0 && clock.LatestBeat.TimeSignatureUpper != 4)
+            {
+                FailAndExit($"FightScene2 requires a four-beat measure, received {clock.LatestBeat.TimeSignatureUpper}.");
+                return;
+            }
+
             if (roster != null &&
                 (roster.ActiveHeroes.Count < 1 || roster.ActiveHeroes.Count > 3 ||
                  roster.ActiveEnemies.Count < 1 || roster.ActiveEnemies.Count > 3 ||
-                 !HasValidPrefabData(roster)))
+                 !HasValidPrefabData(roster) || !HasExpectedHeroSkills(roster)))
             {
                 FailAndExit(
                     $"Default prefab roster is invalid. Heroes={roster.ActiveHeroes.Count}, Enemies={roster.ActiveEnemies.Count}.");
@@ -156,79 +174,149 @@ namespace RhythmHunter.FightDemoEditor
                 SessionState.SetInt(InitialEnemyHpKey, TotalEnemyHp());
 
             if (clock != null && fight != null && clock.ReceivedBeatCount >= 1 &&
-                !SessionState.GetBool(LightAttemptedKey, false) &&
-                !fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
-                clock.TryGetBeatPhase(out float lightPhase) && lightPhase < 0.08f)
+                !SessionState.GetBool(Hero1AttemptedKey, false) &&
+                clock.LatestBeat.Beat != 4 &&
+                clock.TryGetBeatPhase(out float hero1Phase) && hero1Phase < 0.08f)
             {
-                SessionState.SetBool(LightAttemptedKey, true);
+                SessionState.SetBool(Hero1AttemptedKey, true);
+                SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
                 fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Tank);
             }
 
-            if (clock != null && fight != null && clock.ReceivedBeatCount >= 2 &&
-                SessionState.GetBool(LightAttemptedKey, false) &&
-                !SessionState.GetBool(HeavyAttemptedKey, false) &&
-                !fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
-                clock.TryGetBeatPhase(out float heavyPhase) && heavyPhase < 0.08f)
+            if (clock != null && fight != null &&
+                SessionState.GetBool(Hero1AttemptedKey, false) &&
+                !SessionState.GetBool(Hero2AttemptedKey, false) &&
+                clock.LatestBeat.GlobalBeat > SessionState.GetInt(LastInputBeatKey, -1) &&
+                clock.LatestBeat.Beat != 4 &&
+                clock.TryGetBeatPhase(out float hero2Phase) && hero2Phase < 0.08f)
             {
                 fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Support);
-                // Frame-driven animations intentionally raise their visual event later.
-                // Record the input here and verify the resulting counter in the final checks.
-                SessionState.SetBool(HeavyAttemptedKey, true);
-            }
-
-            if (clock != null && fight != null && clock.ReceivedBeatCount >= 4 &&
-                !SessionState.GetBool(GuardAttemptedKey, false) &&
-                fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
-                clock.TryGetBeatPhase(out float guardPhase) && guardPhase < 0.12f)
-            {
-                SessionState.SetBool(GuardAttemptedKey, true);
-                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
+                SessionState.SetBool(Hero2AttemptedKey, true);
+                SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
             }
 
             if (clock != null && fight != null &&
-                SessionState.GetBool(LightAttemptedKey, false) &&
-                SessionState.GetBool(HeavyAttemptedKey, false) &&
-                SessionState.GetBool(GuardAttemptedKey, false) && fight.BlockedAttackCount >= 1 &&
+                SessionState.GetBool(Hero2AttemptedKey, false) &&
+                !SessionState.GetBool(Hero3AttemptedKey, false) &&
+                clock.LatestBeat.GlobalBeat > SessionState.GetInt(LastInputBeatKey, -1) &&
+                clock.LatestBeat.Beat != 4 &&
+                clock.TryGetBeatPhase(out float hero3Phase) && hero3Phase < 0.08f)
+            {
+                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
+                SessionState.SetBool(Hero3AttemptedKey, true);
+                SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
+            }
+
+            if (clock != null && fight != null &&
+                SessionState.GetBool(Hero3AttemptedKey, false) &&
+                !SessionState.GetBool(PaladinSkillAttemptedKey, false) &&
+                clock.LatestBeat.GlobalBeat > SessionState.GetInt(LastInputBeatKey, -1) &&
+                clock.LatestBeat.Beat == 4 &&
+                clock.TryGetBeatPhase(out float skillPhase) && skillPhase < 0.12f)
+            {
+                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Tank);
+                SessionState.SetBool(PaladinSkillAttemptedKey, true);
+                SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
+            }
+
+            if (clock != null && fight != null &&
+                SessionState.GetBool(PaladinSkillAttemptedKey, false) &&
+                !SessionState.GetBool(BardSkillAttemptedKey, false) &&
+                clock.LatestBeat.GlobalBeat > SessionState.GetInt(LastInputBeatKey, -1) &&
+                clock.LatestBeat.Beat == 4 &&
+                clock.TryGetBeatPhase(out float bardSkillPhase) && bardSkillPhase < 0.12f)
+            {
+                FightUnitSlot bard = fight.SecondHero.UnitSlot;
+                bard.TakeDamage(10);
+                SessionState.SetInt(BardHpBeforeHealKey, bard.CurrentHp);
+                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Support);
+                SessionState.SetBool(BardSkillAttemptedKey, true);
+                SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
+            }
+
+            if (clock != null && fight != null &&
+                SessionState.GetBool(BardSkillAttemptedKey, false) &&
+                !SessionState.GetBool(MageSkillAttemptedKey, false) &&
+                clock.LatestBeat.GlobalBeat > SessionState.GetInt(LastInputBeatKey, -1) &&
+                clock.LatestBeat.Beat == 4 &&
+                clock.TryGetBeatPhase(out float mageSkillPhase) && mageSkillPhase < 0.12f)
+            {
+                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
+                SessionState.SetBool(MageSkillAttemptedKey, true);
+                SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
+            }
+
+            if (clock != null && fight != null &&
+                SessionState.GetBool(MageSkillAttemptedKey, false) &&
+                !SessionState.GetBool(MissAttemptedKey, false) &&
+                clock.TryGetBeatPhase(out float missPhase) && missPhase > 0.4f && missPhase < 0.6f)
+            {
+                fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
+                SessionState.SetBool(MissAttemptedKey, true);
+            }
+
+            if (clock != null && fight != null &&
+                SessionState.GetBool(Hero1AttemptedKey, false) &&
+                SessionState.GetBool(Hero2AttemptedKey, false) &&
+                SessionState.GetBool(Hero3AttemptedKey, false) &&
+                SessionState.GetBool(PaladinSkillAttemptedKey, false) &&
+                SessionState.GetBool(BardSkillAttemptedKey, false) &&
+                SessionState.GetBool(MageSkillAttemptedKey, false) &&
+                SessionState.GetBool(MissAttemptedKey, false) &&
+                fight.FrontHero.UnitSlot != null &&
+                fight.FrontHero.UnitSlot.GuardPlayCount >= 1 &&
                 fight.SecondHero.UnitSlot != null &&
-                fight.SecondHero.UnitSlot.NormalAttackPlayCount >= 5)
+                fight.SecondHero.UnitSlot.LightAttackPlayCount >= 1 &&
+                fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
+                fight.ThirdHero.UnitSlot != null &&
+                fight.ThirdHero.UnitSlot.LightAttackPlayCount >= 1 &&
+                fight.ThirdHero.UnitSlot.SkillAttackPlayCount >= 1 &&
+                fight.ThirdHero.UnitSlot.MissFeedbackPlayCount >= 1 &&
+                fight.ActiveEnemySlot != null &&
+                fight.EnemyCurrentMana >= 1 &&
+                TotalEnemyNormalAttacks() >= 3 &&
+                !fight.HasPendingEnemyAttack)
             {
                 int initialEnemyHp = SessionState.GetInt(InitialEnemyHpKey, 0);
                 int currentEnemyHp = TotalEnemyHp();
-                int frontMana = fight.FrontHero.CurrentMana;
-                int frontAttacks = fight.FrontHero.UnitSlot?.NormalAttackPlayCount ?? 0;
-                int bardAttacks = fight.SecondHero.UnitSlot?.NormalAttackPlayCount ?? 0;
-                int bardSkills = fight.SecondHero.SkillActivationCount;
-                int mageAttacks = fight.ThirdHero.UnitSlot?.NormalAttackPlayCount ?? 0;
-                int enemyNormalAttacks = fight.ActiveEnemySlot?.NormalAttackPlayCount ?? 0;
-                int enemySkillAttacks = fight.ActiveEnemySlot?.SkillAttackPlayCount ?? 0;
-                int enemyFrameDamageEvents = fight.ActiveEnemySlot?.CombatAnimator?.DamageEventCount ?? 0;
+                int hero1Normal = fight.FrontHero.UnitSlot?.LightAttackPlayCount ?? 0;
+                int hero2Normal = fight.SecondHero.UnitSlot?.LightAttackPlayCount ?? 0;
+                int hero3Normal = fight.ThirdHero.UnitSlot?.LightAttackPlayCount ?? 0;
+                int bardHpBeforeHeal = SessionState.GetInt(BardHpBeforeHealKey, 0);
+                int enemyNormalAttacks = TotalEnemyNormalAttacks();
+                int enemySkillAttacks = TotalEnemySkillAttacks();
+                int enemyFrameDamageEvents = TotalEnemyDamageEvents();
                 int enemyMana = fight.EnemyCurrentMana;
                 bool scheduledBeatsAligned = fight.LastEnemyAttackGlobalBeat >= 0 &&
                                              (fight.LastEnemyAttackGlobalBeat + 1) % fight.EnemyAttackIntervalBeats == 0 &&
-                                             fight.SecondHero.LastAutomaticAttackGlobalBeat >= 0 &&
-                                             (fight.SecondHero.LastAutomaticAttackGlobalBeat + 1) % fight.SecondHero.AttackIntervalBeats == 0 &&
-                                             fight.ThirdHero.LastAutomaticAttackGlobalBeat >= 0 &&
-                                             (fight.ThirdHero.LastAutomaticAttackGlobalBeat + 1) % fight.ThirdHero.AttackIntervalBeats == 0 &&
                                              !fight.HasPendingEnemyAttack;
                 bool combatFlowPassed = fight.FrontHero.UnitSlot != null &&
                                         fight.SecondHero.UnitSlot != null &&
                                         fight.ThirdHero.UnitSlot != null &&
-                                        !fight.HealthSystemEnabled &&
+                                        fight.HealthSystemEnabled &&
                                         !fight.BattleEnded &&
-                                        frontMana >= 1 &&
-                                        fight.FrontHero.UnitSlot.LightAttackPlayCount >= 1 &&
-                                        fight.FrontHero.UnitSlot.HeavyAttackPlayCount >= 1 &&
+                                        hero1Normal >= 1 &&
+                                        fight.FrontHero.SkillActivationCount >= 1 &&
                                         fight.FrontHero.UnitSlot.GuardPlayCount >= 1 &&
-                                        bardAttacks >= 5 &&
-                                        bardSkills >= 1 &&
+                                        hero2Normal >= 1 &&
+                                        fight.SecondHero.SkillActivationCount >= 1 &&
                                         fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
-                                        mageAttacks >= 2 &&
-                                        enemyNormalAttacks >= 2 &&
-                                        enemyFrameDamageEvents >= 2 &&
+                                        fight.SecondHero.UnitSlot.CurrentHp > bardHpBeforeHeal &&
+                                        hero3Normal >= 1 &&
+                                        fight.ThirdHero.SkillActivationCount >= 1 &&
+                                        fight.ThirdHero.UnitSlot.SkillAttackPlayCount >= 1 &&
+                                        fight.FrontHero.UnitSlot.OnBeatFeedbackPlayCount >= 2 &&
+                                        fight.SecondHero.UnitSlot.OnBeatFeedbackPlayCount >= 2 &&
+                                        fight.ThirdHero.UnitSlot.OnBeatFeedbackPlayCount >= 2 &&
+                                        fight.ThirdHero.UnitSlot.MissFeedbackPlayCount >= 1 &&
+                                        fight.FrontHero.UnitSlot.HeavyAttackPlayCount == 0 &&
+                                        enemyNormalAttacks >= 3 &&
+                                        enemyFrameDamageEvents >= 3 &&
                                         enemySkillAttacks == 0 &&
                                         enemyMana >= 1 &&
+                                        fight.BlockedAttackCount >= 1 &&
                                         scheduledBeatsAligned &&
-                                        currentEnemyHp == initialEnemyHp &&
+                                        currentEnemyHp < initialEnemyHp &&
                                         clock.IsPlaying;
                 FightCharacterDefinition[] singleEnemyRoster =
                 {
@@ -248,8 +336,9 @@ namespace RhythmHunter.FightDemoEditor
                     FailureKey,
                     passed
                         ? string.Empty
-                        : $"Invalid flow. Mana={frontMana}, FrontAttacks={frontAttacks}, " +
-                          $"BardAttacks={bardAttacks}, BardSkills={bardSkills}, MageAttacks={mageAttacks}, " +
+                        : $"Invalid flow. Hero1Normal={hero1Normal}, Guards={fight.FrontHero.UnitSlot.GuardPlayCount}, " +
+                          $"Hero2Normal={hero2Normal}, Hero3Normal={hero3Normal}, " +
+                          $"BardHP={fight.SecondHero.UnitSlot.CurrentHp}/{bardHpBeforeHeal}, " +
                           $"EnemyNormal={enemyNormalAttacks}, EnemySkills={enemySkillAttacks}, EnemyMana={enemyMana}, " +
                           $"EnemyFrameDamageEvents={enemyFrameDamageEvents}, " +
                           $"ScheduledBeatsAligned={scheduledBeatsAligned}, " +
@@ -267,13 +356,20 @@ namespace RhythmHunter.FightDemoEditor
                 SessionState.SetString(
                     FailureKey,
                     $"FightScene2 validation timed out. " +
-                    $"LightAttempted={SessionState.GetBool(LightAttemptedKey, false)}, " +
-                    $"HeavyAttempted={SessionState.GetBool(HeavyAttemptedKey, false)}, " +
-                    $"GuardAttempted={SessionState.GetBool(GuardAttemptedKey, false)}, " +
-                    $"Blocks={fight?.BlockedAttackCount ?? -1}, Pending={fight?.HasPendingEnemyAttack ?? false}, " +
+                    $"Hero1Attempted={SessionState.GetBool(Hero1AttemptedKey, false)}, " +
+                    $"Hero2Attempted={SessionState.GetBool(Hero2AttemptedKey, false)}, " +
+                    $"Hero3Attempted={SessionState.GetBool(Hero3AttemptedKey, false)}, " +
+                    $"PaladinSkill={SessionState.GetBool(PaladinSkillAttemptedKey, false)}, " +
+                    $"BardSkill={SessionState.GetBool(BardSkillAttemptedKey, false)}, " +
+                    $"MageSkill={SessionState.GetBool(MageSkillAttemptedKey, false)}, " +
+                    $"MissAttempted={SessionState.GetBool(MissAttemptedKey, false)}, " +
+                    $"Pending={fight?.HasPendingEnemyAttack ?? false}, " +
                     $"EnemyNormal={enemy?.NormalAttackPlayCount ?? -1}, " +
                     $"EnemyFrameDamage={enemy?.CombatAnimator?.DamageEventCount ?? -1}, " +
-                    $"BardAttacks={fight?.SecondHero.UnitSlot?.NormalAttackPlayCount ?? -1}, " +
+                    $"Hero1Normal={fight?.FrontHero.UnitSlot?.LightAttackPlayCount ?? -1}, " +
+                    $"Guards={fight?.FrontHero.UnitSlot?.GuardPlayCount ?? -1}, " +
+                    $"Hero2Normal={fight?.SecondHero.UnitSlot?.LightAttackPlayCount ?? -1}, " +
+                    $"Hero3Normal={fight?.ThirdHero.UnitSlot?.LightAttackPlayCount ?? -1}, " +
                     $"ReceivedBeats={clock?.ReceivedBeatCount ?? -1}.");
                 EditorApplication.ExitPlaymode();
             }
@@ -294,6 +390,17 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             return true;
+        }
+
+        private static bool HasExpectedHeroSkills(FightRosterManager roster)
+        {
+            return roster.HeroPrefabs.Count >= 3 &&
+                   roster.HeroPrefabs[0] != null &&
+                   roster.HeroPrefabs[0].SkillType == FightCharacterDefinition.SkillBehavior.Guard &&
+                   roster.HeroPrefabs[1] != null &&
+                   roster.HeroPrefabs[1].SkillType == FightCharacterDefinition.SkillBehavior.HealParty &&
+                   roster.HeroPrefabs[2] != null &&
+                   roster.HeroPrefabs[2].SkillType == FightCharacterDefinition.SkillBehavior.Damage;
         }
 
         private static bool ValidateAllCharacterPrefabs(out string failure)
@@ -392,6 +499,42 @@ namespace RhythmHunter.FightDemoEditor
             return total;
         }
 
+        private static int TotalEnemyNormalAttacks()
+        {
+            int total = 0;
+            foreach (FightUnitSlot slot in Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None))
+            {
+                if (slot.Team == FightUnitSlot.UnitTeam.Enemy)
+                    total += slot.NormalAttackPlayCount;
+            }
+
+            return total;
+        }
+
+        private static int TotalEnemySkillAttacks()
+        {
+            int total = 0;
+            foreach (FightUnitSlot slot in Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None))
+            {
+                if (slot.Team == FightUnitSlot.UnitTeam.Enemy)
+                    total += slot.SkillAttackPlayCount;
+            }
+
+            return total;
+        }
+
+        private static int TotalEnemyDamageEvents()
+        {
+            int total = 0;
+            foreach (FightUnitSlot slot in Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None))
+            {
+                if (slot.Team == FightUnitSlot.UnitTeam.Enemy && slot.CombatAnimator != null)
+                    total += slot.CombatAnimator.DamageEventCount;
+            }
+
+            return total;
+        }
+
         private static void FailAndExit(string failure)
         {
             SessionState.SetString(FailureKey, failure);
@@ -416,9 +559,15 @@ namespace RhythmHunter.FightDemoEditor
         {
             SessionState.EraseBool(ActiveKey);
             SessionState.EraseFloat(StartedAtKey);
-            SessionState.EraseBool(LightAttemptedKey);
-            SessionState.EraseBool(HeavyAttemptedKey);
-            SessionState.EraseBool(GuardAttemptedKey);
+            SessionState.EraseBool(Hero1AttemptedKey);
+            SessionState.EraseBool(Hero2AttemptedKey);
+            SessionState.EraseBool(Hero3AttemptedKey);
+            SessionState.EraseBool(PaladinSkillAttemptedKey);
+            SessionState.EraseBool(BardSkillAttemptedKey);
+            SessionState.EraseBool(MageSkillAttemptedKey);
+            SessionState.EraseBool(MissAttemptedKey);
+            SessionState.EraseInt(LastInputBeatKey);
+            SessionState.EraseInt(BardHpBeforeHealKey);
             SessionState.EraseInt(InitialEnemyHpKey);
             SessionState.EraseBool(PassedKey);
             SessionState.EraseString(FailureKey);
