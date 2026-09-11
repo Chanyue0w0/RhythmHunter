@@ -177,8 +177,11 @@ MonoBehaviour:
   role: 0
   slotIndex: 2
   maxHp: 90
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
   attackPower: 14
-  skillDamage: 30
+  skillPower: 30
+  skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
   currentMana: 0
@@ -193,10 +196,16 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1868440148}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
+  effectPlayer: {fileID: 0}
   hpBackground: {fileID: 1681309267}
   hpFill: {fileID: 403897600}
   hpLabel: {fileID: 267799631}
   roleLabel: {fileID: 42493753}
+  onBeatJumpHeight: 0.22
+  onBeatJumpDuration: 0.18
+  missShakeStrength: 0.12
+  missShakeDuration: 0.16
+  missShakeFrequency: 60
 --- !u!1 &13774376
 GameObject:
   m_ObjectHideFlags: 0
@@ -1292,8 +1301,11 @@ MonoBehaviour:
   role: 2
   slotIndex: 1
   maxHp: 85
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
   attackPower: 8
-  skillDamage: 30
+  skillPower: 30
+  skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
   currentMana: 0
@@ -1308,10 +1320,16 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1175132390}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.2, g: 0.78, b: 0.48, a: 1}
+  effectPlayer: {fileID: 0}
   hpBackground: {fileID: 81267975}
   hpFill: {fileID: 510067692}
   hpLabel: {fileID: 1252487855}
   roleLabel: {fileID: 1567002023}
+  onBeatJumpHeight: 0.22
+  onBeatJumpDuration: 0.18
+  missShakeStrength: 0.12
+  missShakeDuration: 0.16
+  missShakeFrequency: 60
 --- !u!1 &295788699
 GameObject:
   m_ObjectHideFlags: 0
@@ -3470,8 +3488,11 @@ MonoBehaviour:
   role: 0
   slotIndex: 0
   maxHp: 80
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
   attackPower: 12
-  skillDamage: 30
+  skillPower: 30
+  skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
   currentMana: 0
@@ -3486,10 +3507,16 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1615964211}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
+  effectPlayer: {fileID: 0}
   hpBackground: {fileID: 1144997886}
   hpFill: {fileID: 1668408736}
   hpLabel: {fileID: 517797252}
   roleLabel: {fileID: 899324079}
+  onBeatJumpHeight: 0.22
+  onBeatJumpDuration: 0.18
+  missShakeStrength: 0.12
+  missShakeDuration: 0.16
+  missShakeFrequency: 60
 --- !u!1 &611917183
 GameObject:
   m_ObjectHideFlags: 0
@@ -3586,8 +3613,11 @@ MonoBehaviour:
   role: 0
   slotIndex: 1
   maxHp: 120
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
   attackPower: 18
-  skillDamage: 30
+  skillPower: 30
+  skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
   currentMana: 0
@@ -3602,10 +3632,16 @@ MonoBehaviour:
   placeholderVisual: {fileID: 366790998}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
+  effectPlayer: {fileID: 0}
   hpBackground: {fileID: 538625507}
   hpFill: {fileID: 13774378}
   hpLabel: {fileID: 1486828711}
   roleLabel: {fileID: 1119591243}
+  onBeatJumpHeight: 0.22
+  onBeatJumpDuration: 0.18
+  missShakeStrength: 0.12
+  missShakeDuration: 0.16
+  missShakeFrequency: 60
 --- !u!1 &649869616
 GameObject:
   m_ObjectHideFlags: 0
@@ -3775,7 +3811,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: X/Y/B (Q/W/E) = Guard / Heal / Damage • Beat 4 activates skills
+  m_Text: "X/Y/B (Q/W/E) = Guard / Heal / Damage \u2022 Beat 4 activates skills"
 --- !u!1 &669889341
 GameObject:
   m_ObjectHideFlags: 0
@@ -4635,8 +4671,11 @@ MonoBehaviour:
   role: 3
   slotIndex: 2
   maxHp: 75
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
   attackPower: 24
-  skillDamage: 30
+  skillPower: 30
+  skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
   currentMana: 0
@@ -4651,10 +4690,16 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1586803384}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}
+  effectPlayer: {fileID: 0}
   hpBackground: {fileID: 1942080884}
   hpFill: {fileID: 1132866506}
   hpLabel: {fileID: 46506982}
   roleLabel: {fileID: 961970724}
+  onBeatJumpHeight: 0.22
+  onBeatJumpDuration: 0.18
+  missShakeStrength: 0.12
+  missShakeDuration: 0.16
+  missShakeFrequency: 60
 --- !u!1 &865237450
 GameObject:
   m_ObjectHideFlags: 0
@@ -9502,51 +9547,21 @@ MonoBehaviour:
   maxPartyHp: 4
   enemyAttackDamage: 1
   resolutionSafetyMs: 12
-  enableFrontHeroModeInFightScene2: 1
-  enableHealthSystemInFightScene2: 1
+  combatMode: 1
+  enableHealthSystemInFrontHeroMode: 1
   enemyAttackIntervalBeats: 4
   frontHero:
     heroLabel: PALADIN
     unitSlot: {fileID: 2037638511}
-    playerControlled: 1
-    attackIntervalBeats: 4
-    maxMana: 4
-    startingMana: 0
-    currentMana: 0
-    skillName: Radiant Smite
-    lightAttackMultiplier: 1
-    heavyAttackMultiplier: 1.75
-    skillDamageMultiplier: 3
     skillActivationCount: 0
-    lastAutomaticAttackGlobalBeat: -1
   secondHero:
     heroLabel: BARD
     unitSlot: {fileID: 287245178}
-    playerControlled: 0
-    attackIntervalBeats: 4
-    maxMana: 4
-    startingMana: 0
-    currentMana: 0
-    skillName: Final Chorus
-    lightAttackMultiplier: 1
-    heavyAttackMultiplier: 1.75
-    skillDamageMultiplier: 2.5
     skillActivationCount: 0
-    lastAutomaticAttackGlobalBeat: -1
   thirdHero:
     heroLabel: MAGE
     unitSlot: {fileID: 828184398}
-    playerControlled: 0
-    attackIntervalBeats: 4
-    maxMana: 4
-    startingMana: 0
-    currentMana: 0
-    skillName: Arcane Burst
-    lightAttackMultiplier: 1
-    heavyAttackMultiplier: 1.75
-    skillDamageMultiplier: 3.5
     skillActivationCount: 0
-    lastAutomaticAttackGlobalBeat: -1
 --- !u!114 &2021200327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9788,8 +9803,11 @@ MonoBehaviour:
   role: 1
   slotIndex: 0
   maxHp: 120
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
   attackPower: 12
-  skillDamage: 30
+  skillPower: 30
+  skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
   currentMana: 0
@@ -9804,10 +9822,16 @@ MonoBehaviour:
   placeholderVisual: {fileID: 505220571}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.12, g: 0.65, b: 0.9, a: 1}
+  effectPlayer: {fileID: 0}
   hpBackground: {fileID: 934003315}
   hpFill: {fileID: 1590038036}
   hpLabel: {fileID: 707206172}
   roleLabel: {fileID: 1462401102}
+  onBeatJumpHeight: 0.22
+  onBeatJumpDuration: 0.18
+  missShakeStrength: 0.12
+  missShakeDuration: 0.16
+  missShakeFrequency: 60
 --- !u!1 &2043876128
 GameObject:
   m_ObjectHideFlags: 0
