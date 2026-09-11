@@ -98,6 +98,11 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
+            bool showHealth = fight == null || fight.HealthSystemEnabled;
+            if (healthText != null)
+                healthText.gameObject.SetActive(showHealth);
+            if (healthBar != null)
+                healthBar.gameObject.SetActive(showHealth);
             OnPartyHealthChanged(fight != null ? fight.PartyHp : 0, fight != null ? fight.MaxPartyHp : 1);
             SetResult(
                 "GET READY",

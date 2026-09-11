@@ -193,8 +193,10 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1868440148}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
+  hpBackground: {fileID: 1681309267}
   hpFill: {fileID: 403897600}
   hpLabel: {fileID: 267799631}
+  roleLabel: {fileID: 42493753}
 --- !u!1 &13774376
 GameObject:
   m_ObjectHideFlags: 0
@@ -1306,8 +1308,10 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1175132390}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.2, g: 0.78, b: 0.48, a: 1}
+  hpBackground: {fileID: 81267975}
   hpFill: {fileID: 510067692}
   hpLabel: {fileID: 1252487855}
+  roleLabel: {fileID: 1567002023}
 --- !u!1 &295788699
 GameObject:
   m_ObjectHideFlags: 0
@@ -3482,8 +3486,10 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1615964211}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
+  hpBackground: {fileID: 1144997886}
   hpFill: {fileID: 1668408736}
   hpLabel: {fileID: 517797252}
+  roleLabel: {fileID: 899324079}
 --- !u!1 &611917183
 GameObject:
   m_ObjectHideFlags: 0
@@ -3596,8 +3602,10 @@ MonoBehaviour:
   placeholderVisual: {fileID: 366790998}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
+  hpBackground: {fileID: 538625507}
   hpFill: {fileID: 13774378}
   hpLabel: {fileID: 1486828711}
+  roleLabel: {fileID: 1119591243}
 --- !u!1 &649869616
 GameObject:
   m_ObjectHideFlags: 0
@@ -4643,8 +4651,10 @@ MonoBehaviour:
   placeholderVisual: {fileID: 1586803384}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}
+  hpBackground: {fileID: 1942080884}
   hpFill: {fileID: 1132866506}
   hpLabel: {fileID: 46506982}
+  roleLabel: {fileID: 961970724}
 --- !u!1 &865237450
 GameObject:
   m_ObjectHideFlags: 0
@@ -9794,8 +9804,10 @@ MonoBehaviour:
   placeholderVisual: {fileID: 505220571}
   fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   accentColor: {r: 0.12, g: 0.65, b: 0.9, a: 1}
+  hpBackground: {fileID: 934003315}
   hpFill: {fileID: 1590038036}
   hpLabel: {fileID: 707206172}
+  roleLabel: {fileID: 1462401102}
 --- !u!1 &2043876128
 GameObject:
   m_ObjectHideFlags: 0

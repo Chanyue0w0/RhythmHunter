@@ -255,12 +255,13 @@ namespace RhythmHunter.FightDemoEditor
             effectPoint.localPosition = new Vector3(team == FightUnitSlot.UnitTeam.Hero ? -0.72f : 0.72f, 0.15f, -0.3f);
 
             CreateWorldText("UnitName", slotObject.transform, font, displayName, Primary, new Vector3(0f, -1.58f, 0f), 0.026f, FontStyle.Bold);
-            CreateWorldText("RoleAndInput", slotObject.transform, font, $"{role.ToString().ToUpperInvariant()}  •  {inputLabel}", color, new Vector3(0f, -1.92f, 0f), 0.017f, FontStyle.Bold);
-            CreateWorldSprite("HealthBackground", slotObject.transform, sprite, new Color(0.03f, 0.04f, 0.06f, 1f), new Vector3(0f, 1.34f, 0f), new Vector2(1.25f, 0.12f), 15);
+            TextMesh roleLabel = CreateWorldText("RoleAndInput", slotObject.transform, font, $"{role.ToString().ToUpperInvariant()}  •  {inputLabel}", color, new Vector3(0f, -1.92f, 0f), 0.017f, FontStyle.Bold);
+            SpriteRenderer hpBackground = CreateWorldSprite("HealthBackground", slotObject.transform, sprite, new Color(0.03f, 0.04f, 0.06f, 1f), new Vector3(0f, 1.34f, 0f), new Vector2(1.25f, 0.12f), 15);
             SpriteRenderer hpFill = CreateWorldSprite("HealthFill", slotObject.transform, sprite, new Color(0.3f, 1f, 0.55f, 1f), new Vector3(0f, 1.34f, -0.1f), new Vector2(1.2f, 0.075f), 16);
             TextMesh hpLabel = CreateWorldText("Stats", slotObject.transform, font, $"HP {hp}/{hp}  ATK {attack}", Secondary, new Vector3(0f, 1.63f, 0f), 0.015f, FontStyle.Normal);
 
             slot.Configure(objectName, displayName, team, role, index, hp, attack, color, actorRoot, effectPoint, placeholder.gameObject, sprite, hpFill, hpLabel);
+            slot.ConfigurePresentation(roleLabel, hpBackground);
             return slot;
         }
 

@@ -57,8 +57,11 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private GameObject placeholderVisual;
         [SerializeField] private Sprite fallbackEffectSprite;
         [SerializeField] private Color accentColor = Color.white;
+        [SerializeField] private FightUnitEffects effectPlayer;
+        [SerializeField] private SpriteRenderer hpBackground;
         [SerializeField] private SpriteRenderer hpFill;
         [SerializeField] private TextMesh hpLabel;
+        [SerializeField] private TextMesh roleLabel;
 
         private GameObject actorInstance;
         private Vector3 actorBaseScale = Vector3.one;
@@ -104,6 +107,18 @@ namespace RhythmHunter.FightDemo
         public int SkillAttackPlayCount => skillAttackPlayCount;
         public int GuardPlayCount => guardPlayCount;
 
+        private FightUnitEffects EffectPlayer
+        {
+            get
+            {
+                if (effectPlayer == null)
+                    effectPlayer = GetComponent<FightUnitEffects>();
+                if (effectPlayer == null)
+                    effectPlayer = gameObject.AddComponent<FightUnitEffects>();
+                return effectPlayer;
+            }
+        }
+
         public void Configure(
             string id,
             string unitName,
@@ -141,6 +156,12 @@ namespace RhythmHunter.FightDemo
             currentMana = 0;
             hasCharacter = true;
             RefreshHealthVisuals();
+        }
+
+        public void ConfigurePresentation(TextMesh role, SpriteRenderer healthBackground)
+        {
+            roleLabel = role;
+            hpBackground = healthBackground;
         }
 
         public void SpawnCharacter(FightCharacterDefinition prefab, FightCombatController beatSource)
@@ -202,6 +223,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            CacheLegacyPresentationReferences();
             currentHp = maxHp;
             SpawnActorPrefab();
             RefreshHealthVisuals();
@@ -367,15 +389,18 @@ namespace RhythmHunter.FightDemo
 
         public void SetHealthDisplayVisible(bool visible)
         {
-            SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
-            foreach (SpriteRenderer renderer in renderers)
-            {
-                if (renderer.name == "HealthBackground" || renderer.name == "HealthFill")
-                    renderer.gameObject.SetActive(visible);
-            }
-
+            if (hpBackground != null)
+                hpBackground.gameObject.SetActive(visible);
+            if (hpFill != null)
+                hpFill.gameObject.SetActive(visible);
             if (hpLabel != null)
                 hpLabel.gameObject.SetActive(visible);
+        }
+
+        public void SetRoleLabel(string value)
+        {
+            if (roleLabel != null)
+                roleLabel.text = value;
         }
 
         private void SpawnAttackEffect(
@@ -385,32 +410,19 @@ namespace RhythmHunter.FightDemo
             GameObject overridePrefab = null,
             float lifetimeOverride = -1f)
         {
-            Transform spawn = normalAttackEffectSpawnPoint != null ? normalAttackEffectSpawnPoint : transform;
-            Vector3 position = spawn.position + attackEffectLocalOffset + Vector3.up * verticalOffset;
-            GameObject effect;
-
             GameObject effectPrefab = overridePrefab != null ? overridePrefab : normalAttackEffectPrefab;
-            if (effectPrefab != null)
-            {
-                effect = Instantiate(effectPrefab, position, spawn.rotation);
-            }
-            else
-            {
-                effect = new GameObject($"{displayName}_NormalAttackVFX");
-                effect.transform.position = position;
-                SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
-                renderer.sprite = fallbackEffectSprite;
-                renderer.color = color;
-                renderer.sortingOrder = 30;
-            }
-
-            effect.SetActive(true);
-            Vector3 direction = team == UnitTeam.Hero ? Vector3.left : Vector3.right;
-            FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();
-            if (attackEffect == null)
-                attackEffect = effect.AddComponent<FightAttackEffect>();
             float lifetime = lifetimeOverride > 0f ? lifetimeOverride : attackEffectLifetime;
-            attackEffect.Play(direction, lifetime, style, color);
+            EffectPlayer.SpawnAttack(
+                displayName,
+                team,
+                normalAttackEffectSpawnPoint,
+                attackEffectLocalOffset,
+                fallbackEffectSprite,
+                effectPrefab,
+                lifetime,
+                style,
+                color,
+                verticalOffset);
         }
 
         private void SpawnGuardLayer(
@@ -421,35 +433,50 @@ namespace RhythmHunter.FightDemo
             float rotationSpeed,
             float startingRotation)
         {
-            Transform root = actorRoot != null ? actorRoot : transform;
-            GameObject effect = new($"{displayName}_GuardVFX", typeof(SpriteRenderer), typeof(FightGuardEffect));
-            effect.transform.SetParent(root, false);
-            effect.transform.localPosition = new Vector3(0f, 0f, -0.45f);
-            effect.transform.localRotation = Quaternion.Euler(0f, 0f, startingRotation);
-            SpriteRenderer renderer = effect.GetComponent<SpriteRenderer>();
-            renderer.sprite = fallbackEffectSprite;
-            renderer.color = color;
-            renderer.sortingOrder = 31;
-            effect.GetComponent<FightGuardEffect>().Play(color, duration, fromScale, toScale, rotationSpeed);
+            EffectPlayer.SpawnGuard(
+                displayName,
+                actorRoot,
+                fallbackEffectSprite,
+                color,
+                duration,
+                fromScale,
+                toScale,
+                rotationSpeed,
+                startingRotation);
         }
 
         private void SpawnAttackChargeLayer(Color color, bool attackBeat, bool enemy, float startingRotation)
         {
-            Transform root = actorRoot != null ? actorRoot : transform;
-            GameObject effect = new($"{displayName}_{(enemy ? "Enemy" : "Hero")}BeatVFX", typeof(SpriteRenderer), typeof(FightGuardEffect));
-            effect.transform.SetParent(root, false);
-            effect.transform.localPosition = new Vector3(0f, 0f, 0.35f);
-            effect.transform.localRotation = Quaternion.Euler(0f, 0f, startingRotation);
-            SpriteRenderer renderer = effect.GetComponent<SpriteRenderer>();
-            renderer.sprite = fallbackEffectSprite;
-            renderer.color = color;
-            renderer.sortingOrder = attackBeat ? 29 : 9;
-            effect.GetComponent<FightGuardEffect>().Play(
+            EffectPlayer.SpawnAttackCharge(
+                displayName,
+                actorRoot,
+                fallbackEffectSprite,
                 color,
-                attackBeat ? 0.5f : 0.28f,
-                attackBeat ? 0.72f : 0.42f,
-                attackBeat ? 2.2f : 1.15f,
-                attackBeat ? 260f : 90f);
+                attackBeat,
+                enemy,
+                startingRotation);
+        }
+
+        private void CacheLegacyPresentationReferences()
+        {
+            SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
+            foreach (SpriteRenderer renderer in renderers)
+            {
+                if (hpBackground == null && renderer.name == "HealthBackground")
+                    hpBackground = renderer;
+            }
+
+            if (roleLabel != null)
+                return;
+            TextMesh[] labels = GetComponentsInChildren<TextMesh>(true);
+            foreach (TextMesh label in labels)
+            {
+                if (label.name == "RoleAndInput")
+                {
+                    roleLabel = label;
+                    return;
+                }
+            }
         }
 
         private void SpawnActorPrefab()
@@ -526,5 +553,12 @@ namespace RhythmHunter.FightDemo
             if (hpLabel != null)
                 hpLabel.text = $"HP {currentHp}/{maxHp}  ATK {attackPower}  SKILL {skillDamage}";
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            CacheLegacyPresentationReferences();
+        }
+#endif
     }
 }

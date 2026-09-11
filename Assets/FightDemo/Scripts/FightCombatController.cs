@@ -221,6 +221,7 @@ namespace RhythmHunter.FightDemo
         public event Action<EnemyAttackResult> EnemyAttackResolved;
         public event Action<int, int> PartyHealthChanged;
         public event Action BattleLost;
+        public event Action RosterRebuilt;
 
         public int PartyHp => partyHp;
         public int MaxPartyHp => maxPartyHp;
@@ -323,12 +324,6 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
-            if (UsesFrontHeroControls)
-            {
-                RefreshFightScene2Labels();
-                RefreshFightScene2HealthVisibility();
-            }
-
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
         }
 
@@ -759,8 +754,7 @@ namespace RhythmHunter.FightDemo
                 return;
 
             RebuildRosterAndResetCombat();
-            RefreshFightScene2Labels();
-            RefreshFightScene2HealthVisibility();
+            RosterRebuilt?.Invoke();
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
         }
 
@@ -774,33 +768,6 @@ namespace RhythmHunter.FightDemo
             }
 
             return null;
-        }
-
-        private void RefreshFightScene2Labels()
-        {
-            SetRoleLabel(frontHero.UnitSlot, "PLAYER  •  Q/X LIGHT  W/Y HEAVY  E/B GUARD");
-            SetRoleLabel(secondHero.UnitSlot, $"AUTO  •  EVERY {secondHero.AttackIntervalBeats} BEATS");
-            SetRoleLabel(thirdHero.UnitSlot, $"AUTO  •  EVERY {thirdHero.AttackIntervalBeats} BEATS");
-        }
-
-        private void RefreshFightScene2HealthVisibility()
-        {
-            FightUnitSlot[] slots = FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None);
-            foreach (FightUnitSlot slot in slots)
-            {
-                if (slot.gameObject.scene == gameObject.scene)
-                    slot.SetHealthDisplayVisible(enableHealthSystemInFrontHeroMode);
-            }
-
-            Transform[] transforms = Resources.FindObjectsOfTypeAll<Transform>();
-            foreach (Transform candidate in transforms)
-            {
-                if (candidate.gameObject.scene != gameObject.scene)
-                    continue;
-
-                if (candidate.name == "TankHealth" || candidate.name == "TankHealthBar")
-                    candidate.gameObject.SetActive(enableHealthSystemInFrontHeroMode);
-            }
         }
 
         private static void PlayActionVisual(FightUnitSlot slot, ActionType action)
@@ -943,22 +910,6 @@ namespace RhythmHunter.FightDemo
                     null);
             }
             activeEnemySlot = FindFrontLivingEnemy();
-        }
-
-        private static void SetRoleLabel(FightUnitSlot slot, string value)
-        {
-            if (slot == null)
-                return;
-
-            TextMesh[] labels = slot.GetComponentsInChildren<TextMesh>(true);
-            foreach (TextMesh label in labels)
-            {
-                if (label.name == "RoleAndInput")
-                {
-                    label.text = value;
-                    return;
-                }
-            }
         }
 
         private static FightUnitSlot SlotAt(IReadOnlyList<FightUnitSlot> slots, int index)

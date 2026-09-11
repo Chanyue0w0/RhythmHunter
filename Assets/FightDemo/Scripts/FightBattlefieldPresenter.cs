@@ -52,12 +52,14 @@ namespace RhythmHunter.FightDemo
             subscribedFight.FightBeat += OnFightBeat;
             subscribedFight.HeroCalled += OnHeroCalled;
             subscribedFight.EnemyAttackResolved += OnEnemyAttackResolved;
+            subscribedFight.RosterRebuilt += RefreshFrontHeroPresentation;
         }
 
         private void Start()
         {
             SetAlpha(tankShield, 0f);
             SetAlpha(enemyTelegraph, 0f);
+            RefreshFrontHeroPresentation();
         }
 
         private void OnDisable()
@@ -73,7 +75,28 @@ namespace RhythmHunter.FightDemo
             subscribedFight.FightBeat -= OnFightBeat;
             subscribedFight.HeroCalled -= OnHeroCalled;
             subscribedFight.EnemyAttackResolved -= OnEnemyAttackResolved;
+            subscribedFight.RosterRebuilt -= RefreshFrontHeroPresentation;
             subscribedFight = null;
+        }
+
+        private void RefreshFrontHeroPresentation()
+        {
+            if (fight == null || !fight.UsesFrontHeroControls)
+                return;
+
+            fight.FrontHero.UnitSlot?.SetRoleLabel("PLAYER  •  Q/X LIGHT  W/Y HEAVY  E/B GUARD");
+            fight.SecondHero.UnitSlot?.SetRoleLabel($"AUTO  •  EVERY {fight.SecondHero.AttackIntervalBeats} BEATS");
+            fight.ThirdHero.UnitSlot?.SetRoleLabel($"AUTO  •  EVERY {fight.ThirdHero.AttackIntervalBeats} BEATS");
+            SetHealthVisibility(heroSlots, fight.HealthSystemEnabled);
+            SetHealthVisibility(enemySlots, fight.HealthSystemEnabled);
+        }
+
+        private static void SetHealthVisibility(FightUnitSlot[] slots, bool visible)
+        {
+            if (slots == null)
+                return;
+            foreach (FightUnitSlot slot in slots)
+                slot?.SetHealthDisplayVisible(visible);
         }
 
         private void Update()
