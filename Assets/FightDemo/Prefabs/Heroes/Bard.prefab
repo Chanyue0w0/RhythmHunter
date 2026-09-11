@@ -116,7 +116,11 @@ MonoBehaviour:
   skillName: Healing Chorus
   skillBehavior: 2
   skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 8051251566155585380, guid: 5dbd5598d6ff1ab4c8915e39f9f6fa53, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 0}
+  impactEffectAnchor: {fileID: 0}
   attackIntervalBeats: 2
   maxMana: 4
   accentColor: {r: 0.2, g: 0.78, b: 0.48, a: 1}

@@ -426,22 +426,31 @@ namespace RhythmHunter.FightDemo
             FightCharacterCombatAnimator.CombatAnimation animation = skill
                 ? FightCharacterCombatAnimator.CombatAnimation.Skill
                 : FightCharacterCombatAnimator.CombatAnimation.LightAttack;
-            Action playEffect = skill ? actor.PlaySkillAttack : actor.PlayLightAttack;
+            Action playEffect = skill
+                ? () => actor.PlaySkillAttackAt(actor.CastEffectAnchor)
+                : () => actor.PlayLightAttackAt(actor.CastEffectAnchor);
             string abilityName = skill ? hero.SkillName : "Normal Ability";
 
             switch (behavior)
             {
                 case FightCharacterDefinition.AbilityBehavior.Guard:
                     ArmGuardForNextEnemyAttack(globalBeat);
-                    PlayAnimatedHeroUtility(actor, FightCharacterCombatAnimator.CombatAnimation.Guard, actor.PlayGuard, null);
+                    PlayAnimatedHeroUtility(
+                        actor,
+                        FightCharacterCombatAnimator.CombatAnimation.Guard,
+                        () => actor.PlayGuardAt(skill),
+                        null);
                     return $"{abilityName} blocks all damage from the next enemy attack";
 
                 case FightCharacterDefinition.AbilityBehavior.HealParty:
+                    // Gameplay resolves from the accepted beat now. Animation and VFX
+                    // callbacks are presentation-only and cannot delay healing.
+                    HealPartyHealth(actor, power);
                     PlayAnimatedHeroUtility(
                         actor,
                         animation,
                         playEffect,
-                        () => HealPartyHealth(actor, power));
+                        null);
                     return $"{abilityName} restores {power:0.#} HP";
 
                 case FightCharacterDefinition.AbilityBehavior.DamageAll:
@@ -450,7 +459,7 @@ namespace RhythmHunter.FightDemo
 
                 case FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront:
                     ArmGuardForNextEnemyAttack(globalBeat);
-                    actor.PlayGuard();
+                    actor.PlayGuardAt(skill);
                     FightUnitSlot guardedTarget = FindFrontLivingEnemy();
                     if (guardedTarget != null)
                         PlayAnimatedHeroAction(actor, guardedTarget, action, power);
@@ -570,7 +579,9 @@ namespace RhythmHunter.FightDemo
             bool hasSequence = attacker.CombatAnimator != null &&
                                attacker.CombatAnimator.HasSequence(
                                    FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
-            pendingEnemyAnimationDriven = hasSequence;
+            // Enemy damage is resolved by the beat/judgement window in Update. The
+            // animation damage frame remains available to artists but has no gameplay authority.
+            pendingEnemyAnimationDriven = false;
             if (hasSequence)
             {
                 int attackRosterVersion = pendingAttackRosterVersion;
@@ -579,14 +590,12 @@ namespace RhythmHunter.FightDemo
                     FightCharacterCombatAnimator.CombatAnimation.NormalAttack,
                     () => PlayEnemyAttackWarning(attackRosterVersion, actionId, attacker),
                     () => PlayEnemyAttackEffect(attackRosterVersion, actionId, attacker),
-                    () => ResolvePendingEnemyAttack(attackRosterVersion, actionId, attacker));
+                    null);
                 if (started)
                     return;
-
-                pendingEnemyAnimationDriven = false;
             }
 
-            attacker.PlayImmediateNormalAttack();
+            attacker.PlayLightAttackAt(tankSlot != null ? tankSlot.ImpactEffectAnchor : null);
         }
 
         private void TryResolvePendingAttack()
@@ -804,10 +813,37 @@ namespace RhythmHunter.FightDemo
         private void PlayHeroActionVisual(
             int expectedRosterVersion,
             FightUnitSlot attacker,
+            FightUnitSlot target,
             ActionType action)
         {
-            if (IsCurrentHero(expectedRosterVersion, attacker))
-                PlayActionVisual(attacker, action);
+            if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
+                return;
+
+            if (action == ActionType.Skill)
+                attacker.PlaySkillAttackAt(target.ImpactEffectAnchor);
+            else
+                attacker.PlayLightAttackAt(target.ImpactEffectAnchor);
+        }
+
+        private void PlayHeroAreaVisual(
+            int expectedRosterVersion,
+            FightUnitSlot attacker,
+            ActionType action)
+        {
+            if (!IsCurrentHero(expectedRosterVersion, attacker))
+                return;
+
+            List<Transform> anchors = new();
+            foreach (FightUnitSlot target in fightScene2Enemies)
+            {
+                if (target != null && target.HasCharacter)
+                    anchors.Add(target.ImpactEffectAnchor);
+            }
+
+            if (action == ActionType.Skill)
+                attacker.PlaySkillAttackAt(anchors.ToArray());
+            else
+                attacker.PlayLightAttackAt(anchors.ToArray());
         }
 
         private void PlayEnemyAttackWarning(
@@ -825,7 +861,7 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot attacker)
         {
             if (IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, attacker))
-                attacker.PlayImmediateNormalAttack();
+                attacker.PlayLightAttackAt(tankSlot != null ? tankSlot.ImpactEffectAnchor : null);
         }
 
         private bool IsCurrentHeroAction(
@@ -885,16 +921,18 @@ namespace RhythmHunter.FightDemo
                 _ => FightCharacterCombatAnimator.CombatAnimation.LightAttack
             };
             int actionRosterVersion = rosterVersion;
+            // The rhythm judgement owns damage timing. Resolve before starting any
+            // animation so projectile speed, effect lifetime, and frame events are visual-only.
+            ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
-                () => PlayHeroActionVisual(actionRosterVersion, attacker, action),
-                () => ApplyHeroDamage(actionRosterVersion, attacker, target, damage));
+                () => PlayHeroActionVisual(actionRosterVersion, attacker, target, action),
+                null);
             if (animated)
                 return;
 
-            PlayActionVisual(attacker, action);
-            ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
+            PlayHeroActionVisual(actionRosterVersion, attacker, target, action);
         }
 
         private void PlayAnimatedHeroAreaAction(
@@ -904,16 +942,16 @@ namespace RhythmHunter.FightDemo
             float damage)
         {
             int actionRosterVersion = rosterVersion;
+            ApplyAreaDamage(actionRosterVersion, attacker, damage);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
-                () => PlayHeroActionVisual(actionRosterVersion, attacker, action),
-                () => ApplyAreaDamage(actionRosterVersion, attacker, damage));
+                () => PlayHeroAreaVisual(actionRosterVersion, attacker, action),
+                null);
             if (animated)
                 return;
 
-            PlayActionVisual(attacker, action);
-            ApplyAreaDamage(actionRosterVersion, attacker, damage);
+            PlayHeroAreaVisual(actionRosterVersion, attacker, action);
         }
 
         private void PlayAnimatedHeroUtility(

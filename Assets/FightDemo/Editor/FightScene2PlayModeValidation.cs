@@ -200,7 +200,13 @@ namespace RhythmHunter.FightDemoEditor
                 clock.LatestBeat.Beat != 4 &&
                 clock.TryGetBeatPhase(out float hero3Phase) && hero3Phase < 0.08f)
             {
+                float hpBeforeInput = TotalEnemyHp();
                 fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
+                if (!Mathf.Approximately(TotalEnemyHp(), hpBeforeInput - 1f))
+                {
+                    FailAndExit("Mage normal damage did not resolve synchronously from the accepted beat.");
+                    return;
+                }
                 SessionState.SetBool(Hero3AttemptedKey, true);
                 SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
             }
@@ -236,7 +242,14 @@ namespace RhythmHunter.FightDemoEditor
                 clock.LatestBeat.Beat == 4 &&
                 clock.TryGetBeatPhase(out float mageSkillPhase) && mageSkillPhase < 0.12f)
             {
+                float hpBeforeInput = TotalEnemyHp();
+                int targetsBeforeInput = LivingEnemyCount();
                 fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Damage);
+                if (!Mathf.Approximately(TotalEnemyHp(), hpBeforeInput - targetsBeforeInput))
+                {
+                    FailAndExit("Mage area damage waited for animation/VFX instead of resolving on the accepted beat.");
+                    return;
+                }
                 SessionState.SetBool(MageSkillAttemptedKey, true);
                 SessionState.SetInt(LastInputBeatKey, (int)clock.LatestBeat.GlobalBeat);
             }
@@ -551,6 +564,18 @@ namespace RhythmHunter.FightDemoEditor
             {
                 if (slot.Team == FightUnitSlot.UnitTeam.Enemy && slot.CombatAnimator != null)
                     total += slot.CombatAnimator.DamageEventCount;
+            }
+
+            return total;
+        }
+
+        private static int LivingEnemyCount()
+        {
+            int total = 0;
+            foreach (FightUnitSlot slot in Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None))
+            {
+                if (slot.Team == FightUnitSlot.UnitTeam.Enemy && slot.HasCharacter && slot.CurrentHp > 0f)
+                    total++;
             }
 
             return total;

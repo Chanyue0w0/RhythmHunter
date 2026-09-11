@@ -5,6 +5,33 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightUnitEffects : MonoBehaviour
     {
+        public void SpawnConfiguredAbility(
+            GameObject effectPrefab,
+            Transform anchor,
+            float lifetime,
+            FightAttackEffect.VisualStyle style,
+            Color color)
+        {
+            if (effectPrefab == null)
+                return;
+
+            Transform spawn = anchor != null ? anchor : transform;
+            GameObject effect = Instantiate(effectPrefab, spawn.position, spawn.rotation);
+            effect.SetActive(true);
+
+            FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();
+            if (attackEffect != null)
+            {
+                attackEffect.PlayInPlace(lifetime, style, color);
+                return;
+            }
+
+            // Particle/VFX-pack prefabs are presentation only. They never report hits.
+            // A zero lifetime lets a self-destroying prefab own its cleanup.
+            if (lifetime > 0f)
+                Destroy(effect, lifetime);
+        }
+
         public void SpawnAttack(
             string unitName,
             FightUnitSlot.UnitTeam team,

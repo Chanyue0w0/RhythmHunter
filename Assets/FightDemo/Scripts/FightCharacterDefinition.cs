@@ -36,8 +36,17 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private AbilityBehavior skillBehavior;
         [FormerlySerializedAs("skillDamage")]
         [SerializeField, Min(0)] private float skillPower = 1f;
+        [Header("Replaceable Ability Effects")]
+        [Tooltip("Optional visual-only prefab for beats 1-3. Damage never depends on this prefab or projectile travel.")]
+        [SerializeField] private GameObject normalAbilityEffectPrefab;
         [Tooltip("Optional replaceable VFX prefab spawned when this character uses its skill.")]
         [SerializeField] private GameObject skillEffectPrefab;
+        [Tooltip("Visual lifetime in seconds. Set to 0 when the effect prefab destroys itself.")]
+        [SerializeField, Min(0f)] private float abilityEffectLifetime = 1.5f;
+        [Tooltip("Caster/guard/heal VFX anchor. Add or move VFX_CastAnchor inside this character prefab.")]
+        [SerializeField] private Transform castEffectAnchor;
+        [Tooltip("Incoming damage VFX anchor. Add or move VFX_ImpactAnchor inside this character prefab.")]
+        [SerializeField] private Transform impactEffectAnchor;
         [Tooltip("AI attack interval. Player-controlled party members ignore this value.")]
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;
@@ -56,7 +65,13 @@ namespace RhythmHunter.FightDemo
         public string SkillName => skillName;
         public AbilityBehavior SkillType => skillBehavior;
         public float SkillPower => skillPower;
+        public GameObject NormalAbilityEffectPrefab => normalAbilityEffectPrefab;
         public GameObject SkillEffectPrefab => skillEffectPrefab;
+        public float AbilityEffectLifetime => abilityEffectLifetime;
+        public Transform AuthoredCastEffectAnchor => castEffectAnchor;
+        public Transform AuthoredImpactEffectAnchor => impactEffectAnchor;
+        public Transform CastEffectAnchor => castEffectAnchor != null ? castEffectAnchor : transform;
+        public Transform ImpactEffectAnchor => impactEffectAnchor != null ? impactEffectAnchor : transform;
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
         public Color AccentColor => accentColor;
@@ -99,6 +114,20 @@ namespace RhythmHunter.FightDemo
             accentColor = color;
         }
 
+        public void ConfigureEffectHooks(
+            GameObject normalEffect,
+            GameObject skillEffect,
+            float effectLifetime,
+            Transform castAnchor,
+            Transform impactAnchor)
+        {
+            normalAbilityEffectPrefab = normalEffect;
+            skillEffectPrefab = skillEffect;
+            abilityEffectLifetime = Mathf.Max(0f, effectLifetime);
+            castEffectAnchor = castAnchor;
+            impactEffectAnchor = impactAnchor;
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
@@ -112,6 +141,7 @@ namespace RhythmHunter.FightDemo
                 : QuantizePositive(skillPower);
             attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
             maxMana = Mathf.Max(1, maxMana);
+            abilityEffectLifetime = Mathf.Max(0f, abilityEffectLifetime);
         }
 #endif
 

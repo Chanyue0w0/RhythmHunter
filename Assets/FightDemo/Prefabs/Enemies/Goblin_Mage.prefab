@@ -116,7 +116,11 @@ MonoBehaviour:
   skillName: Goblin Hex
   skillBehavior: 0
   skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 8107342880664547989, guid: 7d26a3d9b838713459ca2ff3fbd5bae0, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 0}
+  impactEffectAnchor: {fileID: 0}
   attackIntervalBeats: 4
   maxMana: 4
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}

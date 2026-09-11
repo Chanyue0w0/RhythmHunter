@@ -7,7 +7,7 @@ namespace RhythmHunter.FightDemo
 {
     /// <summary>
     /// Owns all character sprite playback: beat-synced idle and frame-driven combat.
-    /// Each prefab owns editable sequences and decides which frame raises warning, VFX, and damage events.
+    /// Sequence events time presentation callbacks only; FightCombatController owns beat-authoritative gameplay.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class FightCharacterCombatAnimator : MonoBehaviour
@@ -33,7 +33,7 @@ namespace RhythmHunter.FightDemo
             [SerializeField] private int warningFrame = -1;
             [Tooltip("-1 disables the attack VFX event for this sequence.")]
             [SerializeField] private int attackEffectFrame;
-            [Tooltip("Frame that applies gameplay damage. Clamped to an existing frame.")]
+            [Tooltip("Legacy presentation event frame. Party-mode damage is resolved by the beat judgement, not this frame.")]
             [SerializeField] private int damageFrame;
 
             public CombatAnimation Animation => animation;

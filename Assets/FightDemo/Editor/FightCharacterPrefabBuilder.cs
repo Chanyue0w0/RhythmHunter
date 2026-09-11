@@ -204,6 +204,8 @@ namespace RhythmHunter.FightDemoEditor
 
             FightCharacterCombatAnimator animator = root.GetComponent<FightCharacterCombatAnimator>();
             animator.ConfigureIdle(null, renderer, frames, 1f, false);
+            Transform castEffectAnchor = CreateEffectAnchor(root.transform, "VFX_CastAnchor", new Vector3(0f, 0.35f, -0.2f));
+            Transform impactEffectAnchor = CreateEffectAnchor(root.transform, "VFX_ImpactAnchor", new Vector3(0f, 1.1f, -0.25f));
             FightCharacterDefinition definition = root.GetComponent<FightCharacterDefinition>();
             definition.Configure(
                 id,
@@ -221,6 +223,7 @@ namespace RhythmHunter.FightDemoEditor
                 attackIntervalBeats,
                 maxMana,
                 accent);
+            definition.ConfigureEffectHooks(null, skillEffect, 1.5f, castEffectAnchor, impactEffectAnchor);
             animator.Configure(renderer, BuildCombatSequences(id, frames));
 
             string path = $"{outputFolder}/{id}.prefab";
@@ -228,6 +231,14 @@ namespace RhythmHunter.FightDemoEditor
             Object.DestroyImmediate(root);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             return prefab != null ? prefab.GetComponent<FightCharacterDefinition>() : null;
+        }
+
+        private static Transform CreateEffectAnchor(Transform parent, string name, Vector3 localPosition)
+        {
+            GameObject anchor = new(name);
+            anchor.transform.SetParent(parent, false);
+            anchor.transform.localPosition = localPosition;
+            return anchor.transform;
         }
 
         private static List<FightCharacterCombatAnimator.Sequence> BuildCombatSequences(

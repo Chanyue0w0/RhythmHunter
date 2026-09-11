@@ -116,7 +116,11 @@ MonoBehaviour:
   skillName: Arcane Burst
   skillBehavior: 3
   skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 1533513433225352677, guid: 4b90ddde63a4da7469b9e61591b39fea, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 0}
+  impactEffectAnchor: {fileID: 0}
   attackIntervalBeats: 4
   maxMana: 3
   accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}

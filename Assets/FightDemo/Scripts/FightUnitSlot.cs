@@ -91,6 +91,8 @@ namespace RhythmHunter.FightDemo
         private Coroutine inputFeedbackRoutine;
         private Transform inputFeedbackTarget;
         private Vector3 inputFeedbackOrigin;
+        private Transform runtimeCastEffectAnchor;
+        private Transform runtimeImpactEffectAnchor;
 
         public event Action<FightUnitSlot, float, float> HealthChanged;
 
@@ -115,10 +117,20 @@ namespace RhythmHunter.FightDemo
         public FightCharacterCombatAnimator CombatAnimator => combatAnimator;
         public GameObject ActorPrefab => actorPrefab;
         public GameObject ActorInstance => actorInstance;
-        public GameObject NormalAttackEffectPrefab => normalAttackEffectPrefab;
-        public GameObject SkillEffectPrefab => skillEffectPrefab;
+        public GameObject NormalAttackEffectPrefab => characterDefinition != null && characterDefinition.NormalAbilityEffectPrefab != null
+            ? characterDefinition.NormalAbilityEffectPrefab
+            : normalAttackEffectPrefab;
+        public GameObject SkillEffectPrefab => characterDefinition != null && characterDefinition.SkillEffectPrefab != null
+            ? characterDefinition.SkillEffectPrefab
+            : skillEffectPrefab;
         public Transform ActorRoot => actorRoot;
         public Transform NormalAttackEffectSpawnPoint => normalAttackEffectSpawnPoint;
+        public Transform CastEffectAnchor => runtimeCastEffectAnchor != null
+            ? runtimeCastEffectAnchor
+            : (characterDefinition != null ? characterDefinition.CastEffectAnchor : actorRoot);
+        public Transform ImpactEffectAnchor => runtimeImpactEffectAnchor != null
+            ? runtimeImpactEffectAnchor
+            : (characterDefinition != null ? characterDefinition.ImpactEffectAnchor : actorRoot);
         public int NormalAttackPlayCount => normalAttackPlayCount;
         public int LightAttackPlayCount => lightAttackPlayCount;
         public int HeavyAttackPlayCount => heavyAttackPlayCount;
@@ -206,6 +218,7 @@ namespace RhythmHunter.FightDemo
             characterDefinition = actorInstance != null
                 ? actorInstance.GetComponent<FightCharacterDefinition>()
                 : prefab;
+            CacheOrCreateRuntimeEffectAnchors();
             combatAnimator?.BindBeatSource(beatSource);
 
             currentHp = maxHp;
@@ -336,10 +349,16 @@ namespace RhythmHunter.FightDemo
 
         public void PlayLightAttack()
         {
+            PlayLightAttackAt();
+        }
+
+        public void PlayLightAttackAt(params Transform[] effectAnchors)
+        {
             normalAttackPlayCount++;
             lightAttackPlayCount++;
             Color lightColor = Color.Lerp(accentColor, new Color(0.2f, 0.95f, 1f, 1f), 0.72f);
-            SpawnAttackEffect(FightAttackEffect.VisualStyle.Light, lightColor, 0f);
+            if (!SpawnConfiguredAbilityEffects(false, FightAttackEffect.VisualStyle.Light, lightColor, effectAnchors))
+                SpawnAttackEffect(FightAttackEffect.VisualStyle.Light, lightColor, 0f);
         }
 
         public void PlayHeavyAttack()
@@ -354,16 +373,40 @@ namespace RhythmHunter.FightDemo
 
         public void PlaySkillAttack()
         {
+            PlaySkillAttackAt();
+        }
+
+        public void PlaySkillAttackAt(params Transform[] effectAnchors)
+        {
             normalAttackPlayCount++;
             skillAttackPlayCount++;
-            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f, skillEffectPrefab);
-            SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f, skillEffectPrefab);
+            Color skillColor = Color.Lerp(accentColor, new Color(1f, 0.82f, 0.2f, 1f), 0.42f);
+            if (!SpawnConfiguredAbilityEffects(true, FightAttackEffect.VisualStyle.Skill, skillColor, effectAnchors))
+            {
+                SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f, skillEffectPrefab);
+                SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f, skillEffectPrefab);
+            }
         }
 
         public void PlayGuard()
         {
+            PlayGuardAt(false);
+        }
+
+        public void PlayGuardAt(bool skill)
+        {
             guardPlayCount++;
-            SpawnGuardLayer(new Color(0.2f, 1f, 0.58f, 0.72f), 0.75f, 0.7f, 1.8f, 220f, 0f);
+            Color guardColor = new(0.2f, 1f, 0.58f, 0.72f);
+            if (SpawnConfiguredAbilityEffects(
+                    skill,
+                    skill ? FightAttackEffect.VisualStyle.Skill : FightAttackEffect.VisualStyle.Light,
+                    guardColor,
+                    new[] { CastEffectAnchor }))
+            {
+                return;
+            }
+
+            SpawnGuardLayer(guardColor, 0.75f, 0.7f, 1.8f, 220f, 0f);
             SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
         }
 
@@ -461,7 +504,7 @@ namespace RhythmHunter.FightDemo
             GameObject overridePrefab = null,
             float lifetimeOverride = -1f)
         {
-            GameObject effectPrefab = overridePrefab != null ? overridePrefab : normalAttackEffectPrefab;
+            GameObject effectPrefab = overridePrefab != null ? overridePrefab : NormalAttackEffectPrefab;
             float lifetime = lifetimeOverride > 0f ? lifetimeOverride : attackEffectLifetime;
             EffectPlayer.SpawnAttack(
                 displayName,
@@ -474,6 +517,30 @@ namespace RhythmHunter.FightDemo
                 style,
                 color,
                 verticalOffset);
+        }
+
+        private bool SpawnConfiguredAbilityEffects(
+            bool skill,
+            FightAttackEffect.VisualStyle style,
+            Color color,
+            Transform[] anchors)
+        {
+            GameObject prefab = skill ? SkillEffectPrefab : NormalAttackEffectPrefab;
+            if (prefab == null)
+                return false;
+
+            float lifetime = characterDefinition != null
+                ? characterDefinition.AbilityEffectLifetime
+                : attackEffectLifetime;
+            if (anchors == null || anchors.Length == 0)
+            {
+                EffectPlayer.SpawnConfiguredAbility(prefab, CastEffectAnchor, lifetime, style, color);
+                return true;
+            }
+
+            foreach (Transform anchor in anchors)
+                EffectPlayer.SpawnConfiguredAbility(prefab, anchor != null ? anchor : CastEffectAnchor, lifetime, style, color);
+            return true;
         }
 
         private void SpawnGuardLayer(
@@ -541,9 +608,42 @@ namespace RhythmHunter.FightDemo
             actorInstance.transform.localPosition = actorLocalOffset;
             actorInstance.transform.localRotation = Quaternion.identity;
             combatAnimator = actorInstance.GetComponentInChildren<FightCharacterCombatAnimator>(true);
+            FightCharacterDefinition spawnedDefinition = actorInstance.GetComponent<FightCharacterDefinition>();
+            if (spawnedDefinition != null)
+                characterDefinition = spawnedDefinition;
+            CacheOrCreateRuntimeEffectAnchors();
 
             if (placeholderVisual != null)
                 placeholderVisual.SetActive(false);
+        }
+
+        private void CacheOrCreateRuntimeEffectAnchors()
+        {
+            if (actorInstance == null)
+                return;
+
+            runtimeCastEffectAnchor = characterDefinition != null
+                ? characterDefinition.AuthoredCastEffectAnchor
+                : null;
+            runtimeImpactEffectAnchor = characterDefinition != null
+                ? characterDefinition.AuthoredImpactEffectAnchor
+                : null;
+            if (runtimeCastEffectAnchor == null)
+                runtimeCastEffectAnchor = FindOrCreateRuntimeAnchor("VFX_CastAnchor", new Vector3(0f, 0.35f, -0.2f));
+            if (runtimeImpactEffectAnchor == null)
+                runtimeImpactEffectAnchor = FindOrCreateRuntimeAnchor("VFX_ImpactAnchor", new Vector3(0f, 1.1f, -0.25f));
+        }
+
+        private Transform FindOrCreateRuntimeAnchor(string anchorName, Vector3 localPosition)
+        {
+            Transform existing = actorInstance.transform.Find(anchorName);
+            if (existing != null)
+                return existing;
+
+            GameObject anchor = new(anchorName);
+            anchor.transform.SetParent(actorInstance.transform, false);
+            anchor.transform.localPosition = localPosition;
+            return anchor.transform;
         }
 
         private void ApplyDefinition(FightCharacterDefinition definition)
@@ -592,6 +692,8 @@ namespace RhythmHunter.FightDemo
                 DestroyImmediate(actorInstance);
             actorInstance = null;
             combatAnimator = null;
+            runtimeCastEffectAnchor = null;
+            runtimeImpactEffectAnchor = null;
         }
 
         private void RefreshHealthVisuals()

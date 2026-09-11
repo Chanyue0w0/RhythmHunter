@@ -116,7 +116,11 @@ MonoBehaviour:
   skillName: Shield Crash
   skillBehavior: 0
   skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 600739970279121489, guid: 3c9546731e5164a4993216f743e300a6, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 0}
+  impactEffectAnchor: {fileID: 0}
   attackIntervalBeats: 4
   maxMana: 4
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}

@@ -28,6 +28,7 @@ namespace RhythmHunter.FightDemo
         private float rotationSpeed;
         private SpriteRenderer spriteRenderer;
         private Color startColor = Color.white;
+        private bool moveDuringPlayback = true;
 
         public void Play(Vector3 travelDirection, float duration)
         {
@@ -38,6 +39,7 @@ namespace RhythmHunter.FightDemo
         {
             origin = transform.position;
             direction = travelDirection.sqrMagnitude > 0f ? travelDirection.normalized : Vector3.left;
+            moveDuringPlayback = true;
             ApplyStyle(style, duration);
             spriteRenderer = GetComponent<SpriteRenderer>();
             startColor = color;
@@ -47,13 +49,25 @@ namespace RhythmHunter.FightDemo
             gameObject.SetActive(true);
         }
 
+        /// <summary>
+        /// Plays this visual at an authored impact/cast anchor. This is deliberately
+        /// visual-only: gameplay damage has already resolved from the beat judgement.
+        /// </summary>
+        public void PlayInPlace(float duration, VisualStyle style, Color color)
+        {
+            Play(Vector3.left, duration, style, color);
+            moveDuringPlayback = false;
+        }
+
         private void Update()
         {
             elapsed += Time.deltaTime;
             float progress = Mathf.Clamp01(elapsed / lifetime);
             Vector3 perpendicular = new(-direction.y, direction.x, 0f);
             float arc = Mathf.Sin(progress * Mathf.PI) * verticalArc;
-            transform.position = origin + direction * (travelDistance * progress) + perpendicular * arc;
+            transform.position = moveDuringPlayback
+                ? origin + direction * (travelDistance * progress) + perpendicular * arc
+                : origin;
             transform.localScale = Vector3.one * (baseScale * Mathf.Max(0f, scaleCurve.Evaluate(progress)));
             transform.Rotate(0f, 0f, rotationSpeed * Time.deltaTime);
 

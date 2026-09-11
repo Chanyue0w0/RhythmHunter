@@ -116,7 +116,11 @@ MonoBehaviour:
   skillName: Aegis Counter
   skillBehavior: 4
   skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 5273961539278508256, guid: 6251f2ae3febbff47ba2d5ed0c7fd63f, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 0}
+  impactEffectAnchor: {fileID: 0}
   attackIntervalBeats: 1
   maxMana: 4
   accentColor: {r: 0.12, g: 0.65, b: 0.9, a: 1}
