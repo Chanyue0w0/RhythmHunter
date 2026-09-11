@@ -183,11 +183,11 @@ namespace RhythmHunter.FightDemoEditor
             fight.Configure(clock, judge, input, heroSlots[0], enemySlots[1], 120, 18);
             hudPresenter.Configure(clock, judge, fight, playback, cycle, warning, result, detail, health, statistics, beatNodes, beatProgress, healthBar, flash);
             battlefieldPresenter.Configure(fight, enemySlots, heroSlots, tankShield, enemyTelegraph);
-            BeatSyncedIdleAnimator[] idleAnimators = battlefield.GetComponentsInChildren<BeatSyncedIdleAnimator>(true);
+            FightCharacterCombatAnimator[] idleAnimators = battlefield.GetComponentsInChildren<FightCharacterCombatAnimator>(true);
             for (int i = 0; i < idleAnimators.Length; i++)
             {
-                BeatSyncedIdleAnimator animator = idleAnimators[i];
-                animator.Configure(fight, animator.TargetRenderer, animator.Frames, animator.CyclesPerBeat, animator.PingPong, i * 0.04f);
+                FightCharacterCombatAnimator animator = idleAnimators[i];
+                animator.ConfigureIdle(fight, animator.TargetRenderer, animator.Frames, animator.CyclesPerBeat, animator.PingPong, i * 0.04f);
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
@@ -238,7 +238,7 @@ namespace RhythmHunter.FightDemoEditor
             CreateWorldText("PrefabLabel", placeholder, font, "PREFAB\nSLOT", new Color(1f, 1f, 1f, 0.82f), new Vector3(0f, 0.18f, -0.2f), 0.022f, FontStyle.Bold);
             placeholder.gameObject.SetActive(false);
 
-            GameObject idleVisual = new("BeatSyncedIdle", typeof(SpriteRenderer), typeof(BeatSyncedIdleAnimator));
+            GameObject idleVisual = new("BeatSyncedIdle", typeof(SpriteRenderer), typeof(FightCharacterCombatAnimator));
             idleVisual.transform.SetParent(actorRoot, false);
             idleVisual.transform.localPosition = new Vector3(0f, -0.15f, -0.2f);
             SpriteRenderer actorRenderer = idleVisual.GetComponent<SpriteRenderer>();
@@ -248,7 +248,7 @@ namespace RhythmHunter.FightDemoEditor
             float sourceHeight = Mathf.Max(0.01f, idleFrames[0].bounds.size.y);
             float actorScale = actorHeight / sourceHeight;
             idleVisual.transform.localScale = new Vector3(actorScale, actorScale, 1f);
-            idleVisual.GetComponent<BeatSyncedIdleAnimator>().Configure(null, actorRenderer, idleFrames, 1f, false);
+            idleVisual.GetComponent<FightCharacterCombatAnimator>().ConfigureIdle(null, actorRenderer, idleFrames, 1f, false);
 
             Transform effectPoint = new GameObject("NormalAttackEffectSpawnPoint").transform;
             effectPoint.SetParent(slotObject.transform, false);

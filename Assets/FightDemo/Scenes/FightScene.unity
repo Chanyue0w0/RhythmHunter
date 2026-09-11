@@ -531,9 +531,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 80839403}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   beatSource: {fileID: 2021200326}
   fallbackBpm: 120
   targetRenderer: {fileID: 80839406}
@@ -543,6 +543,7 @@ MonoBehaviour:
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.04
+  sequences: []
 --- !u!212 &80839406
 SpriteRenderer:
   serializedVersion: 2
@@ -2218,9 +2219,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 434017958}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   beatSource: {fileID: 2021200326}
   fallbackBpm: 120
   targetRenderer: {fileID: 434017961}
@@ -2231,6 +2232,7 @@ MonoBehaviour:
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.19999999
+  sequences: []
 --- !u!212 &434017961
 SpriteRenderer:
   serializedVersion: 2
@@ -3134,9 +3136,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 505211199}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   beatSource: {fileID: 2021200326}
   fallbackBpm: 120
   targetRenderer: {fileID: 505211202}
@@ -3146,6 +3148,7 @@ MonoBehaviour:
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0
+  sequences: []
 --- !u!212 &505211202
 SpriteRenderer:
   serializedVersion: 2
@@ -5777,9 +5780,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1115074067}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   beatSource: {fileID: 2021200326}
   fallbackBpm: 120
   targetRenderer: {fileID: 1115074070}
@@ -5790,6 +5793,7 @@ MonoBehaviour:
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.12
+  sequences: []
 --- !u!212 &1115074070
 SpriteRenderer:
   serializedVersion: 2
@@ -6874,9 +6878,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1309611260}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   beatSource: {fileID: 2021200326}
   fallbackBpm: 120
   targetRenderer: {fileID: 1309611263}
@@ -6887,6 +6891,7 @@ MonoBehaviour:
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.16
+  sequences: []
 --- !u!212 &1309611263
 SpriteRenderer:
   serializedVersion: 2
@@ -8525,9 +8530,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1640942949}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   beatSource: {fileID: 2021200326}
   fallbackBpm: 120
   targetRenderer: {fileID: 1640942952}
@@ -8537,6 +8542,7 @@ MonoBehaviour:
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.08
+  sequences: []
 --- !u!212 &1640942952
 SpriteRenderer:
   serializedVersion: 2

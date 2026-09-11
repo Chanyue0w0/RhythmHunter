@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace RhythmHunter.FightDemo
@@ -29,11 +28,6 @@ namespace RhythmHunter.FightDemo
 
         [Header("Visuals")]
         [SerializeField] private Color accentColor = Color.white;
-        [SerializeField] private SpriteRenderer characterRenderer;
-        [SerializeField] private BeatSyncedIdleAnimator idleAnimator;
-        [SerializeField] private List<Sprite> idleFrames = new();
-        [SerializeField, Min(0.01f)] private float idleCyclesPerBeat = 1f;
-        [SerializeField] private bool idlePingPong;
 
         public string CharacterId => characterId;
         public string DisplayName => displayName;
@@ -47,11 +41,6 @@ namespace RhythmHunter.FightDemo
         public int AttackIntervalBeats => attackIntervalBeats;
         public int MaxMana => maxMana;
         public Color AccentColor => accentColor;
-        public SpriteRenderer CharacterRenderer => characterRenderer;
-        public BeatSyncedIdleAnimator IdleAnimator => idleAnimator;
-        public IReadOnlyList<Sprite> IdleFrames => idleFrames;
-        public float IdleCyclesPerBeat => idleCyclesPerBeat;
-        public bool IdlePingPong => idlePingPong;
 
         public void Configure(
             string id,
@@ -65,12 +54,7 @@ namespace RhythmHunter.FightDemo
             GameObject abilityEffect,
             int intervalBeats,
             int manaCapacity,
-            Color color,
-            SpriteRenderer renderer,
-            BeatSyncedIdleAnimator animator,
-            IEnumerable<Sprite> frames,
-            float cyclesPerBeat = 1f,
-            bool pingPong = false)
+            Color color)
         {
             characterId = id;
             displayName = shownName;
@@ -84,11 +68,6 @@ namespace RhythmHunter.FightDemo
             attackIntervalBeats = Mathf.Max(1, intervalBeats);
             maxMana = Mathf.Max(1, manaCapacity);
             accentColor = color;
-            characterRenderer = renderer;
-            idleAnimator = animator;
-            idleFrames = frames != null ? new List<Sprite>(frames) : new List<Sprite>();
-            idleCyclesPerBeat = Mathf.Max(0.01f, cyclesPerBeat);
-            idlePingPong = pingPong;
         }
 
 #if UNITY_EDITOR
@@ -99,7 +78,6 @@ namespace RhythmHunter.FightDemo
             skillDamage = Mathf.Max(0, skillDamage);
             attackIntervalBeats = Mathf.Max(1, attackIntervalBeats);
             maxMana = Mathf.Max(1, maxMana);
-            idleCyclesPerBeat = Mathf.Max(0.01f, idleCyclesPerBeat);
         }
 #endif
     }

@@ -58,7 +58,7 @@ namespace RhythmHunter.FightDemoEditor
             foreach (FightUnitSlot slot in slots)
             {
                 if (slot.ActorRoot != null &&
-                    slot.ActorRoot.GetComponentsInChildren<BeatSyncedIdleAnimator>(true).Length > 0)
+                    slot.ActorRoot.GetComponentsInChildren<FightCharacterCombatAnimator>(true).Length > 0)
                 {
                     Debug.LogError(
                         $"FIGHT_SCENE2_SMOKE_TEST_FAIL: {slot.name} still contains a scene-authored character.");
@@ -316,14 +316,14 @@ namespace RhythmHunter.FightDemoEditor
                     continue;
 
                 characterCount++;
-                if (definition.AttackIntervalBeats < 1 || definition.IdleFrames.Count == 0)
+                if (definition.AttackIntervalBeats < 1)
                 {
                     failure = $"{path} has invalid attack interval or idle frames.";
                     return false;
                 }
 
                 FightCharacterCombatAnimator combatAnimator = prefab.GetComponent<FightCharacterCombatAnimator>();
-                if (combatAnimator == null)
+                if (combatAnimator == null || combatAnimator.FrameCount == 0 || combatAnimator.TargetRenderer == null)
                 {
                     failure = $"{path} is missing FightCharacterCombatAnimator.";
                     return false;
@@ -375,8 +375,8 @@ namespace RhythmHunter.FightDemoEditor
                    definition.SkillDamage >= 0 &&
                    definition.SkillEffectPrefab != null &&
                    definition.AttackIntervalBeats > 0 &&
-                   definition.IdleFrames.Count > 0 &&
-                   slot.CombatAnimator != null;
+                   slot.CombatAnimator != null &&
+                   slot.CombatAnimator.FrameCount > 0;
         }
 
         private static int TotalEnemyHp()

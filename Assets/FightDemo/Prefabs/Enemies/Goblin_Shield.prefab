@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5025604439274480606}
   - component: {fileID: 5304115042776493395}
-  - component: {fileID: 6752076891445895251}
   - component: {fileID: 860210294745740716}
   - component: {fileID: 3793369446901847789}
   m_Layer: 0
@@ -94,27 +93,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &6752076891445895251
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3464431099182205573}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
-  beatSource: {fileID: 0}
-  fallbackBpm: 120
-  targetRenderer: {fileID: 5304115042776493395}
-  frames:
-  - {fileID: 3597685455855505597, guid: 7379714c2656d8c4babd92aa02815d19, type: 3}
-  - {fileID: -9209713918260888839, guid: 75ecf9a042113904e9b25a2c9f6023c4, type: 3}
-  cyclesPerBeat: 1
-  pingPong: 0
-  phaseOffset: 0
 --- !u!114 &860210294745740716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,13 +117,6 @@ MonoBehaviour:
   attackIntervalBeats: 4
   maxMana: 4
   accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}
-  characterRenderer: {fileID: 5304115042776493395}
-  idleAnimator: {fileID: 6752076891445895251}
-  idleFrames:
-  - {fileID: 3597685455855505597, guid: 7379714c2656d8c4babd92aa02815d19, type: 3}
-  - {fileID: -9209713918260888839, guid: 75ecf9a042113904e9b25a2c9f6023c4, type: 3}
-  idleCyclesPerBeat: 1
-  idlePingPong: 0
 --- !u!114 &3793369446901847789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,7 +130,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   targetRenderer: {fileID: 5304115042776493395}
-  idleAnimator: {fileID: 6752076891445895251}
+  beatSource: {fileID: 0}
+  fallbackBpm: 120
+  frames:
+  - {fileID: 3597685455855505597, guid: 7379714c2656d8c4babd92aa02815d19, type: 3}
+  - {fileID: -9209713918260888839, guid: 75ecf9a042113904e9b25a2c9f6023c4, type: 3}
+  cyclesPerBeat: 1
+  pingPong: 0
+  phaseOffset: 0
   sequences:
   - animation: 0
     frames:

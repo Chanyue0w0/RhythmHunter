@@ -202,14 +202,14 @@ namespace RhythmHunter.FightDemoEditor
                 return false;
             }
 
-            BeatSyncedIdleAnimator[] idleAnimators = Object.FindObjectsByType<BeatSyncedIdleAnimator>(FindObjectsSortMode.None);
+            FightCharacterCombatAnimator[] idleAnimators = Object.FindObjectsByType<FightCharacterCombatAnimator>(FindObjectsSortMode.None);
             if (idleAnimators.Length != 6)
             {
                 failure = $"Expected six beat-synced idle animators, found {idleAnimators.Length}.";
                 return false;
             }
 
-            foreach (BeatSyncedIdleAnimator animator in idleAnimators)
+            foreach (FightCharacterCombatAnimator animator in idleAnimators)
             {
                 if (animator.FrameCount < 2 || animator.TargetRenderer == null || animator.BeatSource == null)
                 {

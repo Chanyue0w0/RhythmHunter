@@ -128,8 +128,6 @@ namespace RhythmHunter.FightDemo
                 PlayHeroCountdown(fight.SecondHero, beat.GlobalBeat);
                 PlayHeroCountdown(fight.ThirdHero, beat.GlobalBeat);
             }
-            else
-                attacker?.Pulse(attackBeat ? 0.3f : 0.1f);
             telegraphTimer = attackBeat ? 0.45f : 0.16f;
         }
 
@@ -141,14 +139,12 @@ namespace RhythmHunter.FightDemo
                     call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
                 {
                     shieldTimer = 0.55f;
-                    fight.FrontHero.UnitSlot?.Pulse();
                 }
 
                 return;
             }
 
             FightUnitSlot hero = SlotAt(heroSlots, HeroIndex(call.Command));
-            hero?.Pulse();
 
             if (hero != null && call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect && !call.IsHeavyBeat)
                 hero.PlayNormalAttack();

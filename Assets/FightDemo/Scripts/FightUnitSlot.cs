@@ -64,13 +64,10 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private TextMesh roleLabel;
 
         private GameObject actorInstance;
-        private Vector3 actorBaseScale = Vector3.one;
         private FightCharacterDefinition characterDefinition;
         private FightCharacterCombatAnimator combatAnimator;
         private bool hasCharacter = true;
         private int currentHp;
-        private float pulse;
-        private float pulseScaleBonus = 0.14f;
         private int normalAttackPlayCount;
         private int lightAttackPlayCount;
         private int heavyAttackPlayCount;
@@ -185,25 +182,7 @@ namespace RhythmHunter.FightDemo
             characterDefinition = actorInstance != null
                 ? actorInstance.GetComponent<FightCharacterDefinition>()
                 : prefab;
-            combatAnimator = actorInstance != null
-                ? actorInstance.GetComponent<FightCharacterCombatAnimator>()
-                : null;
-
-            BeatSyncedIdleAnimator animator = actorInstance != null
-                ? actorInstance.GetComponentInChildren<BeatSyncedIdleAnimator>(true)
-                : null;
-            FightCharacterDefinition runtimeDefinition = actorInstance != null
-                ? actorInstance.GetComponent<FightCharacterDefinition>()
-                : null;
-            if (animator != null && runtimeDefinition != null)
-            {
-                animator.Configure(
-                    beatSource,
-                    runtimeDefinition.CharacterRenderer,
-                    runtimeDefinition.IdleFrames,
-                    runtimeDefinition.IdleCyclesPerBeat,
-                    runtimeDefinition.IdlePingPong);
-            }
+            combatAnimator?.BindBeatSource(beatSource);
 
             currentHp = maxHp;
             currentMana = 0;
@@ -229,23 +208,6 @@ namespace RhythmHunter.FightDemo
             RefreshHealthVisuals();
         }
 
-        private void Update()
-        {
-            pulse = Mathf.MoveTowards(pulse, 0f, Time.deltaTime * 4f);
-            Transform visualRoot = actorInstance != null
-                ? actorInstance.transform
-                : actorRoot != null
-                    ? actorRoot
-                    : placeholderVisual != null
-                        ? placeholderVisual.transform
-                        : null;
-            if (visualRoot != null)
-            {
-                Vector3 baseScale = actorInstance != null ? actorBaseScale : Vector3.one;
-                visualRoot.localScale = baseScale * Mathf.Lerp(1f, 1f + pulseScaleBonus, pulse);
-            }
-        }
-
         public void RestoreFullHealth()
         {
             currentHp = maxHp;
@@ -259,19 +221,7 @@ namespace RhythmHunter.FightDemo
             currentHp -= applied;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
-            Pulse();
             return applied;
-        }
-
-        public void Pulse()
-        {
-            Pulse(0.14f);
-        }
-
-        public void Pulse(float scaleBonus)
-        {
-            pulse = 1f;
-            pulseScaleBonus = Mathf.Max(0.02f, scaleBonus);
         }
 
         public void GainMana(int amount = 1)
@@ -302,7 +252,6 @@ namespace RhythmHunter.FightDemo
             Color warningColor = enemy
                 ? new Color(1f, 0.18f, 0.05f, 0.72f)
                 : new Color(0.15f, 0.9f, 1f, 0.65f);
-            Pulse(enemy ? 0.22f : 0.16f);
             SpawnAttackChargeLayer(warningColor, false, enemy, 0f);
         }
 
@@ -312,7 +261,6 @@ namespace RhythmHunter.FightDemo
             int remaining = Mathf.Clamp(beatsUntilAttack, 0, interval - 1);
             bool attackBeat = remaining == 0;
             float readiness = attackBeat ? 1f : 1f - remaining / (float)interval;
-            Pulse(attackBeat ? 0.34f : Mathf.Lerp(0.06f, 0.18f, readiness));
 
             Color chargeColor = enemy
                 ? attackBeat
@@ -334,14 +282,12 @@ namespace RhythmHunter.FightDemo
         public void PlayNormalAttack()
         {
             normalAttackPlayCount++;
-            Pulse(0.14f);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Normal, accentColor, 0f);
         }
 
         public void PlayImmediateNormalAttack()
         {
             normalAttackPlayCount++;
-            Pulse(0.28f);
             SpawnAttackEffect(
                 FightAttackEffect.VisualStyle.Normal,
                 accentColor,
@@ -354,7 +300,6 @@ namespace RhythmHunter.FightDemo
         {
             normalAttackPlayCount++;
             lightAttackPlayCount++;
-            Pulse(0.16f);
             Color lightColor = Color.Lerp(accentColor, new Color(0.2f, 0.95f, 1f, 1f), 0.72f);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Light, lightColor, 0f);
         }
@@ -363,7 +308,6 @@ namespace RhythmHunter.FightDemo
         {
             normalAttackPlayCount++;
             heavyAttackPlayCount++;
-            Pulse(0.34f);
             Color heavyColor = new(1f, 0.3f, 0.06f, 1f);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Heavy, heavyColor, -0.24f);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Heavy, new Color(1f, 0.68f, 0.08f, 0.9f), 0f);
@@ -374,7 +318,6 @@ namespace RhythmHunter.FightDemo
         {
             normalAttackPlayCount++;
             skillAttackPlayCount++;
-            Pulse(0.42f);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f, skillEffectPrefab);
             SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f, skillEffectPrefab);
         }
@@ -382,7 +325,6 @@ namespace RhythmHunter.FightDemo
         public void PlayGuard()
         {
             guardPlayCount++;
-            Pulse(0.22f);
             SpawnGuardLayer(new Color(0.2f, 1f, 0.58f, 0.72f), 0.75f, 0.7f, 1.8f, 220f, 0f);
             SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
         }
@@ -489,7 +431,7 @@ namespace RhythmHunter.FightDemo
             actorInstance.name = $"{actorPrefab.name} (Runtime)";
             actorInstance.transform.localPosition = actorLocalOffset;
             actorInstance.transform.localRotation = Quaternion.identity;
-            actorBaseScale = actorInstance.transform.localScale;
+            combatAnimator = actorInstance.GetComponentInChildren<FightCharacterCombatAnimator>(true);
 
             if (placeholderVisual != null)
                 placeholderVisual.SetActive(false);
@@ -537,7 +479,6 @@ namespace RhythmHunter.FightDemo
                 DestroyImmediate(actorInstance);
             actorInstance = null;
             combatAnimator = null;
-            actorBaseScale = Vector3.one;
         }
 
         private void RefreshHealthVisuals()

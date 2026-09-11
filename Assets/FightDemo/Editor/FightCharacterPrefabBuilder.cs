@@ -99,9 +99,9 @@ namespace RhythmHunter.FightDemoEditor
                 if (slot.gameObject.scene != scene || slot.ActorRoot == null)
                     continue;
 
-                BeatSyncedIdleAnimator[] sceneCharacters =
-                    slot.ActorRoot.GetComponentsInChildren<BeatSyncedIdleAnimator>(true);
-                foreach (BeatSyncedIdleAnimator sceneCharacter in sceneCharacters)
+                FightCharacterCombatAnimator[] sceneCharacters =
+                    slot.ActorRoot.GetComponentsInChildren<FightCharacterCombatAnimator>(true);
+                foreach (FightCharacterCombatAnimator sceneCharacter in sceneCharacters)
                 {
                     Object.DestroyImmediate(sceneCharacter.gameObject);
                     removedCount++;
@@ -133,12 +133,11 @@ namespace RhythmHunter.FightDemoEditor
                         continue;
 
                     SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();
-                    BeatSyncedIdleAnimator idle = root.GetComponent<BeatSyncedIdleAnimator>();
                     FightCharacterCombatAnimator combat = root.GetComponent<FightCharacterCombatAnimator>();
                     if (combat == null)
                         combat = root.AddComponent<FightCharacterCombatAnimator>();
 
-                    combat.Configure(renderer, idle, BuildCombatSequences(definition.CharacterId, definition.IdleFrames));
+                    combat.Configure(renderer, BuildCombatSequences(definition.CharacterId, combat.Frames));
                     PrefabUtility.SaveAsPrefabAsset(root, path);
                     upgraded++;
                 }
@@ -178,7 +177,6 @@ namespace RhythmHunter.FightDemoEditor
             GameObject root = new(
                 id,
                 typeof(SpriteRenderer),
-                typeof(BeatSyncedIdleAnimator),
                 typeof(FightCharacterDefinition),
                 typeof(FightCharacterCombatAnimator));
             SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();
@@ -189,8 +187,8 @@ namespace RhythmHunter.FightDemoEditor
             float scale = actorHeight / sourceHeight;
             root.transform.localScale = new Vector3(scale, scale, 1f);
 
-            BeatSyncedIdleAnimator animator = root.GetComponent<BeatSyncedIdleAnimator>();
-            animator.Configure(null, renderer, frames, 1f, false);
+            FightCharacterCombatAnimator animator = root.GetComponent<FightCharacterCombatAnimator>();
+            animator.ConfigureIdle(null, renderer, frames, 1f, false);
             FightCharacterDefinition definition = root.GetComponent<FightCharacterDefinition>();
             definition.Configure(
                 id,
@@ -204,12 +202,8 @@ namespace RhythmHunter.FightDemoEditor
                 skillEffect,
                 attackIntervalBeats,
                 maxMana,
-                accent,
-                renderer,
-                animator,
-                frames);
-            FightCharacterCombatAnimator combatAnimator = root.GetComponent<FightCharacterCombatAnimator>();
-            combatAnimator.Configure(renderer, animator, BuildCombatSequences(id, frames));
+                accent);
+            animator.Configure(renderer, BuildCombatSequences(id, frames));
 
             string path = $"{outputFolder}/{id}.prefab";
             PrefabUtility.SaveAsPrefabAsset(root, path);
