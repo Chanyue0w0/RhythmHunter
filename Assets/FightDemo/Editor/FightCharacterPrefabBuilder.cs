@@ -115,6 +115,44 @@ namespace RhythmHunter.FightDemoEditor
             Debug.Log($"FIGHT_SCENE2_SCENE_CHARACTERS_REMOVED:{removedCount}");
         }
 
+        [MenuItem("Rhythm Hunter/Upgrade Fight Character Combat Animations")]
+        public static void UpgradeCharacterCombatAnimationPrefabs()
+        {
+            string[] prefabGuids = AssetDatabase.FindAssets(
+                "t:Prefab",
+                new[] { HeroRoot, EnemyRoot });
+            int upgraded = 0;
+            foreach (string guid in prefabGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                GameObject root = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    FightCharacterDefinition definition = root.GetComponent<FightCharacterDefinition>();
+                    if (definition == null)
+                        continue;
+
+                    SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();
+                    BeatSyncedIdleAnimator idle = root.GetComponent<BeatSyncedIdleAnimator>();
+                    FightCharacterCombatAnimator combat = root.GetComponent<FightCharacterCombatAnimator>();
+                    if (combat == null)
+                        combat = root.AddComponent<FightCharacterCombatAnimator>();
+
+                    combat.Configure(renderer, idle, BuildCombatSequences(definition.CharacterId, definition.IdleFrames));
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                    upgraded++;
+                }
+                finally
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"FIGHT_CHARACTER_COMBAT_ANIMATIONS_UPGRADED:{upgraded}");
+        }
+
         private static FightCharacterDefinition BuildCharacter(
             string id,
             string displayName,
@@ -137,7 +175,12 @@ namespace RhythmHunter.FightDemoEditor
                 throw new MissingReferenceException($"No idle sprites found for {id}.");
 
             GameObject skillEffect = BuildSkillEffect(id, accent, fallbackEffectSprite);
-            GameObject root = new(id, typeof(SpriteRenderer), typeof(BeatSyncedIdleAnimator), typeof(FightCharacterDefinition));
+            GameObject root = new(
+                id,
+                typeof(SpriteRenderer),
+                typeof(BeatSyncedIdleAnimator),
+                typeof(FightCharacterDefinition),
+                typeof(FightCharacterCombatAnimator));
             SpriteRenderer renderer = root.GetComponent<SpriteRenderer>();
             renderer.sprite = frames[0];
             renderer.color = Color.white;
@@ -165,12 +208,127 @@ namespace RhythmHunter.FightDemoEditor
                 renderer,
                 animator,
                 frames);
+            FightCharacterCombatAnimator combatAnimator = root.GetComponent<FightCharacterCombatAnimator>();
+            combatAnimator.Configure(renderer, animator, BuildCombatSequences(id, frames));
 
             string path = $"{outputFolder}/{id}.prefab";
             PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             return prefab != null ? prefab.GetComponent<FightCharacterDefinition>() : null;
+        }
+
+        private static List<FightCharacterCombatAnimator.Sequence> BuildCombatSequences(
+            string characterId,
+            IReadOnlyList<Sprite> idleFrames)
+        {
+            Sprite[] fallback = idleFrames != null
+                ? idleFrames.Where(sprite => sprite != null).ToArray()
+                : new Sprite[0];
+            Sprite[] attack = fallback;
+            Sprite[] hit = fallback.Length > 0 ? new[] { fallback[0] } : fallback;
+            Sprite[] skill = attack;
+            float fps = 16f;
+            int effectFrame = Mathf.Min(1, Mathf.Max(0, attack.Length - 1));
+            int damageFrame = Mathf.Min(2, Mathf.Max(0, attack.Length - 1));
+
+            switch (characterId)
+            {
+                case "Bard":
+                    attack = LoadFrames(
+                        "Assets/FightDemo/Arts/角色/Bard/combo/combo_1.png",
+                        "Assets/FightDemo/Arts/角色/Bard/combo/combo_2.png",
+                        "Assets/FightDemo/Arts/角色/Bard/combo/combo_finish.png");
+                    skill = LoadFrames(
+                        "Assets/FightDemo/Arts/角色/Bard/Fever/fever_1.png",
+                        "Assets/FightDemo/Arts/角色/Bard/Fever/fever_2.png",
+                        "Assets/FightDemo/Arts/角色/Bard/Fever/fever_3.png",
+                        "Assets/FightDemo/Arts/角色/Bard/Fever/fever_4.png",
+                        "Assets/FightDemo/Arts/角色/Bard/Fever/fever_5.png",
+                        "Assets/FightDemo/Arts/角色/Bard/Fever/fever_6.png");
+                    fps = 18f;
+                    effectFrame = 1;
+                    damageFrame = 2;
+                    break;
+                case "Goblin_Mage":
+                    attack = LoadNumberedFrames("Assets/FightDemo/Arts/敵人/Goblin_Mage/attack/attack_{0}.png", 9);
+                    hit = LoadFrames("Assets/FightDemo/Arts/敵人/Goblin_Mage/attacked_1.png");
+                    skill = attack;
+                    fps = 30f;
+                    effectFrame = 2;
+                    damageFrame = 4;
+                    break;
+                case "Goblin_Mercenary":
+                    attack = LoadNumberedFrames("Assets/FightDemo/Arts/敵人/Goblin_Mercenary/attack/attack_{0}.png", 4);
+                    hit = LoadFrames("Assets/FightDemo/Arts/敵人/Goblin_Mercenary/attacked_1.png");
+                    skill = attack;
+                    fps = 20f;
+                    effectFrame = 1;
+                    damageFrame = 2;
+                    break;
+                case "Goblin_Shield":
+                    attack = LoadNumberedFrames("Assets/FightDemo/Arts/敵人/Goblin_Shield/attack/attack_{0}.png", 3);
+                    hit = LoadFrames("Assets/FightDemo/Arts/敵人/Goblin_Shield/attacked_1.png");
+                    skill = attack;
+                    fps = 18f;
+                    effectFrame = 1;
+                    damageFrame = 2;
+                    break;
+            }
+
+            if (attack.Length == 0)
+                attack = fallback;
+            if (skill.Length == 0)
+                skill = attack;
+            if (hit.Length == 0)
+                hit = fallback;
+
+            List<FightCharacterCombatAnimator.Sequence> sequences = new();
+            sequences.Add(CreateSequence(FightCharacterCombatAnimator.CombatAnimation.NormalAttack, attack, fps, 0, effectFrame, damageFrame));
+            sequences.Add(CreateSequence(FightCharacterCombatAnimator.CombatAnimation.LightAttack, attack, fps, 0, effectFrame, damageFrame));
+            sequences.Add(CreateSequence(FightCharacterCombatAnimator.CombatAnimation.HeavyAttack, attack, Mathf.Max(10f, fps * 0.8f), 0, effectFrame, damageFrame));
+            sequences.Add(CreateSequence(FightCharacterCombatAnimator.CombatAnimation.Guard, fallback, 14f, 0, 0, 0));
+            sequences.Add(CreateSequence(
+                FightCharacterCombatAnimator.CombatAnimation.Skill,
+                skill,
+                fps,
+                0,
+                Mathf.Min(2, skill.Length - 1),
+                Mathf.Min(3, skill.Length - 1)));
+            sequences.Add(CreateSequence(FightCharacterCombatAnimator.CombatAnimation.Hit, hit, 12f, -1, -1, 0));
+            sequences.Add(CreateSequence(FightCharacterCombatAnimator.CombatAnimation.Death, hit, 8f, -1, -1, 0));
+            return sequences;
+        }
+
+        private static FightCharacterCombatAnimator.Sequence CreateSequence(
+            FightCharacterCombatAnimator.CombatAnimation animation,
+            IEnumerable<Sprite> frames,
+            float fps,
+            int warningFrame,
+            int effectFrame,
+            int damageFrame)
+        {
+            FightCharacterCombatAnimator.Sequence sequence = new();
+            sequence.Configure(animation, frames, fps, warningFrame, effectFrame, damageFrame);
+            return sequence;
+        }
+
+        private static Sprite[] LoadNumberedFrames(string pathFormat, int count)
+        {
+            List<Sprite> frames = new();
+            for (int i = 1; i <= count; i++)
+            {
+                Sprite sprite = LoadSprite(string.Format(pathFormat, i));
+                if (sprite != null)
+                    frames.Add(sprite);
+            }
+
+            return frames.ToArray();
+        }
+
+        private static Sprite[] LoadFrames(params string[] paths)
+        {
+            return paths.Select(LoadSprite).Where(sprite => sprite != null).ToArray();
         }
 
         private static GameObject BuildSkillEffect(string id, Color accent, Sprite sprite)

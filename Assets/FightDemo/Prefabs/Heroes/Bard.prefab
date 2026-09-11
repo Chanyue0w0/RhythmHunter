@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8196285849424408783}
   - component: {fileID: 6464482926180887097}
   - component: {fileID: 2185465317251320045}
+  - component: {fileID: 5925712019385393702}
   m_Layer: 0
   m_Name: Bard
   m_TagString: Untagged
@@ -103,7 +104,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
   beatSource: {fileID: 0}
   fallbackBpm: 120
@@ -125,7 +126,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
   characterId: Bard
   displayName: BARD
@@ -147,3 +148,80 @@ MonoBehaviour:
   - {fileID: 8050079004319037636, guid: 30365fd678e77b648b9da40fcc59cc36, type: 3}
   idleCyclesPerBeat: 1
   idlePingPong: 0
+--- !u!114 &5925712019385393702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1659145845306111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
+  targetRenderer: {fileID: 8196285849424408783}
+  idleAnimator: {fileID: 6464482926180887097}
+  sequences:
+  - animation: 0
+    frames:
+    - {fileID: -1351328435862124284, guid: 1c30bbd113ed59746a6ac8dfd52e3a84, type: 3}
+    - {fileID: 2103946461064055381, guid: 937694a14aa60424aaec3da7dcdc6b8b, type: 3}
+    - {fileID: 3121326049159161688, guid: ff735b34821d7b54597408a7147b87f0, type: 3}
+    framesPerSecond: 18
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 1
+    frames:
+    - {fileID: -1351328435862124284, guid: 1c30bbd113ed59746a6ac8dfd52e3a84, type: 3}
+    - {fileID: 2103946461064055381, guid: 937694a14aa60424aaec3da7dcdc6b8b, type: 3}
+    - {fileID: 3121326049159161688, guid: ff735b34821d7b54597408a7147b87f0, type: 3}
+    framesPerSecond: 18
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 2
+    frames:
+    - {fileID: -1351328435862124284, guid: 1c30bbd113ed59746a6ac8dfd52e3a84, type: 3}
+    - {fileID: 2103946461064055381, guid: 937694a14aa60424aaec3da7dcdc6b8b, type: 3}
+    - {fileID: 3121326049159161688, guid: ff735b34821d7b54597408a7147b87f0, type: 3}
+    framesPerSecond: 14.400001
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 3
+    frames:
+    - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
+    - {fileID: -8157529274441160004, guid: d9e5ba9e884714847869b90ccac2db14, type: 3}
+    - {fileID: 8050079004319037636, guid: 30365fd678e77b648b9da40fcc59cc36, type: 3}
+    framesPerSecond: 14
+    warningFrame: 0
+    attackEffectFrame: 0
+    damageFrame: 0
+  - animation: 4
+    frames:
+    - {fileID: 3983509589532599869, guid: 4532a6fefbf65ea449fdd30f83598ddb, type: 3}
+    - {fileID: -2303763509387396779, guid: ee40dfa4dd030d54a8a51ca3b4abed7b, type: 3}
+    - {fileID: 408858819960165098, guid: 8b3778a255df4254cb75dd1ab1a8adfc, type: 3}
+    - {fileID: -528471281070363416, guid: dce49542b9d57714ab24013312a1c6cf, type: 3}
+    - {fileID: 352373741322793507, guid: 2e457b27096185247870632d551d2e78, type: 3}
+    - {fileID: 1851172496842706988, guid: 324853e5009eead4c858954294c9e717, type: 3}
+    framesPerSecond: 18
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 3
+  - animation: 5
+    frames:
+    - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
+    framesPerSecond: 12
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0
+  - animation: 6
+    frames:
+    - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
+    framesPerSecond: 8
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0

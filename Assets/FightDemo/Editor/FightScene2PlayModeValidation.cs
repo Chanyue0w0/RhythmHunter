@@ -170,10 +170,10 @@ namespace RhythmHunter.FightDemoEditor
                 !fight.IsEnemyAttackBeat(clock.LatestBeat.GlobalBeat) &&
                 clock.TryGetBeatPhase(out float heavyPhase) && heavyPhase < 0.08f)
             {
-                int attacksBefore = fight.FrontHero.UnitSlot?.NormalAttackPlayCount ?? 0;
                 fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Support);
-                int attacksAfter = fight.FrontHero.UnitSlot?.NormalAttackPlayCount ?? 0;
-                SessionState.SetBool(HeavyAttemptedKey, attacksAfter > attacksBefore);
+                // Frame-driven animations intentionally raise their visual event later.
+                // Record the input here and verify the resulting counter in the final checks.
+                SessionState.SetBool(HeavyAttemptedKey, true);
             }
 
             if (clock != null && fight != null && clock.ReceivedBeatCount >= 4 &&
@@ -201,6 +201,7 @@ namespace RhythmHunter.FightDemoEditor
                 int mageAttacks = fight.ThirdHero.UnitSlot?.NormalAttackPlayCount ?? 0;
                 int enemyNormalAttacks = fight.ActiveEnemySlot?.NormalAttackPlayCount ?? 0;
                 int enemySkillAttacks = fight.ActiveEnemySlot?.SkillAttackPlayCount ?? 0;
+                int enemyFrameDamageEvents = fight.ActiveEnemySlot?.CombatAnimator?.DamageEventCount ?? 0;
                 int enemyMana = fight.EnemyCurrentMana;
                 bool scheduledBeatsAligned = fight.LastEnemyAttackGlobalBeat >= 0 &&
                                              (fight.LastEnemyAttackGlobalBeat + 1) % fight.EnemyAttackIntervalBeats == 0 &&
@@ -223,6 +224,7 @@ namespace RhythmHunter.FightDemoEditor
                                         fight.SecondHero.UnitSlot.SkillAttackPlayCount >= 1 &&
                                         mageAttacks >= 2 &&
                                         enemyNormalAttacks >= 2 &&
+                                        enemyFrameDamageEvents >= 2 &&
                                         enemySkillAttacks == 0 &&
                                         enemyMana >= 1 &&
                                         scheduledBeatsAligned &&
@@ -249,6 +251,7 @@ namespace RhythmHunter.FightDemoEditor
                         : $"Invalid flow. Mana={frontMana}, FrontAttacks={frontAttacks}, " +
                           $"BardAttacks={bardAttacks}, BardSkills={bardSkills}, MageAttacks={mageAttacks}, " +
                           $"EnemyNormal={enemyNormalAttacks}, EnemySkills={enemySkillAttacks}, EnemyMana={enemyMana}, " +
+                          $"EnemyFrameDamageEvents={enemyFrameDamageEvents}, " +
                           $"ScheduledBeatsAligned={scheduledBeatsAligned}, " +
                           $"EnemyHP={currentEnemyHp}/{initialEnemyHp}, Blocks={fight.BlockedAttackCount}, " +
                           $"SingleEnemyRoster={nullableRosterPassed}, " +
@@ -259,7 +262,21 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             if (elapsed >= TimeoutSeconds)
+            {
+                FightUnitSlot enemy = fight != null ? fight.ActiveEnemySlot : null;
+                SessionState.SetString(
+                    FailureKey,
+                    $"FightScene2 validation timed out. " +
+                    $"LightAttempted={SessionState.GetBool(LightAttemptedKey, false)}, " +
+                    $"HeavyAttempted={SessionState.GetBool(HeavyAttemptedKey, false)}, " +
+                    $"GuardAttempted={SessionState.GetBool(GuardAttemptedKey, false)}, " +
+                    $"Blocks={fight?.BlockedAttackCount ?? -1}, Pending={fight?.HasPendingEnemyAttack ?? false}, " +
+                    $"EnemyNormal={enemy?.NormalAttackPlayCount ?? -1}, " +
+                    $"EnemyFrameDamage={enemy?.CombatAnimator?.DamageEventCount ?? -1}, " +
+                    $"BardAttacks={fight?.SecondHero.UnitSlot?.NormalAttackPlayCount ?? -1}, " +
+                    $"ReceivedBeats={clock?.ReceivedBeatCount ?? -1}.");
                 EditorApplication.ExitPlaymode();
+            }
         }
 
         private static bool HasValidPrefabData(FightRosterManager roster)
@@ -304,6 +321,36 @@ namespace RhythmHunter.FightDemoEditor
                     failure = $"{path} has invalid attack interval or idle frames.";
                     return false;
                 }
+
+                FightCharacterCombatAnimator combatAnimator = prefab.GetComponent<FightCharacterCombatAnimator>();
+                if (combatAnimator == null)
+                {
+                    failure = $"{path} is missing FightCharacterCombatAnimator.";
+                    return false;
+                }
+
+                foreach (FightCharacterCombatAnimator.CombatAnimation animation in
+                         System.Enum.GetValues(typeof(FightCharacterCombatAnimator.CombatAnimation)))
+                {
+                    if (!combatAnimator.HasSequence(animation))
+                    {
+                        failure = $"{path} has no frames for {animation}.";
+                        return false;
+                    }
+                }
+
+                foreach (FightCharacterCombatAnimator.Sequence sequence in combatAnimator.Sequences)
+                {
+                    int frameCount = sequence.Frames.Count;
+                    bool invalidEventFrame = sequence.DamageFrame < 0 || sequence.DamageFrame >= frameCount ||
+                                             sequence.WarningFrame >= frameCount ||
+                                             sequence.AttackEffectFrame >= frameCount;
+                    if (frameCount == 0 || invalidEventFrame)
+                    {
+                        failure = $"{path} has invalid frame events for {sequence.Animation}.";
+                        return false;
+                    }
+                }
             }
 
             if (characterCount != 6)
@@ -328,7 +375,8 @@ namespace RhythmHunter.FightDemoEditor
                    definition.SkillDamage >= 0 &&
                    definition.SkillEffectPrefab != null &&
                    definition.AttackIntervalBeats > 0 &&
-                   definition.IdleFrames.Count > 0;
+                   definition.IdleFrames.Count > 0 &&
+                   slot.CombatAnimator != null;
         }
 
         private static int TotalEnemyHp()

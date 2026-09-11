@@ -63,6 +63,7 @@ namespace RhythmHunter.FightDemo
         private GameObject actorInstance;
         private Vector3 actorBaseScale = Vector3.one;
         private FightCharacterDefinition characterDefinition;
+        private FightCharacterCombatAnimator combatAnimator;
         private bool hasCharacter = true;
         private int currentHp;
         private float pulse;
@@ -90,6 +91,7 @@ namespace RhythmHunter.FightDemo
         public bool ManaFull => currentMana >= maxMana;
         public bool HasCharacter => hasCharacter;
         public FightCharacterDefinition CharacterDefinition => characterDefinition;
+        public FightCharacterCombatAnimator CombatAnimator => combatAnimator;
         public GameObject ActorPrefab => actorPrefab;
         public GameObject ActorInstance => actorInstance;
         public GameObject NormalAttackEffectPrefab => normalAttackEffectPrefab;
@@ -162,6 +164,9 @@ namespace RhythmHunter.FightDemo
             characterDefinition = actorInstance != null
                 ? actorInstance.GetComponent<FightCharacterDefinition>()
                 : prefab;
+            combatAnimator = actorInstance != null
+                ? actorInstance.GetComponent<FightCharacterCombatAnimator>()
+                : null;
 
             BeatSyncedIdleAnimator animator = actorInstance != null
                 ? actorInstance.GetComponentInChildren<BeatSyncedIdleAnimator>(true)
@@ -188,6 +193,7 @@ namespace RhythmHunter.FightDemo
         {
             RemoveSpawnedActor();
             characterDefinition = null;
+            combatAnimator = null;
             actorPrefab = null;
             hasCharacter = false;
             currentMana = 0;
@@ -249,6 +255,28 @@ namespace RhythmHunter.FightDemo
         public void GainMana(int amount = 1)
         {
             currentMana = Mathf.Clamp(currentMana + Mathf.Max(0, amount), 0, maxMana);
+        }
+
+        public bool PlayCombatAnimation(
+            FightCharacterCombatAnimator.CombatAnimation animation,
+            Action onWarning,
+            Action onAttackEffect,
+            Action onDamage)
+        {
+            return combatAnimator != null && combatAnimator.Play(
+                animation,
+                onWarning,
+                onAttackEffect,
+                onDamage);
+        }
+
+        public void PlayAttackFrameWarning(bool enemy)
+        {
+            Color warningColor = enemy
+                ? new Color(1f, 0.18f, 0.05f, 0.72f)
+                : new Color(0.15f, 0.9f, 1f, 0.65f);
+            Pulse(enemy ? 0.22f : 0.16f);
+            SpawnAttackChargeLayer(warningColor, false, enemy, 0f);
         }
 
         public void PlayScheduledAttackCountdown(int beatsUntilAttack, int intervalBeats, bool enemy)
@@ -476,6 +504,7 @@ namespace RhythmHunter.FightDemo
             else
                 DestroyImmediate(actorInstance);
             actorInstance = null;
+            combatAnimator = null;
             actorBaseScale = Vector3.one;
         }
 

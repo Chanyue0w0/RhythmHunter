@@ -9508,6 +9508,7 @@ MonoBehaviour:
     heavyAttackMultiplier: 1.75
     skillDamageMultiplier: 3
     skillActivationCount: 0
+    lastAutomaticAttackGlobalBeat: -1
   secondHero:
     heroLabel: BARD
     unitSlot: {fileID: 287245178}
@@ -9521,6 +9522,7 @@ MonoBehaviour:
     heavyAttackMultiplier: 1.75
     skillDamageMultiplier: 2.5
     skillActivationCount: 0
+    lastAutomaticAttackGlobalBeat: -1
   thirdHero:
     heroLabel: MAGE
     unitSlot: {fileID: 828184398}
@@ -9534,6 +9536,7 @@ MonoBehaviour:
     heavyAttackMultiplier: 1.75
     skillDamageMultiplier: 3.5
     skillActivationCount: 0
+    lastAutomaticAttackGlobalBeat: -1
 --- !u!114 &2021200327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9622,9 +9625,9 @@ MonoBehaviour:
   - {fileID: 616141045}
   - {fileID: 928599}
   enemyPrefabs:
-  - {fileID: 2141003279719172301, guid: d5adcbbdd39b811438583527f5f2a2e5, type: 3}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 7770687602645176180, guid: 55ef24f5fa61faa44b0a70dce35c5f29, type: 3}
 --- !u!1 &2028760521
 GameObject:
   m_ObjectHideFlags: 0

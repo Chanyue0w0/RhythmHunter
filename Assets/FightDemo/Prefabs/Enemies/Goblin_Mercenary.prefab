@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 79754002375306009}
   - component: {fileID: 5709982877797145369}
   - component: {fileID: 7770687602645176180}
+  - component: {fileID: 3137556307126913076}
   m_Layer: 0
   m_Name: Goblin_Mercenary
   m_TagString: Untagged
@@ -103,7 +104,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
   beatSource: {fileID: 0}
   fallbackBpm: 120
@@ -124,7 +125,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
   characterId: Goblin_Mercenary
   displayName: GOBLIN MERCENARY
@@ -145,3 +146,80 @@ MonoBehaviour:
   - {fileID: -4357705645274307756, guid: 988a1e04524df2344a26d894b4eb9cec, type: 3}
   idleCyclesPerBeat: 1
   idlePingPong: 0
+--- !u!114 &3137556307126913076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99084398148772865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
+  targetRenderer: {fileID: 79754002375306009}
+  idleAnimator: {fileID: 5709982877797145369}
+  sequences:
+  - animation: 0
+    frames:
+    - {fileID: -3297650188656544483, guid: 5a95e8b566388524aaec659114aa6324, type: 3}
+    - {fileID: -8144534994874435676, guid: e3e76352f900fd44580afddc0108fcd1, type: 3}
+    - {fileID: -5380739489725017918, guid: 36374b4c00e0e3d4f8ff1be3c5842c65, type: 3}
+    - {fileID: -3488042933814449837, guid: c69b76325e6e76e4aa3fc11cb27c8d0b, type: 3}
+    framesPerSecond: 20
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 1
+    frames:
+    - {fileID: -3297650188656544483, guid: 5a95e8b566388524aaec659114aa6324, type: 3}
+    - {fileID: -8144534994874435676, guid: e3e76352f900fd44580afddc0108fcd1, type: 3}
+    - {fileID: -5380739489725017918, guid: 36374b4c00e0e3d4f8ff1be3c5842c65, type: 3}
+    - {fileID: -3488042933814449837, guid: c69b76325e6e76e4aa3fc11cb27c8d0b, type: 3}
+    framesPerSecond: 20
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 2
+    frames:
+    - {fileID: -3297650188656544483, guid: 5a95e8b566388524aaec659114aa6324, type: 3}
+    - {fileID: -8144534994874435676, guid: e3e76352f900fd44580afddc0108fcd1, type: 3}
+    - {fileID: -5380739489725017918, guid: 36374b4c00e0e3d4f8ff1be3c5842c65, type: 3}
+    - {fileID: -3488042933814449837, guid: c69b76325e6e76e4aa3fc11cb27c8d0b, type: 3}
+    framesPerSecond: 16
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 3
+    frames:
+    - {fileID: -4753702385071775785, guid: df361d562c283764b9d9d1438444af62, type: 3}
+    - {fileID: -4357705645274307756, guid: 988a1e04524df2344a26d894b4eb9cec, type: 3}
+    framesPerSecond: 14
+    warningFrame: 0
+    attackEffectFrame: 0
+    damageFrame: 0
+  - animation: 4
+    frames:
+    - {fileID: -3297650188656544483, guid: 5a95e8b566388524aaec659114aa6324, type: 3}
+    - {fileID: -8144534994874435676, guid: e3e76352f900fd44580afddc0108fcd1, type: 3}
+    - {fileID: -5380739489725017918, guid: 36374b4c00e0e3d4f8ff1be3c5842c65, type: 3}
+    - {fileID: -3488042933814449837, guid: c69b76325e6e76e4aa3fc11cb27c8d0b, type: 3}
+    framesPerSecond: 20
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 3
+  - animation: 5
+    frames:
+    - {fileID: -3260786877400901070, guid: cbee8aed081099543801c5e0baeeee14, type: 3}
+    framesPerSecond: 12
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0
+  - animation: 6
+    frames:
+    - {fileID: -3260786877400901070, guid: cbee8aed081099543801c5e0baeeee14, type: 3}
+    framesPerSecond: 8
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0

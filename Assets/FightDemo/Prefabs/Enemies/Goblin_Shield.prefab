@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5304115042776493395}
   - component: {fileID: 6752076891445895251}
   - component: {fileID: 860210294745740716}
+  - component: {fileID: 3793369446901847789}
   m_Layer: 0
   m_Name: Goblin_Shield
   m_TagString: Untagged
@@ -103,7 +104,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
   beatSource: {fileID: 0}
   fallbackBpm: 120
@@ -124,7 +125,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
   characterId: Goblin_Shield
   displayName: GOBLIN SHIELD
@@ -145,3 +146,76 @@ MonoBehaviour:
   - {fileID: -9209713918260888839, guid: 75ecf9a042113904e9b25a2c9f6023c4, type: 3}
   idleCyclesPerBeat: 1
   idlePingPong: 0
+--- !u!114 &3793369446901847789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3464431099182205573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
+  targetRenderer: {fileID: 5304115042776493395}
+  idleAnimator: {fileID: 6752076891445895251}
+  sequences:
+  - animation: 0
+    frames:
+    - {fileID: -3297650188656544483, guid: ed1cebb5a34f33b4989e49806280dead, type: 3}
+    - {fileID: -8144534994874435676, guid: 1f1473e81a94dec4898a24a286b152fd, type: 3}
+    - {fileID: -5380739489725017918, guid: 1240d0def0f01be48a7c6f7b62bc0e64, type: 3}
+    framesPerSecond: 18
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 1
+    frames:
+    - {fileID: -3297650188656544483, guid: ed1cebb5a34f33b4989e49806280dead, type: 3}
+    - {fileID: -8144534994874435676, guid: 1f1473e81a94dec4898a24a286b152fd, type: 3}
+    - {fileID: -5380739489725017918, guid: 1240d0def0f01be48a7c6f7b62bc0e64, type: 3}
+    framesPerSecond: 18
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 2
+    frames:
+    - {fileID: -3297650188656544483, guid: ed1cebb5a34f33b4989e49806280dead, type: 3}
+    - {fileID: -8144534994874435676, guid: 1f1473e81a94dec4898a24a286b152fd, type: 3}
+    - {fileID: -5380739489725017918, guid: 1240d0def0f01be48a7c6f7b62bc0e64, type: 3}
+    framesPerSecond: 14.400001
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 3
+    frames:
+    - {fileID: 3597685455855505597, guid: 7379714c2656d8c4babd92aa02815d19, type: 3}
+    - {fileID: -9209713918260888839, guid: 75ecf9a042113904e9b25a2c9f6023c4, type: 3}
+    framesPerSecond: 14
+    warningFrame: 0
+    attackEffectFrame: 0
+    damageFrame: 0
+  - animation: 4
+    frames:
+    - {fileID: -3297650188656544483, guid: ed1cebb5a34f33b4989e49806280dead, type: 3}
+    - {fileID: -8144534994874435676, guid: 1f1473e81a94dec4898a24a286b152fd, type: 3}
+    - {fileID: -5380739489725017918, guid: 1240d0def0f01be48a7c6f7b62bc0e64, type: 3}
+    framesPerSecond: 18
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 2
+  - animation: 5
+    frames:
+    - {fileID: -3260786877400901070, guid: ade6a28a588364247b6430ab4a086cef, type: 3}
+    framesPerSecond: 12
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0
+  - animation: 6
+    frames:
+    - {fileID: -3260786877400901070, guid: ade6a28a588364247b6430ab4a086cef, type: 3}
+    framesPerSecond: 8
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0

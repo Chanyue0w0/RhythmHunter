@@ -215,6 +215,8 @@ namespace RhythmHunter.FightDemo
         private readonly List<FightUnitSlot> fightScene2Enemies = new();
         private int partyHp;
         private bool pendingEnemyAttack;
+        private bool pendingEnemyAnimationDriven;
+        private FightUnitSlot pendingEnemyAttacker;
         private long pendingAttackGlobalBeat = long.MinValue;
         private int pendingAttackBar;
         private int pendingAttackTimelineMs;
@@ -389,8 +391,21 @@ namespace RhythmHunter.FightDemo
                     PerformHeroAttack(frontHero, ActionType.HeavyAttack, command, judgement);
                     break;
                 case FightInputRouter.HeroCommand.Damage:
-                    guardedGlobalBeat = judgement.NearestBeat.GlobalBeat;
-                    frontHero.UnitSlot?.PlayGuard();
+                    // A valid guard entered during the short animation-driven attack window
+                    // belongs to that pending attack beat even if nearest-beat rounding has
+                    // already crossed the musical boundary.
+                    guardedGlobalBeat = pendingEnemyAttack
+                        ? pendingAttackGlobalBeat
+                        : judgement.NearestBeat.GlobalBeat;
+                    if (frontHero.UnitSlot != null &&
+                        !frontHero.UnitSlot.PlayCombatAnimation(
+                            FightCharacterCombatAnimator.CombatAnimation.Guard,
+                            null,
+                            frontHero.UnitSlot.PlayGuard,
+                            null))
+                    {
+                        frontHero.UnitSlot.PlayGuard();
+                    }
                     HeroCalled?.Invoke(new HeroCallResult(
                         command,
                         judgement,
@@ -413,9 +428,7 @@ namespace RhythmHunter.FightDemo
 
             ActionType resolvedAction = hero.SkillReady ? ActionType.Skill : requestedAction;
             int damage = hero.DamageFor(resolvedAction);
-            PlayActionVisual(hero.UnitSlot, resolvedAction);
-            if (HealthSystemEnabled)
-                target.TakeDamage(damage);
+            PlayAnimatedHeroAction(hero.UnitSlot, target, resolvedAction, damage);
 
             if (resolvedAction == ActionType.Skill)
                 hero.ConsumeSkillMana();
@@ -441,9 +454,7 @@ namespace RhythmHunter.FightDemo
 
             ActionType action = hero.SkillReady ? ActionType.Skill : ActionType.LightAttack;
             int damage = hero.DamageFor(action);
-            PlayActionVisual(hero.UnitSlot, action);
-            if (HealthSystemEnabled)
-                target.TakeDamage(damage);
+            PlayAnimatedHeroAction(hero.UnitSlot, target, action, damage);
 
             if (action == ActionType.Skill)
                 hero.ConsumeSkillMana();
@@ -531,6 +542,7 @@ namespace RhythmHunter.FightDemo
                 if (activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat))
                 {
                     QueueEnemyAttack(beat);
+                    StartEnemyAttackAnimation();
                 }
 
                 return;
@@ -546,11 +558,39 @@ namespace RhythmHunter.FightDemo
             pendingAttackGlobalBeat = beat.GlobalBeat;
             pendingAttackBar = beat.Bar;
             pendingAttackTimelineMs = beat.TimelinePositionMs;
+            pendingEnemyAttacker = activeEnemySlot;
+            pendingEnemyAnimationDriven = false;
+        }
+
+        private void StartEnemyAttackAnimation()
+        {
+            if (!UsesFrontHeroControls || pendingEnemyAttacker == null)
+                return;
+
+            FightUnitSlot attacker = pendingEnemyAttacker;
+            bool hasSequence = attacker.CombatAnimator != null &&
+                               attacker.CombatAnimator.HasSequence(
+                                   FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
+            pendingEnemyAnimationDriven = hasSequence;
+            if (hasSequence)
+            {
+                bool started = attacker.PlayCombatAnimation(
+                    FightCharacterCombatAnimator.CombatAnimation.NormalAttack,
+                    () => attacker.PlayAttackFrameWarning(true),
+                    attacker.PlayImmediateNormalAttack,
+                    ResolvePendingEnemyAttack);
+                if (started)
+                    return;
+
+                pendingEnemyAnimationDriven = false;
+            }
+
+            attacker.PlayImmediateNormalAttack();
         }
 
         private void TryResolvePendingAttack()
         {
-            if (!pendingEnemyAttack || beatClock == null || rhythmJudge == null ||
+            if (!pendingEnemyAttack || pendingEnemyAnimationDriven || beatClock == null || rhythmJudge == null ||
                 !beatClock.TryGetTimelinePositionMs(out int timelineMs))
             {
                 return;
@@ -569,8 +609,9 @@ namespace RhythmHunter.FightDemo
                 return;
 
             bool blocked = guardedGlobalBeat == pendingAttackGlobalBeat;
-            int configuredDamage = UsesFrontHeroControls && activeEnemySlot != null
-                ? Mathf.Max(1, activeEnemySlot.AttackPower)
+            FightUnitSlot attacker = pendingEnemyAttacker != null ? pendingEnemyAttacker : activeEnemySlot;
+            int configuredDamage = UsesFrontHeroControls && attacker != null
+                ? Mathf.Max(1, attacker.AttackPower)
                 : enemyAttackDamage;
             int damage = blocked || !HealthSystemEnabled ? 0 : configuredDamage;
 
@@ -581,8 +622,8 @@ namespace RhythmHunter.FightDemo
 
             // Enemy skills are intentionally controlled elsewhere. Scheduled enemy turns
             // always remain normal attacks, but still bank one mana up to the prefab limit.
-            if (UsesFrontHeroControls && activeEnemySlot != null)
-                activeEnemySlot.GainMana();
+            if (UsesFrontHeroControls && attacker != null)
+                attacker.GainMana();
             lastEnemyAttackGlobalBeat = pendingAttackGlobalBeat;
 
             if (HealthSystemEnabled)
@@ -591,6 +632,11 @@ namespace RhythmHunter.FightDemo
                 if (!blocked && tankSlot != null)
                 {
                     tankSlot.TakeDamage(damage);
+                    tankSlot.PlayCombatAnimation(
+                        FightCharacterCombatAnimator.CombatAnimation.Hit,
+                        null,
+                        null,
+                        null);
                     partyHp = tankSlot.CurrentHp;
                 }
             }
@@ -600,6 +646,8 @@ namespace RhythmHunter.FightDemo
             }
 
             pendingEnemyAttack = false;
+            pendingEnemyAnimationDriven = false;
+            pendingEnemyAttacker = null;
             EnemyAttackResolved?.Invoke(new EnemyAttackResult(
                 pendingAttackGlobalBeat,
                 pendingAttackBar,
@@ -725,6 +773,47 @@ namespace RhythmHunter.FightDemo
                     slot.PlayLightAttack();
                     break;
             }
+        }
+
+        private void PlayAnimatedHeroAction(
+            FightUnitSlot attacker,
+            FightUnitSlot target,
+            ActionType action,
+            int damage)
+        {
+            if (attacker == null)
+                return;
+
+            FightCharacterCombatAnimator.CombatAnimation animation = action switch
+            {
+                ActionType.HeavyAttack => FightCharacterCombatAnimator.CombatAnimation.HeavyAttack,
+                ActionType.Skill => FightCharacterCombatAnimator.CombatAnimation.Skill,
+                _ => FightCharacterCombatAnimator.CombatAnimation.LightAttack
+            };
+            bool animated = attacker.PlayCombatAnimation(
+                animation,
+                () => attacker.PlayAttackFrameWarning(false),
+                () => PlayActionVisual(attacker, action),
+                () => ApplyHeroDamage(target, damage));
+            if (animated)
+                return;
+
+            PlayActionVisual(attacker, action);
+            ApplyHeroDamage(target, damage);
+        }
+
+        private void ApplyHeroDamage(FightUnitSlot target, int damage)
+        {
+            if (HealthSystemEnabled && target != null && target.HasCharacter)
+            {
+                target.TakeDamage(damage);
+                target.PlayCombatAnimation(
+                    FightCharacterCombatAnimator.CombatAnimation.Hit,
+                    null,
+                    null,
+                    null);
+            }
+            activeEnemySlot = FindFrontLivingEnemy();
         }
 
         private static void SetRoleLabel(FightUnitSlot slot, string value)

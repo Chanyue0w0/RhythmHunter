@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 376613475454287180}
   - component: {fileID: 3927864325083623487}
   - component: {fileID: 3784569928049564685}
+  - component: {fileID: 4359318529563951117}
   m_Layer: 0
   m_Name: Paladin
   m_TagString: Untagged
@@ -103,7 +104,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 532ddb88443c5004f9a2097c039771d4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.BeatSyncedIdleAnimator
   beatSource: {fileID: 0}
   fallbackBpm: 120
@@ -125,7 +126,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
   characterId: Paladin
   displayName: PALADIN
@@ -147,3 +148,77 @@ MonoBehaviour:
   - {fileID: 8050079004319037636, guid: b5966e10d5e2a3448b9b4db62f9019fc, type: 3}
   idleCyclesPerBeat: 1
   idlePingPong: 0
+--- !u!114 &4359318529563951117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8076108418711512021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
+  targetRenderer: {fileID: 376613475454287180}
+  idleAnimator: {fileID: 3927864325083623487}
+  sequences:
+  - animation: 0
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    - {fileID: -8157529274441160004, guid: ba589ee7ab4ba6d4e973d42fde1451e4, type: 3}
+    - {fileID: 8050079004319037636, guid: b5966e10d5e2a3448b9b4db62f9019fc, type: 3}
+    framesPerSecond: 16
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 1
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    - {fileID: -8157529274441160004, guid: ba589ee7ab4ba6d4e973d42fde1451e4, type: 3}
+    - {fileID: 8050079004319037636, guid: b5966e10d5e2a3448b9b4db62f9019fc, type: 3}
+    framesPerSecond: 16
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 2
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    - {fileID: -8157529274441160004, guid: ba589ee7ab4ba6d4e973d42fde1451e4, type: 3}
+    - {fileID: 8050079004319037636, guid: b5966e10d5e2a3448b9b4db62f9019fc, type: 3}
+    framesPerSecond: 12.8
+    warningFrame: 0
+    attackEffectFrame: 1
+    damageFrame: 2
+  - animation: 3
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    - {fileID: -8157529274441160004, guid: ba589ee7ab4ba6d4e973d42fde1451e4, type: 3}
+    - {fileID: 8050079004319037636, guid: b5966e10d5e2a3448b9b4db62f9019fc, type: 3}
+    framesPerSecond: 14
+    warningFrame: 0
+    attackEffectFrame: 0
+    damageFrame: 0
+  - animation: 4
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    - {fileID: -8157529274441160004, guid: ba589ee7ab4ba6d4e973d42fde1451e4, type: 3}
+    - {fileID: 8050079004319037636, guid: b5966e10d5e2a3448b9b4db62f9019fc, type: 3}
+    framesPerSecond: 16
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 2
+  - animation: 5
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    framesPerSecond: 12
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0
+  - animation: 6
+    frames:
+    - {fileID: -3781910019033479378, guid: ff0a0eff37964384c82d2a2c1ebd43f5, type: 3}
+    framesPerSecond: 8
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0

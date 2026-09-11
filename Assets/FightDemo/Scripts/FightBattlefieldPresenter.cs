@@ -86,8 +86,6 @@ namespace RhythmHunter.FightDemo
                     fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat),
                     fight.EnemyAttackIntervalBeats,
                     true);
-                if (attackBeat)
-                    attacker?.PlayImmediateNormalAttack();
                 PlayHeroCountdown(fight.SecondHero, beat.GlobalBeat);
                 PlayHeroCountdown(fight.ThirdHero, beat.GlobalBeat);
             }

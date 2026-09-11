@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5019543924416371218}
   - component: {fileID: 1950858982462992507}
   - component: {fileID: 2141003279719172301}
+  - component: {fileID: 2592276553273835630}
   m_Layer: 0
   m_Name: Goblin_Mage
   m_TagString: Untagged
@@ -145,3 +146,100 @@ MonoBehaviour:
   - {fileID: -4357705645274307756, guid: eff7c864129472b41939a6da4fa6a95c, type: 3}
   idleCyclesPerBeat: 1
   idlePingPong: 0
+--- !u!114 &2592276553273835630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2425967328162211096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
+  targetRenderer: {fileID: 5019543924416371218}
+  idleAnimator: {fileID: 1950858982462992507}
+  sequences:
+  - animation: 0
+    frames:
+    - {fileID: -3297650188656544483, guid: c85f6dd18433e8547a4230959b60eeaa, type: 3}
+    - {fileID: -8144534994874435676, guid: b1d4340efd8dc3a43aba551594748b36, type: 3}
+    - {fileID: -5380739489725017918, guid: 9b998477fdd72f548a19f4e70e0a9f21, type: 3}
+    - {fileID: -3488042933814449837, guid: 5c1f0c27128be17489b7489815f529d0, type: 3}
+    - {fileID: 6847047171018105833, guid: 4f2dc1c7a7654a44ab7dcea3b932a218, type: 3}
+    - {fileID: 8981441487407296179, guid: eee5e60258b6a4540883c2bb47984ad4, type: 3}
+    - {fileID: -4573424509575302797, guid: 5627875ae0d663c41bb5cbceb4e750a6, type: 3}
+    - {fileID: 989888692524203060, guid: 45e470693f40b74409242cbb619f49ad, type: 3}
+    - {fileID: 7490336182427478754, guid: 8a0ab03b19c039943a15004d3b24a2f0, type: 3}
+    framesPerSecond: 30
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 4
+  - animation: 1
+    frames:
+    - {fileID: -3297650188656544483, guid: c85f6dd18433e8547a4230959b60eeaa, type: 3}
+    - {fileID: -8144534994874435676, guid: b1d4340efd8dc3a43aba551594748b36, type: 3}
+    - {fileID: -5380739489725017918, guid: 9b998477fdd72f548a19f4e70e0a9f21, type: 3}
+    - {fileID: -3488042933814449837, guid: 5c1f0c27128be17489b7489815f529d0, type: 3}
+    - {fileID: 6847047171018105833, guid: 4f2dc1c7a7654a44ab7dcea3b932a218, type: 3}
+    - {fileID: 8981441487407296179, guid: eee5e60258b6a4540883c2bb47984ad4, type: 3}
+    - {fileID: -4573424509575302797, guid: 5627875ae0d663c41bb5cbceb4e750a6, type: 3}
+    - {fileID: 989888692524203060, guid: 45e470693f40b74409242cbb619f49ad, type: 3}
+    - {fileID: 7490336182427478754, guid: 8a0ab03b19c039943a15004d3b24a2f0, type: 3}
+    framesPerSecond: 30
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 4
+  - animation: 2
+    frames:
+    - {fileID: -3297650188656544483, guid: c85f6dd18433e8547a4230959b60eeaa, type: 3}
+    - {fileID: -8144534994874435676, guid: b1d4340efd8dc3a43aba551594748b36, type: 3}
+    - {fileID: -5380739489725017918, guid: 9b998477fdd72f548a19f4e70e0a9f21, type: 3}
+    - {fileID: -3488042933814449837, guid: 5c1f0c27128be17489b7489815f529d0, type: 3}
+    - {fileID: 6847047171018105833, guid: 4f2dc1c7a7654a44ab7dcea3b932a218, type: 3}
+    - {fileID: 8981441487407296179, guid: eee5e60258b6a4540883c2bb47984ad4, type: 3}
+    - {fileID: -4573424509575302797, guid: 5627875ae0d663c41bb5cbceb4e750a6, type: 3}
+    - {fileID: 989888692524203060, guid: 45e470693f40b74409242cbb619f49ad, type: 3}
+    - {fileID: 7490336182427478754, guid: 8a0ab03b19c039943a15004d3b24a2f0, type: 3}
+    framesPerSecond: 24
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 4
+  - animation: 3
+    frames:
+    - {fileID: -4753702385071775785, guid: 1dde66de78d3f2c4889451a3a685bfe3, type: 3}
+    - {fileID: -4357705645274307756, guid: eff7c864129472b41939a6da4fa6a95c, type: 3}
+    framesPerSecond: 14
+    warningFrame: 0
+    attackEffectFrame: 0
+    damageFrame: 0
+  - animation: 4
+    frames:
+    - {fileID: -3297650188656544483, guid: c85f6dd18433e8547a4230959b60eeaa, type: 3}
+    - {fileID: -8144534994874435676, guid: b1d4340efd8dc3a43aba551594748b36, type: 3}
+    - {fileID: -5380739489725017918, guid: 9b998477fdd72f548a19f4e70e0a9f21, type: 3}
+    - {fileID: -3488042933814449837, guid: 5c1f0c27128be17489b7489815f529d0, type: 3}
+    - {fileID: 6847047171018105833, guid: 4f2dc1c7a7654a44ab7dcea3b932a218, type: 3}
+    - {fileID: 8981441487407296179, guid: eee5e60258b6a4540883c2bb47984ad4, type: 3}
+    - {fileID: -4573424509575302797, guid: 5627875ae0d663c41bb5cbceb4e750a6, type: 3}
+    - {fileID: 989888692524203060, guid: 45e470693f40b74409242cbb619f49ad, type: 3}
+    - {fileID: 7490336182427478754, guid: 8a0ab03b19c039943a15004d3b24a2f0, type: 3}
+    framesPerSecond: 30
+    warningFrame: 0
+    attackEffectFrame: 2
+    damageFrame: 3
+  - animation: 5
+    frames:
+    - {fileID: -3260786877400901070, guid: b8811484502b2084688555914f8d0534, type: 3}
+    framesPerSecond: 12
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0
+  - animation: 6
+    frames:
+    - {fileID: -3260786877400901070, guid: b8811484502b2084688555914f8d0534, type: 3}
+    framesPerSecond: 8
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: 0
