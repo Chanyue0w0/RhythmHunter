@@ -13,7 +13,8 @@ namespace RhythmHunter.FightDemo
         {
             Every,
             Odd,
-            Even
+            Even,
+            Third
         }
 
         [SerializeField] private FightCombatController beatSource;
@@ -61,7 +62,19 @@ namespace RhythmHunter.FightDemo
                 string objectName = sceneTransform.name;
                 if (objectName == "StoneLayer (Beat Pulse)")
                 {
-                    Ensure(sceneTransform, source, 0.015f, 0.45f, BeatParity.Every);
+                    Ensure(sceneTransform, source, 0.015f, 0.45f, BeatParity.Third);
+                    continue;
+                }
+
+                if (objectName == "Background_00")
+                {
+                    Ensure(sceneTransform, source, 0.012f, 0.45f, BeatParity.Third);
+                    continue;
+                }
+
+                if (objectName == "Background_07")
+                {
+                    Ensure(sceneTransform, source, 0.015f, 0.45f, BeatParity.Third);
                     continue;
                 }
 
@@ -114,7 +127,8 @@ namespace RhythmHunter.FightDemo
             bool isOddBeat = PositiveModulo(beatIndex, 2) != 0;
             bool shouldPulse = beatParity == BeatParity.Every ||
                                (beatParity == BeatParity.Odd && isOddBeat) ||
-                               (beatParity == BeatParity.Even && !isOddBeat);
+                               (beatParity == BeatParity.Even && !isOddBeat) ||
+                               (beatParity == BeatParity.Third && PositiveModulo(beatIndex, 4) == 3);
             if (!shouldPulse || beatProgress >= durationInBeats)
             {
                 transform.localScale = restLocalScale;

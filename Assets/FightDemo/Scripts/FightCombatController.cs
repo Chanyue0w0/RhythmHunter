@@ -502,6 +502,7 @@ namespace RhythmHunter.FightDemo
             int grassCount = 0;
             int shadowCount = 0;
             int stoneCount = 0;
+            int backgroundCount = 0;
             Transform[] sceneTransforms = FindObjectsByType<Transform>(
                 FindObjectsInactive.Exclude,
                 FindObjectsSortMode.None);
@@ -516,8 +517,26 @@ namespace RhythmHunter.FightDemo
                 {
                     if (oldPulse != null)
                         oldPulse.enabled = false;
-                    AddArtPulseTarget(sceneTransform, 0.015f, 0.45f, 0);
+                    AddArtPulseTarget(sceneTransform, 0.015f, 0.45f, 3);
                     stoneCount++;
+                    continue;
+                }
+
+                if (objectName == "Background_00")
+                {
+                    if (oldPulse != null)
+                        oldPulse.enabled = false;
+                    AddArtPulseTarget(sceneTransform, 0.012f, 0.45f, 3);
+                    backgroundCount++;
+                    continue;
+                }
+
+                if (objectName == "Background_07")
+                {
+                    if (oldPulse != null)
+                        oldPulse.enabled = false;
+                    AddArtPulseTarget(sceneTransform, 0.015f, 0.45f, 3);
+                    backgroundCount++;
                     continue;
                 }
 
@@ -543,7 +562,7 @@ namespace RhythmHunter.FightDemo
                 grassCount++;
             }
 
-            Debug.Log($"[FightScene Art] Direct pulse targets: grass={grassCount}, shadows={shadowCount}, stone={stoneCount}.", this);
+            Debug.Log($"[FightScene Art] Direct pulse targets: backgrounds={backgroundCount}, grass={grassCount}, shadows={shadowCount}, stone={stoneCount}.", this);
         }
 
         private void AddArtPulseTarget(
@@ -582,7 +601,8 @@ namespace RhythmHunter.FightDemo
 
                 bool shouldPulse = target.Parity == 0 ||
                                    (target.Parity == 1 && isOddBeat) ||
-                                   (target.Parity == 2 && !isOddBeat);
+                                   (target.Parity == 2 && !isOddBeat) ||
+                                   (target.Parity == 3 && PositiveModulo(beatIndex, 4) == 3);
                 if (!shouldPulse || beatProgress >= target.DurationInBeats)
                 {
                     target.Transform.localScale = target.RestScale;
