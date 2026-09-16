@@ -72,7 +72,7 @@ namespace RhythmHunter.FightDemo
                 loopWidth);
 
             float centeredOffset = Mathf.Repeat(
-                -travelledDistance + loopWidth * 0.5f,
+                travelledDistance + loopWidth * 0.5f,
                 loopWidth) - loopWidth * 0.5f;
             Vector3 centerPosition = startPosition + Vector3.right * centeredOffset;
 
