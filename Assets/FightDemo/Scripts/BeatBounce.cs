@@ -46,6 +46,14 @@ namespace RhythmHunter.FightDemo
             Subscribe();
         }
 
+        public void ConfigureGrassSlice(FightCombatController source, int zeroBasedSlice)
+        {
+            BeatParity parity = zeroBasedSlice % 2 == 0
+                ? BeatParity.Odd
+                : BeatParity.Even;
+            Configure(source, 0.03f, 0.45f, parity);
+        }
+
         public static void EnsureSceneAnimation(FightCombatController source)
         {
             if (source == null)
@@ -69,6 +77,12 @@ namespace RhythmHunter.FightDemo
                 if (objectName == "Background_00")
                 {
                     Ensure(sceneTransform, source, 0.012f, 0.45f, BeatParity.Third);
+                    continue;
+                }
+
+                if (objectName == "Background_05")
+                {
+                    Ensure(sceneTransform, source, 0.015f, 0.45f, BeatParity.Third);
                     continue;
                 }
 
