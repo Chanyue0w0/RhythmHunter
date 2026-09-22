@@ -75,7 +75,8 @@ namespace RhythmHunter.FightDemo
         public enum CombatMode
         {
             LegacyFourthBeatGuard,
-            FrontHero
+            FrontHero,
+            EqualBeat
         }
 
         public readonly struct HeroCallResult
@@ -185,7 +186,8 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot TankSlot => tankSlot;
         public FightUnitSlot ActiveEnemySlot => activeEnemySlot;
         public CombatMode Mode => combatMode;
-        public bool UsesFrontHeroControls => combatMode == CombatMode.FrontHero;
+        public bool UsesEqualBeats => combatMode == CombatMode.EqualBeat;
+        public bool UsesFrontHeroControls => combatMode == CombatMode.FrontHero || UsesEqualBeats;
         public bool HealthSystemEnabled => !UsesFrontHeroControls || enableHealthSystemInFrontHeroMode;
         public int EnemyAttackIntervalBeats => UsesFrontHeroControls && activeEnemySlot != null
             ? activeEnemySlot.AttackIntervalBeats
@@ -231,6 +233,11 @@ namespace RhythmHunter.FightDemo
         public void SetCombatMode(CombatMode mode)
         {
             combatMode = mode;
+        }
+
+        public ActionType GetHeroActionForBeat(int beatInBar)
+        {
+            return !UsesEqualBeats && beatInBar == 4 ? ActionType.Skill : ActionType.LightAttack;
         }
 
         public void SetFrontHeroHealthSystemEnabled(bool enabled)
@@ -357,10 +364,11 @@ namespace RhythmHunter.FightDemo
                 return;
             }
 
-            bool heavyBeat = judgement.NearestBeat.Beat == 4;
+            ActionType action = GetHeroActionForBeat(judgement.NearestBeat.Beat);
+            bool heavyBeat = action == ActionType.Skill;
             PerformHeroAction(
                 hero,
-                heavyBeat ? ActionType.Skill : ActionType.LightAttack,
+                action,
                 command,
                 judgement,
                 heavyBeat);

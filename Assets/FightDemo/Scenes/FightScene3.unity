@@ -706,7 +706,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: ENEMY ATTACKS ON EVERY FOURTH BEAT
+  m_Text: ENEMY ATTACK COUNTDOWN
 --- !u!1 &184254595
 GameObject:
   m_ObjectHideFlags: 0
@@ -3811,7 +3811,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "X/Y/B (Q/W/E) = Guard / Heal / Damage \u2022 Beat 4 activates skills"
+  m_Text: "X/Y/B (Q/W/E) = Guard / Heal / Damage \u2022 Basic Ability on every beat"
 --- !u!1 &669889341
 GameObject:
   m_ObjectHideFlags: 0
@@ -5193,7 +5193,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961970722}
-  m_Text: "B / E  \u2022  FRONT -1  \u2022  BEAT 4 ALL -1"
+  m_Text: "BACK  \u2022  B / E  \u2022  BASIC"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -7203,7 +7203,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1462401100}
-  m_Text: "X / Q  \u2022  GUARD  \u2022  BEAT 4 COUNTER"
+  m_Text: "FRONT  \u2022  X / Q  \u2022  BASIC"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -7615,7 +7615,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'PALADIN X/Q: GUARD   BARD Y/W: HEAL   MAGE B/E: DAMAGE   BEAT 4 = SKILL'
+  m_Text: 'FRONT X/Q   MIDDLE Y/W   BACK B/E   BASIC ON EVERY BEAT'
 --- !u!222 &1562105383
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7769,7 +7769,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1567002021}
-  m_Text: "Y / W  \u2022  HEAL 0.5  \u2022  BEAT 4 HEAL 1"
+  m_Text: "MIDDLE  \u2022  Y / W  \u2022  BASIC"
   m_OffsetZ: 0
   m_CharacterSize: 0.017
   m_LineSpacing: 1
@@ -9547,7 +9547,7 @@ MonoBehaviour:
   maxPartyHp: 4
   enemyAttackDamage: 1
   resolutionSafetyMs: 12
-  combatMode: 1
+  combatMode: 2
   enableHealthSystemInFrontHeroMode: 1
   enemyAttackIntervalBeats: 4
   frontHero:

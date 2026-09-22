@@ -32,6 +32,19 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Slider beatProgress;
         [SerializeField] private Slider healthBar;
 
+        [Header("Equal Beat Timeline")]
+        [SerializeField, Min(100f)] private float timelineWidth = 840f;
+        [SerializeField] private float timelineBottomOffset = 76f;
+        [SerializeField, Range(1, 8)] private int previewBeats = 3;
+        [SerializeField, Min(4f)] private float beatPointSize = 14f;
+        [SerializeField] private Color beatPointColor = new(0.2f, 0.92f, 1f, 1f);
+        [SerializeField, Range(0f, 1f)] private float centerFlashStrength = 0.8f;
+
+        private RectTransform timelineRoot;
+        private Image timelineCenter;
+        private Image[] approachingPoints;
+        private bool EqualBeats => fight != null && fight.UsesEqualBeats;
+
         [Header("Screen Feedback")]
         [SerializeField] private Image screenFlash;
 
@@ -102,6 +115,8 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
+            if (EqualBeats)
+                BuildEqualBeatTimeline();
             bool showHealth = fight == null || fight.HealthSystemEnabled;
             if (healthText != null)
                 healthText.gameObject.SetActive(showHealth && (fight == null || !fight.UsesFrontHeroControls));
@@ -113,7 +128,8 @@ namespace RhythmHunter.FightDemo
             SetResult(
                 "GET READY",
                 Cyan,
-                fight != null && fight.UsesFrontHeroControls
+                EqualBeats ? "X/Y/B = Basic Ability  •  Keyboard Q/W/E  •  Every beat is equal"
+                : fight != null && fight.UsesFrontHeroControls
                     ? "X/Y/B = Guard / Heal / Damage  •  Keyboard Q/W/E  •  Beat 4 = Skill"
                     : "Enemy attacks land on every fourth beat.",
                 2f);
@@ -145,12 +161,25 @@ namespace RhythmHunter.FightDemo
         {
             UpdatePlaybackReadout();
             UpdateBeatProgress();
+            UpdateEqualBeatTimeline();
             UpdateFades();
         }
 
         private void OnFightBeat(FmodBeatClock.BeatSnapshot beat)
         {
             currentBeat = beat.Beat;
+
+            if (EqualBeats)
+            {
+                if (warningText != null)
+                {
+                    int remaining = fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat);
+                    warningText.text = remaining == 0 ? "ENEMY ATTACK"
+                        : $"ENEMY ATTACK IN {remaining} BEAT{(remaining == 1 ? string.Empty : "S")}";
+                    warningText.color = remaining == 0 ? Gold : Color.white;
+                }
+                return;
+            }
 
             if (fight != null && fight.UsesFrontHeroControls)
             {
@@ -263,7 +292,8 @@ namespace RhythmHunter.FightDemo
             {
                 receivedAttacks++;
                 flashTimer = 0.55f;
-                string guardHint = fight != null && fight.UsesFrontHeroControls
+                string guardHint = EqualBeats ? "X/Y/B = Basic Ability on every beat"
+                    : fight != null && fight.UsesFrontHeroControls
                     ? "beat 4 activates hero skills"
                     : "press X / Q on beat 4";
                 SetResult(
@@ -409,11 +439,114 @@ namespace RhythmHunter.FightDemo
 
         private void UpdateBeatProgress()
         {
+            if (EqualBeats)
+                return;
             if (beatProgress == null || beatClock == null)
                 return;
 
             if (beatClock.TryGetBeatPhase(out float phase))
                 beatProgress.SetValueWithoutNotify(phase);
+        }
+
+        private void BuildEqualBeatTimeline()
+        {
+            if (timelineRoot != null || beatProgress == null)
+                return;
+
+            // Keep the new HUD under the same optional bottom-UI group as the old HUD.
+            Transform oldPanel = beatProgress.transform.parent;
+            Transform parent = oldPanel.parent;
+            oldPanel.gameObject.SetActive(false);
+            Text legend = parent.Find("InputLegend")?.GetComponent<Text>();
+            if (legend != null)
+                legend.text = "FRONT X/Q   •   MIDDLE Y/W   •   BACK B/E   •   BASIC ON EVERY BEAT";
+            GameObject root = new("EqualBeatTimeline", typeof(RectTransform));
+            timelineRoot = root.GetComponent<RectTransform>();
+            timelineRoot.SetParent(parent, false);
+            timelineRoot.anchorMin = timelineRoot.anchorMax = new Vector2(0.5f, 0f);
+            timelineRoot.anchoredPosition = new Vector2(0f, timelineBottomOffset);
+            timelineRoot.sizeDelta = new Vector2(timelineWidth, 64f);
+            if (statisticsText != null)
+            {
+                statisticsText.transform.SetParent(timelineRoot, false);
+                statisticsText.rectTransform.anchorMin = statisticsText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                statisticsText.rectTransform.anchoredPosition = new Vector2(0f, -32f);
+                statisticsText.rectTransform.sizeDelta = new Vector2(timelineWidth, 22f);
+                statisticsText.alignment = TextAnchor.MiddleCenter;
+            }
+            CreateTimelineImage("Track", new Vector2(timelineWidth, 2f), Dim);
+            CreateTimelineImage("CenterFrame", new Vector2(32f, 44f), beatPointColor);
+            timelineCenter = CreateTimelineImage("Center", new Vector2(26f, 38f), Background);
+            approachingPoints = new Image[Mathf.Clamp(previewBeats, 1, 8) * 2];
+            for (int i = 0; i < approachingPoints.Length; i++)
+            {
+                approachingPoints[i] = CreateTimelineImage($"BeatPoint_{i}", Vector2.one * beatPointSize, beatPointColor);
+                approachingPoints[i].rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                approachingPoints[i].enabled = false;
+            }
+            // Enemy countdown remains independent of the player's equal-beat rhythm.
+            if (warningText != null)
+            {
+                warningText.transform.SetParent(timelineRoot, false);
+                warningText.rectTransform.anchorMin = warningText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                warningText.rectTransform.anchoredPosition = new Vector2(0f, 48f);
+                warningText.rectTransform.sizeDelta = new Vector2(timelineWidth, 30f);
+                warningText.alignment = TextAnchor.MiddleCenter;
+                warningText.text = "WAITING FOR MUSIC";
+            }
+        }
+
+        private Image CreateTimelineImage(string objectName, Vector2 size, Color color)
+        {
+            GameObject item = new(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            Image graphic = item.GetComponent<Image>();
+            graphic.rectTransform.SetParent(timelineRoot, false);
+            graphic.rectTransform.sizeDelta = size;
+            graphic.color = color;
+            graphic.raycastTarget = false;
+            return graphic;
+        }
+
+        private void UpdateEqualBeatTimeline()
+        {
+            if (!EqualBeats || timelineRoot == null)
+                return;
+
+            bool ready = beatClock != null && beatClock.IsPlaying && beatClock.HasTimingAnchor
+                && beatClock.MillisecondsPerBeat > 0;
+            int timelineMs = 0;
+            ready = ready && beatClock.TryGetTimelinePositionMs(out timelineMs);
+            foreach (Image point in approachingPoints)
+                point.enabled = ready;
+            if (!ready)
+            {
+                timelineCenter.color = Background;
+                timelineCenter.rectTransform.localScale = Vector3.one;
+                if (warningText != null)
+                    warningText.text = "WAITING FOR MUSIC";
+                return;
+            }
+
+            // Use the same calibrated time as JudgeNow; no accumulated deltaTime drift.
+            double evaluatedMs = timelineMs + (rhythmJudge != null ? rhythmJudge.JudgementOffsetMs : 0f);
+            RenderEqualBeatTimeline(evaluatedMs, beatClock.LatestBeat.TimelinePositionMs, beatClock.MillisecondsPerBeat);
+        }
+
+        private void RenderEqualBeatTimeline(double evaluatedMs, double anchorMs, double intervalMs)
+        {
+            double beatPosition = (evaluatedMs - anchorMs) / intervalMs;
+            float phase = (float)(beatPosition - System.Math.Floor(beatPosition));
+            int count = approachingPoints.Length / 2;
+            for (int i = 0; i < count; i++)
+            {
+                float distance = (i + 1f - phase) / count * timelineWidth * 0.5f;
+                approachingPoints[i * 2].rectTransform.anchoredPosition = new Vector2(-distance, 0f);
+                approachingPoints[i * 2 + 1].rectTransform.anchoredPosition = new Vector2(distance, 0f);
+            }
+            // Timeline-driven pulse freezes with paused audio and resets with a new anchor.
+            float pulse = Mathf.Clamp01(1f - (float)(phase * intervalMs / 110.0));
+            timelineCenter.color = Color.Lerp(Background, beatPointColor, pulse * centerFlashStrength);
+            timelineCenter.rectTransform.localScale = Vector3.one * (1f + pulse * 0.12f);
         }
 
         private void UpdateFades()
