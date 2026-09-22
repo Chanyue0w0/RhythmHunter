@@ -85,7 +85,7 @@ namespace RhythmHunter.FightDemo
                 return;
 
             SetHealthDisplayMode(heroSlots, false, false);
-            SetHealthDisplayMode(enemySlots, false, fight.HealthSystemEnabled);
+            SetHealthDisplayMode(enemySlots, fight.UsesEqualBeats && fight.HealthSystemEnabled, fight.HealthSystemEnabled);
             if (fight.UsesEqualBeats)
             {
                 SetPositionLabel(fight.FrontHero.UnitSlot, "FRONT", "X / Q");

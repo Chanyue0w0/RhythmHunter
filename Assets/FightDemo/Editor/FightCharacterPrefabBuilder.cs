@@ -28,7 +28,7 @@ namespace RhythmHunter.FightDemoEditor
 
             FightCharacterDefinition paladin = BuildCharacter(
                 "Paladin", "PALADIN", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Tank,
-                4f, FightCharacterDefinition.AbilityBehavior.Guard, 0f, 1f,
+                3f, FightCharacterDefinition.AbilityBehavior.Guard, 0f, 1f,
                 "Aegis Counter", FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront, 1f, 1, 4,
                 new Color(0.12f, 0.65f, 0.9f, 1f), 1.72f,
                 new[]
@@ -36,10 +36,10 @@ namespace RhythmHunter.FightDemoEditor
                     "Assets/FightDemo/Arts/角色/Paladin/Idle/Idle1.png",
                     "Assets/FightDemo/Arts/角色/Paladin/Idle/Idle2.png",
                     "Assets/FightDemo/Arts/角色/Paladin/Idle/Idle3.png"
-                }, fallbackEffectSprite, HeroRoot);
+                }, fallbackEffectSprite, HeroRoot, 3);
             FightCharacterDefinition bard = BuildCharacter(
                 "Bard", "BARD", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Support,
-                4f, FightCharacterDefinition.AbilityBehavior.HealParty, 0.5f, 1f,
+                1f, FightCharacterDefinition.AbilityBehavior.HealParty, 0.5f, 1f,
                 "Healing Chorus", FightCharacterDefinition.AbilityBehavior.HealParty, 1f, 2, 4,
                 new Color(0.2f, 0.78f, 0.48f, 1f), 1.72f,
                 new[]
@@ -47,10 +47,10 @@ namespace RhythmHunter.FightDemoEditor
                     "Assets/FightDemo/Arts/角色/Bard/Idle/Idle1.png",
                     "Assets/FightDemo/Arts/角色/Bard/Idle/Idle2.png",
                     "Assets/FightDemo/Arts/角色/Bard/Idle/Idle3.png"
-                }, fallbackEffectSprite, HeroRoot);
+                }, fallbackEffectSprite, HeroRoot, 1);
             FightCharacterDefinition mage = BuildCharacter(
                 "Mage", "MAGE", FightUnitSlot.UnitTeam.Hero, FightUnitSlot.UnitRole.Damage,
-                4f, FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 1f,
+                1f, FightCharacterDefinition.AbilityBehavior.DamageFront, 1f, 1f,
                 "Arcane Burst", FightCharacterDefinition.AbilityBehavior.DamageAll, 1f, 4, 3,
                 new Color(0.72f, 0.3f, 0.88f, 1f), 1.72f,
                 new[]
@@ -58,7 +58,7 @@ namespace RhythmHunter.FightDemoEditor
                     "Assets/FightDemo/Arts/角色/Mage/Idle/Idle1.png",
                     "Assets/FightDemo/Arts/角色/Mage/Idle/Idle2.png",
                     "Assets/FightDemo/Arts/角色/Mage/Idle/Idle3.png"
-                }, fallbackEffectSprite, HeroRoot);
+                }, fallbackEffectSprite, HeroRoot, 1);
 
             FightCharacterDefinition goblinMage = BuildCharacter(
                 "Goblin_Mage", "GOBLIN MAGE", FightUnitSlot.UnitTeam.Enemy, FightUnitSlot.UnitRole.Enemy,
@@ -182,7 +182,8 @@ namespace RhythmHunter.FightDemoEditor
             float actorHeight,
             IEnumerable<string> idlePaths,
             Sprite fallbackEffectSprite,
-            string outputFolder)
+            string outputFolder,
+            int defense = 0)
         {
             Sprite[] frames = idlePaths.Select(LoadSprite).Where(sprite => sprite != null).ToArray();
             if (frames.Length == 0)
@@ -222,7 +223,8 @@ namespace RhythmHunter.FightDemoEditor
                 skillEffect,
                 attackIntervalBeats,
                 maxMana,
-                accent);
+                accent,
+                defense);
             definition.ConfigureEffectHooks(null, skillEffect, 1.5f, castEffectAnchor, impactEffectAnchor);
             animator.Configure(renderer, BuildCombatSequences(id, frames));
 

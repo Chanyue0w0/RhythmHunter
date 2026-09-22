@@ -116,13 +116,17 @@ namespace RhythmHunter.FightDemo
         private void Start()
         {
             if (EqualBeats)
+            {
                 BuildEqualBeatTimeline();
+                if (healthText != null && healthText.canvas != null)
+                    gameObject.AddComponent<FightDefenseHud>().Configure(fight, healthText.canvas, healthText.font);
+            }
             bool showHealth = fight == null || fight.HealthSystemEnabled;
             if (healthText != null)
                 healthText.gameObject.SetActive(showHealth && (fight == null || !fight.UsesFrontHeroControls));
             if (healthBar != null)
                 healthBar.gameObject.SetActive(showHealth && (fight == null || !fight.UsesFrontHeroControls));
-            if (fight != null && fight.UsesFrontHeroControls)
+            if (fight != null && fight.UsesFrontHeroControls && !EqualBeats)
                 BuildPixelHeartUi(Mathf.CeilToInt(fight.MaxPartyHp));
             OnPartyHealthChanged(fight != null ? fight.PartyHp : 0f, fight != null ? fight.MaxPartyHp : 1f);
             SetResult(
@@ -171,6 +175,12 @@ namespace RhythmHunter.FightDemo
 
             if (EqualBeats)
             {
+                if (fight.BattleEnded)
+                {
+                    if (warningText != null)
+                        warningText.text = "BATTLE ENDED";
+                    return;
+                }
                 if (warningText != null)
                 {
                     int remaining = fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat);
@@ -279,6 +289,11 @@ namespace RhythmHunter.FightDemo
 
         private void OnEnemyAttackResolved(FightCombatController.EnemyAttackResult attack)
         {
+            if (EqualBeats && fight.BattleEnded)
+            {
+                OnBattleLost();
+                return;
+            }
             if (attack.Blocked)
             {
                 blockedAttacks++;

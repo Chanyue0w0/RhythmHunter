@@ -109,7 +109,11 @@ MonoBehaviour:
   displayName: PALADIN
   team: 1
   role: 1
-  maxHp: 4
+  maxHp: 3
+  defense: 3
+  armorRecoveryDelay: 4
+  armorRecoveryInterval: 2
+  armorRecoveryAmount: 0.5
   basicAbilityName: Guard
   normalAbilityBehavior: 1
   normalAbilityPower: 0

@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace RhythmHunter.FightDemoEditor
 {
@@ -49,6 +50,7 @@ namespace RhythmHunter.FightDemoEditor
                 fight.SetCombatMode(FightCombatController.CombatMode.EqualBeat);
 
                 ValidateFormation(components.OfType<FightRosterManager>().Single(), fight);
+                ValidateDefense(fight);
 
                 Invoke(hud, "BuildEqualBeatTimeline");
                 var points = Field<Image[]>(hud, "approachingPoints");
@@ -81,7 +83,8 @@ namespace RhythmHunter.FightDemoEditor
                 Require(points.All(point => !point.enabled), "No moving points before music is ready.");
                 Require(center.rectTransform.localScale == Vector3.one, "Waiting state must clear the pulse.");
                 Require(root.GetComponentsInChildren<Image>().All(graphic => !graphic.raycastTarget), "Timeline must not intercept input.");
-                File.WriteAllText(Result, "PASS: all six party permutations; empty positions keep bindings; character-owned Basic data; scene mode; all-beat Basic selection; legacy fourth-beat skills; paired inward motion across bars/tempos; center arrival/pulse; waiting state; idempotent HUD; nonblocking UI.\nLive FMOD/input and visual playtesting are separate checks.");
+                ValidateDefenseHud(fight, hud);
+                File.WriteAllText(Result, "PASS: 5 shared HP; frontline DEF 1:1; armor-first damage and overflow; recovery delay/interval/reset/cap; healing does not restore armor; zero-HP input remains enabled; live defense/enemy HUD and developer toggle; all six party permutations; empty positions keep bindings; character-owned Basic data; equal-beat timeline regressions.\nLive FMOD/input and visual playtesting are separate checks.");
                 Debug.Log("FIGHT_SCENE3_BEAT_VALIDATION_PASS");
                 passed = true;
             }
@@ -116,6 +119,8 @@ namespace RhythmHunter.FightDemoEditor
                 var assigned = order.Select(index => index < 0 ? null : heroes[index]).ToArray();
                 roster.SetRoster(assigned, enemies);
                 Invoke(fight, "RebuildRosterAndResetCombat");
+                Require(Mathf.Approximately(fight.MaxPartyHp, assigned.Where(hero => hero != null).Sum(hero => hero.MaxHp)), "Shared HP must sum occupied positions.");
+                Require(Mathf.Approximately(fight.MaxPartyArmor, assigned[0] != null ? fight.ArmorForDefense(assigned[0].Defense) : 0), "Only the authored frontline grants armor.");
                 for (int i = 0; i < 3; i++)
                 {
                     FightUnitSlot slot = fight.GetHeroForCommand((FightInputRouter.HeroCommand)i).UnitSlot;
@@ -136,6 +141,137 @@ namespace RhythmHunter.FightDemoEditor
         }
 
         private static void Invoke(object target, string method, params object[] args) => target.GetType().GetMethod(method, Private).Invoke(target, args);
+
+        private static void ValidateDefense(FightCombatController fight)
+        {
+            int[] defense = { 0, 2, 3, 5, 6, 8, 9, 10 };
+            float[] armor = { 0, 2, 3, 5, 6, 8, 9, 10 };
+            for (int i = 0; i < defense.Length; i++)
+                Require(Mathf.Approximately(fight.ArmorForDefense(defense[i]), armor[i]), "DEF must convert to armor 1:1.");
+            Require(fight.FrontHero.UnitSlot.MaxHp == 3 && fight.SecondHero.UnitSlot.MaxHp == 1 && fight.ThirdHero.UnitSlot.MaxHp == 1, "Default hero HP must be 3 / 1 / 1.");
+            Require(fight.FrontHero.UnitSlot.CharacterDefinition.Defense == 3 && fight.SecondHero.UnitSlot.CharacterDefinition.Defense == 1 && fight.ThirdHero.UnitSlot.CharacterDefinition.Defense == 1, "Default hero DEF must be 3 / 1 / 1.");
+            Require(fight.MaxPartyHp == 5 && fight.MaxPartyArmor == 3, "Default party must have 5 HP and 3 frontline armor.");
+            float fullHp = fight.MaxPartyHp;
+            float fullArmor = fight.MaxPartyArmor;
+            fight.ApplyPartyDamage(fullArmor + 1, 10);
+            Require(fight.PartyArmor == 0 && fight.PartyHp == fullHp - 1, "Armor must absorb damage before HP, including overflow.");
+            fight.AdvanceArmorRecovery(13);
+            Require(fight.PartyArmor == 0, "Armor recovered before the delay.");
+            fight.AdvanceArmorRecovery(14);
+            Require(fight.PartyArmor == 0.5f, "First recovery must occur at damage beat + delay.");
+            fight.AdvanceArmorRecovery(14);
+            fight.AdvanceArmorRecovery(15);
+            Require(fight.PartyArmor == 0.5f, "Recovery must not duplicate on the same beat or occur before the interval.");
+            fight.AdvanceArmorRecovery(16);
+            Require(fight.PartyArmor == 1f, "Recovery interval mismatch.");
+            fight.ApplyPartyDamage(0.5f, 17);
+            fight.AdvanceArmorRecovery(20);
+            Require(fight.PartyArmor == 0.5f, "New armor damage must reset the entire delay.");
+            fight.ApplyPartyDamage(0f, 20);
+            fight.AdvanceArmorRecovery(21);
+            Require(fight.PartyArmor == 1f, "Zero/blocked damage must not reset recovery.");
+            fight.AdvanceArmorRecovery(100);
+            Require(fight.PartyArmor == fullArmor && fight.PartyHp == fullHp - 1, "Recovery must cap armor and never regenerate HP.");
+            fight.ApplyPartyDamage(fullArmor, 110);
+            Invoke(fight, "HealPartyHealth", fight.SecondHero.UnitSlot, 100f);
+            Require(fight.PartyHp == fullHp && fight.PartyArmor == 0, "Healing must cap HP without restoring armor.");
+            typeof(FightCombatController).GetField("pendingEnemyAttack", Private).SetValue(fight, true);
+            fight.AdvanceArmorRecovery(114);
+            Require(fight.PartyArmor == 0, "Recovery must wait for pending damage resolution.");
+            typeof(FightCombatController).GetField("pendingEnemyAttack", Private).SetValue(fight, false);
+            fight.AdvanceArmorRecovery(114);
+            Require(fight.PartyArmor == 0.5f, "Recovery did not resume after resolution.");
+            fight.ApplyPartyDamage(999f, 115);
+            Require(fight.PartyHp == 0 && fight.PartyArmor == 0 && !fight.BattleEnded, "Zero team HP must not lock prototype combat.");
+            bool inputDispatched = false;
+            Action<FightCombatController.HeroCallResult> onInput = result => inputDispatched = true;
+            fight.HeroCalled += onInput;
+            fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Back);
+            fight.HeroCalled -= onInput;
+            Require(inputDispatched, "Basic input must still reach judgement at zero HP.");
+            fight.AdvanceArmorRecovery(200);
+            Invoke(fight, "HealPartyHealth", fight.SecondHero.UnitSlot, 100f);
+            Require(fight.PartyHp == fullHp && fight.PartyArmor == fullArmor, "Zero-HP parties must still heal and recover armor.");
+            Invoke(fight, "RebuildRosterAndResetCombat");
+        }
+
+        private static void ValidateDefenseHud(FightCombatController fight, FightScenePresenter presenter)
+        {
+            Text health = Field<Text>(presenter, "healthText");
+            var hud = fight.gameObject.AddComponent<FightDefenseHud>();
+            hud.Configure(fight, health.canvas, health.font);
+            Require(Field<Text[]>(hud, "values").Length == 6, "Developer panel must cover both teams.");
+            fight.ApplyPartyDamage(fight.MaxPartyArmor + 0.5f, 1);
+            hud.Refresh();
+            Require(Field<Text>(hud, "hpText").text.Contains($"{fight.PartyHp:0.#} / {fight.MaxPartyHp:0.#}"), "HP HUD is stale.");
+            Require(Field<Text>(hud, "armorText").text.Contains($"0 / {fight.MaxPartyArmor:0.#}"), "Armor HUD is stale.");
+            var enemy = fight.RosterManager.ActiveEnemies[0];
+            enemy.TakeDamage(0.5f);
+            hud.Refresh();
+            Require(Field<Text[]>(hud, "enemyLabels")[0].text.Contains($"{enemy.CurrentHp:0.#} / {enemy.MaxHp:0.#}"), "Enemy health label must update after damage.");
+            Require(Field<Image[]>(hud, "enemyFills")[0].rectTransform.sizeDelta.x < 508, "Enemy health bar must shrink after damage.");
+            var dev = Field<GameObject>(hud, "developerPanel");
+            var root = Field<RectTransform>(hud, "root");
+            root.GetComponentInChildren<Button>().onClick.Invoke();
+            Require(!dev.activeSelf, "Developer panel must be collapsible.");
+            root.GetComponentInChildren<Button>().onClick.Invoke();
+            Require(dev.activeSelf, "Developer panel must reopen.");
+            if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
+                CaptureHud(health.canvas);
+            UnityEngine.Object.DestroyImmediate(hud);
+            Invoke(fight, "RebuildRosterAndResetCombat");
+        }
+
+        private static void CaptureHud(Canvas source)
+        {
+            Scene previousScene = SceneManager.GetActiveScene();
+            Scene stage = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            RenderTexture previousTarget = RenderTexture.active;
+            var target = new RenderTexture(1280, 720, 24);
+            var texture = new Texture2D(1280, 720, TextureFormat.RGB24, false);
+            try
+            {
+                SceneManager.SetActiveScene(stage);
+                var canvas = UnityEngine.Object.Instantiate(source.gameObject).GetComponent<Canvas>();
+                var camera = new GameObject("HUD Preview Camera").AddComponent<Camera>();
+                camera.orthographic = true;
+                camera.orthographicSize = 5.4f;
+                camera.backgroundColor = new Color(0.07f, 0.1f, 0.14f);
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.transform.position = new Vector3(0, 0, -10);
+                camera.targetTexture = target;
+                canvas.GetComponent<CanvasScaler>().enabled = false;
+                canvas.renderMode = RenderMode.WorldSpace;
+                canvas.sortingOrder = short.MaxValue;
+                canvas.worldCamera = camera;
+                var rect = (RectTransform)canvas.transform;
+                rect.pivot = Vector2.one * 0.5f;
+                rect.sizeDelta = new Vector2(1920, 1080);
+                rect.position = Vector3.zero;
+                rect.rotation = Quaternion.identity;
+                rect.localScale = Vector3.one * 0.01f;
+                Canvas.ForceUpdateCanvases();
+                foreach (Graphic graphic in canvas.GetComponentsInChildren<Graphic>())
+                {
+                    graphic.SetAllDirty();
+                    graphic.Rebuild(CanvasUpdate.PreRender);
+                }
+                Canvas.ForceUpdateCanvases();
+                camera.Render();
+                RenderTexture.active = target;
+                texture.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+                texture.Apply();
+                File.WriteAllBytes("Temp/FightDefenseHud-preview.png", texture.EncodeToPNG());
+            }
+            finally
+            {
+                RenderTexture.active = previousTarget;
+                UnityEngine.Object.DestroyImmediate(texture);
+                UnityEngine.Object.DestroyImmediate(target);
+                SceneManager.SetActiveScene(previousScene);
+                EditorSceneManager.CloseScene(stage, true);
+            }
+        }
         private static void Require(bool condition, string message)
         {
             if (!condition)

@@ -79,6 +79,7 @@ namespace RhythmHunter.FightDemo
             EqualBeat
         }
 
+
         public readonly struct HeroCallResult
         {
             public HeroCallResult(
@@ -154,6 +155,10 @@ namespace RhythmHunter.FightDemo
         private int rosterVersion;
         private long nextActionId;
         private float partyHp;
+        private float partyArmor;
+        private float maxPartyArmor;
+        private long latestCombatBeat = -1;
+        private long nextArmorRecoveryBeat = long.MaxValue;
         private bool pendingEnemyAttack;
         private bool pendingEnemyAnimationDriven;
         private FightUnitSlot pendingEnemyAttacker;
@@ -178,6 +183,10 @@ namespace RhythmHunter.FightDemo
 
         public float PartyHp => partyHp;
         public float MaxPartyHp => maxPartyHp;
+        public float PartyArmor => partyArmor;
+        public float MaxPartyArmor => maxPartyArmor;
+        public int ArmorRecoveryBeatsRemaining => nextArmorRecoveryBeat == long.MaxValue ? 0
+            : (int)Math.Max(0, nextArmorRecoveryBeat - latestCombatBeat);
         public bool BattleEnded => battleEnded;
         public bool HasPendingEnemyAttack => pendingEnemyAttack;
         public int BlockedAttackCount => blockedAttackCount;
@@ -276,7 +285,8 @@ namespace RhythmHunter.FightDemo
             if (UsesFrontHeroControls)
                 RebuildRosterAndResetCombat();
 
-            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : maxPartyHp;
+            if (!UsesEqualBeats)
+                maxPartyHp = tankSlot != null ? tankSlot.MaxHp : maxPartyHp;
             partyHp = maxPartyHp;
             if (tankSlot != null)
                 tankSlot.RestoreFullHealth();
@@ -295,6 +305,7 @@ namespace RhythmHunter.FightDemo
         private void Update()
         {
             TryResolvePendingAttack();
+            AdvanceArmorRecovery(latestCombatBeat);
         }
 
         private void OnDisable()
@@ -546,6 +557,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
+            latestCombatBeat = beat.GlobalBeat;
             FightBeat?.Invoke(beat);
 
             if (battleEnded)
@@ -659,7 +671,10 @@ namespace RhythmHunter.FightDemo
 
             if (HealthSystemEnabled)
             {
-                partyHp = Mathf.Max(0f, partyHp - damage);
+                if (UsesEqualBeats)
+                    ApplyPartyDamage(damage, pendingAttackGlobalBeat);
+                else
+                    partyHp = Mathf.Max(0f, partyHp - damage);
                 if (!blocked && tankSlot != null)
                 {
                     tankSlot.PlayCombatAnimation(
@@ -775,10 +790,59 @@ namespace RhythmHunter.FightDemo
             totalHealingReceived = 0f;
             lastEnemyAttackGlobalBeat = -1;
 
-            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(0.5f, maxPartyHp);
+            maxPartyHp = UsesEqualBeats
+                ? (frontHero.UnitSlot != null ? frontHero.UnitSlot.MaxHp : 0f)
+                  + (secondHero.UnitSlot != null ? secondHero.UnitSlot.MaxHp : 0f)
+                  + (thirdHero.UnitSlot != null ? thirdHero.UnitSlot.MaxHp : 0f)
+                : tankSlot != null ? tankSlot.MaxHp : Mathf.Max(0.5f, maxPartyHp);
+            maxPartyArmor = UsesEqualBeats && tankSlot != null && tankSlot.CharacterDefinition != null
+                ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) : 0f;
+            partyArmor = maxPartyArmor;
+            latestCombatBeat = beatClock != null && beatClock.HasTimingAnchor ? beatClock.LatestBeat.GlobalBeat : -1;
+            nextArmorRecoveryBeat = long.MaxValue;
             if (tankSlot != null)
                 tankSlot.RestoreFullHealth();
             partyHp = maxPartyHp;
+        }
+
+        public float ArmorForDefense(int defense)
+        {
+            return Mathf.Max(0, defense);
+        }
+
+        public float ApplyPartyDamage(float amount, long globalBeat)
+        {
+            if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || amount <= 0f)
+                return 0f;
+            float damage = Mathf.Max(0f, Mathf.Round(amount * 2f) * 0.5f);
+            if (damage <= 0f)
+                return 0f;
+            latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
+            float armorDamage = Mathf.Min(partyArmor, damage);
+            partyArmor -= armorDamage;
+            float hpDamage = Mathf.Min(partyHp, damage - armorDamage);
+            partyHp -= hpDamage;
+            var definition = tankSlot != null ? tankSlot.CharacterDefinition : null;
+            nextArmorRecoveryBeat = definition != null && partyArmor < maxPartyArmor
+                ? globalBeat + definition.ArmorRecoveryDelay : long.MaxValue;
+            PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
+            // This prototype remains playable at zero HP, including Basic input and healing.
+            return armorDamage + hpDamage;
+        }
+
+        public void AdvanceArmorRecovery(long globalBeat)
+        {
+            latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
+            if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || pendingEnemyAttack ||
+                nextArmorRecoveryBeat == long.MaxValue || globalBeat < nextArmorRecoveryBeat)
+                return;
+            var definition = tankSlot != null ? tankSlot.CharacterDefinition : null;
+            if (definition == null)
+                return;
+            long ticks = 1 + (globalBeat - nextArmorRecoveryBeat) / definition.ArmorRecoveryInterval;
+            partyArmor = Mathf.Min(maxPartyArmor, partyArmor + ticks * definition.ArmorRecoveryAmount);
+            nextArmorRecoveryBeat = partyArmor >= maxPartyArmor ? long.MaxValue
+                : nextArmorRecoveryBeat + ticks * definition.ArmorRecoveryInterval;
         }
 
         private void OnRosterChanged()
@@ -1006,7 +1070,7 @@ namespace RhythmHunter.FightDemo
 
         private void HealPartyHealth(FightUnitSlot healer, float amount)
         {
-            if (healer == null || amount <= 0f)
+            if (healer == null || amount <= 0f || (UsesEqualBeats && battleEnded))
                 return;
 
             float previous = partyHp;

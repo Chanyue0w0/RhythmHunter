@@ -109,7 +109,11 @@ MonoBehaviour:
   displayName: MAGE
   team: 1
   role: 3
-  maxHp: 4
+  maxHp: 1
+  defense: 1
+  armorRecoveryDelay: 4
+  armorRecoveryInterval: 2
+  armorRecoveryAmount: 0.5
   basicAbilityName: Arcane Bolt
   normalAbilityBehavior: 0
   normalAbilityPower: 1

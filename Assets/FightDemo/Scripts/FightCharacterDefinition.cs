@@ -27,6 +27,11 @@ namespace RhythmHunter.FightDemo
 
         [Header("Base Combat Information")]
         [SerializeField, Min(0.5f)] private float maxHp = 4f;
+        [SerializeField, Range(0, 10)] private int defense;
+        [Header("Frontline Armor Recovery")]
+        [SerializeField, Min(1)] private int armorRecoveryDelay = 4;
+        [SerializeField, Min(1)] private int armorRecoveryInterval = 2;
+        [SerializeField, Min(0.5f)] private float armorRecoveryAmount = 0.5f;
         [Header("Basic Ability")]
         [SerializeField] private string basicAbilityName = "Basic Ability";
         [Tooltip("Character-owned Basic behavior on every beat in EqualBeat mode. Independent of party position.")]
@@ -62,6 +67,10 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot.UnitTeam Team => team;
         public FightUnitSlot.UnitRole Role => role;
         public float MaxHp => maxHp;
+        public int Defense => Mathf.Clamp(defense, 0, 10);
+        public int ArmorRecoveryDelay => Mathf.Max(1, armorRecoveryDelay);
+        public int ArmorRecoveryInterval => Mathf.Max(1, armorRecoveryInterval);
+        public float ArmorRecoveryAmount => QuantizePositive(armorRecoveryAmount);
         public string BasicAbilityName => string.IsNullOrWhiteSpace(basicAbilityName) ? "Basic Ability" : basicAbilityName;
         public AbilityBehavior BasicAbilityType => normalAbilityBehavior;
         public float BasicAbilityPower => normalAbilityPower;
@@ -97,13 +106,15 @@ namespace RhythmHunter.FightDemo
             GameObject abilityEffect,
             int intervalBeats,
             int manaCapacity,
-            Color color)
+            Color color,
+            int configuredDefense = 0)
         {
             characterId = id;
             displayName = shownName;
             team = unitTeam;
             role = unitRole;
             maxHp = QuantizePositive(hp);
+            defense = Mathf.Clamp(configuredDefense, 0, 10);
             normalAbilityBehavior = normalBehavior;
             normalAbilityPower = normalBehavior == AbilityBehavior.Guard
                 ? 0f
@@ -138,6 +149,10 @@ namespace RhythmHunter.FightDemo
         private void OnValidate()
         {
             maxHp = QuantizePositive(maxHp);
+            defense = Mathf.Clamp(defense, 0, 10);
+            armorRecoveryDelay = Mathf.Max(1, armorRecoveryDelay);
+            armorRecoveryInterval = Mathf.Max(1, armorRecoveryInterval);
+            armorRecoveryAmount = QuantizePositive(armorRecoveryAmount);
             normalAbilityPower = normalAbilityBehavior == AbilityBehavior.Guard
                 ? 0f
                 : QuantizePositive(normalAbilityPower);
