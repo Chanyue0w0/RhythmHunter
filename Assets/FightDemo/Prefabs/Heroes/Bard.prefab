@@ -110,6 +110,7 @@ MonoBehaviour:
   team: 1
   role: 2
   maxHp: 4
+  basicAbilityName: Heal
   normalAbilityBehavior: 2
   normalAbilityPower: 0.5
   attackPower: 1

@@ -110,6 +110,7 @@ MonoBehaviour:
   team: 1
   role: 3
   maxHp: 4
+  basicAbilityName: Arcane Bolt
   normalAbilityBehavior: 0
   normalAbilityPower: 1
   attackPower: 1

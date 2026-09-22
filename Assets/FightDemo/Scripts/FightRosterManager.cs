@@ -13,6 +13,8 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightRosterManager : MonoBehaviour
     {
+        public enum PartyPosition { Front, Middle, Back }
+
         [Header("Runtime Dependencies")]
         [SerializeField] private FightCombatController fightController;
         [SerializeField] private FmodBeatClock beatClock;
@@ -36,6 +38,15 @@ namespace RhythmHunter.FightDemo
         public IReadOnlyList<FightUnitSlot> ActiveEnemies => activeEnemies;
         public IReadOnlyList<FightCharacterDefinition> HeroPrefabs => heroPrefabs;
         public IReadOnlyList<FightCharacterDefinition> EnemyPrefabs => enemyPrefabs;
+
+        public FightUnitSlot GetHeroAtPosition(PartyPosition position)
+        {
+            int index = (int)position;
+            if (index < 0 || index >= heroSpawnSlots.Length)
+                return null;
+            FightUnitSlot slot = heroSpawnSlots[index];
+            return slot != null && slot.HasCharacter ? slot : null;
+        }
 
         public void Configure(
             FightCombatController controller,

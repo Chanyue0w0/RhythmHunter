@@ -351,7 +351,7 @@ namespace RhythmHunter.FightDemo
             if (command == FightInputRouter.HeroCommand.Ultimate || rhythmJudge == null)
                 return;
 
-            HeroBeatSettings hero = HeroFor(command);
+            HeroBeatSettings hero = GetHeroForCommand(command);
             if (hero?.UnitSlot == null)
                 return;
 
@@ -374,13 +374,13 @@ namespace RhythmHunter.FightDemo
                 heavyBeat);
         }
 
-        private HeroBeatSettings HeroFor(FightInputRouter.HeroCommand command)
+        public HeroBeatSettings GetHeroForCommand(FightInputRouter.HeroCommand command)
         {
             return command switch
             {
-                FightInputRouter.HeroCommand.Tank => frontHero,
-                FightInputRouter.HeroCommand.Support => secondHero,
-                FightInputRouter.HeroCommand.Damage => thirdHero,
+                FightInputRouter.HeroCommand.Front => frontHero,
+                FightInputRouter.HeroCommand.Middle => secondHero,
+                FightInputRouter.HeroCommand.Back => thirdHero,
                 _ => null
             };
         }
@@ -437,7 +437,8 @@ namespace RhythmHunter.FightDemo
             Action playEffect = skill
                 ? () => actor.PlaySkillAttackAt(actor.CastEffectAnchor)
                 : () => actor.PlayLightAttackAt(actor.CastEffectAnchor);
-            string abilityName = skill ? hero.SkillName : "Normal Ability";
+            string abilityName = skill ? hero.SkillName : actor.CharacterDefinition != null
+                ? actor.CharacterDefinition.BasicAbilityName : "Basic Ability";
 
             switch (behavior)
             {
@@ -739,13 +740,22 @@ namespace RhythmHunter.FightDemo
             fightScene2Enemies.Sort((left, right) => right.SlotIndex.CompareTo(left.SlotIndex));
 
             rosterVersion++;
-            frontHero.BindUnitSlot(SlotAt(heroes, 0), true);
-            secondHero.BindUnitSlot(SlotAt(heroes, 1), true);
-            thirdHero.BindUnitSlot(SlotAt(heroes, 2), true);
+            frontHero.BindUnitSlot(HeroAtPosition(heroes, FightRosterManager.PartyPosition.Front), true);
+            secondHero.BindUnitSlot(HeroAtPosition(heroes, FightRosterManager.PartyPosition.Middle), true);
+            thirdHero.BindUnitSlot(HeroAtPosition(heroes, FightRosterManager.PartyPosition.Back), true);
             tankSlot = frontHero.UnitSlot;
             activeEnemySlot = FindFrontLivingEnemy();
             enemyAttackIntervalBeats = Mathf.Max(1, enemyAttackIntervalBeats);
             ResetBattleStateForRoster();
+        }
+
+        private FightUnitSlot HeroAtPosition(List<FightUnitSlot> heroes, FightRosterManager.PartyPosition position)
+        {
+            if (!UsesEqualBeats)
+                return SlotAt(heroes, (int)position);
+            if (rosterManager != null)
+                return rosterManager.GetHeroAtPosition(position);
+            return heroes.Find(slot => slot.SlotIndex == (int)position);
         }
 
         private void ResetBattleStateForRoster()

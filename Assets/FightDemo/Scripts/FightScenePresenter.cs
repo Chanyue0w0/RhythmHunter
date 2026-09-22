@@ -227,7 +227,7 @@ namespace RhythmHunter.FightDemo
                 if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
                 {
                     perfectCalls++;
-                    string title = call.SkillActivated ? "SKILL" : "NORMAL ABILITY";
+                    string title = call.SkillActivated ? "SKILL" : EqualBeats ? "BASIC ABILITY" : "NORMAL ABILITY";
                     SetResult(title, call.SkillActivated ? Gold : Green, call.Message, 1.2f);
                 }
                 else

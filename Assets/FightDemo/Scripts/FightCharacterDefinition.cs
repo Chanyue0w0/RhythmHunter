@@ -27,17 +27,20 @@ namespace RhythmHunter.FightDemo
 
         [Header("Base Combat Information")]
         [SerializeField, Min(0.5f)] private float maxHp = 4f;
-        [Tooltip("Gameplay behavior activated on beats 1-3.")]
+        [Header("Basic Ability")]
+        [SerializeField] private string basicAbilityName = "Basic Ability";
+        [Tooltip("Character-owned Basic behavior on every beat in EqualBeat mode. Independent of party position.")]
         [SerializeField] private AbilityBehavior normalAbilityBehavior;
         [SerializeField, Min(0)] private float normalAbilityPower = 1f;
         [SerializeField, Min(0.5f)] private float attackPower = 1f;
+        [Header("Team Skill / Legacy Fourth-Beat Skill")]
         [SerializeField] private string skillName = "Beat Skill";
-        [Tooltip("Gameplay behavior activated when this character is called on beat 4.")]
+        [Tooltip("Character skill behavior. Currently used by legacy fourth-beat skills; reserved for the upcoming Team Skill sequence in EqualBeat mode.")]
         [SerializeField] private AbilityBehavior skillBehavior;
         [FormerlySerializedAs("skillDamage")]
         [SerializeField, Min(0)] private float skillPower = 1f;
         [Header("Replaceable Ability Effects")]
-        [Tooltip("Optional visual-only prefab for beats 1-3. Damage never depends on this prefab or projectile travel.")]
+        [Tooltip("Optional visual-only Basic Ability prefab. Damage never depends on this prefab or projectile travel.")]
         [SerializeField] private GameObject normalAbilityEffectPrefab;
         [Tooltip("Optional replaceable VFX prefab spawned when this character uses its skill.")]
         [SerializeField] private GameObject skillEffectPrefab;
@@ -59,6 +62,9 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot.UnitTeam Team => team;
         public FightUnitSlot.UnitRole Role => role;
         public float MaxHp => maxHp;
+        public string BasicAbilityName => string.IsNullOrWhiteSpace(basicAbilityName) ? "Basic Ability" : basicAbilityName;
+        public AbilityBehavior BasicAbilityType => normalAbilityBehavior;
+        public float BasicAbilityPower => normalAbilityPower;
         public AbilityBehavior NormalAbilityType => normalAbilityBehavior;
         public float NormalAbilityPower => normalAbilityPower;
         public float AttackPower => attackPower;

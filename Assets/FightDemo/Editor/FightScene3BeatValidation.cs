@@ -48,6 +48,8 @@ namespace RhythmHunter.FightDemoEditor
                 Require(fight.GetHeroActionForBeat(4) == FightCombatController.ActionType.Skill, "Older scenes must retain fourth-beat skills.");
                 fight.SetCombatMode(FightCombatController.CombatMode.EqualBeat);
 
+                ValidateFormation(components.OfType<FightRosterManager>().Single(), fight);
+
                 Invoke(hud, "BuildEqualBeatTimeline");
                 var points = Field<Image[]>(hud, "approachingPoints");
                 var center = Field<Image>(hud, "timelineCenter");
@@ -79,16 +81,7 @@ namespace RhythmHunter.FightDemoEditor
                 Require(points.All(point => !point.enabled), "No moving points before music is ready.");
                 Require(center.rectTransform.localScale == Vector3.one, "Waiting state must clear the pulse.");
                 Require(root.GetComponentsInChildren<Image>().All(graphic => !graphic.raycastTarget), "Timeline must not intercept input.");
-                if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
-                {
-                    Invoke(hud, "RenderEqualBeatTimeline", 2250.0, 2000.0, 500.0);
-                    foreach (Image point in points)
-                        point.enabled = true;
-                    var camera = scene.GetRootGameObjects().SelectMany(item => item.GetComponentsInChildren<Camera>(true)).First();
-                    Capture(root.GetComponentInParent<Canvas>(), camera, 1280, 720);
-                    Capture(root.GetComponentInParent<Canvas>(), camera, 1024, 768);
-                }
-                File.WriteAllText(Result, "PASS: scene mode; all-beat Basic selection; legacy fourth-beat skills; paired inward motion across bars/tempos; center arrival/pulse; waiting state; idempotent HUD; nonblocking UI.\nLive FMOD/input and visual playtesting are separate checks.");
+                File.WriteAllText(Result, "PASS: all six party permutations; empty positions keep bindings; character-owned Basic data; scene mode; all-beat Basic selection; legacy fourth-beat skills; paired inward motion across bars/tempos; center arrival/pulse; waiting state; idempotent HUD; nonblocking UI.\nLive FMOD/input and visual playtesting are separate checks.");
                 Debug.Log("FIGHT_SCENE3_BEAT_VALIDATION_PASS");
                 passed = true;
             }
@@ -107,32 +100,41 @@ namespace RhythmHunter.FightDemoEditor
 
         private static T Field<T>(object target, string name) => (T)target.GetType().GetField(name, Private).GetValue(target);
 
-        private static void Capture(Canvas canvas, Camera camera, int width, int height)
+        private static void ValidateFormation(FightRosterManager roster, FightCombatController fight)
         {
-            var target = new RenderTexture(width, height, 24);
-            var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
-            RenderTexture previous = RenderTexture.active;
-            try
+            var heroes = roster.HeroPrefabs.ToArray();
+            var enemies = roster.EnemyPrefabs.ToArray();
+            int[][] orders =
             {
-                camera.targetTexture = target;
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = camera;
-                canvas.planeDistance = 1f;
-                Canvas.ForceUpdateCanvases();
-                camera.Render();
-                RenderTexture.active = target;
-                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-                texture.Apply();
-                File.WriteAllBytes($"Temp/FightScene3Beat-{width}x{height}.png", texture.EncodeToPNG());
-            }
-            finally
+                new[] { 0, 1, 2 }, new[] { 0, 2, 1 }, new[] { 1, 0, 2 },
+                new[] { 1, 2, 0 }, new[] { 2, 0, 1 }, new[] { 2, 1, 0 },
+                new[] { -1, 1, 2 }, new[] { 0, -1, 2 }, new[] { 0, 1, -1 },
+                new[] { -1, -1, -1 }
+            };
+            foreach (int[] order in orders)
             {
-                camera.targetTexture = null;
-                RenderTexture.active = previous;
-                UnityEngine.Object.DestroyImmediate(texture);
-                UnityEngine.Object.DestroyImmediate(target);
+                var assigned = order.Select(index => index < 0 ? null : heroes[index]).ToArray();
+                roster.SetRoster(assigned, enemies);
+                Invoke(fight, "RebuildRosterAndResetCombat");
+                for (int i = 0; i < 3; i++)
+                {
+                    FightUnitSlot slot = fight.GetHeroForCommand((FightInputRouter.HeroCommand)i).UnitSlot;
+                    Require(slot == roster.GetHeroAtPosition((FightRosterManager.PartyPosition)i), "Input must resolve its authored position.");
+                    if (assigned[i] == null)
+                    {
+                        Require(slot == null, "An empty position must not shift another character's binding.");
+                        continue;
+                    }
+                    Require(slot != null && slot.CharacterDefinition.CharacterId == assigned[i].CharacterId, "Any hero must be assignable to any position.");
+                    Require(slot.NormalAbilityBehavior == assigned[i].BasicAbilityType &&
+                        Mathf.Approximately(slot.NormalAbilityPower, assigned[i].BasicAbilityPower), "Basic behavior/power must follow the character, not the slot.");
+                }
             }
+            Require(fight.GetHeroForCommand(FightInputRouter.HeroCommand.Ultimate) == null, "Ultimate must not resolve to a Basic slot.");
+            roster.SetRoster(heroes, enemies);
+            Invoke(fight, "RebuildRosterAndResetCombat");
         }
+
         private static void Invoke(object target, string method, params object[] args) => target.GetType().GetMethod(method, Private).Invoke(target, args);
         private static void Require(bool condition, string message)
         {

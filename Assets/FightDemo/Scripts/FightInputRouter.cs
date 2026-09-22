@@ -12,10 +12,14 @@ namespace RhythmHunter.FightDemo
     {
         public enum HeroCommand
         {
-            Tank,
-            Support,
-            Damage,
-            Ultimate
+            Front = 0,
+            Middle = 1,
+            Back = 2,
+            Ultimate = 3,
+            // Preserve existing code and serialized command values in the older prototypes.
+            Tank = Front,
+            Support = Middle,
+            Damage = Back
         }
 
         private const string ActionMapName = "Abilities";
@@ -154,9 +158,9 @@ namespace RhythmHunter.FightDemo
             enabledByRouter = false;
         }
 
-        private void OnTank(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Tank);
-        private void OnSupport(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Support);
-        private void OnDamage(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Damage);
+        private void OnTank(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Front);
+        private void OnSupport(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Middle);
+        private void OnDamage(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Back);
         private void OnUltimate(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Ultimate);
     }
 }

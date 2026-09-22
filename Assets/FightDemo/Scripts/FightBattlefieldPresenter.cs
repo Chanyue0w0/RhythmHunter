@@ -88,9 +88,9 @@ namespace RhythmHunter.FightDemo
             SetHealthDisplayMode(enemySlots, false, fight.HealthSystemEnabled);
             if (fight.UsesEqualBeats)
             {
-                fight.FrontHero.UnitSlot?.SetRoleLabel("FRONT  •  X / Q  •  BASIC");
-                fight.SecondHero.UnitSlot?.SetRoleLabel("MIDDLE  •  Y / W  •  BASIC");
-                fight.ThirdHero.UnitSlot?.SetRoleLabel("BACK  •  B / E  •  BASIC");
+                SetPositionLabel(fight.FrontHero.UnitSlot, "FRONT", "X / Q");
+                SetPositionLabel(fight.SecondHero.UnitSlot, "MIDDLE", "Y / W");
+                SetPositionLabel(fight.ThirdHero.UnitSlot, "BACK", "B / E");
                 return;
             }
             fight.FrontHero.UnitSlot?.SetRoleLabel("X / Q  •  GUARD  •  BEAT 4 COUNTER");
@@ -104,6 +104,14 @@ namespace RhythmHunter.FightDemo
                 return;
             foreach (FightUnitSlot slot in slots)
                 slot?.SetHealthDisplayMode(showBar, showNumber);
+        }
+
+        private static void SetPositionLabel(FightUnitSlot slot, string position, string input)
+        {
+            if (slot == null)
+                return;
+            string ability = slot.CharacterDefinition != null ? slot.CharacterDefinition.BasicAbilityName : "Basic";
+            slot.SetRoleLabel($"{position}  •  {input}  •  {ability}");
         }
 
         private void Update()

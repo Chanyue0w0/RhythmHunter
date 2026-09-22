@@ -655,8 +655,8 @@ namespace RhythmHunter.FightDemo
             team = definition.Team;
             role = definition.Role;
             maxHp = definition.MaxHp;
-            normalAbilityBehavior = definition.NormalAbilityType;
-            normalAbilityPower = definition.NormalAbilityPower;
+            normalAbilityBehavior = definition.BasicAbilityType;
+            normalAbilityPower = definition.BasicAbilityPower;
             attackPower = definition.AttackPower;
             skillPower = definition.SkillPower;
             skillBehavior = definition.SkillType;

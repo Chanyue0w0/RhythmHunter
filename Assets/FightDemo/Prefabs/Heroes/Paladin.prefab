@@ -110,6 +110,7 @@ MonoBehaviour:
   team: 1
   role: 1
   maxHp: 4
+  basicAbilityName: Guard
   normalAbilityBehavior: 1
   normalAbilityPower: 0
   attackPower: 1
