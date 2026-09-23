@@ -7615,7 +7615,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'FRONT X/Q   MIDDLE Y/W   BACK B/E   BASIC ON EVERY BEAT'
+  m_Text: FRONT X/Q   MIDDLE Y/W   BACK B/E   BASIC ON EVERY BEAT
 --- !u!222 &1562105383
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9525,6 +9525,12 @@ MonoBehaviour:
   - {fileID: 809463615}
   beatProgress: {fileID: 1380923318}
   healthBar: {fileID: 455403627}
+  timelineWidth: 840
+  timelineBottomOffset: 76
+  previewBeats: 3
+  beatPointSize: 14
+  beatPointColor: {r: 0.2, g: 0.92, b: 1, a: 1}
+  centerFlashStrength: 0.8
   screenFlash: {fileID: 1465678668}
 --- !u!114 &2021200326
 MonoBehaviour:
@@ -9603,7 +9609,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3814f07b225d8f34084d9aed7684d7c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock
-  musicEventPath: event:/Combat soundtracks/Combat 01
+  musicEventPath: event:/Ritual Slam
   musicStartDelaySeconds: 1
   musicVolume: 1
   musicPitch: 1

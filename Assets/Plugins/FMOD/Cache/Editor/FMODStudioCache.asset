@@ -259,6 +259,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 64440
+--- !u!114 &-4325693147175791193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ritual Slam
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Ritual Slam
+  Guid:
+    Data1: -292092496
+    Data2: 1120807726
+    Data3: 2014885293
+    Data4: -2101002351
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 179360
 --- !u!114 &-4012418388762648735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -510,6 +537,7 @@ MonoBehaviour:
   - {fileID: 8847483650728763382}
   - {fileID: -4453772787299686953}
   - {fileID: 5533849383473480245}
+  - {fileID: -4325693147175791193}
   EditorParameters:
   - {fileID: -5040547114344505986}
   - {fileID: -1051140484031798589}
@@ -520,7 +548,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: 3274462911295270183}
   cacheVersion: 131860
-  cacheTime: 639235284119915129
+  cacheTime: 639257830815058135
   SerializableEventsDict:
   - key: event:/SoundEffects/InCombat/Paladin_NormalParry
     index: 0
@@ -570,6 +598,8 @@ MonoBehaviour:
     index: 22
   - key: event:/ZooGoblinFight/BGM/The Divine Bureaucracy
     index: 23
+  - key: event:/Ritual Slam
+    index: 24
 --- !u!114 &1068593537462916099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -799,10 +829,10 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639235284119915129
+  lastModified: 639257830815058135
   FileSizes:
   - Name: Desktop
-    Value: 2602
+    Value: 2644
   Exists: 1
 --- !u!114 &3656930557680544666
 MonoBehaviour:
@@ -1027,10 +1057,10 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639235284119874910
+  lastModified: 639257830814972820
   FileSizes:
   - Name: Desktop
-    Value: 12240096
+    Value: 14556928
   Exists: 1
 --- !u!114 &8847483650728763382
 MonoBehaviour:
