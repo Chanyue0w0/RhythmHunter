@@ -123,6 +123,37 @@ namespace RhythmHunter.FightDemoEditor
                     clock.TryGetTimelinePositionMs(out int now);
                     Require(now>pausedTimeline+500 && clock.ReceivedBeatCount>pausedBeat,"Playback must continue from the paused position.");
                     File.AppendAllText(Result,$"PASS: new scene, profile migration, both profile reads in FightScene3, single music instance, pause freezes timeline at {pausedTimeline} ms, resume advances to {now} ms.\n");
+                    EditorSceneManager.LoadSceneInPlayMode("Assets/FightDemo/Scenes/FightScene.unity",new LoadSceneParameters(LoadSceneMode.Single));
+                    phase=6;suppliedBackground=false;return;
+                }
+                if(phase==6)
+                {
+                    if(SceneManager.GetActiveScene().name!="FightScene"||clock.ReceivedBeatCount<3)return;
+                    var scene=SceneManager.GetActiveScene();
+                    int animatorCount=0;
+                    foreach(var root in scene.GetRootGameObjects())
+                    {
+                        foreach(var transform in root.GetComponentsInChildren<Transform>(true))
+                            Require(GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(transform.gameObject)==0,"Art scene must not reference removed scripts.");
+                        foreach(var animator in root.GetComponentsInChildren<FightCharacterCombatAnimator>())
+                        {
+                            Require(animator.TargetRenderer!=null && animator.FrameCount>0,"Art character must retain its renderer and idle frames.");
+                            Require(animator.TargetRenderer.sharedMaterial.shader.name=="Universal Render Pipeline/2D/Sprite-Lit-Default","Art characters must retain natural lighting.");
+                            animatorCount++;
+                        }
+                    }
+                    Require(animatorCount>=6,"Art scene must retain all six animated characters.");
+                    Require(UnityEngine.Object.FindFirstObjectByType<FightSceneNaturalLighting>()!=null,"Art lighting must initialize.");
+                    var fight=UnityEngine.Object.FindFirstObjectByType<FightCombatController>();
+                    var targets=(System.Collections.ICollection)typeof(FightCombatController).GetField("artPulseTargets",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(fight);
+                    Require(targets.Count>0,"Art beat pulse targets must initialize.");
+                    ScreenCapture.CaptureScreenshot("Temp/FightArtMerge-live.png");
+                    File.AppendAllText(Result,$"PASS: art scene runs with {animatorCount} animated characters, natural lighting, {targets.Count} pulse targets and no missing scripts.\n");
+                    phase=7;checkpoint=EditorApplication.timeSinceStartup+.5;return;
+                }
+                if(phase==7)
+                {
+                    if(EditorApplication.timeSinceStartup<checkpoint)return;
                     Finish();
                 }
             }

@@ -203,10 +203,10 @@ namespace RhythmHunter.FightDemo
             }
 
             int characterCount = 0;
-            BeatSyncedIdleAnimator[] animators = FindObjectsByType<BeatSyncedIdleAnimator>(
+            FightCharacterCombatAnimator[] animators = FindObjectsByType<FightCharacterCombatAnimator>(
                 FindObjectsInactive.Exclude,
                 FindObjectsSortMode.None);
-            foreach (BeatSyncedIdleAnimator animator in animators)
+            foreach (FightCharacterCombatAnimator animator in animators)
             {
                 SpriteRenderer renderer = animator.TargetRenderer;
                 if (renderer == null || renderer.gameObject.scene != scene)
