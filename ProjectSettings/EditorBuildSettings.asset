@@ -35,10 +35,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/OtterAquariumPrototype/Scenes/OtterShellBeatLab.unity
     guid: 2a4c98089ff3ce643a12001baabda0b6
-  - enabled: 1
+  - enabled: 0
     path: Assets/FightDemo/Scenes/FightCalibrationScene.unity
     guid: 97e57dff16c872e4594af611b6831fd8
-  - enabled: 1
+  - enabled: 0
     path: Assets/FightDemo/Scenes/FightScene3.unity
     guid: c8e462ba90db4cc4ad314ddcb4e5ff47
   m_configObjects:
