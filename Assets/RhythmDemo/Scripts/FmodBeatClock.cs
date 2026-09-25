@@ -101,6 +101,7 @@ namespace RhythmHunter.RhythmDemo
         private bool selfHandleAllocated;
         private bool initialized;
         private bool playbackStarted;
+        private bool paused;
         private bool hasAnchor;
         private BeatSnapshot latestBeat;
         private long receivedBeatCount;
@@ -115,6 +116,7 @@ namespace RhythmHunter.RhythmDemo
         public float MusicPitch => musicPitch;
         public bool IsReady => initialized && musicInstance.isValid();
         public bool IsPlaying => playbackStarted && musicInstance.isValid();
+        public bool IsPaused => paused;
         public bool HasTimingAnchor => hasAnchor;
         public BeatSnapshot LatestBeat => latestBeat;
         public long ReceivedBeatCount => receivedBeatCount;
@@ -141,7 +143,18 @@ namespace RhythmHunter.RhythmDemo
 
         private void Update()
         {
-            ProcessPendingBeats();
+            if (!paused) ProcessPendingBeats();
+        }
+
+        public bool SetPaused(bool value)
+        {
+            if (musicInstance.isValid())
+            {
+                RESULT result = musicInstance.setPaused(value);
+                if (result != RESULT.OK) { ReportError("FMOD pause failed: " + result); return false; }
+            }
+            paused = value;
+            return true;
         }
 
         private void OnDestroy()
@@ -188,6 +201,8 @@ namespace RhythmHunter.RhythmDemo
             if (!IsReady || playbackStarted)
                 return;
 
+            musicInstance.setPaused(paused);
+
             RESULT result = musicInstance.start();
             if (result != RESULT.OK)
             {
@@ -201,6 +216,14 @@ namespace RhythmHunter.RhythmDemo
         public void StopMusic()
         {
             ShutdownMusic();
+        }
+
+        public void RestartMusic()
+        {
+            ShutdownMusic();
+            receivedBeatCount = 0;
+            InitializeMusic();
+            StartMusic();
         }
 
         public bool TryGetTimelinePositionMs(out int timelinePositionMs)
@@ -340,6 +363,7 @@ namespace RhythmHunter.RhythmDemo
         {
             initialized = false;
             playbackStarted = false;
+            paused = false;
             hasAnchor = false;
 
             if (musicInstance.isValid())

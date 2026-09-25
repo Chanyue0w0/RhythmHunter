@@ -177,6 +177,7 @@ namespace RhythmHunter.FightDemo
         private long calibrationStartBeat;
         private long resumeAfterCalibrationBeat = -1;
         public bool TimingCalibrationActive { get; private set; }
+        public bool IsPaused => beatClock != null && beatClock.IsPaused;
 
         public void SetTimingCalibrationActive(bool active)
         {
@@ -327,7 +328,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
-            if (TimingCalibrationActive) return;
+            if (TimingCalibrationActive || IsPaused) return;
             TryResolvePendingAttack();
             AdvanceArmorRecovery(latestCombatBeat);
         }
@@ -369,7 +370,7 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (battleEnded || TimingCalibrationActive ||
+            if (battleEnded || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
@@ -601,6 +602,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
+            if (IsPaused) return;
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive) return;
             if (UsesEqualBeats)
@@ -687,6 +689,7 @@ namespace RhythmHunter.FightDemo
             long expectedActionId,
             FightUnitSlot expectedAttacker)
         {
+            if (IsPaused) return;
             if (!IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, expectedAttacker))
                 return;
 
@@ -882,7 +885,7 @@ namespace RhythmHunter.FightDemo
 
         public void AdvanceArmorRecovery(long globalBeat)
         {
-            if (TimingCalibrationActive) return;
+            if (TimingCalibrationActive || IsPaused) return;
             latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
             if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || pendingEnemyAttack ||
                 nextArmorRecoveryBeat == long.MaxValue || globalBeat < nextArmorRecoveryBeat)

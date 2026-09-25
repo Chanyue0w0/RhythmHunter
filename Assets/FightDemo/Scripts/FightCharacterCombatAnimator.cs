@@ -183,7 +183,7 @@ namespace RhythmHunter.FightDemo
             if (targetRenderer == null || frames == null || frames.Count == 0)
                 return;
 
-            double now = Time.unscaledTimeAsDouble;
+            double now = Time.timeAsDouble;
             double beatPosition = hasBeatAnchor
                 ? beatAnchorIndex + Math.Max(0d, now - beatAnchorTime) / Math.Max(0.001d, secondsPerBeat)
                 : now / Math.Max(0.001d, secondsPerBeat);
@@ -198,7 +198,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
-            beatAnchorTime = Time.unscaledTimeAsDouble;
+            beatAnchorTime = Time.timeAsDouble;
             beatAnchorIndex = beat.GlobalBeat;
             secondsPerBeat = 60d / Math.Max(1d, beat.Tempo);
             hasBeatAnchor = true;

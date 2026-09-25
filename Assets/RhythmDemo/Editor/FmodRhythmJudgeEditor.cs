@@ -14,9 +14,13 @@ namespace RhythmHunter.RhythmDemoEditor
         {
             DrawDefaultInspector();
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("個人跟拍校正（本機 PlayerPrefs）", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("個人跟拍校正（共用 JSON）", EditorStyles.boldLabel);
             DrawSavedProfile("鍵盤保存值（ms）", "Keyboard");
             DrawSavedProfile("手把保存值（ms）", "Gamepad");
+            EditorGUILayout.SelectableLabel(RhythmCalibrationStore.FilePath, EditorStyles.textField, GUILayout.Height(36));
+            if (GUILayout.Button("開啟校正檔案位置")) EditorUtility.RevealInFinder(RhythmCalibrationStore.FilePath);
+            if (!string.IsNullOrEmpty(RhythmCalibrationStore.LastError))
+                EditorGUILayout.HelpBox(RhythmCalibrationStore.LastError, MessageType.Warning);
             EditorGUILayout.HelpBox("正值 = 習慣晚按，負值 = 習慣早按。SAVE 會保存至本機，停止 Play Mode 後仍保留；不寫入場景或 Prefab。未保存的 PREVIEW 不會改動上方保存值。", MessageType.Info);
 
             if (targets.Length != 1)
@@ -45,8 +49,8 @@ namespace RhythmHunter.RhythmDemoEditor
             string key = "FightTiming.v1." + profile;
             using (new EditorGUI.DisabledScope(true))
             {
-                if (PlayerPrefs.HasKey(key))
-                    EditorGUILayout.FloatField(new GUIContent(label, "PlayerPrefs key: " + key), PlayerPrefs.GetFloat(key));
+                if (RhythmCalibrationStore.HasSaved(profile))
+                    EditorGUILayout.FloatField(new GUIContent(label, "Legacy PlayerPrefs key: " + key), RhythmCalibrationStore.GetDelay(profile));
                 else
                     EditorGUILayout.TextField(new GUIContent(label, "PlayerPrefs key: " + key), "尚未保存（預設 0 ms）");
             }

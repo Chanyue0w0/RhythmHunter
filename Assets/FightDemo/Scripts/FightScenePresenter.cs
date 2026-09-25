@@ -43,7 +43,6 @@ namespace RhythmHunter.FightDemo
         private RectTransform timelineRoot;
         private Image timelineCenter;
         private Image[] approachingPoints;
-        private FightTimingCalibration timingCalibration;
         private bool EqualBeats => fight != null && fight.UsesEqualBeats;
 
         [Header("Screen Feedback")]
@@ -119,13 +118,11 @@ namespace RhythmHunter.FightDemo
             if (EqualBeats)
             {
                 BuildEqualBeatTimeline();
+                rhythmJudge.EnablePersonalCalibration();
                 if (healthText != null && healthText.canvas != null)
                 {
                     gameObject.AddComponent<FightDefenseHud>().Configure(fight, healthText.canvas, healthText.font);
-                    rhythmJudge.EnablePersonalCalibration();
-                    timingCalibration = gameObject.AddComponent<FightTimingCalibration>();
-                    timingCalibration.Configure(fight, beatClock, rhythmJudge,
-                        fight.GetComponent<FightInputRouter>(), healthText.canvas, healthText.font);
+                    gameObject.AddComponent<FightPauseController>().Configure(beatClock, healthText.canvas, healthText.font);
                 }
             }
             bool showHealth = fight == null || fight.HealthSystemEnabled;
@@ -170,6 +167,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (fight != null && fight.IsPaused) return;
             UpdatePlaybackReadout();
             UpdateBeatProgress();
             UpdateEqualBeatTimeline();
@@ -539,24 +537,14 @@ namespace RhythmHunter.FightDemo
                 && beatClock.MillisecondsPerBeat > 0;
             int timelineMs = 0;
             ready = ready && beatClock.TryGetTimelinePositionMs(out timelineMs);
-            bool hideCues = timingCalibration != null && timingCalibration.HideRhythmCues;
             foreach (Image point in approachingPoints)
-                point.enabled = ready && !hideCues;
+                point.enabled = ready;
             if (!ready)
             {
                 timelineCenter.color = Background;
                 timelineCenter.rectTransform.localScale = Vector3.one;
                 if (warningText != null)
                     warningText.text = "WAITING FOR MUSIC";
-                return;
-            }
-
-            if (timingCalibration != null && timingCalibration.IsOpen && warningText != null)
-                warningText.text = "CALIBRATION  |  FOLLOW THE MUSIC";
-            if (hideCues)
-            {
-                timelineCenter.color = Background;
-                timelineCenter.rectTransform.localScale = Vector3.one;
                 return;
             }
 
@@ -585,7 +573,7 @@ namespace RhythmHunter.FightDemo
 
         private void UpdateFades()
         {
-            resultTimer = Mathf.Max(0f, resultTimer - Time.unscaledDeltaTime);
+            resultTimer = Mathf.Max(0f, resultTimer - Time.deltaTime);
             float resultAlpha = resultTimer > 0f ? Mathf.Clamp01(resultTimer * 4f) : 0.28f;
 
             if (resultText != null)
@@ -602,7 +590,7 @@ namespace RhythmHunter.FightDemo
                 detailText.color = color;
             }
 
-            flashTimer = Mathf.Max(0f, flashTimer - Time.unscaledDeltaTime);
+            flashTimer = Mathf.Max(0f, flashTimer - Time.deltaTime);
             if (screenFlash != null)
             {
                 float alpha = Mathf.Clamp01(flashTimer * 4f) * 0.28f;

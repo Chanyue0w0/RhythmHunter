@@ -25,13 +25,16 @@ namespace RhythmHunter.FightDemo
         float originalDelay;
         string profile, message = "";
         double lastTapTime;
+        Action enterBattle;
+        bool Standalone => enterBattle != null;
         public bool IsOpen => panel != null && panel.activeSelf;
         public bool HideRhythmCues => IsOpen && !cues;
 
         public void Configure(FightCombatController controller, FmodBeatClock beatClock, FmodRhythmJudge rhythmJudge,
-            FightInputRouter input, Canvas canvas, Font uiFont)
+            FightInputRouter input, Canvas canvas, Font uiFont, Action onEnterBattle = null)
         {
             fight = controller; clock = beatClock; judge = rhythmJudge; router = input; font = uiFont;
+            enterBattle = onEnterBattle;
             Build(canvas.transform);
             if (router != null) router.CommandStarted += OnCommand;
         }
@@ -58,12 +61,12 @@ namespace RhythmHunter.FightDemo
         void Update()
         {
             if (panel == null) return;
-            if ((Keyboard.current?.f8Key.wasPressedThisFrame ?? false) || (Gamepad.current?.startButton.wasPressedThisFrame ?? false))
+            if (!Standalone && ((Keyboard.current?.f8Key.wasPressedThisFrame ?? false) || (Gamepad.current?.startButton.wasPressedThisFrame ?? false)))
             {
                 if (IsOpen) Close(); else Open();
             }
             if (!IsOpen) return;
-            if (Keyboard.current?.escapeKey.wasPressedThisFrame ?? false) { Close(); return; }
+            if (!Standalone && (Keyboard.current?.escapeKey.wasPressedThisFrame ?? false)) { Close(); return; }
             if (measuring && Time.realtimeSinceStartupAsDouble - lastTapTime > 5)
             {
                 samples.Clear(); lastTapTime = Time.realtimeSinceStartupAsDouble;
@@ -77,7 +80,7 @@ namespace RhythmHunter.FightDemo
             if (IsOpen) return;
             originalDelay = judge.PersonalDelayMs; profile = judge.InputProfile;
             panel.SetActive(true); panel.transform.SetAsLastSibling();
-            fight.SetTimingCalibrationActive(true);
+            if (fight != null) fight.SetTimingCalibrationActive(true);
             Begin();
         }
 
@@ -134,14 +137,17 @@ namespace RhythmHunter.FightDemo
         public void Save()
         {
             if (!samples.Reliable) return;
-            judge.SetPersonalDelay((float)samples.MedianMs, true);
+            if (!judge.SetPersonalDelay((float)samples.MedianMs, true))
+            { message = RhythmCalibrationStore.LastError; return; }
             originalDelay = judge.PersonalDelayMs; trial = true;
-            message = "Saved for this input device. Close to resume battle on the next beat.";
+            message = Standalone ? "Saved. ENTER BATTLE will load FightScene3 with this calibration."
+                : "Saved for this input device. Close to resume battle on the next beat.";
         }
 
         public void ResetProfile()
         {
-            judge.SetPersonalDelay(0, true); originalDelay = 0; trial = false;
+            if (!judge.SetPersonalDelay(0, true)) { message = RhythmCalibrationStore.LastError; return; }
+            originalDelay = 0; trial = false;
             samples.Clear(); measuring = false; status.text = "Profile reset to 0 ms.";
             message = "Saved offset cleared for this input device. Select Retry to measure again.";
         }
@@ -161,16 +167,20 @@ namespace RhythmHunter.FightDemo
 
         void Build(Transform parent)
         {
-            Button toggle = ButtonAt(parent, "TIMING  [F8 / START]", new Vector2(-24,-236), new Vector2(270,36), Open);
-            toggleObject = toggle.gameObject;
-            var toggleRect = (RectTransform)toggle.transform;
-            toggleRect.anchorMin = toggleRect.anchorMax = toggleRect.pivot = Vector2.one;
+            if (!Standalone)
+            {
+                Button toggle = ButtonAt(parent, "TIMING  [F8 / START]", new Vector2(-24,-236), new Vector2(270,36), Open);
+                toggleObject = toggle.gameObject;
+                var toggleRect = (RectTransform)toggle.transform;
+                toggleRect.anchorMin = toggleRect.anchorMax = toggleRect.pivot = Vector2.one;
+            }
             var box = Rect("TimingCalibration", parent, Vector2.zero, new Vector2(780,490));
             box.anchorMin = box.anchorMax = box.pivot = new Vector2(.5f,.5f);
             panel = box.gameObject;
             var background = panel.AddComponent<Image>(); background.color = new Color(.025f,.045f,.075f,.98f);
             Label(box, "TIMING CALIBRATION", new Vector2(30,-20), new Vector2(700,34), 26);
-            Label(box, "Battle paused. Tap Q / W / E or X / Y / B once per beat.   ESC / F8: close", new Vector2(30,-62),new Vector2(720,26),16);
+            Label(box, Standalone ? "Tap Q / W / E or X / Y / B once per beat. SAVE before entering battle."
+                : "Battle paused. Tap Q / W / E or X / Y / B once per beat.   ESC / F8: close", new Vector2(30,-62),new Vector2(720,26),16);
             readout = Label(box,"",new Vector2(30,-102),new Vector2(720,108),17);
             progress = Label(box,"",new Vector2(30,-219),new Vector2(720,66),17);
             var bar=Rect("Progress",box,new Vector2(30,-290),new Vector2(700,6));
@@ -192,7 +202,10 @@ namespace RhythmHunter.FightDemo
             ButtonAt(box,"RESET",new Vector2(372,-408),new Vector2(104,36),ResetProfile);
             var cue=ButtonAt(box,"CUES: OFF",new Vector2(486,-408),new Vector2(124,36),()=>{cues=!cues;cueLabel.text=cues?"CUES: ON":"CUES: OFF";Begin();});
             cueLabel=cue.GetComponentInChildren<Text>();
-            ButtonAt(box,"CLOSE",new Vector2(620,-408),new Vector2(124,36),Close);
+            ButtonAt(box,Standalone ? "ENTER BATTLE" : "CLOSE",new Vector2(620,-408),new Vector2(124,36),()=>
+            {
+                if (Standalone) enterBattle(); else Close();
+            });
             Label(box,"This measures habit + device/audio latency. Keep the same headphones and output device.",new Vector2(30,-454),new Vector2(720,24),14);
             panel.SetActive(false);
         }

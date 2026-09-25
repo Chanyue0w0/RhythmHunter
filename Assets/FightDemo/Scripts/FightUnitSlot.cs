@@ -431,7 +431,7 @@ namespace RhythmHunter.FightDemo
             float duration = Mathf.Max(0.01f, onBeatJumpDuration);
             while (elapsed < duration && inputFeedbackTarget != null)
             {
-                elapsed += Time.unscaledDeltaTime;
+                elapsed += Time.deltaTime;
                 float progress = Mathf.Clamp01(elapsed / duration);
                 float height = Mathf.Sin(progress * Mathf.PI) * onBeatJumpHeight;
                 inputFeedbackTarget.localPosition = inputFeedbackOrigin + Vector3.up * height;
@@ -447,7 +447,7 @@ namespace RhythmHunter.FightDemo
             float duration = Mathf.Max(0.01f, missShakeDuration);
             while (elapsed < duration && inputFeedbackTarget != null)
             {
-                elapsed += Time.unscaledDeltaTime;
+                elapsed += Time.deltaTime;
                 float progress = Mathf.Clamp01(elapsed / duration);
                 float damping = 1f - progress;
                 float offset = Mathf.Sin(elapsed * missShakeFrequency) * missShakeStrength * damping;

@@ -81,19 +81,17 @@ namespace RhythmHunter.RhythmDemo
             if (personalCalibrationEnabled && profileLoaded && inputProfile == profile) return;
             inputProfile = profile;
             personalDelayMs = personalCalibrationEnabled
-                ? Mathf.Clamp(PlayerPrefs.GetFloat("FightTiming.v1." + inputProfile, 0f), -MaxPersonalDelayMs, MaxPersonalDelayMs) : 0f;
+                ? Mathf.Clamp(RhythmCalibrationStore.GetDelay(inputProfile), -MaxPersonalDelayMs, MaxPersonalDelayMs) : 0f;
             profileLoaded = personalCalibrationEnabled;
         }
 
-        public void SetPersonalDelay(float delayMs, bool save)
+        public bool SetPersonalDelay(float delayMs, bool save)
         {
-            if (!personalCalibrationEnabled || float.IsNaN(delayMs) || float.IsInfinity(delayMs)) return;
-            personalDelayMs = Mathf.Clamp(delayMs, -MaxPersonalDelayMs, MaxPersonalDelayMs);
-            if (save)
-            {
-                PlayerPrefs.SetFloat("FightTiming.v1." + inputProfile, personalDelayMs);
-                PlayerPrefs.Save();
-            }
+            if (!personalCalibrationEnabled || float.IsNaN(delayMs) || float.IsInfinity(delayMs)) return false;
+            float value = Mathf.Clamp(delayMs, -MaxPersonalDelayMs, MaxPersonalDelayMs);
+            if (save && !RhythmCalibrationStore.Save(inputProfile, value)) return false;
+            personalDelayMs = value;
+            return true;
         }
 
         public bool TryMeasureInput(double inputAgeMs, out double deltaMs, out long globalBeat)
@@ -110,7 +108,7 @@ namespace RhythmHunter.RhythmDemo
         {
             rawMs = 0;
             if (double.IsNaN(inputAgeMs) || double.IsInfinity(inputAgeMs) || inputAgeMs > 250 ||
-                beatClock == null || !beatClock.HasTimingAnchor || !beatClock.TryGetTimelinePositionMs(out rawMs)) return false;
+                beatClock == null || beatClock.IsPaused || !beatClock.HasTimingAnchor || !beatClock.TryGetTimelinePositionMs(out rawMs)) return false;
             rawMs -= (int)Math.Round(Math.Max(0, inputAgeMs) * beatClock.MusicPitch);
             return true;
         }
