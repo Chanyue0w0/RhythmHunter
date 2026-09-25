@@ -94,11 +94,21 @@ namespace RhythmHunter.FightDemo
 
         private static void SetupGlobalLight(Transform rig)
         {
+            // The art scene already contains an authored global light. URP allows
+            // only one per blend style/sorting layer; keep the artist's light.
+            foreach (Light2D authored in FindObjectsByType<Light2D>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            {
+                if (authored.gameObject.scene == rig.gameObject.scene &&
+                    !authored.transform.IsChildOf(rig) && authored.lightType == Light2D.LightType.Global &&
+                    authored.blendStyleIndex == 0)
+                    return;
+            }
             Light2D light = GetOrCreateLight(rig, "Cool Natural Fill");
             light.lightType = Light2D.LightType.Global;
             light.blendStyleIndex = 0;
             light.color = new Color(0.58f, 0.68f, 0.82f, 1f);
             light.intensity = 0.58f;
+            light.gameObject.SetActive(true);
         }
 
         private static void SetupSunLight(Transform rig)
@@ -112,6 +122,7 @@ namespace RhythmHunter.FightDemo
             light.pointLightOuterRadius = 12f;
             light.falloffIntensity = 0.45f;
             light.transform.localPosition = new Vector3(-3.6f, 3.2f, -1f);
+            light.gameObject.SetActive(true);
         }
 
         private static Light2D GetOrCreateLight(Transform rig, string lightName)
@@ -121,6 +132,9 @@ namespace RhythmHunter.FightDemo
             if (child == null)
             {
                 lightObject = new GameObject(lightName);
+                // Configure the type before registration (OnEnable) to avoid
+                // briefly registering another default global light.
+                lightObject.SetActive(false);
                 lightObject.transform.SetParent(rig, false);
             }
             else

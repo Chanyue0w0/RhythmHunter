@@ -155,6 +155,7 @@ namespace RhythmHunter.FightDemo
             public float Amount;
             public float DurationInBeats;
             public int Parity;
+            public bool ScrollsHorizontally;
         }
 
         private readonly List<ArtPulseTarget> artPulseTargets = new();
@@ -689,7 +690,7 @@ namespace RhythmHunter.FightDemo
                     continue;
                 }
 
-                if (objectName == "Background_07")
+                if (objectName == "Background_05" || objectName == "Background_07")
                 {
                     if (oldPulse != null)
                         oldPulse.enabled = false;
@@ -735,7 +736,8 @@ namespace RhythmHunter.FightDemo
                 RestScale = target.localScale,
                 Amount = amount,
                 DurationInBeats = durationInBeats,
-                Parity = parity
+                Parity = parity,
+                ScrollsHorizontally = target.GetComponent<LoopingBackgroundScroller>() != null
             });
         }
 
@@ -769,7 +771,11 @@ namespace RhythmHunter.FightDemo
 
                 float pulseProgress = beatProgress / Math.Max(0.05f, target.DurationInBeats);
                 float multiplier = 1f + Mathf.Sin(pulseProgress * Mathf.PI) * target.Amount;
-                target.Transform.localScale = target.RestScale * multiplier;
+                // Tiled layers must keep their horizontal width and seam spacing.
+                // Pulse vertically; foreground grass/shadows can still scale in both axes.
+                target.Transform.localScale = target.ScrollsHorizontally
+                    ? new Vector3(target.RestScale.x, target.RestScale.y * multiplier, target.RestScale.z)
+                    : target.RestScale * multiplier;
             }
         }
 

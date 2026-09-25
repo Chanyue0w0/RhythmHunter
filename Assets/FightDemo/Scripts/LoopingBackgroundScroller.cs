@@ -4,7 +4,7 @@ using UnityEngine;
 namespace RhythmHunter.FightDemo
 {
     /// <summary>
-    /// Scrolls a sprite to the left and keeps copies on both sides for a seamless loop.
+    /// Scrolls a sprite to the right and keeps copies on both sides for a seamless loop.
     /// </summary>
     public sealed class LoopingBackgroundScroller : MonoBehaviour
     {
@@ -27,6 +27,9 @@ namespace RhythmHunter.FightDemo
         private Vector3 startPosition;
         private float unscaledSpriteWidth;
         private float travelledDistance;
+        private float restScaleX;
+        private readonly List<(Transform source, Transform copy)> copiedTransforms = new();
+        private MaterialPropertyBlock spriteProperties;
         private bool usingBeatSlices;
         private readonly List<Sprite> beatSliceSprites = new();
         private readonly List<Vector3> beatSlicePositions = new();
@@ -34,6 +37,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            restScaleX = Mathf.Abs(transform.localScale.x);
             if (sourceRenderer == null)
                 sourceRenderer = GetComponent<SpriteRenderer>();
 
@@ -68,7 +72,7 @@ namespace RhythmHunter.FightDemo
             float localUnitsPerSecond = unitsPerSecond / Mathf.Max(0.0001f, parentScaleX);
             float loopWidth = GetLoopWidth();
             travelledDistance = Mathf.Repeat(
-                travelledDistance + localUnitsPerSecond * Time.unscaledDeltaTime,
+                travelledDistance + localUnitsPerSecond * Time.deltaTime,
                 loopWidth);
 
             float centeredOffset = Mathf.Repeat(
@@ -81,6 +85,14 @@ namespace RhythmHunter.FightDemo
             transform.localPosition = centerPosition;
             leftLoopCopy.localPosition = centerPosition + Vector3.left * loopWidth;
             rightLoopCopy.localPosition = centerPosition + Vector3.right * loopWidth;
+            // Only the authored grass owns animation. Copies display that same pose.
+            foreach (var pair in copiedTransforms)
+            {
+                if (pair.source == null || pair.copy == null) continue;
+                pair.copy.localPosition = pair.source.localPosition;
+                pair.copy.localRotation = pair.source.localRotation;
+                pair.copy.localScale = pair.source.localScale;
+            }
         }
 
         private void OnDisable()
@@ -130,9 +142,40 @@ namespace RhythmHunter.FightDemo
             for (int index = 0; index < transform.childCount; index++)
             {
                 Transform sourceChild = transform.GetChild(index);
-                GameObject childCopy = Instantiate(sourceChild.gameObject, copyParent, false);
-                childCopy.name = sourceChild.name;
+                CopyVisualHierarchy(sourceChild, copyParent);
             }
+        }
+
+        private void CopyVisualHierarchy(Transform source, Transform parent)
+        {
+            // Do not clone BeatBounce or other behaviours: their Awake/order and
+            // beat anchors can differ from the original's combat-driven animation.
+            GameObject copy = new($"{source.name} (Loop Visual)");
+            copy.layer = source.gameObject.layer;
+            copy.transform.SetParent(parent, false);
+            copy.transform.localPosition = source.localPosition;
+            copy.transform.localRotation = source.localRotation;
+            copy.transform.localScale = source.localScale;
+            SpriteRenderer renderer = source.GetComponent<SpriteRenderer>();
+            if (renderer != null)
+            {
+                SpriteRenderer visual = copy.AddComponent<SpriteRenderer>();
+                visual.sprite = renderer.sprite;
+                visual.color = renderer.color;
+                visual.flipX = renderer.flipX;
+                visual.flipY = renderer.flipY;
+                visual.sharedMaterials = renderer.sharedMaterials;
+                visual.sortingLayerID = renderer.sortingLayerID;
+                visual.sortingOrder = renderer.sortingOrder;
+                visual.maskInteraction = renderer.maskInteraction;
+                visual.spriteSortPoint = renderer.spriteSortPoint;
+                visual.enabled = renderer.enabled;
+                BindSpriteTexture(visual, renderer, renderer.sprite);
+            }
+            copy.SetActive(source.gameObject.activeSelf);
+            copiedTransforms.Add((source, copy.transform));
+            foreach (Transform child in source)
+                CopyVisualHierarchy(child, copy.transform);
         }
 
         private bool CreateConfiguredBeatSliceAssets()
@@ -343,6 +386,22 @@ namespace RhythmHunter.FightDemo
             target.sortingLayerID = sourceRenderer.sortingLayerID;
             target.sortingOrder = sourceRenderer.sortingOrder;
             target.maskInteraction = sourceRenderer.maskInteraction;
+            target.drawMode = sourceRenderer.drawMode;
+            target.size = sourceRenderer.size;
+            target.tileMode = sourceRenderer.tileMode;
+            target.spriteSortPoint = sourceRenderer.spriteSortPoint;
+            BindSpriteTexture(target, sourceRenderer, sprite);
+        }
+
+        private void BindSpriteTexture(SpriteRenderer target, SpriteRenderer source, Sprite sprite)
+        {
+            // Legacy Sprites/Default under URP does not reliably bind _MainTex on
+            // newly created renderers. A valid Sprite/bounds alone can still draw
+            // an invisible copy. Preserve overrides and explicitly bind its texture.
+            spriteProperties ??= new MaterialPropertyBlock();
+            source.GetPropertyBlock(spriteProperties);
+            if (sprite != null) spriteProperties.SetTexture("_MainTex", sprite.texture);
+            target.SetPropertyBlock(spriteProperties);
         }
 
         private void ApplyHorizontalCrop()
@@ -410,7 +469,7 @@ namespace RhythmHunter.FightDemo
             return Mathf.Max(
                        1f / pixelsPerUnit,
                        unscaledSpriteWidth + gapUnits - overlapUnits) *
-                   Mathf.Abs(transform.localScale.x);
+                   restScaleX;
         }
 
         private void OnDestroy()

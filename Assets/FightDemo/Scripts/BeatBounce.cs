@@ -28,6 +28,7 @@ namespace RhythmHunter.FightDemo
         private long beatAnchorIndex;
         private double secondsPerBeat;
         private bool hasBeatAnchor;
+        private bool scrollsHorizontally;
 
         private void Configure(
             FightCombatController source,
@@ -113,6 +114,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            scrollsHorizontally = GetComponent<LoopingBackgroundScroller>() != null;
             restLocalScale = transform.localScale;
             secondsPerBeat = 60d / Mathf.Max(1f, fallbackBpm);
         }
@@ -131,7 +133,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
-            double now = Time.unscaledTimeAsDouble;
+            double now = Time.timeAsDouble;
             double beatPosition = hasBeatAnchor
                 ? beatAnchorIndex + Math.Max(0d, now - beatAnchorTime) / Math.Max(0.001d, secondsPerBeat)
                 : now / Math.Max(0.001d, secondsPerBeat);
@@ -151,12 +153,14 @@ namespace RhythmHunter.FightDemo
 
             float pulseProgress = Mathf.Clamp01(beatProgress / Math.Max(0.05f, durationInBeats));
             float multiplier = 1f + Mathf.Sin(pulseProgress * Mathf.PI * 2f) * scaleAmount;
-            transform.localScale = restLocalScale * multiplier;
+            transform.localScale = scrollsHorizontally
+                ? new Vector3(restLocalScale.x, restLocalScale.y * multiplier, restLocalScale.z)
+                : restLocalScale * multiplier;
         }
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
-            beatAnchorTime = Time.unscaledTimeAsDouble;
+            beatAnchorTime = Time.timeAsDouble;
             beatAnchorIndex = beat.GlobalBeat;
             secondsPerBeat = 60d / Math.Max(1d, beat.Tempo);
             hasBeatAnchor = true;
