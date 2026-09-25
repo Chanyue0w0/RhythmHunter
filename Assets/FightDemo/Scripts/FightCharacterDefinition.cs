@@ -34,7 +34,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0.5f)] private float armorRecoveryAmount = 0.5f;
         [Header("Basic Ability")]
         [SerializeField] private string basicAbilityName = "Basic Ability";
-        [Tooltip("Character-owned Basic behavior on every beat in EqualBeat mode. Independent of party position.")]
+        [Tooltip("Character-owned Basic behavior on every beat, independent of party position. In EqualBeat mode Guard protects only the successfully judged beat, never a later attack.")]
         [SerializeField] private AbilityBehavior normalAbilityBehavior;
         [SerializeField, Min(0)] private float normalAbilityPower = 1f;
         [SerializeField, Min(0.5f)] private float attackPower = 1f;

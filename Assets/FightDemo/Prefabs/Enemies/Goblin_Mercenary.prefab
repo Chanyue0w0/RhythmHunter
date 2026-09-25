@@ -110,6 +110,11 @@ MonoBehaviour:
   team: 0
   role: 0
   maxHp: 20
+  defense: 0
+  armorRecoveryDelay: 4
+  armorRecoveryInterval: 2
+  armorRecoveryAmount: 0.5
+  basicAbilityName: Basic Ability
   normalAbilityBehavior: 0
   normalAbilityPower: 1
   attackPower: 1
@@ -121,7 +126,7 @@ MonoBehaviour:
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 0}
   impactEffectAnchor: {fileID: 0}
-  attackIntervalBeats: 4
+  attackIntervalBeats: 999
   maxMana: 4
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
 --- !u!114 &3137556307126913076

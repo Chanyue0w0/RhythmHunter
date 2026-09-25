@@ -112,6 +112,10 @@ namespace RhythmHunter.FightDemo
             var data = slot.CharacterDefinition;
             string ability = slot.Team == FightUnitSlot.UnitTeam.Enemy ? $"ATK {slot.AttackPower:0.#}"
                 : data != null ? data.BasicAbilityName + (data.BasicAbilityPower > 0 ? $" {data.BasicAbilityPower:0.#}" : "") : "Basic";
+            if (slot.Team == FightUnitSlot.UnitTeam.Hero && data != null &&
+                (data.BasicAbilityType == FightCharacterDefinition.AbilityBehavior.Guard ||
+                 data.BasicAbilityType == FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront))
+                ability += " (same beat)";
             return $"{position}  {slot.DisplayName}   HP {slot.MaxHp:0.#}  DEF {(data != null ? data.Defense : 0)}  |  {ability}";
         }
 

@@ -43,6 +43,7 @@ namespace RhythmHunter.FightDemo
         private RectTransform timelineRoot;
         private Image timelineCenter;
         private Image[] approachingPoints;
+        private FightTimingCalibration timingCalibration;
         private bool EqualBeats => fight != null && fight.UsesEqualBeats;
 
         [Header("Screen Feedback")]
@@ -119,7 +120,13 @@ namespace RhythmHunter.FightDemo
             {
                 BuildEqualBeatTimeline();
                 if (healthText != null && healthText.canvas != null)
+                {
                     gameObject.AddComponent<FightDefenseHud>().Configure(fight, healthText.canvas, healthText.font);
+                    rhythmJudge.EnablePersonalCalibration();
+                    timingCalibration = gameObject.AddComponent<FightTimingCalibration>();
+                    timingCalibration.Configure(fight, beatClock, rhythmJudge,
+                        fight.GetComponent<FightInputRouter>(), healthText.canvas, healthText.font);
+                }
             }
             bool showHealth = fight == null || fight.HealthSystemEnabled;
             if (healthText != null)
@@ -184,7 +191,7 @@ namespace RhythmHunter.FightDemo
                 if (warningText != null)
                 {
                     int remaining = fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat);
-                    warningText.text = remaining == 0 ? "ENEMY ATTACK"
+                    warningText.text = remaining == 0 ? "ENEMY ATTACK  •  GUARD THIS BEAT"
                         : $"ENEMY ATTACK IN {remaining} BEAT{(remaining == 1 ? string.Empty : "S")}";
                     warningText.color = remaining == 0 ? Gold : Color.white;
                 }
@@ -238,7 +245,8 @@ namespace RhythmHunter.FightDemo
                 {
                     perfectCalls++;
                     string title = call.SkillActivated ? "SKILL" : EqualBeats ? "BASIC ABILITY" : "NORMAL ABILITY";
-                    SetResult(title, call.SkillActivated ? Gold : Green, call.Message, 1.2f);
+                    SetResult(title, call.SkillActivated ? Gold : Green,
+                        call.Message + "  |  " + FormatDelta(call.RhythmResult.DeltaMs), 1.2f);
                 }
                 else
                 {
@@ -531,8 +539,9 @@ namespace RhythmHunter.FightDemo
                 && beatClock.MillisecondsPerBeat > 0;
             int timelineMs = 0;
             ready = ready && beatClock.TryGetTimelinePositionMs(out timelineMs);
+            bool hideCues = timingCalibration != null && timingCalibration.HideRhythmCues;
             foreach (Image point in approachingPoints)
-                point.enabled = ready;
+                point.enabled = ready && !hideCues;
             if (!ready)
             {
                 timelineCenter.color = Background;
@@ -542,8 +551,18 @@ namespace RhythmHunter.FightDemo
                 return;
             }
 
+            if (timingCalibration != null && timingCalibration.IsOpen && warningText != null)
+                warningText.text = "CALIBRATION  |  FOLLOW THE MUSIC";
+            if (hideCues)
+            {
+                timelineCenter.color = Background;
+                timelineCenter.rectTransform.localScale = Vector3.one;
+                return;
+            }
+
             // Use the same calibrated time as JudgeNow; no accumulated deltaTime drift.
-            double evaluatedMs = timelineMs + (rhythmJudge != null ? rhythmJudge.JudgementOffsetMs : 0f);
+            // Personal input compensation must not move the musical visual target.
+            double evaluatedMs = timelineMs + (rhythmJudge != null ? rhythmJudge.VisualOffsetMs : 0f);
             RenderEqualBeatTimeline(evaluatedMs, beatClock.LatestBeat.TimelinePositionMs, beatClock.MillisecondsPerBeat);
         }
 

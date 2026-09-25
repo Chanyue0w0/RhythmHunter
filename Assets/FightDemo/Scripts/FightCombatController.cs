@@ -168,11 +168,34 @@ namespace RhythmHunter.FightDemo
         private int pendingAttackBar;
         private int pendingAttackTimelineMs;
         private long guardedGlobalBeat = long.MinValue;
+        private readonly HashSet<long> guardedBeats = new();
         private bool battleEnded;
         private int blockedAttackCount;
         private int receivedAttackCount;
         private float totalHealingReceived;
         private long lastEnemyAttackGlobalBeat = -1;
+        private long calibrationStartBeat;
+        private long resumeAfterCalibrationBeat = -1;
+        public bool TimingCalibrationActive { get; private set; }
+
+        public void SetTimingCalibrationActive(bool active)
+        {
+            if (TimingCalibrationActive == active) return;
+            TimingCalibrationActive = active;
+            pendingEnemyAttack = false;
+            pendingEnemyAnimationDriven = false;
+            pendingEnemyAttacker = null;
+            pendingEnemyActionId = long.MinValue;
+            guardedBeats.Clear();
+            guardedGlobalBeat = long.MinValue;
+            if (active) calibrationStartBeat = latestCombatBeat;
+            else
+            {
+                if (nextArmorRecoveryBeat != long.MaxValue)
+                    nextArmorRecoveryBeat += Math.Max(0, latestCombatBeat - calibrationStartBeat);
+                resumeAfterCalibrationBeat = latestCombatBeat;
+            }
+        }
 
         public event Action<FmodBeatClock.BeatSnapshot> FightBeat;
         public event Action<HeroCallResult> HeroCalled;
@@ -304,6 +327,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (TimingCalibrationActive) return;
             TryResolvePendingAttack();
             AdvanceArmorRecovery(latestCombatBeat);
         }
@@ -345,7 +369,8 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (battleEnded)
+            if (battleEnded || TimingCalibrationActive ||
+                (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
             if (UsesFrontHeroControls)
@@ -366,7 +391,16 @@ namespace RhythmHunter.FightDemo
             if (hero?.UnitSlot == null)
                 return;
 
-            FmodRhythmJudge.Result judgement = rhythmJudge.JudgeNow();
+            if (UsesEqualBeats && inputRouter != null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
+            FmodRhythmJudge.Result judgement = UsesEqualBeats
+                ? rhythmJudge.JudgeInput(inputRouter != null ? inputRouter.CurrentInputAgeMs : 0)
+                : rhythmJudge.JudgeNow();
+            ApplyHeroJudgement(hero, command, judgement);
+        }
+
+        private void ApplyHeroJudgement(HeroBeatSettings hero, FightInputRouter.HeroCommand command,
+            FmodRhythmJudge.Result judgement)
+        {
             bool perfect = judgement.Judgement == FmodRhythmJudge.Grade.Perfect;
             hero.UnitSlot.PlayInputFeedback(perfect);
             if (!perfect)
@@ -454,13 +488,14 @@ namespace RhythmHunter.FightDemo
             switch (behavior)
             {
                 case FightCharacterDefinition.AbilityBehavior.Guard:
-                    ArmGuardForNextEnemyAttack(globalBeat);
+                    ArmGuard(globalBeat);
                     PlayAnimatedHeroUtility(
                         actor,
                         FightCharacterCombatAnimator.CombatAnimation.Guard,
                         () => actor.PlayGuardAt(skill),
                         null);
-                    return $"{abilityName} blocks all damage from the next enemy attack";
+                    return UsesEqualBeats ? $"{abilityName} blocks enemy damage on this beat only"
+                        : $"{abilityName} blocks all damage from the next enemy attack";
 
                 case FightCharacterDefinition.AbilityBehavior.HealParty:
                     // Gameplay resolves from the accepted beat now. Animation and VFX
@@ -478,12 +513,14 @@ namespace RhythmHunter.FightDemo
                     return $"{abilityName} deals {power:0.#} damage to every enemy";
 
                 case FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront:
-                    ArmGuardForNextEnemyAttack(globalBeat);
+                    ArmGuard(globalBeat);
                     actor.PlayGuardAt(skill);
                     FightUnitSlot guardedTarget = FindFrontLivingEnemy();
                     if (guardedTarget != null)
                         PlayAnimatedHeroAction(actor, guardedTarget, action, power);
-                    return $"{abilityName} blocks all damage and deals {power:0.#} damage to the front enemy";
+                    return UsesEqualBeats
+                        ? $"{abilityName} guards this beat and deals {power:0.#} damage to the front enemy"
+                        : $"{abilityName} blocks all damage and deals {power:0.#} damage to the front enemy";
 
                 default:
                     FightUnitSlot target = FindFrontLivingEnemy();
@@ -494,8 +531,15 @@ namespace RhythmHunter.FightDemo
             }
         }
 
-        private void ArmGuardForNextEnemyAttack(long inputGlobalBeat)
+        private void ArmGuard(long inputGlobalBeat)
         {
+            if (UsesEqualBeats)
+            {
+                // Preserve adjacent accepted beats independently, even when a late attack
+                // resolution overlaps an early input for the following beat.
+                guardedBeats.Add(inputGlobalBeat);
+                return;
+            }
             guardedGlobalBeat = pendingEnemyAttack
                 ? pendingAttackGlobalBeat
                 : inputGlobalBeat + GetEnemyBeatsUntilAttack(inputGlobalBeat);
@@ -558,6 +602,10 @@ namespace RhythmHunter.FightDemo
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
             latestCombatBeat = beat.GlobalBeat;
+            if (TimingCalibrationActive) return;
+            if (UsesEqualBeats)
+                guardedBeats.RemoveWhere(guardBeat => guardBeat < beat.GlobalBeat &&
+                    (!pendingEnemyAttack || guardBeat != pendingAttackGlobalBeat));
             FightBeat?.Invoke(beat);
 
             if (battleEnded)
@@ -644,14 +692,15 @@ namespace RhythmHunter.FightDemo
 
             // The attack animation may reach its damage frame before the late half of
             // the Perfect window closes. Keep the pending action alive so a valid
-            // fourth-beat guard is accepted across the complete judgement window.
+            // same-beat guard is accepted across the complete judgement window.
             if (pendingEnemyAnimationDriven && !HasEnemyResolutionWindowElapsed())
             {
                 pendingEnemyAnimationDriven = false;
                 return;
             }
 
-            bool blocked = guardedGlobalBeat == pendingAttackGlobalBeat;
+            bool blocked = UsesEqualBeats ? guardedBeats.Remove(pendingAttackGlobalBeat)
+                : guardedGlobalBeat == pendingAttackGlobalBeat;
             FightUnitSlot attacker = pendingEnemyAttacker != null ? pendingEnemyAttacker : activeEnemySlot;
             float configuredDamage = UsesFrontHeroControls && attacker != null
                 ? Mathf.Max(0.5f, attacker.AttackPower)
@@ -784,6 +833,7 @@ namespace RhythmHunter.FightDemo
             pendingAttackBar = 0;
             pendingAttackTimelineMs = 0;
             guardedGlobalBeat = long.MinValue;
+            guardedBeats.Clear();
             battleEnded = false;
             blockedAttackCount = 0;
             receivedAttackCount = 0;
@@ -832,6 +882,7 @@ namespace RhythmHunter.FightDemo
 
         public void AdvanceArmorRecovery(long globalBeat)
         {
+            if (TimingCalibrationActive) return;
             latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
             if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || pendingEnemyAttack ||
                 nextArmorRecoveryBeat == long.MaxValue || globalBeat < nextArmorRecoveryBeat)

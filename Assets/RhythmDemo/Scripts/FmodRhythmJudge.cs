@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RhythmHunter.RhythmDemo
@@ -50,12 +51,69 @@ namespace RhythmHunter.RhythmDemo
         [SerializeField] private bool duplicatePerfectBecomesMiss = true;
 
         private long lastPerfectGlobalBeat = long.MinValue;
+        private readonly HashSet<long> successfulBeats = new();
+        private bool personalCalibrationEnabled;
+        private bool profileLoaded;
+        private float personalDelayMs;
+        private string inputProfile = "Keyboard";
+        public const float MaxPersonalDelayMs = 150f;
 
         public event Action<Result> Judged;
 
         public float PerfectWindowMs => perfectWindowMs;
-        public float JudgementOffsetMs => judgementOffsetMs;
+        // Positive personal delay means the player taps late. Subtract it from input time.
+        public float JudgementOffsetMs => judgementOffsetMs - personalDelayMs;
+        public float VisualOffsetMs => judgementOffsetMs;
+        public float PersonalDelayMs => personalDelayMs;
+        public bool PersonalCalibrationEnabled => personalCalibrationEnabled;
+        public string InputProfile => inputProfile;
         public FmodBeatClock BeatClock => beatClock;
+
+        public void EnablePersonalCalibration()
+        {
+            personalCalibrationEnabled = true;
+            SetInputProfile(inputProfile);
+        }
+
+        public void SetInputProfile(string profile)
+        {
+            profile = profile == "Gamepad" ? "Gamepad" : "Keyboard";
+            if (personalCalibrationEnabled && profileLoaded && inputProfile == profile) return;
+            inputProfile = profile;
+            personalDelayMs = personalCalibrationEnabled
+                ? Mathf.Clamp(PlayerPrefs.GetFloat("FightTiming.v1." + inputProfile, 0f), -MaxPersonalDelayMs, MaxPersonalDelayMs) : 0f;
+            profileLoaded = personalCalibrationEnabled;
+        }
+
+        public void SetPersonalDelay(float delayMs, bool save)
+        {
+            if (!personalCalibrationEnabled || float.IsNaN(delayMs) || float.IsInfinity(delayMs)) return;
+            personalDelayMs = Mathf.Clamp(delayMs, -MaxPersonalDelayMs, MaxPersonalDelayMs);
+            if (save)
+            {
+                PlayerPrefs.SetFloat("FightTiming.v1." + inputProfile, personalDelayMs);
+                PlayerPrefs.Save();
+            }
+        }
+
+        public bool TryMeasureInput(double inputAgeMs, out double deltaMs, out long globalBeat)
+        {
+            deltaMs = 0; globalBeat = -1;
+            if (!TryGetInputTimeline(inputAgeMs, out int rawMs) ||
+                !beatClock.TryGetNearestBeat(rawMs + VisualOffsetMs, out var nearest) || nearest.GlobalBeat < 0) return false;
+            deltaMs = nearest.DeltaMs;
+            globalBeat = nearest.GlobalBeat;
+            return true;
+        }
+
+        private bool TryGetInputTimeline(double inputAgeMs, out int rawMs)
+        {
+            rawMs = 0;
+            if (double.IsNaN(inputAgeMs) || double.IsInfinity(inputAgeMs) || inputAgeMs > 250 ||
+                beatClock == null || !beatClock.HasTimingAnchor || !beatClock.TryGetTimelinePositionMs(out rawMs)) return false;
+            rawMs -= (int)Math.Round(Math.Max(0, inputAgeMs) * beatClock.MusicPitch);
+            return true;
+        }
 
         public void Configure(FmodBeatClock clock, float windowMs, float offsetMs)
         {
@@ -64,10 +122,11 @@ namespace RhythmHunter.RhythmDemo
             judgementOffsetMs = offsetMs;
         }
 
-        public Result JudgeNow()
+        public Result JudgeNow() => JudgeInput(0);
+
+        public Result JudgeInput(double inputAgeMs)
         {
-            if (beatClock == null || !beatClock.HasTimingAnchor ||
-                !beatClock.TryGetTimelinePositionMs(out int rawTimelineMs))
+            if (!TryGetInputTimeline(inputAgeMs, out int rawTimelineMs))
             {
                 return Publish(new Result(
                     Grade.NotReady,
@@ -76,11 +135,17 @@ namespace RhythmHunter.RhythmDemo
                     0.0,
                     default,
                     false,
-                    "Waiting for the first FMOD beat callback."));
+                    "Waiting for timing, or input arrived too late."));
             }
 
-            // Preserve the legacy listener's +30 ms judgement convention.
-            double evaluatedTimelineMs = rawTimelineMs + judgementOffsetMs;
+            return JudgeTimelinePosition(rawTimelineMs);
+        }
+
+        // Separate timeline evaluation from FMOD polling so timing boundaries can be
+        // validated deterministically against the exact same production judge.
+        private Result JudgeTimelinePosition(int rawTimelineMs)
+        {
+            double evaluatedTimelineMs = rawTimelineMs + JudgementOffsetMs;
             if (!beatClock.TryGetNearestBeat(evaluatedTimelineMs, out FmodBeatClock.NearestBeat nearestBeat))
             {
                 return Publish(new Result(
@@ -93,12 +158,15 @@ namespace RhythmHunter.RhythmDemo
                     "FMOD timing data is not ready."));
             }
 
-            bool insidePerfectWindow = Math.Abs(nearestBeat.DeltaMs) <= perfectWindowMs;
-            bool duplicateBeat = insidePerfectWindow && nearestBeat.GlobalBeat == lastPerfectGlobalBeat;
+            bool insidePerfectWindow = nearestBeat.GlobalBeat >= 0 && Math.Abs(nearestBeat.DeltaMs) <= perfectWindowMs;
+            bool duplicateBeat = insidePerfectWindow && (successfulBeats.Contains(nearestBeat.GlobalBeat) ||
+                (lastPerfectGlobalBeat != long.MinValue && nearestBeat.GlobalBeat < lastPerfectGlobalBeat - 8));
 
             if (insidePerfectWindow && !(duplicatePerfectBecomesMiss && duplicateBeat))
             {
-                lastPerfectGlobalBeat = nearestBeat.GlobalBeat;
+                lastPerfectGlobalBeat = Math.Max(lastPerfectGlobalBeat, nearestBeat.GlobalBeat);
+                successfulBeats.Add(nearestBeat.GlobalBeat);
+                successfulBeats.RemoveWhere(beat => beat < lastPerfectGlobalBeat - 8);
                 return Publish(new Result(
                     Grade.Perfect,
                     nearestBeat.DeltaMs,
@@ -126,6 +194,7 @@ namespace RhythmHunter.RhythmDemo
         public void ResetDuplicateTracking()
         {
             lastPerfectGlobalBeat = long.MinValue;
+            successfulBeats.Clear();
         }
 
         private Result Publish(Result result)

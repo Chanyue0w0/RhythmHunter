@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{00b32bca-6580-4aca-8ef6-92590c269fd6}">
+		<property name="assetPath">
+			<value>Ritual Slam (2)_120.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>116.184</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{f24e18cd-8f6a-4b3a-9b51-f3181c79b9f8}</destination>
+		</relationship>
+	</object>
+</objects>

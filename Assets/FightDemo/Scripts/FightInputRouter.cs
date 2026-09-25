@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace RhythmHunter.FightDemo
 {
@@ -44,6 +45,16 @@ namespace RhythmHunter.FightDemo
         private bool enabledUltimateAction;
 
         public event Action<HeroCommand> CommandStarted;
+        public double CurrentInputAgeMs { get; private set; }
+        public string CurrentInputProfile { get; private set; } = "Keyboard";
+
+        private void Dispatch(HeroCommand command, InputAction.CallbackContext context)
+        {
+            CurrentInputAgeMs = Math.Max(0, (InputState.currentTime - context.time) * 1000.0);
+            CurrentInputProfile = context.control.device is Gamepad ? "Gamepad" : "Keyboard";
+            try { CommandStarted?.Invoke(command); }
+            finally { CurrentInputAgeMs = 0; }
+        }
 
         public InputActionAsset FightControls => fightControls;
         public bool IsConfigured => tankAction != null && supportAction != null &&
@@ -158,9 +169,9 @@ namespace RhythmHunter.FightDemo
             enabledByRouter = false;
         }
 
-        private void OnTank(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Front);
-        private void OnSupport(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Middle);
-        private void OnDamage(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Back);
-        private void OnUltimate(InputAction.CallbackContext context) => CommandStarted?.Invoke(HeroCommand.Ultimate);
+        private void OnTank(InputAction.CallbackContext context) => Dispatch(HeroCommand.Front, context);
+        private void OnSupport(InputAction.CallbackContext context) => Dispatch(HeroCommand.Middle, context);
+        private void OnDamage(InputAction.CallbackContext context) => Dispatch(HeroCommand.Back, context);
+        private void OnUltimate(InputAction.CallbackContext context) => Dispatch(HeroCommand.Ultimate, context);
     }
 }

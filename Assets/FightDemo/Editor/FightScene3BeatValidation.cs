@@ -51,6 +51,7 @@ namespace RhythmHunter.FightDemoEditor
 
                 ValidateFormation(components.OfType<FightRosterManager>().Single(), fight);
                 ValidateDefense(fight);
+                FightBasicGuardValidation.Run(fight);
 
                 Invoke(hud, "BuildEqualBeatTimeline");
                 var points = Field<Image[]>(hud, "approachingPoints");
@@ -84,6 +85,7 @@ namespace RhythmHunter.FightDemoEditor
                 Require(center.rectTransform.localScale == Vector3.one, "Waiting state must clear the pulse.");
                 Require(root.GetComponentsInChildren<Image>().All(graphic => !graphic.raycastTarget), "Timeline must not intercept input.");
                 ValidateDefenseHud(fight, hud);
+                FightTimingCalibrationValidation.Run(fight, hud, canvas => CaptureHud(canvas, "Temp/FightTimingCalibration-preview.png"));
                 File.WriteAllText(Result, "PASS: 5 shared HP; frontline DEF 1:1; armor-first damage and overflow; recovery delay/interval/reset/cap; healing does not restore armor; zero-HP input remains enabled; live defense/enemy HUD and developer toggle; all six party permutations; empty positions keep bindings; character-owned Basic data; equal-beat timeline regressions.\nLive FMOD/input and visual playtesting are separate checks.");
                 Debug.Log("FIGHT_SCENE3_BEAT_VALIDATION_PASS");
                 passed = true;
@@ -222,7 +224,7 @@ namespace RhythmHunter.FightDemoEditor
             Invoke(fight, "RebuildRosterAndResetCombat");
         }
 
-        private static void CaptureHud(Canvas source)
+        private static void CaptureHud(Canvas source, string outputPath = "Temp/FightDefenseHud-preview.png")
         {
             Scene previousScene = SceneManager.GetActiveScene();
             Scene stage = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
@@ -261,7 +263,7 @@ namespace RhythmHunter.FightDemoEditor
                 RenderTexture.active = target;
                 texture.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
                 texture.Apply();
-                File.WriteAllBytes("Temp/FightDefenseHud-preview.png", texture.EncodeToPNG());
+                File.WriteAllBytes(outputPath, texture.EncodeToPNG());
             }
             finally
             {

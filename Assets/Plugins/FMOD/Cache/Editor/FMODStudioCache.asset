@@ -313,6 +313,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 1000
+--- !u!114 &-3627185575464319165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ritual Slam _120_3
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Ritual Slam _120_3
+  Guid:
+    Data1: 1861110769
+    Data2: 1304305147
+    Data3: 1971456416
+    Data4: -1232112839
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 119760
 --- !u!114 &-2984020202965395412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -538,6 +565,8 @@ MonoBehaviour:
   - {fileID: -4453772787299686953}
   - {fileID: 5533849383473480245}
   - {fileID: -4325693147175791193}
+  - {fileID: 4629913534215295544}
+  - {fileID: -3627185575464319165}
   EditorParameters:
   - {fileID: -5040547114344505986}
   - {fileID: -1051140484031798589}
@@ -548,7 +577,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: 3274462911295270183}
   cacheVersion: 131860
-  cacheTime: 639257830815058135
+  cacheTime: 639259414933806283
   SerializableEventsDict:
   - key: event:/SoundEffects/InCombat/Paladin_NormalParry
     index: 0
@@ -600,6 +629,10 @@ MonoBehaviour:
     index: 23
   - key: event:/Ritual Slam
     index: 24
+  - key: event:/Ritual Slam_120
+    index: 25
+  - key: event:/Ritual Slam _120_3
+    index: 26
 --- !u!114 &1068593537462916099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -829,10 +862,10 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639257830815058135
+  lastModified: 639259414933806283
   FileSizes:
   - Name: Desktop
-    Value: 2644
+    Value: 2728
   Exists: 1
 --- !u!114 &3656930557680544666
 MonoBehaviour:
@@ -885,6 +918,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 0
+--- !u!114 &4629913534215295544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ritual Slam_120
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Ritual Slam_120
+  Guid:
+    Data1: -245182173
+    Data2: 1232329954
+    Data3: 1938590873
+    Data4: 1669064373
+  Banks:
+  - {fileID: 8443941594977626587}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 116184
 --- !u!114 &4940550310842746521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1057,10 +1117,10 @@ MonoBehaviour:
   Path: ProjectFMOD/FightSceneTest/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639257830814972820
+  lastModified: 639259414933766301
   FileSizes:
   - Name: Desktop
-    Value: 14556928
+    Value: 17598016
   Exists: 1
 --- !u!114 &8847483650728763382
 MonoBehaviour:
