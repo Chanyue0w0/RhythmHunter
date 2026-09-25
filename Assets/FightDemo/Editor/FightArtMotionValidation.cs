@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 using RhythmHunter.FightDemo;
 using RhythmHunter.RhythmDemo;
 using UnityEditor;
@@ -27,6 +28,10 @@ namespace RhythmHunter.FightDemoEditor
         static float previousTimeScale;
         static int layerIndex;
         static LoopingBackgroundScroller[] layers;
+        static double heldBeatCount;
+        static float heldDistance;
+        static int pausedTimeline;
+        static long pausedBeat;
 
         static FightArtMotionValidation()
         {
@@ -59,7 +64,9 @@ namespace RhythmHunter.FightDemoEditor
                 if (EditorApplication.isPlayingOrWillChangePlaymode) return;
                 SessionState.SetString(Previous, AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
                 SessionState.SetBool(Running, true);
-                EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/FightDemo/Scenes/FightScene.unity");
+                bool integrated = File.ReadAllText(Request).Trim() == "FightScene3";
+                EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(integrated
+                    ? "Assets/FightDemo/Scenes/FightScene3.unity" : "Assets/FightDemo/Scenes/FightScene.unity");
                 File.WriteAllText(Result, "Starting live art background motion check.\n");
                 EditorApplication.isPlaying = true;
                 return;
@@ -79,6 +86,7 @@ namespace RhythmHunter.FightDemoEditor
                 if (phase == 0)
                 {
                     if (clock.ReceivedBeatCount < 3) return;
+                    if (clock.gameObject.scene.name == "FightScene3") ValidateIntegratedBattle(clock);
                     previousTimeScale = Time.timeScale;
                     foreach (var scroller in UnityEngine.Object.FindObjectsByType<LoopingBackgroundScroller>(FindObjectsSortMode.None))
                     {
@@ -122,10 +130,19 @@ namespace RhythmHunter.FightDemoEditor
                     samples++;
                     if (EditorApplication.timeSinceStartup < checkpoint) return;
                     foreach (var entry in widths) pausedPositions.Add(entry.Key.transform, entry.Key.transform.localPosition);
-                    Require(clock.SetPaused(true), "FMOD pause failed.");
+                    var pause = UnityEngine.Object.FindFirstObjectByType<FightPauseController>();
+                    if (pause != null) pause.SetPaused(true);
+                    else Require(clock.SetPaused(true), "FMOD pause failed.");
                     Time.timeScale = 0;
-                    phase = 2;
-                    checkpoint = EditorApplication.timeSinceStartup + 1;
+                    phase = 11;
+                    checkpoint = EditorApplication.timeSinceStartup + .2;
+                    return;
+                }
+                if (phase == 11)
+                {
+                    if (EditorApplication.timeSinceStartup < checkpoint) return;
+                    clock.TryGetTimelinePositionMs(out pausedTimeline); pausedBeat = clock.ReceivedBeatCount;
+                    phase = 2; checkpoint = EditorApplication.timeSinceStartup + .8;
                     return;
                 }
                 if (phase == 2)
@@ -133,6 +150,16 @@ namespace RhythmHunter.FightDemoEditor
                     if (EditorApplication.timeSinceStartup < checkpoint) return;
                     foreach (var entry in pausedPositions)
                         Require((entry.Key.localPosition - entry.Value).sqrMagnitude < .000001f, "Background kept scrolling while paused.");
+                    clock.TryGetTimelinePositionMs(out int currentTimeline);
+                    Require(Math.Abs(currentTimeline - pausedTimeline) < 2 && clock.ReceivedBeatCount == pausedBeat, "Pause must freeze the music timeline and beats.");
+                    var pause = UnityEngine.Object.FindFirstObjectByType<FightPauseController>();
+                    if (pause != null)
+                    {
+                        pause.SetPaused(false);
+                        Require(!clock.IsPaused && Time.timeScale > 0, "Second pause toggle must resume music and game time.");
+                        // Hide the pause overlay while taking frozen scene screenshots.
+                        clock.SetPaused(true); Time.timeScale = 0;
+                    }
                     File.AppendAllText(Result, $"PASS: {widths.Count} stable loop periods, {visualCopies} synchronized grass copies, {samples} live samples, background pause.\n");
                     phase = 3;
                     checkpoint = EditorApplication.timeSinceStartup + .2;
@@ -159,8 +186,59 @@ namespace RhythmHunter.FightDemoEditor
                     if (++layerIndex < layers.Length) { phase = 3; return; }
                     File.AppendAllText(Result, "PASS: all 11 rendered wrap boundaries and explicit sprite texture bindings.\n");
                     clock.SetPaused(false);
-                    Finish();
+                    Time.timeScale = previousTimeScale;
+                    var environment = UnityEngine.Object.FindFirstObjectByType<FightEnvironmentController>();
+                    environment.MotionEnabled = false;
+                    heldDistance = Distance(layers[0]); heldBeatCount = clock.ReceivedBeatCount;
+                    phase = 6; checkpoint = EditorApplication.timeSinceStartup + 1.2;
+                    return;
                 }
+                if (phase == 6)
+                {
+                    if (EditorApplication.timeSinceStartup < checkpoint) return;
+                    Require(Mathf.Abs(Distance(layers[0]) - heldDistance) < .00001f, "Master motion switch must freeze scroll without resetting it.");
+                    Require(clock.ReceivedBeatCount > heldBeatCount, "Environment switch must not stop music or gameplay beats.");
+                    var environment = UnityEngine.Object.FindFirstObjectByType<FightEnvironmentController>();
+                    environment.MotionEnabled = true; environment.ScrollingEnabled = false;
+                    phase = 7; checkpoint = EditorApplication.timeSinceStartup + .5;
+                    return;
+                }
+                if (phase == 7)
+                {
+                    if (EditorApplication.timeSinceStartup < checkpoint) return;
+                    Require(Mathf.Abs(Distance(layers[0]) - heldDistance) < .00001f, "Scroll switch must preserve offset while beat animation continues.");
+                    var environment = UnityEngine.Object.FindFirstObjectByType<FightEnvironmentController>();
+                    environment.ScrollingEnabled = true; environment.Direction = FightEnvironmentController.ScrollDirection.Left;
+                    environment.BeatPulseEnabled = false;
+                    heldDistance = Distance(layers[0]);
+                    phase = 8; checkpoint = EditorApplication.timeSinceStartup + .3;
+                    return;
+                }
+                if (phase == 8)
+                {
+                    if (EditorApplication.timeSinceStartup < checkpoint) return;
+                    float delta = Mathf.Repeat(Distance(layers[0]) - heldDistance + widths[layers[0]] * .5f, widths[layers[0]]) - widths[layers[0]] * .5f;
+                    Require(delta < -.001f && delta > -1, "Left direction must move left continuously, without a reset/jump.");
+                    var environment = UnityEngine.Object.FindFirstObjectByType<FightEnvironmentController>();
+                    var pulses = (FightEnvironmentController.Pulse[])typeof(FightEnvironmentController).GetField("pulses", Private).GetValue(environment);
+                    Require(pulses.All(p => p.target == null || (p.target.localScale - p.restScale).sqrMagnitude < .000001f), "Disabling beat pulse must restore base scales.");
+                    environment.BeatPulseEnabled = true;
+                    environment.Direction = FightEnvironmentController.ScrollDirection.Right;
+                    heldDistance = Distance(layers[0]);
+                    phase = 9; checkpoint = EditorApplication.timeSinceStartup + .3;
+                    return;
+                }
+                if (phase == 9)
+                {
+                    if (EditorApplication.timeSinceStartup < checkpoint) return;
+                    float delta = Mathf.Repeat(Distance(layers[0]) - heldDistance + widths[layers[0]] * .5f, widths[layers[0]]) - widths[layers[0]] * .5f;
+                    Require(delta > .001f && delta < 1, "Right direction must resume continuously.");
+                    File.AppendAllText(Result, "PASS: master motion/scroll switches preserve offsets; music beats continue; left/right reverse without jumping.\n");
+                    ScreenCapture.CaptureScreenshot("Temp/FightArtIntegration-live.png");
+                    phase = 10; checkpoint = EditorApplication.timeSinceStartup + .5;
+                    return;
+                }
+                if (phase == 10 && EditorApplication.timeSinceStartup >= checkpoint) Finish();
             }
             catch (Exception exception)
             {
@@ -171,6 +249,43 @@ namespace RhythmHunter.FightDemoEditor
 
         static string ImagePath(LoopingBackgroundScroller layer, bool before) =>
             $"Temp/ArtWrap-{layer.name}-{(before ? "before" : "after")}.png";
+
+        static float Distance(LoopingBackgroundScroller layer) => (float)typeof(LoopingBackgroundScroller).GetField("travelledDistance", Private).GetValue(layer);
+
+        static void ValidateIntegratedBattle(FmodBeatClock clock)
+        {
+            Require(UnityEngine.Object.FindObjectsByType<FmodBeatClock>(FindObjectsSortMode.None).Length == 1, "Expected exactly one FMOD clock.");
+            Require(clock.MusicEventPath == "event:/Ritual Slam _120_3", "Battle music changed.");
+            Require(Math.Abs(clock.LatestBeat.Tempo - 121.15f) < .01f, "FMOD tempo must be 121.15 BPM.");
+            var fight = UnityEngine.Object.FindFirstObjectByType<FightCombatController>();
+            Require(fight.UsesEqualBeats, "Integrated scene must retain EqualBeat combat.");
+            var roster = UnityEngine.Object.FindFirstObjectByType<FightRosterManager>();
+            var judge = UnityEngine.Object.FindFirstObjectByType<FmodRhythmJudge>();
+            foreach (string profile in new[] { "Keyboard", "Gamepad" })
+            {
+                judge.SetInputProfile(profile);
+                Require(judge.PersonalDelayMs == RhythmCalibrationStore.GetDelay(profile), "Battle must read shared saved calibration.");
+            }
+            judge.SetInputProfile("Keyboard");
+            Require(roster.ActiveHeroes.Count == 3, "Three role-based heroes must spawn.");
+            foreach (var slot in roster.ActiveHeroes.Concat(roster.ActiveEnemies))
+            {
+                var animator = slot.CombatAnimator;
+                Require(animator != null && animator.BeatSource == fight, "Character must use the battle's beat source.");
+                Require(animator.TargetRenderer.sharedMaterial.shader.name.Contains("Sprite-Lit"), "Character must receive 2D lighting.");
+                Require(animator.Frames.All(sprite => AssetDatabase.GetAssetPath(sprite).StartsWith("Assets/FightDemo/Arts/")), "Idle must use official art.");
+                Require(animator.Sequences.All(sequence => sequence.Frames.All(sprite => AssetDatabase.GetAssetPath(sprite).StartsWith("Assets/FightDemo/Arts/"))), "Combat must never switch to old art.");
+            }
+            // Respawning exercises the same roster API used by formation changes.
+            var savedHeroes = roster.HeroPrefabs.ToArray(); var savedEnemies = roster.EnemyPrefabs.ToArray();
+            var giant = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/FightDemo/Prefabs/ArtBattle/Goblin_Giant.prefab").GetComponent<FightCharacterDefinition>();
+            var killer = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/FightDemo/Prefabs/ArtBattle/Goblin_Killer.prefab").GetComponent<FightCharacterDefinition>();
+            roster.SetRoster(savedHeroes, new[] { giant, killer, null });
+            Require(roster.ActiveEnemies.Count == 2 && roster.ActiveEnemies.All(slot => slot.CombatAnimator.FrameCount == 3), "Both official goblin prefabs must spawn through the existing roster.");
+            roster.SetRoster(savedHeroes, savedEnemies);
+            Require(roster.ActiveHeroes.All(slot => slot.CombatAnimator.TargetRenderer.sharedMaterial.shader.name.Contains("Sprite-Lit")), "Respawn must preserve lighting.");
+            File.AppendAllText(Result, "PASS: official-art prefab roster, lit respawns, EqualBeat combat, single FMOD event Ritual Slam _120_3, tempo 121.15.\n");
+        }
 
         static void ValidateTextures(LoopingBackgroundScroller layer)
         {

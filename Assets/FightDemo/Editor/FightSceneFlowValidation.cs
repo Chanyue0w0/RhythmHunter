@@ -145,10 +145,10 @@ namespace RhythmHunter.FightDemoEditor
                     Require(animatorCount>=6,"Art scene must retain all six animated characters.");
                     Require(UnityEngine.Object.FindFirstObjectByType<FightSceneNaturalLighting>()!=null,"Art lighting must initialize.");
                     var fight=UnityEngine.Object.FindFirstObjectByType<FightCombatController>();
-                    var targets=(System.Collections.ICollection)typeof(FightCombatController).GetField("artPulseTargets",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(fight);
-                    Require(targets.Count>0,"Art beat pulse targets must initialize.");
+                    int pulseCount=fight.GetComponent<FightEnvironmentController>().PulseCount;
+                    Require(pulseCount>0,"Art beat pulse targets must initialize.");
                     ScreenCapture.CaptureScreenshot("Temp/FightArtMerge-live.png");
-                    File.AppendAllText(Result,$"PASS: art scene runs with {animatorCount} animated characters, natural lighting, {targets.Count} pulse targets and no missing scripts.\n");
+                    File.AppendAllText(Result,$"PASS: art scene runs with {animatorCount} animated characters, natural lighting, {pulseCount} pulse targets and no missing scripts.\n");
                     phase=7;checkpoint=EditorApplication.timeSinceStartup+.5;return;
                 }
                 if(phase==7)

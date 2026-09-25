@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace RhythmHunter.FightDemo
 {
@@ -17,6 +18,7 @@ namespace RhythmHunter.FightDemo
 
             Transform spawn = anchor != null ? anchor : transform;
             GameObject effect = Instantiate(effectPrefab, spawn.position, spawn.rotation);
+            SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
             effect.SetActive(true);
 
             FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();
@@ -61,6 +63,7 @@ namespace RhythmHunter.FightDemo
                 renderer.sortingOrder = 30;
             }
 
+            SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
             effect.SetActive(true);
             Vector3 direction = team == FightUnitSlot.UnitTeam.Hero ? Vector3.left : Vector3.right;
             FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();

@@ -77,6 +77,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1f)] private float missShakeFrequency = 60f;
 
         private GameObject actorInstance;
+        private TextMesh unitNameLabel;
         private FightCharacterDefinition characterDefinition;
         private FightCharacterCombatAnimator combatAnimator;
         private bool hasCharacter = true;
@@ -199,6 +200,7 @@ namespace RhythmHunter.FightDemo
 
         public void SpawnCharacter(FightCharacterDefinition prefab, FightCombatController beatSource)
         {
+            CacheLegacyPresentationReferences();
             if (prefab == null)
             {
                 ClearCharacter();
@@ -584,7 +586,7 @@ namespace RhythmHunter.FightDemo
                     hpBackground = renderer;
             }
 
-            if (roleLabel != null)
+            if (roleLabel != null && unitNameLabel != null)
                 return;
             TextMesh[] labels = GetComponentsInChildren<TextMesh>(true);
             foreach (TextMesh label in labels)
@@ -592,8 +594,8 @@ namespace RhythmHunter.FightDemo
                 if (label.name == "RoleAndInput")
                 {
                     roleLabel = label;
-                    return;
                 }
+                if (label.name == "UnitName") unitNameLabel = label;
             }
         }
 
@@ -698,6 +700,7 @@ namespace RhythmHunter.FightDemo
 
         private void RefreshHealthVisuals()
         {
+            if (unitNameLabel != null) unitNameLabel.text = displayName;
             float ratio = maxHp > 0 ? (float)currentHp / maxHp : 0f;
             if (hpFill != null)
             {

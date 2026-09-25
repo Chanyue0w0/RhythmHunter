@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2052762948902822046
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4424178650152436019}
+  - component: {fileID: 4232183820247662683}
+  m_Layer: 0
+  m_Name: Swordsman_Paladin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4424178650152436019
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2052762948902822046}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3706692169455734281}
+  - {fileID: 1005054088885619773}
+  - {fileID: 8708303165673788821}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4232183820247662683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2052762948902822046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  characterId: Paladin
+  displayName: PALADIN
+  team: 1
+  role: 1
+  maxHp: 3
+  defense: 3
+  armorRecoveryDelay: 4
+  armorRecoveryInterval: 2
+  armorRecoveryAmount: 0.5
+  basicAbilityName: Guard
+  normalAbilityBehavior: 1
+  normalAbilityPower: 0
+  attackPower: 1
+  skillName: Aegis Counter
+  skillBehavior: 4
+  skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 5273961539278508256, guid: 6251f2ae3febbff47ba2d5ed0c7fd63f, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 1005054088885619773}
+  impactEffectAnchor: {fileID: 8708303165673788821}
+  attackIntervalBeats: 1
+  maxMana: 4
+  accentColor: {r: 0.12, g: 0.65, b: 0.9, a: 1}
+--- !u!1 &4268722423222428815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8708303165673788821}
+  m_Layer: 0
+  m_Name: VFX_ImpactAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8708303165673788821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4268722423222428815}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -0.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4424178650152436019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8801647073210647542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1005054088885619773}
+  m_Layer: 0
+  m_Name: VFX_CastAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1005054088885619773
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8801647073210647542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -0.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4424178650152436019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &7308472826507671534
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4424178650152436019}
+    m_Modifications:
+    - target: {fileID: 2574302599794239125, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_Name
+      value: HeroSwordsman_Visual
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+--- !u!4 &3706692169455734281 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
+  m_PrefabInstance: {fileID: 7308472826507671534}
+  m_PrefabAsset: {fileID: 0}

@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1844794721030616701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7004274928639243472}
+  m_Layer: 0
+  m_Name: VFX_ImpactAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7004274928639243472
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844794721030616701}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -0.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7806950159752532399}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5960830191988315324
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6601874366244489931}
+  m_Layer: 0
+  m_Name: VFX_CastAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6601874366244489931
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5960830191988315324}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -0.3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7806950159752532399}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6489656208228852419
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7806950159752532399}
+  - component: {fileID: 1049329208925010419}
+  m_Layer: 0
+  m_Name: Goblin_Giant
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7806950159752532399
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6489656208228852419}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4896774704012948112}
+  - {fileID: 6601874366244489931}
+  - {fileID: 7004274928639243472}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1049329208925010419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6489656208228852419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  characterId: Goblin_Giant
+  displayName: GIANT GOBLIN
+  team: 0
+  role: 0
+  maxHp: 20
+  defense: 0
+  armorRecoveryDelay: 4
+  armorRecoveryInterval: 2
+  armorRecoveryAmount: 0.5
+  basicAbilityName: Basic Ability
+  normalAbilityBehavior: 0
+  normalAbilityPower: 1
+  attackPower: 1
+  skillName: Mercenary Cleave
+  skillBehavior: 0
+  skillPower: 1
+  normalAbilityEffectPrefab: {fileID: 0}
+  skillEffectPrefab: {fileID: 2574835647068987013, guid: 49cb9df558623204ca97c8b6d74b7639, type: 3}
+  abilityEffectLifetime: 1.5
+  castEffectAnchor: {fileID: 6601874366244489931}
+  impactEffectAnchor: {fileID: 7004274928639243472}
+  attackIntervalBeats: 999
+  maxMana: 4
+  accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
+--- !u!1001 &4601833531708514031
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7806950159752532399}
+    m_Modifications:
+    - target: {fileID: 21628946630740200, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_Name
+      value: GoblinGiant_Visual
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aa86617e3530d44418739a780609a517, type: 3}
+--- !u!4 &4896774704012948112 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
+  m_PrefabInstance: {fileID: 4601833531708514031}
+  m_PrefabAsset: {fileID: 0}

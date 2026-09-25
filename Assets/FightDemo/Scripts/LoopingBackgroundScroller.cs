@@ -28,6 +28,10 @@ namespace RhythmHunter.FightDemo
         private float unscaledSpriteWidth;
         private float travelledDistance;
         private float restScaleX;
+        private float motionMultiplier = 1f;
+
+        // Changing speed/direction must not reset the accumulated scroll position.
+        public void SetMotionMultiplier(float multiplier) => motionMultiplier = multiplier;
         private readonly List<(Transform source, Transform copy)> copiedTransforms = new();
         private MaterialPropertyBlock spriteProperties;
         private bool usingBeatSlices;
@@ -72,7 +76,7 @@ namespace RhythmHunter.FightDemo
             float localUnitsPerSecond = unitsPerSecond / Mathf.Max(0.0001f, parentScaleX);
             float loopWidth = GetLoopWidth();
             travelledDistance = Mathf.Repeat(
-                travelledDistance + localUnitsPerSecond * Time.deltaTime,
+                travelledDistance + localUnitsPerSecond * motionMultiplier * Time.deltaTime,
                 loopWidth);
 
             float centeredOffset = Mathf.Repeat(

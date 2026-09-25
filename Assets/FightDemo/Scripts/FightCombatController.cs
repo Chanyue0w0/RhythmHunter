@@ -148,22 +148,6 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private HeroBeatSettings thirdHero =
             new("Hero 3 - Player");
 
-        private sealed class ArtPulseTarget
-        {
-            public Transform Transform;
-            public Vector3 RestScale;
-            public float Amount;
-            public float DurationInBeats;
-            public int Parity;
-            public bool ScrollsHorizontally;
-        }
-
-        private readonly List<ArtPulseTarget> artPulseTargets = new();
-        private double artBeatAnchorTime;
-        private long artBeatAnchorIndex;
-        private double artSecondsPerBeat = 0.5d;
-        private bool hasArtBeatAnchor;
-
         private readonly List<FightUnitSlot> fightScene2Enemies = new();
         private FmodBeatClock subscribedBeatClock;
         private FightInputRouter subscribedInputRouter;
@@ -335,7 +319,7 @@ namespace RhythmHunter.FightDemo
         private void OnEnable()
         {
             FightSceneNaturalLighting.Ensure(this);
-            InitializeArtPulseTargets();
+            FightEnvironmentController.EnsureLegacy(this);
             SubscribeDependencies();
         }
 
@@ -347,7 +331,7 @@ namespace RhythmHunter.FightDemo
         private void Update()
         {
             if (TimingCalibrationActive || IsPaused) return;
-            UpdateArtPulseTargets();
+
             TryResolvePendingAttack();
             AdvanceArmorRecovery(latestCombatBeat);
         }
@@ -622,10 +606,7 @@ namespace RhythmHunter.FightDemo
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
             if (IsPaused) return;
-            artBeatAnchorTime = Time.timeAsDouble;
-            artBeatAnchorIndex = beat.GlobalBeat;
-            artSecondsPerBeat = 60d / Math.Max(1d, beat.Tempo);
-            hasArtBeatAnchor = true;
+
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive) return;
             if (UsesEqualBeats)
@@ -650,142 +631,6 @@ namespace RhythmHunter.FightDemo
 
             if (beat.Beat == 4)
                 QueueEnemyAttack(beat);
-        }
-
-        private void InitializeArtPulseTargets()
-        {
-            artPulseTargets.Clear();
-            if (gameObject.scene.name != "FightScene")
-                return;
-
-            int grassCount = 0;
-            int shadowCount = 0;
-            int stoneCount = 0;
-            int backgroundCount = 0;
-            Transform[] sceneTransforms = FindObjectsByType<Transform>(
-                FindObjectsInactive.Exclude,
-                FindObjectsSortMode.None);
-            foreach (Transform sceneTransform in sceneTransforms)
-            {
-                if (sceneTransform.gameObject.scene != gameObject.scene)
-                    continue;
-
-                BeatBounce oldPulse = sceneTransform.GetComponent<BeatBounce>();
-                string objectName = sceneTransform.name;
-                if (objectName == "StoneLayer (Beat Pulse)")
-                {
-                    if (oldPulse != null)
-                        oldPulse.enabled = false;
-                    AddArtPulseTarget(sceneTransform, 0.015f, 0.45f, 3);
-                    stoneCount++;
-                    continue;
-                }
-
-                if (objectName == "Background_00")
-                {
-                    if (oldPulse != null)
-                        oldPulse.enabled = false;
-                    AddArtPulseTarget(sceneTransform, 0.012f, 0.45f, 3);
-                    backgroundCount++;
-                    continue;
-                }
-
-                if (objectName == "Background_05" || objectName == "Background_07")
-                {
-                    if (oldPulse != null)
-                        oldPulse.enabled = false;
-                    AddArtPulseTarget(sceneTransform, 0.015f, 0.45f, 3);
-                    backgroundCount++;
-                    continue;
-                }
-
-                if (objectName == "SlotGround")
-                {
-                    if (oldPulse != null)
-                        oldPulse.enabled = false;
-                    AddArtPulseTarget(sceneTransform, 0.04f, 0.6f, 0);
-                    shadowCount++;
-                    continue;
-                }
-
-                if (!objectName.StartsWith("Grass_", StringComparison.Ordinal) ||
-                    !int.TryParse(objectName.Substring("Grass_".Length), out int zeroBasedSlice))
-                {
-                    continue;
-                }
-
-                if (oldPulse != null)
-                    oldPulse.enabled = false;
-                int sliceParity = zeroBasedSlice % 2 == 0 ? 1 : 2;
-                AddArtPulseTarget(sceneTransform, 0.03f, 0.45f, sliceParity);
-                grassCount++;
-            }
-
-            Debug.Log($"[FightScene Art] Direct pulse targets: backgrounds={backgroundCount}, grass={grassCount}, shadows={shadowCount}, stone={stoneCount}.", this);
-        }
-
-        private void AddArtPulseTarget(
-            Transform target,
-            float amount,
-            float durationInBeats,
-            int parity)
-        {
-            artPulseTargets.Add(new ArtPulseTarget
-            {
-                Transform = target,
-                RestScale = target.localScale,
-                Amount = amount,
-                DurationInBeats = durationInBeats,
-                Parity = parity,
-                ScrollsHorizontally = target.GetComponent<LoopingBackgroundScroller>() != null
-            });
-        }
-
-        private void UpdateArtPulseTargets()
-        {
-            if (artPulseTargets.Count == 0)
-                return;
-
-            double now = Time.timeAsDouble;
-            double beatPosition = hasArtBeatAnchor
-                ? artBeatAnchorIndex + Math.Max(0d, now - artBeatAnchorTime) / Math.Max(0.001d, artSecondsPerBeat)
-                : now / Math.Max(0.001d, artSecondsPerBeat);
-            long beatIndex = (long)Math.Floor(beatPosition);
-            float beatProgress = (float)(beatPosition - beatIndex);
-            bool isOddBeat = PositiveModulo(beatIndex, 2) != 0;
-
-            foreach (ArtPulseTarget target in artPulseTargets)
-            {
-                if (target.Transform == null)
-                    continue;
-
-                bool shouldPulse = target.Parity == 0 ||
-                                   (target.Parity == 1 && isOddBeat) ||
-                                   (target.Parity == 2 && !isOddBeat) ||
-                                   (target.Parity == 3 && PositiveModulo(beatIndex, 4) == 3);
-                if (!shouldPulse || beatProgress >= target.DurationInBeats)
-                {
-                    target.Transform.localScale = target.RestScale;
-                    continue;
-                }
-
-                float pulseProgress = beatProgress / Math.Max(0.05f, target.DurationInBeats);
-                float multiplier = 1f + Mathf.Sin(pulseProgress * Mathf.PI) * target.Amount;
-                // Tiled layers must keep their horizontal width and seam spacing.
-                // Pulse vertically; foreground grass/shadows can still scale in both axes.
-                target.Transform.localScale = target.ScrollsHorizontally
-                    ? new Vector3(target.RestScale.x, target.RestScale.y * multiplier, target.RestScale.z)
-                    : target.RestScale * multiplier;
-            }
-        }
-
-        private static long PositiveModulo(long value, long modulus)
-        {
-            if (modulus <= 0)
-                return 0;
-
-            long result = value % modulus;
-            return result < 0 ? result + modulus : result;
         }
 
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
