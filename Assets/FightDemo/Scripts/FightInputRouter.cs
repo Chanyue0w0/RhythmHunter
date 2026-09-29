@@ -17,6 +17,7 @@ namespace RhythmHunter.FightDemo
             Middle = 1,
             Back = 2,
             Ultimate = 3,
+            TeamSkill = 4,
             // Preserve existing code and serialized command values in the older prototypes.
             Tank = Front,
             Support = Middle,
@@ -172,6 +173,12 @@ namespace RhythmHunter.FightDemo
         private void OnTank(InputAction.CallbackContext context) => Dispatch(HeroCommand.Front, context);
         private void OnSupport(InputAction.CallbackContext context) => Dispatch(HeroCommand.Middle, context);
         private void OnDamage(InputAction.CallbackContext context) => Dispatch(HeroCommand.Back, context);
-        private void OnUltimate(InputAction.CallbackContext context) => Dispatch(HeroCommand.Ultimate, context);
+        private void OnUltimate(InputAction.CallbackContext context)
+        {
+            bool modifier = context.control.device is Gamepad pad
+                ? pad.rightShoulder.isPressed
+                : context.control.device is Keyboard keyboard && keyboard.shiftKey.isPressed;
+            Dispatch(modifier ? HeroCommand.Ultimate : HeroCommand.TeamSkill, context);
+        }
     }
 }

@@ -39,8 +39,11 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private float normalAbilityPower = 1f;
         [SerializeField, Min(0.5f)] private float attackPower = 1f;
         [Header("Team Skill / Legacy Fourth-Beat Skill")]
+        [SerializeField, Min(1)] private int teamSkillManaCost = 10;
+        [Tooltip("Beats reserved for this character's Team Skill performance before the next character starts.")]
+        [SerializeField, Min(1)] private int teamSkillPerformanceBeats = 4;
         [SerializeField] private string skillName = "Beat Skill";
-        [Tooltip("Character skill behavior. Currently used by legacy fourth-beat skills; reserved for the upcoming Team Skill sequence in EqualBeat mode.")]
+        [Tooltip("Used by the EqualBeat Team Skill chain in formation order, and by legacy fourth-beat skills.")]
         [SerializeField] private AbilityBehavior skillBehavior;
         [FormerlySerializedAs("skillDamage")]
         [SerializeField, Min(0)] private float skillPower = 1f;
@@ -78,6 +81,8 @@ namespace RhythmHunter.FightDemo
         public float NormalAbilityPower => normalAbilityPower;
         public float AttackPower => attackPower;
         public string SkillName => skillName;
+        public int TeamSkillManaCost => Mathf.Max(1, teamSkillManaCost);
+        public int TeamSkillPerformanceBeats => Mathf.Max(1, teamSkillPerformanceBeats);
         public AbilityBehavior SkillType => skillBehavior;
         public float SkillPower => skillPower;
         public GameObject NormalAbilityEffectPrefab => normalAbilityEffectPrefab;

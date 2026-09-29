@@ -10,7 +10,7 @@ namespace RhythmHunter.FightDemo
     /// Runs the original fourth-beat guard prototype in FightScene and the three-hero
     /// party controls used by the later fight scenes.
     /// </summary>
-    public sealed class FightCombatController : MonoBehaviour
+    public sealed partial class FightCombatController : MonoBehaviour
     {
         [Serializable]
         public sealed class HeroBeatSettings
@@ -182,6 +182,7 @@ namespace RhythmHunter.FightDemo
         public void SetTimingCalibrationActive(bool active)
         {
             if (TimingCalibrationActive == active) return;
+            if (active) ResetTeamSkill();
             TimingCalibrationActive = active;
             pendingEnemyAttack = false;
             pendingEnemyAnimationDriven = false;
@@ -265,6 +266,7 @@ namespace RhythmHunter.FightDemo
 
         public void SetCombatMode(CombatMode mode)
         {
+            if (combatMode != mode) ResetTeamSkill();
             combatMode = mode;
         }
 
@@ -338,6 +340,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            ResetTeamSkill();
             UnsubscribeDependencies();
         }
 
@@ -377,6 +380,16 @@ namespace RhythmHunter.FightDemo
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
+            if (command == FightInputRouter.HeroCommand.TeamSkill)
+            {
+                if (UsesEqualBeats) { TryStartTeamSkill(); return; }
+                command = FightInputRouter.HeroCommand.Ultimate;
+            }
+            if (UsesEqualBeats && command == FightInputRouter.HeroCommand.Ultimate)
+            {
+                TryStartTeamUltimate();
+                return;
+            }
             if (UsesFrontHeroControls)
             {
                 SubmitFrontHeroCommand(command);
@@ -462,6 +475,7 @@ namespace RhythmHunter.FightDemo
                 judgement.NearestBeat.GlobalBeat);
 
             activeEnemySlot = FindFrontLivingEnemy();
+            if (!skill && UsesEqualBeats) GainTeamSkill(judgement);
             HeroCalled?.Invoke(new HeroCallResult(
                 command,
                 judgement,
@@ -609,6 +623,8 @@ namespace RhythmHunter.FightDemo
 
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive) return;
+            AdvanceTeamSkill(beat.GlobalBeat);
+            AdvanceTeamUltimate(beat.GlobalBeat);
             if (UsesEqualBeats)
                 guardedBeats.RemoveWhere(guardBeat => guardBeat < beat.GlobalBeat &&
                     (!pendingEnemyAttack || guardBeat != pendingAttackGlobalBeat));
@@ -831,6 +847,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetBattleStateForRoster()
         {
+            ResetTeamSkill();
             pendingEnemyAttack = false;
             pendingEnemyAnimationDriven = false;
             pendingEnemyAttacker = null;

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RhythmHunter.FightDemo
 {
-    public sealed class FightScenePresenter : MonoBehaviour
+    public sealed partial class FightScenePresenter : MonoBehaviour
     {
         private static readonly Color Background = new(0.018f, 0.025f, 0.045f, 1f);
         private static readonly Color Cyan = new(0.2f, 0.92f, 1f, 1f);
@@ -167,6 +167,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            UpdateTeamSkillHud();
             if (fight != null && fight.IsPaused) return;
             UpdatePlaybackReadout();
             UpdateBeatProgress();

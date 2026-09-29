@@ -122,6 +122,8 @@ MonoBehaviour:
   normalAbilityBehavior: 2
   normalAbilityPower: 0.5
   attackPower: 1
+  teamSkillManaCost: 10
+  teamSkillPerformanceBeats: 4
   skillName: Healing Chorus
   skillBehavior: 2
   skillPower: 1

@@ -103,7 +103,7 @@ namespace RhythmHunter.FightDemo
 
         void OnCommand(FightInputRouter.HeroCommand command)
         {
-            if (!IsOpen || command == FightInputRouter.HeroCommand.Ultimate) return;
+            if (!IsOpen || command == FightInputRouter.HeroCommand.Ultimate || command == FightInputRouter.HeroCommand.TeamSkill) return;
             string device = router.CurrentInputProfile;
             if (device != profile)
             {
