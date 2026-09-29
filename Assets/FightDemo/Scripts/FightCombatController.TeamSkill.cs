@@ -83,6 +83,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            ResetBossState();
             ResetTeamUltimate();
             teamSkillGauge = 0; teamSkillStep = 0; lastGaugeBeat = long.MinValue;
             lastTeamSkillBeat = long.MinValue;

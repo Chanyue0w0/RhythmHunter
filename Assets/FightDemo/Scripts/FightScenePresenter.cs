@@ -168,6 +168,7 @@ namespace RhythmHunter.FightDemo
         private void Update()
         {
             UpdateTeamSkillHud();
+            UpdateBossHud();
             if (fight != null && fight.IsPaused) return;
             UpdatePlaybackReadout();
             UpdateBeatProgress();
@@ -190,7 +191,8 @@ namespace RhythmHunter.FightDemo
                 if (warningText != null)
                 {
                     int remaining = fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat);
-                    warningText.text = remaining == 0 ? "ENEMY ATTACK  •  GUARD THIS BEAT"
+                    warningText.text = remaining < 0 ? "BOSS — " + fight.CurrentBossPhase.ToString().ToUpperInvariant()
+                        : remaining == 0 ? "ENEMY ATTACK  •  GUARD THIS BEAT"
                         : $"ENEMY ATTACK IN {remaining} BEAT{(remaining == 1 ? string.Empty : "S")}";
                     warningText.color = remaining == 0 ? Gold : Color.white;
                 }
@@ -307,7 +309,7 @@ namespace RhythmHunter.FightDemo
                 SetResult(
                     "BLOCKED",
                     Green,
-                    $"Enemy normal attack blocked • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}",
+                    fight.BossActive ? "Boss attack blocked" : $"Enemy normal attack blocked • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana}",
                     1.4f);
             }
             else
@@ -321,7 +323,8 @@ namespace RhythmHunter.FightDemo
                 SetResult(
                     "PARTY HIT",
                     Red,
-                    $"Enemy normal attack • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana} • {guardHint}",
+                    fight.BossActive ? $"Boss attack • {attack.Damage:0.#} damage • {guardHint}"
+                        : $"Enemy normal attack • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana} • {guardHint}",
                     1.4f);
             }
 

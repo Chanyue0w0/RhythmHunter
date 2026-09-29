@@ -109,6 +109,8 @@ namespace RhythmHunter.FightDemoEditor
         {
             var heroes = roster.HeroPrefabs.ToArray();
             var enemies = roster.EnemyPrefabs.ToArray();
+            for (int i = 0; i < enemies.Length; i++) if (enemies[i] != null)
+                enemies[i] = AssetDatabase.LoadAssetAtPath<FightCharacterDefinition>("Assets/FightDemo/Prefabs/ArtBattle/Goblin_Killer.prefab");
             int[][] orders =
             {
                 new[] { 0, 1, 2 }, new[] { 0, 2, 1 }, new[] { 1, 0, 2 },

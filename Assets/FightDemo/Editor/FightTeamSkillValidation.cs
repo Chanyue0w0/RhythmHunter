@@ -34,6 +34,9 @@ namespace RhythmHunter.FightDemoEditor
                 var fight = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightCombatController>(true)).Single();
                 var roster = fight.RosterManager;
                 var heroes = roster.HeroPrefabs.ToArray(); var enemies = roster.EnemyPrefabs.ToArray();
+                // Resource/effect regression uses a neutral enemy; boss interactions have their own suite.
+                for (int i = 0; i < enemies.Length; i++) if (enemies[i] != null)
+                    enemies[i] = AssetDatabase.LoadAssetAtPath<FightCharacterDefinition>("Assets/FightDemo/Prefabs/ArtBattle/Goblin_Killer.prefab");
                 var order = new List<FightUnitSlot>(); fight.TeamSkillStepResolved += order.Add;
                 int now = 0;
                 void Beat(int beat) { now = beat; Call(fight, "OnBeat", new FmodBeatClock.BeatSnapshot(beat, beat / 4 + 1, beat % 4 + 1, beat * 500, 120, 4, 4)); }

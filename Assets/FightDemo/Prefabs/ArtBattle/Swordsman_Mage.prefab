@@ -92,6 +92,8 @@ MonoBehaviour:
   normalAbilityPower: 1
   attackPower: 1
   teamSkillManaCost: 10
+  basicBreakPower: 1
+  skillBreakPower: 2
   teamSkillPerformanceBeats: 4
   skillName: Arcane Burst
   skillBehavior: 3

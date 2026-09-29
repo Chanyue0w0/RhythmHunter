@@ -282,11 +282,13 @@ namespace RhythmHunter.FightDemo
 
         public int GetEnemyBeatsUntilAttack(long globalBeat)
         {
+            if (BossActive) return BossBeatsUntilAttack(globalBeat);
             return GetBeatsUntilScheduledAttack(globalBeat, EnemyAttackIntervalBeats);
         }
 
         public bool IsEnemyAttackBeat(long globalBeat)
         {
+            if (BossActive) return IsBossAttackBeat(globalBeat);
             return IsScheduledAttackBeat(globalBeat, EnemyAttackIntervalBeats);
         }
 
@@ -503,6 +505,11 @@ namespace RhythmHunter.FightDemo
             string abilityName = skill ? hero.SkillName : actor.CharacterDefinition != null
                 ? actor.CharacterDefinition.BasicAbilityName : "Basic Ability";
 
+            // Accepted early inputs use their judged beat's state as well.
+            AdvanceBossState(globalBeat);
+            if (actor.CharacterDefinition != null)
+                ApplyBossBreak(skill ? actor.CharacterDefinition.SkillBreakPower : actor.CharacterDefinition.BasicBreakPower, globalBeat);
+
             switch (behavior)
             {
                 case FightCharacterDefinition.AbilityBehavior.Guard:
@@ -544,8 +551,9 @@ namespace RhythmHunter.FightDemo
                     FightUnitSlot target = FindFrontLivingEnemy();
                     if (target == null)
                         return $"{abilityName} found no target";
+                    float effectivePower = ModifyBossDamage(target, power);
                     PlayAnimatedHeroAction(actor, target, action, power);
-                    return $"{abilityName} deals {power:0.#} damage to the front enemy";
+                    return $"{abilityName} deals {effectivePower:0.#} damage to the front enemy";
             }
         }
 
@@ -623,6 +631,7 @@ namespace RhythmHunter.FightDemo
 
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive) return;
+            AdvanceBossState(beat.GlobalBeat);
             AdvanceTeamSkill(beat.GlobalBeat);
             AdvanceTeamUltimate(beat.GlobalBeat);
             if (UsesEqualBeats)
@@ -636,7 +645,8 @@ namespace RhythmHunter.FightDemo
             if (UsesFrontHeroControls)
             {
                 activeEnemySlot = FindFrontLivingEnemy();
-                if (activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat))
+                if (activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
+                    (!BossActive || lastBossAttackBeat != beat.GlobalBeat))
                 {
                     QueueEnemyAttack(beat);
                     StartEnemyAttackAnimation();
@@ -651,6 +661,8 @@ namespace RhythmHunter.FightDemo
 
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
         {
+            pendingBossDamage = BossAttackDamage(beat.GlobalBeat);
+            if (BossActive) lastBossAttackBeat = beat.GlobalBeat;
             pendingEnemyActionId = ++nextActionId;
             pendingAttackRosterVersion = rosterVersion;
             pendingEnemyAttack = true;
@@ -728,6 +740,7 @@ namespace RhythmHunter.FightDemo
             float configuredDamage = UsesFrontHeroControls && attacker != null
                 ? Mathf.Max(0.5f, attacker.AttackPower)
                 : enemyAttackDamage;
+            if (pendingBossDamage > 0) configuredDamage = pendingBossDamage;
             float damage = blocked || !HealthSystemEnabled ? 0f : QuantizeCombatValue(configuredDamage);
 
             if (blocked)
@@ -773,6 +786,10 @@ namespace RhythmHunter.FightDemo
                 damage,
                 partyHp));
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
+
+            if (blocked && BossActive && attacker == bossActor && CurrentBossPhase == BossPhase.Rage)
+                ApplyBossBreak(BossPattern.successfulGuardBreakPower, pendingAttackGlobalBeat);
+            pendingBossDamage = 0;
 
             // FightScene2 is an open-ended gameplay lab. HP never ends the session,
             // even if the health toggle is temporarily enabled for comparison.
@@ -1164,7 +1181,8 @@ namespace RhythmHunter.FightDemo
             {
                 if (target == null || !target.HasCharacter || target.CurrentHp <= 0f)
                     continue;
-                target.TakeDamage(damage);
+                target.TakeDamage(ModifyBossDamage(target, damage));
+                CancelDefeatedBossAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
                     null,
@@ -1185,7 +1203,8 @@ namespace RhythmHunter.FightDemo
 
             if (HealthSystemEnabled && target != null && target.HasCharacter)
             {
-                target.TakeDamage(damage);
+                target.TakeDamage(ModifyBossDamage(target, damage));
+                CancelDefeatedBossAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
                     null,

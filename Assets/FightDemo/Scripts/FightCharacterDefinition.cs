@@ -8,7 +8,7 @@ namespace RhythmHunter.FightDemo
     /// The roster manager reads this component when it spawns the battlefield lineup.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class FightCharacterDefinition : MonoBehaviour
+    public sealed partial class FightCharacterDefinition : MonoBehaviour
     {
         public enum AbilityBehavior
         {

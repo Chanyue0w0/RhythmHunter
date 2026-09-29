@@ -310,6 +310,7 @@ namespace RhythmHunter.FightDemo
 
         public void PlayScheduledAttackCountdown(int beatsUntilAttack, int intervalBeats, bool enemy)
         {
+            if (beatsUntilAttack < 0) return; // Boss has no attack scheduled in this phase.
             int interval = Mathf.Max(1, intervalBeats);
             int remaining = Mathf.Clamp(beatsUntilAttack, 0, interval - 1);
             bool attackBeat = remaining == 0;

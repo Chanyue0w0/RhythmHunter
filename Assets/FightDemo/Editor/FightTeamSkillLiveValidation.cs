@@ -56,6 +56,9 @@ namespace RhythmHunter.FightDemoEditor
                 {
                     if (clock.ReceivedBeatCount < 3) return;
                     fight = UnityEngine.Object.FindFirstObjectByType<FightCombatController>();
+                    // Keep this resource/timing test independent of Boss damage modifiers.
+                    foreach (var enemy in fight.RosterManager.ActiveEnemies)
+                        enemy.CharacterDefinition.BossPattern.enabled = false;
                     pause = UnityEngine.Object.FindFirstObjectByType<FightPauseController>();
                     fight.TeamSkillStepResolved += OnStep;
                     // Logic validation separately covers real Basic actions; prime only
