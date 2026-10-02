@@ -23,13 +23,15 @@ namespace RhythmHunter.FightDemo
             bossPanel.gameObject.SetActive(true);
             bossLabel.color = fight.CurrentBossPhase == FightCombatController.BossPhase.Rage ? Red : Gold;
             bossLabel.text = $"BOSS  {fight.CurrentBossPhase.ToString().ToUpperInvariant()}  •  {fight.BossBeatsRemaining} BEATS" +
+                (fight.EnemyActionsPaused ? "  •  PAUSED" : "") +
                 (fight.CurrentBossPhase == FightCombatController.BossPhase.Break ? "" : $"  •  BREAK {fight.BossBreakProgress}/{fight.BossBreakThreshold}") +
                 $"\n{fight.BossHint}";
             // Counters can change phase between FMOD callbacks; refresh immediately.
             if (warningText != null && beatClock != null && beatClock.HasTimingAnchor)
             {
                 int remaining = fight.GetEnemyBeatsUntilAttack(beatClock.LatestBeat.GlobalBeat);
-                warningText.text = remaining < 0 ? "BOSS — " + fight.CurrentBossPhase.ToString().ToUpperInvariant()
+                warningText.text = fight.EnemyActionsPaused ? "ENEMIES PAUSED — TEAM SKILL"
+                    : remaining < 0 ? "BOSS — " + fight.CurrentBossPhase.ToString().ToUpperInvariant()
                     : remaining == 0 ? "ENEMY ATTACK  •  GUARD THIS BEAT"
                     : $"ENEMY ATTACK IN {remaining} BEAT{(remaining == 1 ? "" : "S")}";
                 warningText.color = remaining == 0 ? Gold : Color.white;

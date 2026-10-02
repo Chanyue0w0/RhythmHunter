@@ -104,6 +104,20 @@ namespace RhythmHunter.FightDemo
         private bool warningRaised;
         private bool effectRaised;
         private bool damageRaised;
+        private bool playbackPaused;
+        private double idlePausedBeats, pauseBeatPosition;
+        public bool PlaybackPaused => playbackPaused;
+
+        public void SetPlaybackPaused(bool paused)
+        {
+            if (playbackPaused == paused) return;
+            if (paused) pauseBeatPosition = CurrentIdleBeatPosition();
+            else idlePausedBeats += Math.Max(0d, CurrentIdleBeatPosition() - pauseBeatPosition);
+            playbackPaused = paused;
+        }
+
+        // Interruptions discard callbacks; they must never flush a suspended attack.
+        public void InterruptPlayback() => FinishActiveSequence(false);
 
         public FightCombatController BeatSource => beatSource;
         public SpriteRenderer TargetRenderer => targetRenderer;
@@ -183,10 +197,7 @@ namespace RhythmHunter.FightDemo
             if (targetRenderer == null || frames == null || frames.Count == 0)
                 return;
 
-            double now = Time.timeAsDouble;
-            double beatPosition = hasBeatAnchor
-                ? beatAnchorIndex + Math.Max(0d, now - beatAnchorTime) / Math.Max(0.001d, secondsPerBeat)
-                : now / Math.Max(0.001d, secondsPerBeat);
+            double beatPosition = CurrentIdleBeatPosition() - idlePausedBeats;
             double cyclePosition = beatPosition * Math.Max(0.01d, cyclesPerBeat) + phaseOffset;
             int sequenceLength = pingPong && frames.Count > 2 ? frames.Count * 2 - 2 : frames.Count;
             int sequenceFrame = PositiveModulo((int)Math.Floor(cyclePosition * sequenceLength), sequenceLength);
@@ -194,6 +205,14 @@ namespace RhythmHunter.FightDemo
                 ? sequenceLength - sequenceFrame
                 : sequenceFrame;
             ShowFrame(frameIndex);
+        }
+
+        private double CurrentIdleBeatPosition()
+        {
+            double now = Time.timeAsDouble;
+            return hasBeatAnchor
+                ? beatAnchorIndex + Math.Max(0d, now - beatAnchorTime) / Math.Max(0.001d, secondsPerBeat)
+                : now / Math.Max(0.001d, secondsPerBeat);
         }
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
@@ -255,6 +274,10 @@ namespace RhythmHunter.FightDemo
             if (!isActiveAndEnabled || sequence == null || sequence.Frames.Count == 0 || targetRenderer == null)
                 return false;
 
+            // Hits and other presentation requests cannot replace the held frame.
+            // Gameplay interruption is explicit via InterruptPlayback().
+            if (playbackPaused) return true;
+
             FinishActiveSequence(true);
             // A callback may have started another animation or disabled this component.
             if (!isActiveAndEnabled || activeSequence != null)
@@ -277,6 +300,12 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            AdvancePlayback(Time.deltaTime);
+        }
+
+        private void AdvancePlayback(float deltaTime)
+        {
+            if (playbackPaused) return;
             if (activeSequence == null)
             {
                 UpdateIdle();
@@ -284,7 +313,7 @@ namespace RhythmHunter.FightDemo
             }
 
             int version = playbackVersion;
-            frameElapsed += Time.deltaTime;
+            frameElapsed += deltaTime;
             float frameDuration = 1f / Mathf.Max(1f, activeSequence.FramesPerSecond);
             while (activeSequence != null && playbackVersion == version && frameElapsed >= frameDuration)
             {
@@ -304,6 +333,7 @@ namespace RhythmHunter.FightDemo
         {
             Unsubscribe();
             FinishActiveSequence(false);
+            playbackPaused = false;
         }
 
         private void EnterFrame(int frameIndex)
@@ -354,7 +384,7 @@ namespace RhythmHunter.FightDemo
             damageCallback = null;
             completedCallback = null;
             shownFrame = -1;
-            if (isActiveAndEnabled) UpdateIdle();
+            if (isActiveAndEnabled && !playbackPaused) UpdateIdle();
             if (raiseEffect) AttackEffectEventCount++;
             if (raiseDamage) DamageEventCount++;
             effect?.Invoke();

@@ -47,6 +47,7 @@ namespace RhythmHunter.FightDemo
                 teamSkillDurations[i] = teamSkillActors[i]?.UnitSlot?.CharacterDefinition?.TeamSkillPerformanceBeats ?? 1;
             teamSkillGauge = 0; teamSkillStep = 0;
             nextTeamSkillBeat = latestCombatBeat + 1;
+            BeginEnemyPause();
             TeamSkillStatus = "QUEUED — next beat";
             return true;
         }
@@ -59,6 +60,7 @@ namespace RhythmHunter.FightDemo
             if (teamSkillStep >= teamSkillActors.Length)
             {
                 nextTeamSkillBeat = long.MaxValue;
+                EndEnemyPause(true);
                 TeamSkillPerformingHero = null;
                 TeamSkillStatus = "CHAIN COMPLETE — build mana with Basic abilities";
                 GainTeamUltimateCharge();
@@ -83,6 +85,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            ResetEnemyPause();
             ResetBossState();
             ResetTeamUltimate();
             teamSkillGauge = 0; teamSkillStep = 0; lastGaugeBeat = long.MinValue;

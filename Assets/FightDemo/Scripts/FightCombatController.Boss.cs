@@ -40,7 +40,7 @@ namespace RhythmHunter.FightDemo
 
         private void AdvanceBossState(long beat)
         {
-            if (!UsesEqualBeats) return;
+            if (!UsesEqualBeats || EnemyActionsPaused) return;
             var target = FindFrontLivingEnemy();
             if (target != bossActor)
             {
@@ -87,15 +87,12 @@ namespace RhythmHunter.FightDemo
 
         private void CancelBossPendingAttack()
         {
-            if (bossActor == null || pendingEnemyAttacker != bossActor) return;
-            pendingEnemyAttack = false; pendingEnemyAnimationDriven = false;
-            pendingEnemyAttacker = null; pendingEnemyActionId = long.MinValue;
-            pendingBossDamage = 0;
+            InterruptEnemyAttack(bossActor);
         }
 
-        private void CancelDefeatedBossAttack(FightUnitSlot target)
+        private void CancelDefeatedEnemyAttack(FightUnitSlot target)
         {
-            if (target == bossActor && target.CurrentHp <= 0) CancelBossPendingAttack();
+            if (target != null && target.CurrentHp <= 0) InterruptEnemyAttack(target);
         }
 
         private bool IsBossAttackBeat(long beat)
@@ -127,7 +124,7 @@ namespace RhythmHunter.FightDemo
 
         private void ApplyBossBreak(int power, long beat)
         {
-            if (!BossActive || power <= 0 || beat < bossPhaseStart || beat >= bossPhaseEnd ||
+            if (!BossActive || power <= 0 || (!EnemyActionsPaused && (beat < bossPhaseStart || beat >= bossPhaseEnd)) ||
                 (CurrentBossPhase != BossPhase.Armor && CurrentBossPhase != BossPhase.Charge && CurrentBossPhase != BossPhase.Rage)) return;
             bossBreakProgress = Mathf.Min(BossBreakThreshold, bossBreakProgress + power);
             if (bossBreakProgress >= BossBreakThreshold) EnterBossPhase(BossPhase.Break, System.Math.Max(latestCombatBeat, beat));

@@ -191,7 +191,8 @@ namespace RhythmHunter.FightDemo
                 if (warningText != null)
                 {
                     int remaining = fight.GetEnemyBeatsUntilAttack(beat.GlobalBeat);
-                    warningText.text = remaining < 0 ? "BOSS — " + fight.CurrentBossPhase.ToString().ToUpperInvariant()
+                    warningText.text = fight.EnemyActionsPaused ? "ENEMIES PAUSED — TEAM SKILL"
+                        : remaining < 0 ? "BOSS — " + fight.CurrentBossPhase.ToString().ToUpperInvariant()
                         : remaining == 0 ? "ENEMY ATTACK  •  GUARD THIS BEAT"
                         : $"ENEMY ATTACK IN {remaining} BEAT{(remaining == 1 ? string.Empty : "S")}";
                     warningText.color = remaining == 0 ? Gold : Color.white;

@@ -128,6 +128,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnFightBeat(FmodBeatClock.BeatSnapshot beat)
         {
+            if (fight != null && fight.EnemyActionsPaused) return;
             FightUnitSlot attacker = fight != null && fight.UsesFrontHeroControls
                 ? fight.ActiveEnemySlot
                 : SlotAt(enemySlots, 1);

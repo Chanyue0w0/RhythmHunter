@@ -34,7 +34,7 @@ FightScene3 的敵方第三格已改用 `Assets/FightDemo/Prefabs/ArtBattle/Gobl
 
 更換 Boss：FightScene3 的 FightRosterManager → Enemy Prefabs 第三格。場上位置沿用 Enemy Spawn Slots 對應物件的 Transform。
 
-暫停會凍結 Boss 與音樂。重生編隊、校準、切換模式會重設流程；死亡 Boss 不再行動。Break 事件已提供給後續 Fever 接入，本次尚未加入半拍 Fever。
+全域暫停會凍結 Boss 與音樂。Team Skill 則只凍結敵人動畫、攻擊與 Boss 倒數，音樂與我方演出繼續；若技能中途造成 Break，取消原攻擊，Break 拍數在 Team Skill 結束後才開始流逝。重生編隊、校準、切換模式會重設流程；死亡 Boss 不再行動。Break 事件已提供給後續 Fever 接入，本次尚未加入半拍 Fever。
 
 ## 驗證
 

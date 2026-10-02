@@ -10,6 +10,10 @@
 - 連鎖期間仍可操作 Basic，但不增加魔力；到最後一名角色的完整表演時段結束後才能重新蓄力。
 - 空角色位置會跳過；編隊變更、進入校準或停用戰鬥控制器會取消連鎖並清空量表。
 - Start／Esc／F8 暫停音樂時連鎖一併暫停，繼續後接著施放。
+- Team Skill 成功啟動（包括等待下一拍）起，敵人動畫保持原畫格與小數進度，攻擊結算、一般攻擊排程、Boss 狀態倒數也暫停。音樂、我方演出與我方護甲恢復照常進行。
+- 最後一名角色表演完整結束後，未被打斷的攻擊動畫從原進度繼續。待結算攻擊移至恢復當拍，保留完整踩拍防禦窗口，不立即補算過期傷害，也不補發停住期間的攻擊。
+- 普通受擊不會替換凍結畫格。打斷技能／Break／擊倒敵人會取消該次攻擊與動畫回呼；恢復後不會重播。Team Skill 中造成的 Break，其完整拍數從恢復後開始計算。
+- 新技能可呼叫 `FightCombatController.InterruptEnemyAttack(enemySlot)` 中斷指定敵人；中斷不會解除 Team Skill 的整體凍結。
 - 完整完成一次連鎖增加 1 格 Ultimate 充能，預設 3 格可按 **RB＋A**（鍵盤 Shift＋R）發動全隊大招。大招不消耗 Team Skill 魔力，詳見 `FightScene3TeamUltimate.md`。
 
 ## 調整參數
@@ -37,10 +41,11 @@
 | 吟遊詩人 | Healing Chorus | 全隊共用 HP 恢復 1，不補護甲 |
 | 法師 | Arcane Burst | 對所有存活敵人造成 1 傷害 |
 
-目前技能效果在各角色表演開始的拍點結算，動作素材沿用現有圖組；固定表演時段供後續正式演出接入，沒有新增動作素材。Buff／Debuff、Boss 狀態與 Fever 尚未實作。
+目前技能效果在各角色表演開始的拍點結算，動作素材沿用現有圖組；固定表演時段供後續正式演出接入，沒有新增動作素材。Boss 狀態已實作，詳見 `FightScene3Boss.md`；Buff／Debuff 與 Fever 尚未實作。
 
 ## 驗證
 
 - `Temp/FightTeamSkillValidation.request` 寫入 `run`：量表、重複輸入、順序、空槽與取消規則。
 - `Temp/FightTeamSkillLiveValidation.request` 寫入 `run`：虛擬手把 A／RB＋A 路由、實際 FMOD 連鎖、暫停／繼續與畫面擷取。
 - 既有 `FightScene3BeatValidation` 用於 HP、護甲、Guard、陣形、校準與節拍 UI 回歸。
+- `FightEnemyPauseValidation` 驗證畫格／小數進度、傷害／倒數暫停、正常恢復、中斷、Break 與清理；`FightEnemyPauseLiveValidation` 使用實際 FMOD 驗證中途停住攻擊、全域暫停重疊與技能打斷。

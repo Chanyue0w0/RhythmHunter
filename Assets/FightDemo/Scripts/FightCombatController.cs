@@ -283,13 +283,13 @@ namespace RhythmHunter.FightDemo
         public int GetEnemyBeatsUntilAttack(long globalBeat)
         {
             if (BossActive) return BossBeatsUntilAttack(globalBeat);
-            return GetBeatsUntilScheduledAttack(globalBeat, EnemyAttackIntervalBeats);
+            return GetBeatsUntilScheduledAttack(globalBeat - enemyPausedBeats, EnemyAttackIntervalBeats);
         }
 
         public bool IsEnemyAttackBeat(long globalBeat)
         {
             if (BossActive) return IsBossAttackBeat(globalBeat);
-            return IsScheduledAttackBeat(globalBeat, EnemyAttackIntervalBeats);
+            return IsScheduledAttackBeat(globalBeat - enemyPausedBeats, EnemyAttackIntervalBeats);
         }
 
         public bool IsScheduledAttackBeat(long globalBeat, int attackInterval)
@@ -631,6 +631,7 @@ namespace RhythmHunter.FightDemo
 
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive) return;
+            AdvanceEnemyPause(beat.GlobalBeat);
             AdvanceBossState(beat.GlobalBeat);
             AdvanceTeamSkill(beat.GlobalBeat);
             AdvanceTeamUltimate(beat.GlobalBeat);
@@ -642,10 +643,12 @@ namespace RhythmHunter.FightDemo
             if (battleEnded)
                 return;
 
+            if (EnemyActionsPaused) return;
+
             if (UsesFrontHeroControls)
             {
                 activeEnemySlot = FindFrontLivingEnemy();
-                if (activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
+                if (!pendingEnemyAttack && lastEnemyQueuedBeat != beat.GlobalBeat && activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
                     (!BossActive || lastBossAttackBeat != beat.GlobalBeat))
                 {
                     QueueEnemyAttack(beat);
@@ -661,6 +664,7 @@ namespace RhythmHunter.FightDemo
 
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
         {
+            lastEnemyQueuedBeat = beat.GlobalBeat;
             pendingBossDamage = BossAttackDamage(beat.GlobalBeat);
             if (BossActive) lastBossAttackBeat = beat.GlobalBeat;
             pendingEnemyActionId = ++nextActionId;
@@ -703,6 +707,7 @@ namespace RhythmHunter.FightDemo
 
         private void TryResolvePendingAttack()
         {
+            if (EnemyActionsPaused) return;
             if (!pendingEnemyAttack || pendingEnemyAnimationDriven || beatClock == null || rhythmJudge == null ||
                 !beatClock.TryGetTimelinePositionMs(out int timelineMs))
             {
@@ -721,7 +726,7 @@ namespace RhythmHunter.FightDemo
             long expectedActionId,
             FightUnitSlot expectedAttacker)
         {
-            if (IsPaused) return;
+            if (IsPaused || EnemyActionsPaused) return;
             if (!IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, expectedAttacker))
                 return;
 
@@ -1182,7 +1187,7 @@ namespace RhythmHunter.FightDemo
                 if (target == null || !target.HasCharacter || target.CurrentHp <= 0f)
                     continue;
                 target.TakeDamage(ModifyBossDamage(target, damage));
-                CancelDefeatedBossAttack(target);
+                CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
                     null,
@@ -1204,7 +1209,7 @@ namespace RhythmHunter.FightDemo
             if (HealthSystemEnabled && target != null && target.HasCharacter)
             {
                 target.TakeDamage(ModifyBossDamage(target, damage));
-                CancelDefeatedBossAttack(target);
+                CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
                     null,
