@@ -10,7 +10,7 @@ namespace RhythmHunter.FightDemo
         private FightCombatController fight;
         private Font font;
         private RectTransform root;
-        private Text hpText, armorText, recoveryText;
+        private Text hpText, armorText, recoveryText, basicText;
         private HeartRow hpHearts, armorHearts;
         private Text[] values, enemyLabels;
         private Image[] enemyFills;
@@ -31,6 +31,12 @@ namespace RhythmHunter.FightDemo
             root.anchorMin = Vector2.zero;
             root.anchorMax = Vector2.one;
             root.sizeDelta = Vector2.zero;
+            basicText = Label(root, "", Vector2.zero, new Vector2(1000, 36), 20);
+            basicText.rectTransform.anchorMin = basicText.rectTransform.anchorMax = new Vector2(.5f, 0);
+            basicText.rectTransform.pivot = new Vector2(.5f, 0);
+            basicText.rectTransform.anchoredPosition = new Vector2(0, 178);
+            basicText.alignment = TextAnchor.MiddleCenter;
+            basicText.color = blue;
 
             RectTransform party = Panel("TeamDefense", root, new Vector2(-24, -24), new Vector2(560, 204), true);
             Label(party, "TEAM DEFENSE", new Vector2(16, -10), new Vector2(528, 28), 20);
@@ -89,6 +95,8 @@ namespace RhythmHunter.FightDemo
                 : fight.PartyArmor >= fight.MaxPartyArmor ? "Armor full"
                 : !fight.NaturalArmorRecoveryEnabled ? "No passive armor recovery"
                 : $"Armor recovery in {fight.ArmorRecoveryBeatsRemaining} beat(s)";
+            basicText.text = BasicStatus();
+            basicText.gameObject.SetActive(!fight.AwaitingBattleStart && !fight.BattleEnded);
             var enemies = fight.RosterManager != null ? fight.RosterManager.ActiveEnemies : null;
             for (int i = 0; i < 3; i++)
             {
@@ -104,6 +112,23 @@ namespace RhythmHunter.FightDemo
                 if (developerPanel.activeSelf)
                     values[i + 3].text = StatLine($"ENEMY {i + 1}", enemy);
             }
+        }
+
+        private string BasicStatus()
+        {
+            string status = fight.GuardingCurrentBeat ? "GUARD ACTIVE — ALL HITS THIS BEAT" : "";
+            for (int i = 0; i < 3; i++)
+            {
+                var actor = fight.GetHeroForCommand((FightInputRouter.HeroCommand)i).UnitSlot;
+                var data = actor != null ? actor.CharacterDefinition : null;
+                if (data == null || data.BasicAbilityType != FightCharacterDefinition.AbilityBehavior.AimedShot) continue;
+                int progress = fight.GetAimedShotProgress(actor);
+                string phase = progress == 0 ? "READY" : progress == 1 ? "PREPARING" : "AIMING";
+                if (fight.TeamSkillRunning && progress > 0) phase = "PAUSED";
+                status += (status.Length > 0 ? "  |  " : "") +
+                    $"AIM {new[] { "X / Q", "Y / W", "B / E" }[i]}  {progress}/{data.ConsecutiveInputBeats}  {phase}";
+            }
+            return status;
         }
 
         private static string StatLine(string position, FightUnitSlot slot)

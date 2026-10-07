@@ -12,7 +12,7 @@
 - 既有 Team Ultimate 原樣保留，未來是否改為多次 Team Skill 後的強化版本另議。
 - 不實作三種哥布林與哥布林王正式能力。
 
-## 1. 角色資料、共用資源、戰前編隊（本輪）
+## 1. 角色資料、共用資源、戰前編隊（已確認、已 push）
 
 - 沿用現有角色 Prefab 結構，建立 LongswordWarrior、EnergyMage、SkeletonGunner 資料 Prefab。
 - 先保留共用劍士外觀；正式法師與骷髏燧發槍素材在後續掛點驗收接入，不宣稱本輪美術完成。
@@ -32,6 +32,7 @@
 - 已檢視 `Temp/FightPartyPreparation-preview.png`：面板無重疊或截字。這是 UI 渲染預覽，不代表正式角色美術或實際 FMOD 操作驗證。
 - 完整結果在 `Temp/FightPartyPreparationValidation.result`。
 - 使用者已確認第 1 關，授權 push 並進入第 2 關；不將此確認當作已完成實際 FMOD／手把自動驗證。
+- 已 push 至 `origin/FightPartyControl`，提交 `a044a3d`。下列第 1 關能力開放狀態為當時紀錄，目前狀態以第 2 關為準。
 
 ### 使用者操作驗收
 
@@ -63,11 +64,51 @@
 
 舊 `FightScene3BeatValidation` 等套件包含 5 HP、自然回甲、舊職業補血與零血量继续等歷史假設，不能拿它們的既有 PASS 當作本次新規格已通過。完整套件的遷移與重跑列在第 5 關。
 
-## 2. 普通能力與輸入
+## 2. 普通能力與輸入（本輪，待確認後才 push）
 
 - 戰士即時斬擊；法師一拍多次格擋及早晚判定窗口。
 - 射手連續三拍準備、漏拍／錯拍／同拍重複、進度提示。
 - 各成功普通能力输入 +1 MP；射手準備失敗不退款。
+
+### 已實作
+
+- 戰士成功判定當下對目前存活首位造成基礎 1 HP，仍由節拍判定掌握傷害時機。
+- 法師的 Guard 在該判定拍內不會被首次命中消耗；同拍多次符合規則的命中都被擋住，下一拍不沿用。動畫／VFX 顯示於實際前衛。
+- 射手三次連續成功輸入依序準備、瞄準、射擊；第三次重新尋找存活首位，基礎傷害 1，射擊後歸零。中斷與被動增傷仍留在第 3 關。
+- 同拍重複輸入不推進、不加 MP，也不清掉本拍已取得的準備；射手錯拍會清零。下一拍被其他角色成功使用時，因既有共用判定規則，射手進度清零。
+- 無輸入的漏拍依 FMOD 時間軸、BPM、個人校準與晚側窗口關閉判斷，不在 OnBeat 當下提前清零。使用既有判定安全邊界，不新增音樂時鐘。
+- 每次準備／瞄準／射擊成功各 +1 MP；失敗不退還已取得的 MP；法師沒擋到攻擊仍 +1；重複命中不額外產 MP；封頂 60。
+- 基本進度 HUD 顯示位置按鍵與 `1/3 PREPARING`、`2/3 AIMING`，格擋有效拍顯示 `GUARD ACTIVE`。
+- Team Skill 暫停時不清準備；恢復後第一個普通拍可接續。已驗證暫停入口的模擬呼叫，完整 Team Skill 演出仍待第 3／4 關驗收。
+- 無存活目標、戰鬥結束旗標、停用、校準與重建陣容會清準備；已提供 `ResetBasicAbilityProgress()` 給後續 Wave 清理使用，尚未宣稱換波流程完成。
+
+### 第 2 關驗證
+
+- Unity 編譯成功；獨立 Preview Scene 使用**正式 FmodRhythmJudge** 的確定性驗證通過 **91 項檢查**。
+- 包含早／晚邊界、同拍三次格擋、相鄰格擋、射手兩輪射擊、同拍連按、錯拍、漏拍、換角色、死亡後換目標、沒有目標、MP 封頂與失敗不退款。
+- 測試涵蓋 60／120／150 BPM，以及 -90／0／+90 ms 判定偏移；沒有使用替代音樂時鐘。
+- UI 預覽：`Temp/FightPartyBasic-preview.png`；結果：`Temp/FightPartyBasicValidation.result`。
+- 不包含實體手把／實際 FMOD 音訊延遲操作、敵人正式技能、中斷增傷、新 Team Skill、Wave 與正式射手美術。
+
+### 使用者操作驗收
+
+1. FightScene3 進 Play Mode，先採預設戰士／法師／射手順序並點 `START BATTLE`。
+2. 拍點按 Q／X：首位立即受傷，MP +1。
+3. 拍點按 W／Y：MP +1；該拍敵方命中被格擋。單一敵人目前未提供正式連斬；同拍多次命中已由獨立驗證排程確認。
+4. 連續三拍各按一次 E／B：依序顯示 1/3、2/3、射擊並歸零，MP 共 +3。
+5. 試同拍連按、第二拍不按、第二拍錯拍、或改按另一角色；確認不會提前射擊、進度依規則清理，已取得 MP 保留。
+6. 可停止 Play Mode 後交換編隊再開戰，確認射手提示與能力跟著新的 X／Y／B 位置走。
+
+自動驗證入口：`Rhythm Hunter > Validate Party Checkpoint 2 - Basic Abilities`，或 `Temp/FightPartyBasicValidation.request` 寫入 `run`。
+
+### 第 2 關資料／掛點／檔案
+
+- `FightCharacterDefinition` 新增 `Consecutive Input Beats`（射手 3）與 `Basic Guard Beats`（法師 1）；普通傷害維持使用 `Normal Ability Power`。
+- `SkeletonGunner.prefab` 已將 Basic 設為 `AimedShot`，`EnergyMage.prefab` 明確設定格擋一拍。
+- `FightCombatController.BasicAbilities.cs` 管理準備、錯拍、到期及清理；既有 controller 傷害入口、EnemyPause、TeamSkill 重設接入此狀態。
+- `FightUnitSlot.PlayGuardAt` 支援將效果指向實際前衛，能力 Prefab 仍由施法角色決定。
+- `FightDefenseHud` 顯示準備進度與格擋；`FightPartyBasicValidation` 提供本關驗證。
+- 仍沿用暫代劍士外觀與既有施法／命中特效掛點；正式準備、瞄準、燧發槍射擊動畫和槍口掛點未在本輪製作。
 
 ## 3. 脆弱、中斷、Team Skill 與被動
 

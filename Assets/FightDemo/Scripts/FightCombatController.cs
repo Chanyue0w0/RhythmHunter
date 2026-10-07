@@ -349,6 +349,7 @@ namespace RhythmHunter.FightDemo
         {
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart) return;
 
+            UpdateBasicAbilityProgress();
             TryResolvePendingAttack();
             AdvanceArmorRecovery(latestCombatBeat);
         }
@@ -437,6 +438,7 @@ namespace RhythmHunter.FightDemo
             FmodRhythmJudge.Result judgement)
         {
             bool perfect = judgement.Judgement == FmodRhythmJudge.Grade.Perfect;
+            TrackAimedShotJudgement(hero.UnitSlot, judgement);
             hero.UnitSlot.PlayInputFeedback(perfect);
             if (!perfect)
             {
@@ -529,6 +531,9 @@ namespace RhythmHunter.FightDemo
 
             // Accepted early inputs use their judged beat's state as well.
             AdvanceBossState(globalBeat);
+            // Preparation inputs are not attacks and must not build Boss Break.
+            if (!skill && behavior == FightCharacterDefinition.AbilityBehavior.AimedShot)
+                return PerformAimedShot(actor, power, globalBeat);
             if (actor.CharacterDefinition != null)
                 ApplyBossBreak(skill ? actor.CharacterDefinition.SkillBreakPower : actor.CharacterDefinition.BasicBreakPower, globalBeat);
 
@@ -537,11 +542,11 @@ namespace RhythmHunter.FightDemo
                 case FightCharacterDefinition.AbilityBehavior.Unavailable:
                     return $"{abilityName} is not available in this checkpoint";
                 case FightCharacterDefinition.AbilityBehavior.Guard:
-                    ArmGuard(globalBeat);
+                    ArmGuard(globalBeat, skill ? 1 : actor.CharacterDefinition?.BasicGuardBeats ?? 1);
                     PlayAnimatedHeroUtility(
                         actor,
                         FightCharacterCombatAnimator.CombatAnimation.Guard,
-                        () => actor.PlayGuardAt(skill),
+                        () => actor.PlayGuardAt(skill, UsesEqualBeats ? tankSlot : null),
                         null);
                     return UsesEqualBeats ? $"{abilityName} blocks enemy damage on this beat only"
                         : $"{abilityName} blocks all damage from the next enemy attack";
@@ -562,8 +567,8 @@ namespace RhythmHunter.FightDemo
                     return $"{abilityName} deals {power:0.#} damage to every enemy";
 
                 case FightCharacterDefinition.AbilityBehavior.GuardAndDamageFront:
-                    ArmGuard(globalBeat);
-                    actor.PlayGuardAt(skill);
+                    ArmGuard(globalBeat, skill ? 1 : actor.CharacterDefinition?.BasicGuardBeats ?? 1);
+                    actor.PlayGuardAt(skill, UsesEqualBeats ? tankSlot : null);
                     FightUnitSlot guardedTarget = FindFrontLivingEnemy();
                     if (guardedTarget != null)
                         PlayAnimatedHeroAction(actor, guardedTarget, action, power);
@@ -581,13 +586,14 @@ namespace RhythmHunter.FightDemo
             }
         }
 
-        private void ArmGuard(long inputGlobalBeat)
+        private void ArmGuard(long inputGlobalBeat, int durationBeats = 1)
         {
             if (UsesEqualBeats)
             {
                 // Preserve adjacent accepted beats independently, even when a late attack
                 // resolution overlaps an early input for the following beat.
-                guardedBeats.Add(inputGlobalBeat);
+                for (int offset = 0; offset < Mathf.Max(1, durationBeats); offset++)
+                    guardedBeats.Add(inputGlobalBeat + offset);
                 return;
             }
             guardedGlobalBeat = pendingEnemyAttack
@@ -768,7 +774,7 @@ namespace RhythmHunter.FightDemo
                 return;
             }
 
-            bool blocked = UsesEqualBeats ? guardedBeats.Remove(pendingAttackGlobalBeat)
+            bool blocked = UsesEqualBeats ? guardedBeats.Contains(pendingAttackGlobalBeat)
                 : guardedGlobalBeat == pendingAttackGlobalBeat;
             FightUnitSlot attacker = pendingEnemyAttacker != null ? pendingEnemyAttacker : activeEnemySlot;
             float configuredDamage = UsesFrontHeroControls && attacker != null

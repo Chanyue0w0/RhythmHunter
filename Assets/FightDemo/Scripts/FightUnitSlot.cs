@@ -396,21 +396,22 @@ namespace RhythmHunter.FightDemo
             PlayGuardAt(false);
         }
 
-        public void PlayGuardAt(bool skill)
+        public void PlayGuardAt(bool skill, FightUnitSlot protectedUnit = null)
         {
             guardPlayCount++;
+            FightUnitSlot receiver = protectedUnit != null ? protectedUnit : this;
             Color guardColor = new(0.2f, 1f, 0.58f, 0.72f);
             if (SpawnConfiguredAbilityEffects(
                     skill,
                     skill ? FightAttackEffect.VisualStyle.Skill : FightAttackEffect.VisualStyle.Light,
                     guardColor,
-                    new[] { CastEffectAnchor }))
+                    new[] { receiver.CastEffectAnchor }))
             {
                 return;
             }
 
-            SpawnGuardLayer(guardColor, 0.75f, 0.7f, 1.8f, 220f, 0f);
-            SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
+            receiver.SpawnGuardLayer(guardColor, 0.75f, 0.7f, 1.8f, 220f, 0f);
+            receiver.SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
         }
 
         public void PlayInputFeedback(bool onBeat)

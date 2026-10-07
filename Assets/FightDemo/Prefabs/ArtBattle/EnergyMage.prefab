@@ -90,6 +90,7 @@ MonoBehaviour:
   armorRecoveryAmount: 0.5
   basicAbilityName: Protective Barrier
   normalAbilityBehavior: 1
+  basicGuardBeats: 1
   normalAbilityPower: 0
   attackPower: 1
   teamSkillManaCost: 20

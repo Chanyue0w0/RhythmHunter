@@ -92,6 +92,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            ResetBasicAbilityProgress();
             ResetEnemyPause();
             ResetBossState();
             ResetTeamUltimate();

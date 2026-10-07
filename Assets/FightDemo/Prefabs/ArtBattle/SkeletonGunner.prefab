@@ -119,8 +119,9 @@ MonoBehaviour:
   armorRecoveryDelay: 4
   armorRecoveryInterval: 2
   armorRecoveryAmount: 0.5
-  basicAbilityName: Aimed Shot (pending)
-  normalAbilityBehavior: 5
+  basicAbilityName: Aimed Shot
+  normalAbilityBehavior: 6
+  consecutiveInputBeats: 3
   normalAbilityPower: 1
   attackPower: 1
   teamSkillManaCost: 20

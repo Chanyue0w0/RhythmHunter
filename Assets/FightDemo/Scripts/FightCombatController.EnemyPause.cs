@@ -49,6 +49,8 @@ namespace RhythmHunter.FightDemo
         {
             if (!EnemyActionsPaused) return;
             EnemyActionsPaused = false;
+            if (resumeAttack && aimedShotProgress > 0)
+                lastAimedShotBeat = latestCombatBeat - 1;
             foreach (var animator in frozenEnemyAnimators)
                 if (animator != null) animator.SetPlaybackPaused(false);
             frozenEnemyAnimators.Clear();

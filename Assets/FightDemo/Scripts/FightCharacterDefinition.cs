@@ -17,7 +17,8 @@ namespace RhythmHunter.FightDemo
             HealParty,
             DamageAll,
             GuardAndDamageFront,
-            Unavailable
+            Unavailable,
+            AimedShot
         }
 
         [Header("Identity")]
@@ -40,6 +41,10 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Character-owned Basic behavior on every beat, independent of party position. In EqualBeat mode Guard protects only the successfully judged beat, never a later attack.")]
         [SerializeField] private AbilityBehavior normalAbilityBehavior;
         [SerializeField, Min(0)] private float normalAbilityPower = 1f;
+        [Tooltip("Consecutive judged beats needed for Aimed Shot. Repeated inputs on one beat never advance it.")]
+        [SerializeField, Min(1)] private int consecutiveInputBeats = 3;
+        [Tooltip("Guard covers these judged beats, including every eligible hit on each beat.")]
+        [SerializeField, Min(1)] private int basicGuardBeats = 1;
         [SerializeField, Min(0.5f)] private float attackPower = 1f;
         [Header("Team Skill / Legacy Fourth-Beat Skill")]
         [SerializeField, Min(1)] private int teamSkillManaCost = 10;
@@ -81,6 +86,8 @@ namespace RhythmHunter.FightDemo
         public string BasicAbilityName => string.IsNullOrWhiteSpace(basicAbilityName) ? "Basic Ability" : basicAbilityName;
         public AbilityBehavior BasicAbilityType => normalAbilityBehavior;
         public float BasicAbilityPower => normalAbilityPower;
+        public int ConsecutiveInputBeats => Mathf.Max(1, consecutiveInputBeats);
+        public int BasicGuardBeats => Mathf.Max(1, basicGuardBeats);
         public AbilityBehavior NormalAbilityType => normalAbilityBehavior;
         public float NormalAbilityPower => normalAbilityPower;
         public float AttackPower => attackPower;
