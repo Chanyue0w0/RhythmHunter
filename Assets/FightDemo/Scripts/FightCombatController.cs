@@ -213,6 +213,18 @@ namespace RhythmHunter.FightDemo
         public int ArmorRecoveryBeatsRemaining => nextArmorRecoveryBeat == long.MaxValue ? 0
             : (int)Math.Max(0, nextArmorRecoveryBeat - latestCombatBeat);
         public bool BattleEnded => battleEnded;
+        public bool UsesBattlePreparation => UsesEqualBeats && rosterManager != null && rosterManager.RequiresBattlePreparation;
+        public bool AwaitingBattleStart => UsesBattlePreparation && !rosterManager.BattleStarted;
+        public bool NaturalArmorRecoveryEnabled => !UsesBattlePreparation;
+
+        public bool TryBeginBattle()
+        {
+            if (!AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
+            ResetBattleStateForRoster();
+            rhythmJudge?.ResetDuplicateTracking();
+            PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
+            return true;
+        }
         public bool HasPendingEnemyAttack => pendingEnemyAttack;
         public int BlockedAttackCount => blockedAttackCount;
         public int ReceivedAttackCount => receivedAttackCount;
@@ -288,6 +300,7 @@ namespace RhythmHunter.FightDemo
 
         public bool IsEnemyAttackBeat(long globalBeat)
         {
+            if (AwaitingBattleStart) return false;
             if (BossActive) return IsBossAttackBeat(globalBeat);
             return IsScheduledAttackBeat(globalBeat - enemyPausedBeats, EnemyAttackIntervalBeats);
         }
@@ -334,7 +347,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
-            if (TimingCalibrationActive || IsPaused) return;
+            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart) return;
 
             TryResolvePendingAttack();
             AdvanceArmorRecovery(latestCombatBeat);
@@ -378,7 +391,7 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (battleEnded || TimingCalibrationActive || IsPaused ||
+            if (battleEnded || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
@@ -394,6 +407,9 @@ namespace RhythmHunter.FightDemo
             }
             if (UsesFrontHeroControls)
             {
+                // A remains routed separately so future on-beat encouragement can be
+                // introduced without consuming the shared Basic judgement slot.
+                if (TeamSkillRunning) return;
                 SubmitFrontHeroCommand(command);
                 return;
             }
@@ -466,6 +482,12 @@ namespace RhythmHunter.FightDemo
             FightCharacterDefinition.AbilityBehavior behavior = skill
                 ? actor.SkillBehavior
                 : actor.NormalAbilityBehavior;
+            if (behavior == FightCharacterDefinition.AbilityBehavior.Unavailable)
+            {
+                HeroCalled?.Invoke(new HeroCallResult(command, judgement, false, false,
+                    $"{hero.HeroLabel}: ability not available in this checkpoint."));
+                return;
+            }
             float power = skill ? actor.SkillPower : actor.AttackPower;
             if (!skill)
                 power = actor.NormalAbilityPower;
@@ -512,6 +534,8 @@ namespace RhythmHunter.FightDemo
 
             switch (behavior)
             {
+                case FightCharacterDefinition.AbilityBehavior.Unavailable:
+                    return $"{abilityName} is not available in this checkpoint";
                 case FightCharacterDefinition.AbilityBehavior.Guard:
                     ArmGuard(globalBeat);
                     PlayAnimatedHeroUtility(
@@ -631,6 +655,11 @@ namespace RhythmHunter.FightDemo
 
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive) return;
+            if (AwaitingBattleStart)
+            {
+                FightBeat?.Invoke(beat);
+                return;
+            }
             AdvanceEnemyPause(beat.GlobalBeat);
             AdvanceBossState(beat.GlobalBeat);
             AdvanceTeamSkill(beat.GlobalBeat);
@@ -892,7 +921,7 @@ namespace RhythmHunter.FightDemo
                   + (thirdHero.UnitSlot != null ? thirdHero.UnitSlot.MaxHp : 0f)
                 : tankSlot != null ? tankSlot.MaxHp : Mathf.Max(0.5f, maxPartyHp);
             maxPartyArmor = UsesEqualBeats && tankSlot != null && tankSlot.CharacterDefinition != null
-                ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) : 0f;
+                ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) + tankSlot.CharacterDefinition.FrontlineDefenseBonus : 0f;
             partyArmor = maxPartyArmor;
             latestCombatBeat = beatClock != null && beatClock.HasTimingAnchor ? beatClock.LatestBeat.GlobalBeat : -1;
             nextArmorRecoveryBeat = long.MaxValue;
@@ -908,7 +937,7 @@ namespace RhythmHunter.FightDemo
 
         public float ApplyPartyDamage(float amount, long globalBeat)
         {
-            if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || amount <= 0f)
+            if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || AwaitingBattleStart || amount <= 0f)
                 return 0f;
             float damage = Mathf.Max(0f, Mathf.Round(amount * 2f) * 0.5f);
             if (damage <= 0f)
@@ -919,7 +948,7 @@ namespace RhythmHunter.FightDemo
             float hpDamage = Mathf.Min(partyHp, damage - armorDamage);
             partyHp -= hpDamage;
             var definition = tankSlot != null ? tankSlot.CharacterDefinition : null;
-            nextArmorRecoveryBeat = definition != null && partyArmor < maxPartyArmor
+            nextArmorRecoveryBeat = NaturalArmorRecoveryEnabled && definition != null && partyArmor < maxPartyArmor
                 ? globalBeat + definition.ArmorRecoveryDelay : long.MaxValue;
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             // This prototype remains playable at zero HP, including Basic input and healing.
@@ -928,7 +957,7 @@ namespace RhythmHunter.FightDemo
 
         public void AdvanceArmorRecovery(long globalBeat)
         {
-            if (TimingCalibrationActive || IsPaused) return;
+            if (TimingCalibrationActive || IsPaused || !NaturalArmorRecoveryEnabled) return;
             latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
             if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || pendingEnemyAttack ||
                 nextArmorRecoveryBeat == long.MaxValue || globalBeat < nextArmorRecoveryBeat)

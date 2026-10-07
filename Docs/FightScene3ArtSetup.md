@@ -1,5 +1,7 @@
 # FightScene3 正式美術與 Prefab 設定
 
+> FightPartyControl 的 FightScene3 已接入 LongswordWarrior／EnergyMage／SkeletonGunner 新資料 Prefab；目前沿用暫代劍士外觀。下文 Swordsman 三職業配置為舊版記錄，最新接線、數值與待補素材請看 [三人隊伍驗收關卡](FightPartyImplementationCheckpoints.md)。
+
 ## 場景與戰鬥資料
 
 開啟 `Assets/FightDemo/Scenes/FightScene3.unity`。保留 EqualBeat 戰鬥、原輸入、敵人血量、開發者數值介面、暫停與個人校準讀取。音樂仍由原本唯一的 FMOD Beat Clock 播放 `event:/Ritual Slam _120_3`；環境與角色接收其戰鬥拍點事件，不另設 BPM。

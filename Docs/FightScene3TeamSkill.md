@@ -1,5 +1,7 @@
 # FightScene3 Team Skill
 
+> FightPartyControl 正在分關卡改造三人隊伍。FightScene3 已換成戰士／法師／射手資料，需求 60 MP，Team Skill 期間封鎖 Basic；新技能目前待後續關卡開放。下列舊職業、30 MP 與演出期間可操作 Basic 的敘述是歷史版本，最新範圍與驗收請看 [三人隊伍驗收關卡](FightPartyImplementationCheckpoints.md)。
+
 ## 操作
 
 - 成功踩拍使用 X／Y／B Basic（鍵盤 Q／W／E）增加全隊共用量表。

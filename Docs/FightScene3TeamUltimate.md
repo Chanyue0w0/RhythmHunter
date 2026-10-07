@@ -1,5 +1,7 @@
 # FightScene3 Team Ultimate
 
+> FightPartyControl 本次暫不重設計 Team Ultimate。FightScene3 的新隊伍需求已改為 60 MP；新 Team Skill 尚在分關卡製作，下文 30 MP 是舊版配置。進度請看 [三人隊伍驗收關卡](FightPartyImplementationCheckpoints.md)。
+
 ## 使用方式
 
 1. 成功 Basic 累積共用魔力；全隊需求仍為角色加總，三名正式英雄共 30 點。

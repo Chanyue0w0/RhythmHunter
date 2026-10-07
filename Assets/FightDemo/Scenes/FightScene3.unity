@@ -9602,14 +9602,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightRosterManager
   fightController: {fileID: 2021200326}
   beatClock: {fileID: 2021200329}
+  requireBattlePreparation: 1
   heroSpawnSlots:
   - {fileID: 2037638511}
   - {fileID: 287245178}
   - {fileID: 828184398}
   heroPrefabs:
-  - {fileID: 4232183820247662683, guid: f28badd7dbd217245bb39aae3ca0c745, type: 3}
-  - {fileID: 4415416321156734532, guid: f532149af4baaa348ae1bad00f844542, type: 3}
-  - {fileID: 5101759564044618693, guid: d614d303502021f47a7481c319f4e97f, type: 3}
+  - {fileID: 4232183820247662683, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
+  - {fileID: 5101759564044618693, guid: 9ae3e407b8344b419802f6c808162073, type: 3}
+  - {fileID: 4415416321156734532, guid: 97306e18a76d49b89f730b8346026685, type: 3}
   enemySpawnSlots:
   - {fileID: 581508853}
   - {fileID: 616141045}

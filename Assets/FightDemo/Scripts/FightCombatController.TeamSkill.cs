@@ -20,7 +20,7 @@ namespace RhythmHunter.FightDemo
         private static int ManaCost(HeroBeatSettings hero) => hero?.UnitSlot != null && hero.UnitSlot.HasCharacter
             ? hero.UnitSlot.CharacterDefinition?.TeamSkillManaCost ?? 0 : 0;
         public bool TeamSkillRunning => nextTeamSkillBeat != long.MaxValue;
-        public bool TeamSkillReady => UsesEqualBeats && !TeamSkillRunning && !TeamUltimateRunning && TeamSkillGaugeMax > 0 && teamSkillGauge >= TeamSkillGaugeMax;
+        public bool TeamSkillReady => UsesEqualBeats && !AwaitingBattleStart && !TeamSkillRunning && !TeamUltimateRunning && TeamSkillGaugeMax > 0 && teamSkillGauge >= TeamSkillGaugeMax;
         public string TeamSkillStatus { get; private set; } = "Build charge with Basic abilities";
         public event System.Action<FightUnitSlot> TeamSkillStepResolved;
 
@@ -39,6 +39,13 @@ namespace RhythmHunter.FightDemo
         public bool TryStartTeamSkill()
         {
             if (!TeamSkillReady || IsPaused || TimingCalibrationActive || battleEnded || latestCombatBeat < 0) return false;
+            if (frontHero.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable ||
+                secondHero.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable ||
+                thirdHero.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable)
+            {
+                TeamSkillStatus = "Team Skills pending checkpoint 3";
+                return false;
+            }
             teamSkillActors[0] = frontHero; teamSkillActors[1] = secondHero; teamSkillActors[2] = thirdHero;
             bool any = false;
             foreach (var hero in teamSkillActors) any |= hero?.UnitSlot != null && hero.UnitSlot.HasCharacter;

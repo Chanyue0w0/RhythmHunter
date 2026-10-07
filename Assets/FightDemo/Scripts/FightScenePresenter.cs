@@ -122,6 +122,8 @@ namespace RhythmHunter.FightDemo
                 if (healthText != null && healthText.canvas != null)
                 {
                     gameObject.AddComponent<FightDefenseHud>().Configure(fight, healthText.canvas, healthText.font);
+                    if (fight.UsesBattlePreparation)
+                        gameObject.AddComponent<FightFormationPanel>().Configure(fight, healthText.canvas, healthText.font);
                     gameObject.AddComponent<FightPauseController>().Configure(beatClock, healthText.canvas, healthText.font);
                 }
             }

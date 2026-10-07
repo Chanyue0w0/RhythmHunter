@@ -87,6 +87,7 @@ namespace RhythmHunter.FightDemo
             armorHearts.Set(fight.PartyArmor, fight.MaxPartyArmor);
             recoveryText.text = fight.BattleEnded ? "DEFEATED" : fight.MaxPartyArmor <= 0 ? "No frontline armor"
                 : fight.PartyArmor >= fight.MaxPartyArmor ? "Armor full"
+                : !fight.NaturalArmorRecoveryEnabled ? "No passive armor recovery"
                 : $"Armor recovery in {fight.ArmorRecoveryBeatsRemaining} beat(s)";
             var enemies = fight.RosterManager != null ? fight.RosterManager.ActiveEnemies : null;
             for (int i = 0; i < 3; i++)

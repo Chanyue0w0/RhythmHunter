@@ -16,7 +16,8 @@ namespace RhythmHunter.FightDemo
             Guard,
             HealParty,
             DamageAll,
-            GuardAndDamageFront
+            GuardAndDamageFront,
+            Unavailable
         }
 
         [Header("Identity")]
@@ -28,6 +29,8 @@ namespace RhythmHunter.FightDemo
         [Header("Base Combat Information")]
         [SerializeField, Min(0.5f)] private float maxHp = 4f;
         [SerializeField, Range(0, 10)] private int defense;
+        [Tooltip("Added to shared armor capacity only while this character occupies the front position.")]
+        [SerializeField, Min(0)] private int frontlineDefenseBonus;
         [Header("Frontline Armor Recovery")]
         [SerializeField, Min(1)] private int armorRecoveryDelay = 4;
         [SerializeField, Min(1)] private int armorRecoveryInterval = 2;
@@ -71,6 +74,7 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot.UnitRole Role => role;
         public float MaxHp => maxHp;
         public int Defense => Mathf.Clamp(defense, 0, 10);
+        public int FrontlineDefenseBonus => Mathf.Max(0, frontlineDefenseBonus);
         public int ArmorRecoveryDelay => Mathf.Max(1, armorRecoveryDelay);
         public int ArmorRecoveryInterval => Mathf.Max(1, armorRecoveryInterval);
         public float ArmorRecoveryAmount => QuantizePositive(armorRecoveryAmount);

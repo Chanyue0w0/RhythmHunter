@@ -15,9 +15,12 @@ namespace RhythmHunter.FightDemoEditor
             DrawPropertiesExcluding(serializedObject, "heroSpawnSlots", "heroPrefabs");
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Player Formation", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("FightScene3: any hero can occupy any position. Empty positions keep their input binding. Changes take effect on the next roster spawn.", MessageType.Info);
+            bool locked = Application.isPlaying && ((FightRosterManager)target).FormationLocked;
+            EditorGUILayout.HelpBox(locked ? "Formation is locked for this battle, including all waves."
+                : "FightScene3: use the pre-battle panel to swap positions. X/Q, Y/W, B/E follow Front, Middle, Back.", MessageType.Info);
             SerializedProperty slots = serializedObject.FindProperty("heroSpawnSlots");
             SerializedProperty heroes = serializedObject.FindProperty("heroPrefabs");
+            EditorGUI.BeginDisabledGroup(locked);
             for (int i = 0; i < 3; i++)
             {
                 EditorGUILayout.LabelField(Positions[i], EditorStyles.boldLabel);
@@ -26,6 +29,7 @@ namespace RhythmHunter.FightDemoEditor
                 if (i < heroes.arraySize)
                     EditorGUILayout.PropertyField(heroes.GetArrayElementAtIndex(i), new GUIContent("Character Prefab"));
             }
+            EditorGUI.EndDisabledGroup();
             serializedObject.ApplyModifiedProperties();
         }
     }

@@ -15,6 +15,13 @@ namespace RhythmHunter.FightDemo
     {
         public enum PartyPosition { Front, Middle, Back }
 
+        [Header("Battle Preparation")]
+        [Tooltip("Require an explicit start and lock the hero formation for the entire battle. Legacy labs can leave this off.")]
+        [SerializeField] private bool requireBattlePreparation;
+        public bool RequiresBattlePreparation => requireBattlePreparation;
+        public bool BattleStarted { get; private set; }
+        public bool FormationLocked => requireBattlePreparation && BattleStarted;
+
         [Header("Runtime Dependencies")]
         [SerializeField] private FightCombatController fightController;
         [SerializeField] private FmodBeatClock beatClock;
@@ -56,6 +63,7 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot[] enemySlots,
             FightCharacterDefinition[] enemies)
         {
+            if (FormationLocked) return;
             fightController = controller;
             beatClock = clock;
             heroSpawnSlots = NormalizeSlots(heroSlots);
@@ -77,6 +85,7 @@ namespace RhythmHunter.FightDemo
             IReadOnlyList<FightCharacterDefinition> enemies,
             bool spawnImmediately = true)
         {
+            if (FormationLocked) return;
             CopyRoster(heroes, heroPrefabs);
             CopyRoster(enemies, enemyPrefabs);
             if (spawnImmediately)
@@ -86,11 +95,31 @@ namespace RhythmHunter.FightDemo
         [ContextMenu("Respawn Configured Roster")]
         public void SpawnConfiguredRoster()
         {
+            if (FormationLocked) return;
             activeHeroes.Clear();
             activeEnemies.Clear();
             SpawnSide(heroSpawnSlots, heroPrefabs, FightUnitSlot.UnitTeam.Hero, activeHeroes);
             SpawnSide(enemySpawnSlots, enemyPrefabs, FightUnitSlot.UnitTeam.Enemy, activeEnemies);
             RosterChanged?.Invoke();
+        }
+
+        public bool TrySwapHeroes(PartyPosition first, PartyPosition second)
+        {
+            int a = (int)first, b = (int)second;
+            if (FormationLocked || a < 0 || b < 0 || a >= heroPrefabs.Length ||
+                b >= heroPrefabs.Length || a == b) return false;
+            (heroPrefabs[a], heroPrefabs[b]) = (heroPrefabs[b], heroPrefabs[a]);
+            SpawnConfiguredRoster();
+            return true;
+        }
+
+        internal bool TryLockFormation()
+        {
+            if (!requireBattlePreparation || BattleStarted) return false;
+            for (int i = 0; i < 3; i++)
+                if (GetHeroAtPosition((PartyPosition)i) == null) return false;
+            BattleStarted = true;
+            return true;
         }
 
         private void SpawnSide(
