@@ -9558,7 +9558,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodRhythmJudge
   beatClock: {fileID: 2021200329}
-  perfectWindowMs: 150
+  perfectWindowMs: 120
   judgementOffsetMs: 0
   duplicatePerfectBecomesMiss: 1
 --- !u!114 &2021200329
