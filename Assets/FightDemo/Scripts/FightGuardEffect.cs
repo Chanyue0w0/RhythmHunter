@@ -29,6 +29,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (TryGetComponent<FightBattleEffect>(out var playback) && playback.Frozen) return;
             elapsed += Time.deltaTime;
             float progress = Mathf.Clamp01(elapsed / duration);
             float eased = 1f - (1f - progress) * (1f - progress);

@@ -111,6 +111,7 @@ namespace RhythmHunter.FightDemo
             subscribedFight.EnemyAttackResolved += OnEnemyAttackResolved;
             subscribedFight.PartyHealthChanged += OnPartyHealthChanged;
             subscribedFight.BattleLost += OnBattleLost;
+            subscribedFight.BattleVictory += OnBattleVictory;
         }
 
         private void Start()
@@ -164,6 +165,7 @@ namespace RhythmHunter.FightDemo
             subscribedFight.EnemyAttackResolved -= OnEnemyAttackResolved;
             subscribedFight.PartyHealthChanged -= OnPartyHealthChanged;
             subscribedFight.BattleLost -= OnBattleLost;
+            subscribedFight.BattleVictory -= OnBattleVictory;
             subscribedFight = null;
         }
 
@@ -444,6 +446,12 @@ namespace RhythmHunter.FightDemo
             SetResult("DEFEAT", Red, "Stop Play Mode to reset the prototype", 999f);
             if (warningText != null)
                 warningText.text = "BATTLE ENDED";
+        }
+
+        private void OnBattleVictory()
+        {
+            SetResult("VICTORY", Gold, "All waves cleared", 999f);
+            if (warningText != null) warningText.text = "BATTLE COMPLETE";
         }
 
         private void UpdatePlaybackReadout()

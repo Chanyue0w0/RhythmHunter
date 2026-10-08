@@ -39,7 +39,7 @@ namespace RhythmHunter.FightDemo
 
         public bool TryStartTeamUltimate()
         {
-            if (!TeamUltimateReady || AwaitingBattleStart || IsPaused || TimingCalibrationActive || battleEnded || latestCombatBeat < 0) return false;
+            if (!TeamUltimateReady || AwaitingNextWave || AwaitingBattleStart || IsPaused || TimingCalibrationActive || battleEnded || latestCombatBeat < 0) return false;
             ultimateActors[0] = frontHero.UnitSlot; ultimateActors[1] = secondHero.UnitSlot; ultimateActors[2] = thirdHero.UnitSlot;
             ultimateDuration = Mathf.Max(1, teamUltimatePerformanceBeats);
             ultimateImpactOffset = Mathf.Clamp(teamUltimateImpactBeat, 1, ultimateDuration) - 1;

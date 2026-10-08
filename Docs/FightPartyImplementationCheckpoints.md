@@ -157,12 +157,43 @@
 
 使用者已確認第 3 關及三人各 2 拍演出，授權 push。修訂後技能 110 項、編隊 170 項、普通能力 91 項檢查通過。跨 Wave 保留 MP 已是確認規則，實際換波、飛行攻擊凍結、強化第零拍與勝敗清理尚不能視為本關已完成。
 
-## 4. 暫停、Wave 與生命週期
+## 4. 暫停、Wave 與生命週期（已確認）
+
+使用者已確認本關並授權 push，接續第 5 關。
 
 - 敵人行為／已發射攻擊戰鬥進度凍結；中斷不刪除已發射物。
 - 強化第零拍；射手進度凍結，正常拍恢復判定。
 - 清 Wave 回滿 DEF、保留 HP/MP；整場不能換位；剩餘 Team Skill 不跨 Wave。
 - 勝敗、無目標、停用與重入清理；預告／連斬／蓄力／延遲命中／盾窗口測試替身。
+
+### 本關實作
+
+- 保留現有 FMOD 時鐘與 Team Skill 排程。普通戰鬥新增 `NormalBattleBeatCount`／`NormalBattleBeat`：演出及等待期間不推進，恢復普通戰鬥的第一拍才推進一次；重複回呼不多扣拍。未新增玩家增傷技能或另一個音樂時鐘，後續按拍強化應使用此入口。
+- 既有敵人動畫、一般攻擊倒數及 Boss 狀態期限維持暫停；已生效格擋的拍點也平移，避免表演期間提前失效。表演中施加的 Boss Break 保留完整期限。
+- `ScheduleEnemyHits` 提供敵人行為接線入口：從目前普通戰鬥拍數排定單段、連段、蓄力後命中或已發射的延遲攻擊。這些測試行為沒有配置到正式哥布林 Prefab。
+- 可中斷行為取消尚未執行段落；`launchedProjectile` 命中排程獨立於發射者，中斷發射者不刪除已發射攻擊。命中須等現有晚側判定窗口與安全邊界關閉，同拍成功格擋適用該拍所有符合條件的命中。
+- 既有 `FightAttackEffect`／`FightGuardEffect` 與新 `FightBattleEffect` 接入敵方表演暫停、全局暫停及換波清理。ParticleSystem 與 Animator 暫停後恢復原狀態；效果仍為視覺，不靠動畫事件或飛行到達時機造成傷害。
+- `FightRosterManager.Additional Waves` 定義初始敵方之後的波次。換波只生成敵人；原英雄、HP、MP、編隊鎖定全部保留，DEF 在清波時補滿，射手準備與舊敵人排程／狀態／效果清空。
+- 最後一名敵人死亡時標記清波；當前 Team Skill 在空戰場完成餘下演出及法師被動，再於完整演出結束的拍點換波。新敵人不承受前波剩餘技能，生成拍不安排敵人攻擊。
+- FightScene3 共用 HP 歸零觸發一次敗北；清完最後一波觸發勝利。兩者停止後續輸入、技能與攻擊，清理暫停／排程／演出回呼；HUD 顯示結果。舊場景未啟用 Battle Preparation 的零 HP 實驗模式保留。
+
+### Inspector 與操作驗收
+
+1. 開啟 FightScene3，`FightDemoController > Fight Roster Manager > Enemy Prefabs` 仍是第一波。
+2. `Additional Waves` 每個元素代表後續一波，`Enemies` 依原敵方槽位規則填入最多三名現有敵人 Prefab。沒有新增英雄欄位，不能藉換波更改隊形。
+3. 原 FightScene3 敵人配置不變，未自行新增正式關卡或哥布林能力；未設定 Additional Waves 時，清完原敵人即勝利。可在編輯模式增加測試波次後進 Play Mode 驗收。
+4. 蓄積部分 MP 並損失 DEF／HP，再清波：確認回滿 DEF，HP／MP 保留，角色不重生，編隊仍鎖住，HUD 的 Wave 編號更新。
+5. 用 Team Skill 清波：待剩餘演出完成才出現下一波，下一波滿血。受到致命傷害後應顯示 DEFEAT，清完最後一波顯示 VICTORY；重開場景進行新戰鬥。
+6. `Rhythm Hunter > Validate Party Checkpoint 4 - Lifecycle`，或編輯模式寫入 `Temp/FightPartyLifecycleValidation.request` 為 `run`，執行確定性測試。
+
+### 主要檔案與限制
+
+- Unity 編譯成功；第 4 關 **31 項檢查通過**，前 3 關回歸 **170 + 91 + 110 項通過**，合計 402 項。第 4 關結果在 `Temp/FightPartyLifecycleValidation.result`；涵蓋既有盾窗與 Break 期限、表演中的格擋保留，以及避免新敵人排程與舊普通攻擊同時出招。
+- 新增 `FightCombatController.BattleLifecycle.cs`、`FightCombatController.EnemyActions.cs`、`FightBattleEffect.cs`，分別管理換波／終局、可中斷段落及延遲命中、視覺暫停與清理。
+- 修改 RosterManager、CombatController、EnemyPause、TeamSkill／TeamUltimate 入口防護、UnitSlot／UnitEffects、AttackEffect／GuardEffect、DefenseHud／ScenePresenter。沒有修改角色或正式敵人 Prefab、FightScene3 場景配置、音樂、判定窗口及快取。
+- 驗證沿用前關 Preview Scene 的中立測試敌人，以及既有測試 Boss 的固定護甲／Break 窗口；不等於完成下一階段正式敌人的技能設計。
+- 正式外部 VFX 若自帶獨立移動／自毀腳本，仍需第 5 關逐資產檢查並接入暫停契約；本次保證內建效果及已接管的粒子／Animator，尚未驗證所有第三方特效。
+- 本關測試未使用真實 FMOD 音訊／手把。Preview Scene 仍可能出現先前記錄的 URP 重複 Global Light 訊息，不能宣稱完整實機或正式美術驗收完成。
 
 ## 5. 完整回歸與演出
 

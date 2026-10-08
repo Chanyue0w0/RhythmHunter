@@ -91,11 +91,12 @@ namespace RhythmHunter.FightDemo
             armorText.text = $"ARMOR  {fight.PartyArmor:0.#} / {fight.MaxPartyArmor:0.#}";
             hpHearts.Set(fight.PartyHp, fight.MaxPartyHp);
             armorHearts.Set(fight.PartyArmor, fight.MaxPartyArmor);
-            recoveryText.text = fight.BattleEnded ? "DEFEATED" : fight.MaxPartyArmor <= 0 ? "No frontline armor"
+            recoveryText.text = fight.BattleEnded ? (fight.BattleWon ? "VICTORY" : "DEFEATED") : fight.AwaitingNextWave ? "WAVE CLEAR — armor restored" : fight.MaxPartyArmor <= 0 ? "No frontline armor"
                 : fight.PartyArmor >= fight.MaxPartyArmor ? "Armor full"
                 : !fight.NaturalArmorRecoveryEnabled ? "No passive armor recovery"
                 : $"Armor recovery in {fight.ArmorRecoveryBeatsRemaining} beat(s)";
             basicText.text = BasicStatus();
+            if (fight.UsesBattlePreparation) basicText.text = $"WAVE {fight.CurrentWave}/{fight.WaveCount}   " + basicText.text;
             basicText.gameObject.SetActive(!fight.AwaitingBattleStart && !fight.BattleEnded);
             var enemies = fight.RosterManager != null ? fight.RosterManager.ActiveEnemies : null;
             for (int i = 0; i < 3; i++)

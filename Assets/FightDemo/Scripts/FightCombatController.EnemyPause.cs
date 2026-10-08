@@ -30,6 +30,10 @@ namespace RhythmHunter.FightDemo
             long elapsed = beat - lastEnemyFreezeBeat;
             lastEnemyFreezeBeat = beat;
             enemyPausedBeats += elapsed;
+            var retainedGuards = new List<long>(guardedBeats);
+            guardedBeats.Clear();
+            foreach (long guard in retainedGuards) guardedBeats.Add(guard + elapsed);
+            ShiftScheduledEnemyHits(elapsed);
             if (lastEnemyQueuedBeat != long.MinValue) lastEnemyQueuedBeat += elapsed;
             if (BossActive)
             {
@@ -39,9 +43,7 @@ namespace RhythmHunter.FightDemo
             }
             if (pendingEnemyAttack)
             {
-                bool guarded = guardedBeats.Remove(pendingAttackGlobalBeat);
                 pendingAttackGlobalBeat += elapsed;
-                if (guarded) guardedBeats.Add(pendingAttackGlobalBeat);
             }
         }
 
@@ -51,6 +53,7 @@ namespace RhythmHunter.FightDemo
             EnemyActionsPaused = false;
             if (resumeAttack && aimedShotProgress > 0)
                 lastAimedShotBeat = latestCombatBeat - 1;
+            if (resumeAttack) ResumeScheduledEnemyHits();
             foreach (var animator in frozenEnemyAnimators)
                 if (animator != null) animator.SetPlaybackPaused(false);
             frozenEnemyAnimators.Clear();
@@ -83,7 +86,8 @@ namespace RhythmHunter.FightDemo
             bool pending = pendingEnemyAttack && pendingEnemyAttacker == enemy;
             bool activeBossAction = BossActive && enemy == bossActor && latestCombatBeat < bossPhaseEnd &&
                 (CurrentBossPhase == BossPhase.Attack || CurrentBossPhase == BossPhase.Charge || CurrentBossPhase == BossPhase.Rage);
-            if (!pending && !activeBossAction) return false;
+            bool scheduled = InterruptScheduledEnemyAction(enemy);
+            if (!pending && !activeBossAction && !scheduled) return false;
             InterruptEnemyAttack(enemy);
             // Cancels the remaining scheduled hits of the current test-boss sequence.
             // Already emitted visual/projectile objects are not owned or deleted here.

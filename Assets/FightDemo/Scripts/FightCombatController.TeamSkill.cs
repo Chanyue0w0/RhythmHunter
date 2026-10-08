@@ -23,7 +23,7 @@ namespace RhythmHunter.FightDemo
         private static int ManaCost(HeroBeatSettings hero) => hero?.UnitSlot != null && hero.UnitSlot.HasCharacter
             ? hero.UnitSlot.CharacterDefinition?.TeamSkillManaCost ?? 0 : 0;
         public bool TeamSkillRunning => nextTeamSkillBeat != long.MaxValue;
-        public bool TeamSkillReady => UsesEqualBeats && !AwaitingBattleStart && !TeamSkillRunning && !TeamUltimateRunning && TeamSkillGaugeMax > 0 && teamSkillGauge >= TeamSkillGaugeMax;
+        public bool TeamSkillReady => UsesEqualBeats && !battleEnded && !AwaitingNextWave && !AwaitingBattleStart && !TeamSkillRunning && !TeamUltimateRunning && TeamSkillGaugeMax > 0 && teamSkillGauge >= TeamSkillGaugeMax;
         public string TeamSkillStatus { get; private set; } = "Build charge with Basic abilities";
         public event System.Action<FightUnitSlot> TeamSkillStepResolved;
 
@@ -120,6 +120,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            ClearEnemyScheduledActions();
             foreach (var enemy in fightScene2Enemies) if (enemy != null) enemy.ClearFragile();
             ResetBasicAbilityProgress();
             ResetEnemyPause();

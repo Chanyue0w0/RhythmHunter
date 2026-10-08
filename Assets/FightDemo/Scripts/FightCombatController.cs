@@ -347,16 +347,19 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
-            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart) return;
+            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
+            CheckWaveCompletion();
             UpdateBasicAbilityProgress();
             TryResolvePendingAttack();
+            if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int impactTime)) ResolveEnemyCombatWork(impactTime);
             AdvanceArmorRecovery(latestCombatBeat);
         }
 
         private void OnDisable()
         {
             ResetTeamSkill();
+            CancelEnemyCombatWork();
             UnsubscribeDependencies();
         }
 
@@ -392,7 +395,7 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (battleEnded || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
+            if (battleEnded || AwaitingNextWave || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
@@ -664,7 +667,7 @@ namespace RhythmHunter.FightDemo
             if (IsPaused) return;
 
             latestCombatBeat = beat.GlobalBeat;
-            if (TimingCalibrationActive) return;
+            if (TimingCalibrationActive || battleEnded) return;
             if (AwaitingBattleStart)
             {
                 FightBeat?.Invoke(beat);
@@ -674,9 +677,12 @@ namespace RhythmHunter.FightDemo
             AdvanceBossState(beat.GlobalBeat);
             AdvanceTeamSkill(beat.GlobalBeat);
             AdvanceTeamUltimate(beat.GlobalBeat);
+            if (UsesBattlePreparation && AdvanceWaveBoundary()) return;
+            AdvanceNormalBattleBeat(beat);
             if (UsesEqualBeats)
                 guardedBeats.RemoveWhere(guardBeat => guardBeat < beat.GlobalBeat &&
-                    (!pendingEnemyAttack || guardBeat != pendingAttackGlobalBeat));
+                    (!pendingEnemyAttack || guardBeat != pendingAttackGlobalBeat) &&
+                    !enemyHits.Exists(hit => hit.hitBeat == guardBeat));
             FightBeat?.Invoke(beat);
 
             if (battleEnded)
@@ -688,6 +694,7 @@ namespace RhythmHunter.FightDemo
             {
                 activeEnemySlot = FindFrontLivingEnemy();
                 if (!pendingEnemyAttack && lastEnemyQueuedBeat != beat.GlobalBeat && activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
+                    !enemyHits.Exists(hit => hit.source == activeEnemySlot && !hit.launched) &&
                     (!BossActive || lastBossAttackBeat != beat.GlobalBeat))
                 {
                     QueueEnemyAttack(beat);
@@ -920,6 +927,12 @@ namespace RhythmHunter.FightDemo
             guardedGlobalBeat = long.MinValue;
             guardedBeats.Clear();
             battleEnded = false;
+            BattleWon = AwaitingNextWave = false;
+            CurrentWave = 1;
+            NormalBattleBeatCount = 0;
+            lastNormalBattleBeat = long.MinValue;
+            ClearEnemyScheduledActions();
+            ClearBattleEffects();
             blockedAttackCount = 0;
             receivedAttackCount = 0;
             totalHealingReceived = 0f;
@@ -961,7 +974,7 @@ namespace RhythmHunter.FightDemo
             nextArmorRecoveryBeat = NaturalArmorRecoveryEnabled && definition != null && partyArmor < maxPartyArmor
                 ? globalBeat + definition.ArmorRecoveryDelay : long.MaxValue;
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
-            // This prototype remains playable at zero HP, including Basic input and healing.
+            if (UsesBattlePreparation && partyHp <= 0) FinishBattle(false);
             return armorDamage + hpDamage;
         }
 

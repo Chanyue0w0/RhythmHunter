@@ -6,6 +6,15 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightUnitEffects : MonoBehaviour
     {
+        private void TrackEffect(GameObject effect, float lifetime = 0)
+        {
+            var slot = GetComponent<FightUnitSlot>();
+            if (slot == null) slot = GetComponentInParent<FightUnitSlot>();
+            var owner = effect.GetComponent<FightBattleEffect>();
+            if (owner == null) owner = effect.AddComponent<FightBattleEffect>();
+            owner.Configure(slot != null ? slot.CombatController : null,
+                slot != null && slot.Team == FightUnitSlot.UnitTeam.Enemy, lifetime);
+        }
         public void SpawnConfiguredAbility(
             GameObject effectPrefab,
             Transform anchor,
@@ -25,13 +34,13 @@ namespace RhythmHunter.FightDemo
             if (attackEffect != null)
             {
                 attackEffect.PlayInPlace(lifetime, style, color);
+                TrackEffect(effect);
                 return;
             }
 
             // Particle/VFX-pack prefabs are presentation only. They never report hits.
             // A zero lifetime lets a self-destroying prefab own its cleanup.
-            if (lifetime > 0f)
-                Destroy(effect, lifetime);
+            TrackEffect(effect, lifetime);
         }
 
         public void SpawnAttack(
@@ -70,6 +79,7 @@ namespace RhythmHunter.FightDemo
             if (attackEffect == null)
                 attackEffect = effect.AddComponent<FightAttackEffect>();
             attackEffect.Play(direction, lifetime, style, color);
+            TrackEffect(effect);
         }
 
         public void SpawnGuard(
@@ -93,6 +103,7 @@ namespace RhythmHunter.FightDemo
             renderer.color = color;
             renderer.sortingOrder = 31;
             effect.GetComponent<FightGuardEffect>().Play(color, duration, fromScale, toScale, rotationSpeed);
+            TrackEffect(effect);
         }
 
         public void SpawnAttackCharge(
@@ -119,6 +130,7 @@ namespace RhythmHunter.FightDemo
                 attackBeat ? 0.72f : 0.42f,
                 attackBeat ? 2.2f : 1.15f,
                 attackBeat ? 260f : 90f);
+            TrackEffect(effect);
         }
     }
 }

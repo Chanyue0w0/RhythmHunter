@@ -77,6 +77,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1f)] private float missShakeFrequency = 60f;
 
         private GameObject actorInstance;
+        public FightCombatController CombatController { get; private set; }
         private TextMesh unitNameLabel;
         private FightCharacterDefinition characterDefinition;
         private FightCharacterCombatAnimator combatAnimator;
@@ -211,6 +212,7 @@ namespace RhythmHunter.FightDemo
 
         public void SpawnCharacter(FightCharacterDefinition prefab, FightCombatController beatSource)
         {
+            CombatController = beatSource;
             ClearFragile();
             CacheLegacyPresentationReferences();
             if (prefab == null)

@@ -36,6 +36,24 @@ namespace RhythmHunter.FightDemo
         [Header("Enemy Prefabs (Entries May Be Empty)")]
         [SerializeField] private FightCharacterDefinition[] enemyPrefabs = new FightCharacterDefinition[3];
 
+        [Serializable]
+        public sealed class EnemyWave
+        {
+            public FightCharacterDefinition[] enemies = new FightCharacterDefinition[3];
+        }
+        [Tooltip("Optional waves after the initial Enemy Prefabs. Hero formation stays locked.")]
+        [SerializeField] private EnemyWave[] additionalWaves = Array.Empty<EnemyWave>();
+        public int WaveCount => 1 + (additionalWaves?.Length ?? 0);
+
+        internal bool SpawnNextEnemyWave(int waveIndex)
+        {
+            if (!FormationLocked || waveIndex < 1 || waveIndex >= WaveCount) return false;
+            activeEnemies.Clear();
+            SpawnSide(enemySpawnSlots, additionalWaves[waveIndex - 1]?.enemies,
+                FightUnitSlot.UnitTeam.Enemy, activeEnemies);
+            return true;
+        }
+
         private readonly List<FightUnitSlot> activeHeroes = new();
         private readonly List<FightUnitSlot> activeEnemies = new();
 

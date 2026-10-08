@@ -189,7 +189,7 @@ namespace RhythmHunter.FightDemoEditor
             Check(!f.Fight.TeamSkillRunning && !f.Fight.EnemyActionsPaused && f.Fight.TeamUltimateCharge == 1, "Chain finishes and preserves the existing Ultimate charge.");
         }
 
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             readonly Scene scene;
             readonly FmodBeatClock clock;
@@ -219,6 +219,7 @@ namespace RhythmHunter.FightDemoEditor
             {
                 Set(clock, "hasAnchor", true); Set(clock, "latestBeat", Snapshot(0));
                 judge.Configure(clock, 120, 0); judge.ResetDuplicateTracking();
+                Set(judge, "personalDelayMs", 0f); // Deterministic fixture never depends on a user's saved device calibration.
                 Call(Fight, "RebuildRosterAndResetCombat");
                 foreach (var enemy in Enemies) { enemy.CharacterDefinition.BossPattern.enabled = false; Set(enemy, "maxHp", 100f); enemy.RestoreFullHealth(); }
             }

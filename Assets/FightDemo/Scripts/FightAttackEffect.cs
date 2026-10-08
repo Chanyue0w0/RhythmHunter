@@ -61,6 +61,7 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (TryGetComponent<FightBattleEffect>(out var playback) && playback.Frozen) return;
             elapsed += Time.deltaTime;
             float progress = Mathf.Clamp01(elapsed / lifetime);
             Vector3 perpendicular = new(-direction.y, direction.x, 0f);
