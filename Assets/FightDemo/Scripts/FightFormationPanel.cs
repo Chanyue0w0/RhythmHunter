@@ -31,7 +31,7 @@ namespace RhythmHunter.FightDemo
             summary = FightMenuUi.Label(panel, "", new Vector2(20, -198), new Vector2(550, 42), font, 18);
             buttons[3] = FightMenuUi.Button(panel, "START BATTLE", new Vector2(590, -204), new Vector2(260, 36), font,
                 () => { fight.TryBeginBattle(); Refresh(); });
-            FightMenuUi.Label(panel, "Basic abilities available. Team Skills and gunner interruption are coming next.",
+            FightMenuUi.Label(panel, "Team Skill: 60 MP, then A / R. Heroes cast in formation order. ◆ x2 = Fragile.",
                 new Vector2(20, -255), new Vector2(830, 32), font, 15);
             lockedLabel = FightMenuUi.Label(canvas.transform, "", Vector2.zero, new Vector2(870, 30), font, 16);
             lockedLabel.name = "FormationLockStatus";

@@ -64,7 +64,9 @@
 
 舊 `FightScene3BeatValidation` 等套件包含 5 HP、自然回甲、舊職業補血與零血量继续等歷史假設，不能拿它們的既有 PASS 當作本次新規格已通過。完整套件的遷移與重跑列在第 5 關。
 
-## 2. 普通能力與輸入（本輪，待確認後才 push）
+## 2. 普通能力與輸入（已確認、已 push）
+
+使用者已確認並授權進入第 3 關；提交 `bc32b55` 已 push 至 `origin/FightPartyControl`。以下保留本關完成時的驗證範圍。
 
 - 戰士即時斬擊；法師一拍多次格擋及早晚判定窗口。
 - 射手連續三拍準備、漏拍／錯拍／同拍重複、進度提示。
@@ -110,12 +112,50 @@
 - `FightDefenseHud` 顯示準備進度與格擋；`FightPartyBasicValidation` 提供本關驗證。
 - 仍沿用暫代劍士外觀與既有施法／命中特效掛點；正式準備、瞄準、燧發槍射擊動畫和槍口掛點未在本輪製作。
 
-## 3. 脆弱、中斷、Team Skill 與被動
+## 3. 脆弱、中斷、Team Skill 與被動（已確認）
 
 - 非疊加脆弱，僅有效傷害消耗，每名敵人獨立判定。
 - 中斷結果由行為系統提供，射手只在成功時增加同次傷害。
 - 逐角色即時決定技能模式；法師效果結算後滿甲。
 - 足夠 HP 的三敵測試：戰法射 14/0/0、戰射法 8/4/4。
+
+### 已實作與驗證
+
+- 演出時間已依使用者指定：每角最多 4 拍；目前戰士、法師、射手各 2 拍。第 1 拍分別為跳躍／舉手／舉手瞄準的準備拍，第 2 拍斬擊／能量爆破／射擊才結算技能及法師被動。正式準備動畫仍待素材掛接，目前提供 PREPARING 提示。
+- 三人於 N、N+2、N+4 開始，效果於 N+1、N+3、N+5 結算，N+6 恢復普通戰鬥；共 6 拍，120 BPM 為 3 秒，另加發動後等待下一拍的時間。敵人在準備與結算期間皆保持 Team Skill 暫停。
+- 2 拍修訂已編譯；測試已改成每拍推進，新增準備拍零傷害、第二拍唯一結算及完整保留末拍的檢查。首次重跑遇到 Play Mode 與 Preview Scene 不相容；回到編輯模式後本關通過 **110 項檢查**，兩種編隊傷害維持不變。下方 83 項為修改拍數前紀錄。
+- 脆弱附著於個別敵人；重複施加不疊加，下一次正傷害加倍並立即移除。HUD 顯示 `◆ x2`，消耗後清除。零傷害、現有 Boss 完全減傷不消耗；保留既有 Boss 減傷先結算，再套用脆弱的流程。
+- 戰士先造成 2 傷害，再對原目標仍存活時施加脆弱；可消耗舊脆弱後重新施加，斬殺不轉移狀態。
+- 法師輪到施放才尋找最前方脆弱敵人，集中基礎 4，否則全體各 2。自身技能結算後補滿共用 DEF，位置與模式不影響被動，不補 HP。
+- 射手技能只檢查當時首位是否脆弱；單體 4 或全體各 2，選定後不因死亡切換模式，也不附加普攻中斷。
+- 射手普通第三拍向既有敵人行為排程要求中斷；成功才將同發傷害由 1 改為 2，再由共用傷害入口套用脆弱。待機、已結算收招及不可中斷皆不加成，不產生第二次傷害。
+- 中斷涵蓋既有待結算攻擊與測試 Boss 的進行中攻擊／蓄力／連續攻擊階段；取消尚未執行的段落，不解除整體 Team Skill 暫停、不刪除已發射物。未替正式哥布林配置能力。
+- 每位技能讀取前一位結算後的敵人狀態；死亡後重新找合法目標。全體傷害使用當次目標快照，陣容失效時停止，避免重入事件把舊連鎖復活。完整 Wave 換波保護仍在第 4 關。
+- 新 EnergyMage Prefab 繼承的舊 `Basic Break Power`／`Skill Break Power` 已歸零，避免額外觸發未列入規格的 Boss Break；原版法師 Prefab 保留。
+- Unity 編譯成功；`FightPartySkillValidation` 通過 **83 項檢查**，前兩關重跑 **170 + 91 項**亦通過。
+- 實際逐拍連鎖驗證：戰士→法師→射手 **14/0/0**；戰士→射手→法師 **8/4/4**。兩者法師結算後滿甲、HP 不變；另驗證法師前衛仍觸發補甲。
+- 包含脆弱刷新／零傷害／死亡、集中優先序、模式固定、同發中斷增傷、重複中斷、無目標、停用清理、陣容重入取消與 HUD 狀態。結果在 `Temp/FightPartySkillValidation.result`，已檢視 `Temp/FightPartySkill-preview.png`。
+- Preview Scene 渲染時出現 URP 重複 Global Light 訊息；預覽與開啟中的 FightScene3 光源並存，未改動正式場景光源。本輪不宣稱 Console 完全無訊息，也不將確定性測試視為實際 FMOD／手把驗證。
+
+### 使用者操作驗收
+
+1. Unity 選單 `Rhythm Hunter > Validate Party Checkpoint 3 - Skills and Fragile` 可重跑本關；亦可在編輯模式將 `run` 寫入 `Temp/FightPartySkillValidation.request`。
+2. FightScene3 開戰後，以成功普通能力累積至 60 MP，再按 A／R。依序觀察戰士施加 `◆ x2`、下一位技能消耗脆弱與法師補滿 DEF；期間 Basic 停止。
+3. 停止 Play Mode，再交換成戰士→射手→法師重新開戰，確認技能依新的位置順序施放。
+4. 精確的兩組傷害表由三名各 100 HP、無額外防禦的測試敵人驗證。正式 FightScene3 仍使用既有測試 Boss，受其防禦、血量與階段影響，不保證畫面上直接重現傷害表。
+5. 射手第三拍命中進行中的可中斷攻擊，確認提示 `INTERRUPTED`；待機命中不應顯示成功中斷。新敵人完整行為替身與飛行攻擊測試留待第 4 關。
+
+### Inspector、掛點與主要檔案
+
+- 三份 `LongswordWarrior`／`EnergyMage`／`SkeletonGunner` Prefab 已設定 `Skill Behavior`、`Skill Power`。戰士為 `BreakingSlash`／2；法師為 `EnergySurge`／2，`Conditional Skill Power` 4；射手為 `FormationBreaker`／4，條件強度 2。
+- 三者 `Team Skill Performance Beats` 均為 2（限制 1–4），新增 `Team Skill Effect Beat Offset` 均為 1，即第二拍結算；偏移以 0 起算且不能超出演出長度。舊角色預設偏移 0 保留首拍結算。
+- 法師 `Restore Armor After Team Skill` 開啟；射手 `Basic Interrupts Enemy` 開啟、`Successful Interrupt Damage Bonus` 1。敵人資料新增 `Attack Interruptible`，預設開啟。
+- `FightCombatController.PartySkills.cs` 集中三個技能模式；`EnemyPause.cs` 提供有結果的中斷入口；`BasicAbilities.cs` 接入同發增傷；`TeamSkill.cs` 處理施放後被動與失效檢查。
+- `FightUnitSlot.cs` 管理脆弱及傷害消耗；`FightCharacterDefinition.cs` 保存能力參數；`FightCombatController.cs` 接線與全體目標快照；`FightDefenseHud.cs`、`FightFormationPanel.cs` 更新狀態與說明。
+- `Editor/FightPartySkillValidation.cs` 為本關獨立驗證入口。沒有另建音樂時鐘或大型被動框架。
+- 仍使用既有 Cast／Impact 掛點和暫代劍士演出。正式脆弱特效掛點、法師能量波、骷髏準備／瞄準／燧發槍口動畫特效尚缺；目前以 HUD 圖示及文字提供可辨識狀態。
+
+使用者已確認第 3 關及三人各 2 拍演出，授權 push。修訂後技能 110 項、編隊 170 項、普通能力 91 項檢查通過。跨 Wave 保留 MP 已是確認規則，實際換波、飛行攻擊凍結、強化第零拍與勝敗清理尚不能視為本關已完成。
 
 ## 4. 暫停、Wave 與生命週期
 

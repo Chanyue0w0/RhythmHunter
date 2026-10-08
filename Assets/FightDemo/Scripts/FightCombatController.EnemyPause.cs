@@ -76,6 +76,22 @@ namespace RhythmHunter.FightDemo
         }
 
         /// <summary>Use for an ability that interrupts an enemy, including during Team Skill.</summary>
+        public bool TryInterruptEnemyAttack(FightUnitSlot enemy)
+        {
+            if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || !fightScene2Enemies.Contains(enemy) ||
+                (enemy.CharacterDefinition != null && !enemy.CharacterDefinition.AttackInterruptible)) return false;
+            bool pending = pendingEnemyAttack && pendingEnemyAttacker == enemy;
+            bool activeBossAction = BossActive && enemy == bossActor && latestCombatBeat < bossPhaseEnd &&
+                (CurrentBossPhase == BossPhase.Attack || CurrentBossPhase == BossPhase.Charge || CurrentBossPhase == BossPhase.Rage);
+            if (!pending && !activeBossAction) return false;
+            InterruptEnemyAttack(enemy);
+            // Cancels the remaining scheduled hits of the current test-boss sequence.
+            // Already emitted visual/projectile objects are not owned or deleted here.
+            if (activeBossAction) EnterBossPhase(BossPhase.Neutral, latestCombatBeat);
+            return true;
+        }
+
+        /// <summary>Unconditional cancellation for death, Break and teardown; not evidence of a successful player interrupt.</summary>
         public void InterruptEnemyAttack(FightUnitSlot enemy)
         {
             if (enemy == null || !fightScene2Enemies.Contains(enemy)) return;

@@ -106,7 +106,8 @@ namespace RhythmHunter.FightDemo
                 enemyRows[i].SetActive(enemy != null && enemy.HasCharacter);
                 if (enemy != null)
                 {
-                    enemyLabels[i].text = $"{enemy.DisplayName}   HP {enemy.CurrentHp:0.#} / {enemy.MaxHp:0.#}";
+                    enemyLabels[i].text = $"{enemy.DisplayName}   HP {enemy.CurrentHp:0.#} / {enemy.MaxHp:0.#}" +
+                        (enemy.IsFragile ? " <color=#FFCF55>◆ x2</color>" : "");
                     enemyFills[i].rectTransform.sizeDelta = new Vector2(508 * Mathf.Clamp01(enemy.CurrentHp / enemy.MaxHp), 9);
                 }
                 if (developerPanel.activeSelf)

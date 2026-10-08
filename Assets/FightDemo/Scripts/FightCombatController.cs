@@ -539,6 +539,10 @@ namespace RhythmHunter.FightDemo
 
             switch (behavior)
             {
+                case FightCharacterDefinition.AbilityBehavior.BreakingSlash:
+                case FightCharacterDefinition.AbilityBehavior.EnergySurge:
+                case FightCharacterDefinition.AbilityBehavior.FormationBreaker:
+                    return PerformPartySkill(actor, behavior, power);
                 case FightCharacterDefinition.AbilityBehavior.Unavailable:
                     return $"{abilityName} is not available in this checkpoint";
                 case FightCharacterDefinition.AbilityBehavior.Guard:
@@ -1048,8 +1052,9 @@ namespace RhythmHunter.FightDemo
                 return;
 
             List<Transform> anchors = new();
-            foreach (FightUnitSlot target in fightScene2Enemies)
+            foreach (FightUnitSlot target in fightScene2Enemies.ToArray())
             {
+                if (!IsCurrentHero(expectedRosterVersion, attacker)) return;
                 if (target != null && target.HasCharacter)
                     anchors.Add(target.ImpactEffectAnchor);
             }
@@ -1217,8 +1222,9 @@ namespace RhythmHunter.FightDemo
             if (!IsCurrentHero(expectedRosterVersion, attacker) || !HealthSystemEnabled)
                 return;
 
-            foreach (FightUnitSlot target in fightScene2Enemies)
+            foreach (FightUnitSlot target in fightScene2Enemies.ToArray())
             {
+                if (!IsCurrentHero(expectedRosterVersion, attacker)) return;
                 if (target == null || !target.HasCharacter || target.CurrentHp <= 0f)
                     continue;
                 target.TakeDamage(ModifyBossDamage(target, damage));
@@ -1241,7 +1247,7 @@ namespace RhythmHunter.FightDemo
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
                 return;
 
-            if (HealthSystemEnabled && target != null && target.HasCharacter)
+            if (HealthSystemEnabled && target != null && target.HasCharacter && target.CurrentHp > 0)
             {
                 target.TakeDamage(ModifyBossDamage(target, damage));
                 CancelDefeatedEnemyAttack(target);

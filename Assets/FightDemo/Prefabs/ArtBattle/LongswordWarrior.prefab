@@ -62,10 +62,11 @@ MonoBehaviour:
   normalAbilityPower: 1
   attackPower: 1
   teamSkillManaCost: 20
-  teamSkillPerformanceBeats: 4
-  skillName: Breaking Slash (pending)
-  skillBehavior: 5
-  skillPower: 1
+  teamSkillPerformanceBeats: 2
+  teamSkillEffectBeatOffset: 1
+  skillName: Breaking Slash
+  skillBehavior: 7
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5

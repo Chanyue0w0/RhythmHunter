@@ -58,11 +58,13 @@ namespace RhythmHunter.FightDemo
             // Reacquire on the third input; never retain a target from preparation.
             var target = FindFrontLivingEnemy();
             if (target == null) return "Aimed Shot found no target";
+            bool interrupted = actor.CharacterDefinition != null && actor.CharacterDefinition.BasicInterruptsEnemy &&
+                TryInterruptEnemyAttack(target);
+            if (interrupted) power += actor.CharacterDefinition.SuccessfulInterruptDamageBonus;
             if (actor.CharacterDefinition != null)
                 ApplyBossBreak(actor.CharacterDefinition.BasicBreakPower, beat);
-            // Successful-interruption feedback and the same-hit bonus are checkpoint 3.
             PlayAnimatedHeroAction(actor, target, ActionType.LightAttack, power);
-            return $"Aimed Shot fires for {power:0.#} damage";
+            return $"Aimed Shot fires for {power:0.#} base damage" + (interrupted ? " — INTERRUPTED" : "");
         }
 
         private void UpdateBasicAbilityProgress()

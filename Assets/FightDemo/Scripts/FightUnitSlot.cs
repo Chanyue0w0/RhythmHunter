@@ -82,6 +82,17 @@ namespace RhythmHunter.FightDemo
         private FightCharacterCombatAnimator combatAnimator;
         private bool hasCharacter = true;
         private float currentHp;
+        private bool fragile;
+        public bool IsFragile => fragile && team == UnitTeam.Enemy && hasCharacter && currentHp > 0;
+
+        public bool ApplyFragile()
+        {
+            if (team != UnitTeam.Enemy || !hasCharacter || currentHp <= 0) return false;
+            fragile = true;
+            return true;
+        }
+
+        public void ClearFragile() => fragile = false;
         private int normalAttackPlayCount;
         private int lightAttackPlayCount;
         private int heavyAttackPlayCount;
@@ -200,6 +211,7 @@ namespace RhythmHunter.FightDemo
 
         public void SpawnCharacter(FightCharacterDefinition prefab, FightCombatController beatSource)
         {
+            ClearFragile();
             CacheLegacyPresentationReferences();
             if (prefab == null)
             {
@@ -230,6 +242,7 @@ namespace RhythmHunter.FightDemo
 
         public void ClearCharacter()
         {
+            ClearFragile();
             RemoveSpawnedActor();
             characterDefinition = null;
             combatAnimator = null;
@@ -249,11 +262,13 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            ClearFragile();
             ResetInputFeedback();
         }
 
         public void RestoreFullHealth()
         {
+            ClearFragile();
             currentHp = maxHp;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
@@ -261,7 +276,11 @@ namespace RhythmHunter.FightDemo
 
         public float TakeDamage(float amount)
         {
-            float applied = Mathf.Clamp(QuantizeNonNegative(amount), 0f, currentHp);
+            float damage = QuantizeNonNegative(amount);
+            bool consumeFragile = IsFragile && damage > 0;
+            float applied = Mathf.Clamp(consumeFragile ? damage * 2f : damage, 0f, currentHp);
+            // Clear before notifications: reentrant damage must not reuse the status.
+            if (consumeFragile && applied > 0) ClearFragile();
             currentHp -= applied;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);

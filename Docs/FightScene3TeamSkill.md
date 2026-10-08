@@ -1,8 +1,10 @@
 # FightScene3 Team Skill
 
-> FightPartyControl 正在分關卡改造三人隊伍。FightScene3 已換成戰士／法師／射手資料，需求 60 MP，Team Skill 期間封鎖 Basic；新技能目前待後續關卡開放。下列舊職業、30 MP 與演出期間可操作 Basic 的敘述是歷史版本，最新範圍與驗收請看 [三人隊伍驗收關卡](FightPartyImplementationCheckpoints.md)。
+> FightPartyControl 正在分關卡改造三人隊伍。FightScene3 已換成戰士／法師／射手資料，需求 60 MP，Team Skill 期間封鎖 Basic；第 3 關已接入破勢斬、能量波動、破陣彈、脆弱與法師滿甲被動，待使用者驗收。技能條件在每位角色實際施放時判定。下列舊職業、30 MP 與演出期間可操作 Basic 的敘述是歷史版本，最新規則、Inspector 與驗收請看 [三人隊伍驗收關卡](FightPartyImplementationCheckpoints.md)。跨 Wave／飛行攻擊／完整時間凍結仍待第 4 關。
 
 ## 操作
+
+以下為舊版操作紀錄。目前三位新角色均為 2 拍：首拍準備、第二拍結算；每角上限 4 拍，完整連鎖共 6 拍。新角色的設定與驗證狀態以三人隊伍驗收文件為準。
 
 - 成功踩拍使用 X／Y／B Basic（鍵盤 Q／W／E）增加全隊共用量表。
 - 預設每次 +1 魔力；需求是目前隊伍三名角色的需求魔力加總。三名正式英雄各需 10 點，因此全隊需求 30 點；Miss、重複拍點、空槽不增加魔力。

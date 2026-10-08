@@ -18,7 +18,10 @@ namespace RhythmHunter.FightDemo
             DamageAll,
             GuardAndDamageFront,
             Unavailable,
-            AimedShot
+            AimedShot,
+            BreakingSlash,
+            EnergySurge,
+            FormationBreaker
         }
 
         [Header("Identity")]
@@ -45,16 +48,26 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int consecutiveInputBeats = 3;
         [Tooltip("Guard covers these judged beats, including every eligible hit on each beat.")]
         [SerializeField, Min(1)] private int basicGuardBeats = 1;
+        [SerializeField] private bool basicInterruptsEnemy;
+        [SerializeField, Min(0)] private float successfulInterruptDamageBonus;
         [SerializeField, Min(0.5f)] private float attackPower = 1f;
         [Header("Team Skill / Legacy Fourth-Beat Skill")]
         [SerializeField, Min(1)] private int teamSkillManaCost = 10;
         [Tooltip("Beats reserved for this character's Team Skill performance before the next character starts.")]
-        [SerializeField, Min(1)] private int teamSkillPerformanceBeats = 4;
+        [SerializeField, Range(1, 4)] private int teamSkillPerformanceBeats = 4;
+        [Tooltip("Zero-based effect beat within the performance: 0 = first beat, 1 = second beat.")]
+        [SerializeField, Range(0, 3)] private int teamSkillEffectBeatOffset;
         [SerializeField] private string skillName = "Beat Skill";
         [Tooltip("Used by the EqualBeat Team Skill chain in formation order, and by legacy fourth-beat skills.")]
         [SerializeField] private AbilityBehavior skillBehavior;
         [FormerlySerializedAs("skillDamage")]
         [SerializeField, Min(0)] private float skillPower = 1f;
+        [Tooltip("Energy Surge focused damage or Formation Breaker piercing damage, before Fragile.")]
+        [SerializeField, Min(0)] private float conditionalSkillPower = 4f;
+        [SerializeField] private bool restoreArmorAfterTeamSkill;
+        [Header("Enemy Action")]
+        [Tooltip("Whether the currently pending attack / active windup can be interrupted. Idle and recovery never qualify.")]
+        [SerializeField] private bool attackInterruptible = true;
         [Header("Replaceable Ability Effects")]
         [Tooltip("Optional visual-only Basic Ability prefab. Damage never depends on this prefab or projectile travel.")]
         [SerializeField] private GameObject normalAbilityEffectPrefab;
@@ -88,12 +101,18 @@ namespace RhythmHunter.FightDemo
         public float BasicAbilityPower => normalAbilityPower;
         public int ConsecutiveInputBeats => Mathf.Max(1, consecutiveInputBeats);
         public int BasicGuardBeats => Mathf.Max(1, basicGuardBeats);
+        public bool BasicInterruptsEnemy => basicInterruptsEnemy;
+        public float SuccessfulInterruptDamageBonus => Mathf.Max(0, successfulInterruptDamageBonus);
+        public float ConditionalSkillPower => Mathf.Max(0, conditionalSkillPower);
+        public bool RestoreArmorAfterTeamSkill => restoreArmorAfterTeamSkill;
+        public bool AttackInterruptible => attackInterruptible;
         public AbilityBehavior NormalAbilityType => normalAbilityBehavior;
         public float NormalAbilityPower => normalAbilityPower;
         public float AttackPower => attackPower;
         public string SkillName => skillName;
         public int TeamSkillManaCost => Mathf.Max(1, teamSkillManaCost);
-        public int TeamSkillPerformanceBeats => Mathf.Max(1, teamSkillPerformanceBeats);
+        public int TeamSkillPerformanceBeats => Mathf.Clamp(teamSkillPerformanceBeats, 1, 4);
+        public int TeamSkillEffectBeatOffset => Mathf.Clamp(teamSkillEffectBeatOffset, 0, TeamSkillPerformanceBeats - 1);
         public AbilityBehavior SkillType => skillBehavior;
         public float SkillPower => skillPower;
         public GameObject NormalAbilityEffectPrefab => normalAbilityEffectPrefab;
