@@ -3771,7 +3771,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "X/Y/B (Q/W/E) = Guard / Heal / Damage \u2022 Basic Ability on every beat"
+  m_Text: "X/Y/B (Q/W/E) = Front / Middle / Back \u2022 Basic Ability on every beat"
 --- !u!1 &669889341
 GameObject:
   m_ObjectHideFlags: 0
@@ -9517,6 +9517,7 @@ MonoBehaviour:
   maxPartyHp: 4
   enemyAttackDamage: 1
   resolutionSafetyMs: 12
+  endBattleOnZeroHp: 0
   combatMode: 2
   enableHealthSystemInFrontHeroMode: 1
   enemyAttackIntervalBeats: 4
@@ -9624,6 +9625,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 2418354018728722847, guid: dfccd1a744e64584b8e72fdc1b7f935e, type: 3}
+  additionalWaves: []
 --- !u!1 &2028760521
 GameObject:
   m_ObjectHideFlags: 0

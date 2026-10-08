@@ -133,6 +133,10 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0.5f)] private float maxPartyHp = 4f;
         [SerializeField, Min(0.5f)] private float enemyAttackDamage = 1f;
         [SerializeField, Min(0f)] private float resolutionSafetyMs = 12f;
+        [Header("Battle Testing")]
+        [Tooltip("In prepared party battles, end combat when shared HP reaches zero. Disable to keep testing at 0 HP. Does not restart an already ended battle.")]
+        [SerializeField] private bool endBattleOnZeroHp = true;
+        public bool EndBattleOnZeroHp => endBattleOnZeroHp;
 
         [Header("Combat Mode")]
         [FormerlySerializedAs("enableFrontHeroModeInFightScene2")]
@@ -974,7 +978,7 @@ namespace RhythmHunter.FightDemo
             nextArmorRecoveryBeat = NaturalArmorRecoveryEnabled && definition != null && partyArmor < maxPartyArmor
                 ? globalBeat + definition.ArmorRecoveryDelay : long.MaxValue;
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
-            if (UsesBattlePreparation && partyHp <= 0) FinishBattle(false);
+            if (UsesBattlePreparation && endBattleOnZeroHp && partyHp <= 0) FinishBattle(false);
             return armorDamage + hpDamage;
         }
 

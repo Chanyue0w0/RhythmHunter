@@ -49,9 +49,11 @@ namespace RhythmHunter.FightDemoEditor
                 Require(fight.GetHeroActionForBeat(4) == FightCombatController.ActionType.Skill, "Older scenes must retain fourth-beat skills.");
                 fight.SetCombatMode(FightCombatController.CombatMode.EqualBeat);
 
-                ValidateFormation(components.OfType<FightRosterManager>().Single(), fight);
-                ValidateDefense(fight);
-                FightBasicGuardValidation.Run(fight);
+                Invoke(fight, "SubscribeDependencies");
+                fight.RosterManager.SpawnConfiguredRoster();
+                Require(fight.TryBeginBattle(), "Current party starts explicitly.");
+                Require(fight.MaxPartyHp == 4 && fight.MaxPartyArmor == 3, "Current party has shared 4 HP and warrior-front DEF 3.");
+                // Basic guard/resource/formation behavior is covered by the party checkpoint suites.
 
                 Invoke(hud, "BuildEqualBeatTimeline");
                 var points = Field<Image[]>(hud, "approachingPoints");
@@ -86,7 +88,7 @@ namespace RhythmHunter.FightDemoEditor
                 Require(root.GetComponentsInChildren<Image>().All(graphic => !graphic.raycastTarget), "Timeline must not intercept input.");
                 ValidateDefenseHud(fight, hud);
                 FightTimingCalibrationValidation.Run(fight, hud, canvas => CaptureHud(canvas, "Temp/FightTimingCalibration-preview.png"));
-                File.WriteAllText(Result, "PASS: 5 shared HP; frontline DEF 1:1; armor-first damage and overflow; recovery delay/interval/reset/cap; healing does not restore armor; zero-HP input remains enabled; live defense/enemy HUD and developer toggle; all six party permutations; empty positions keep bindings; character-owned Basic data; equal-beat timeline regressions.\nLive FMOD/input and visual playtesting are separate checks.");
+                File.WriteAllText(Result, "PASS: current 4 HP / 3 frontline DEF, explicit battle start, equal-beat timeline at multiple tempos, defense/enemy HUD, developer toggle, and calibration regression. Party ability/lifecycle checks run in the checkpoint suites.\nLive FMOD/input and visual playtesting are separate checks.");
                 Debug.Log("FIGHT_SCENE3_BEAT_VALIDATION_PASS");
                 passed = true;
             }
@@ -104,100 +106,7 @@ namespace RhythmHunter.FightDemoEditor
         }
 
         private static T Field<T>(object target, string name) => (T)target.GetType().GetField(name, Private).GetValue(target);
-
-        private static void ValidateFormation(FightRosterManager roster, FightCombatController fight)
-        {
-            var heroes = roster.HeroPrefabs.ToArray();
-            var enemies = roster.EnemyPrefabs.ToArray();
-            for (int i = 0; i < enemies.Length; i++) if (enemies[i] != null)
-                enemies[i] = AssetDatabase.LoadAssetAtPath<FightCharacterDefinition>("Assets/FightDemo/Prefabs/ArtBattle/Goblin_Killer.prefab");
-            int[][] orders =
-            {
-                new[] { 0, 1, 2 }, new[] { 0, 2, 1 }, new[] { 1, 0, 2 },
-                new[] { 1, 2, 0 }, new[] { 2, 0, 1 }, new[] { 2, 1, 0 },
-                new[] { -1, 1, 2 }, new[] { 0, -1, 2 }, new[] { 0, 1, -1 },
-                new[] { -1, -1, -1 }
-            };
-            foreach (int[] order in orders)
-            {
-                var assigned = order.Select(index => index < 0 ? null : heroes[index]).ToArray();
-                roster.SetRoster(assigned, enemies);
-                Invoke(fight, "RebuildRosterAndResetCombat");
-                Require(Mathf.Approximately(fight.MaxPartyHp, assigned.Where(hero => hero != null).Sum(hero => hero.MaxHp)), "Shared HP must sum occupied positions.");
-                Require(Mathf.Approximately(fight.MaxPartyArmor, assigned[0] != null ? fight.ArmorForDefense(assigned[0].Defense) : 0), "Only the authored frontline grants armor.");
-                for (int i = 0; i < 3; i++)
-                {
-                    FightUnitSlot slot = fight.GetHeroForCommand((FightInputRouter.HeroCommand)i).UnitSlot;
-                    Require(slot == roster.GetHeroAtPosition((FightRosterManager.PartyPosition)i), "Input must resolve its authored position.");
-                    if (assigned[i] == null)
-                    {
-                        Require(slot == null, "An empty position must not shift another character's binding.");
-                        continue;
-                    }
-                    Require(slot != null && slot.CharacterDefinition.CharacterId == assigned[i].CharacterId, "Any hero must be assignable to any position.");
-                    Require(slot.NormalAbilityBehavior == assigned[i].BasicAbilityType &&
-                        Mathf.Approximately(slot.NormalAbilityPower, assigned[i].BasicAbilityPower), "Basic behavior/power must follow the character, not the slot.");
-                }
-            }
-            Require(fight.GetHeroForCommand(FightInputRouter.HeroCommand.Ultimate) == null, "Ultimate must not resolve to a Basic slot.");
-            roster.SetRoster(heroes, enemies);
-            Invoke(fight, "RebuildRosterAndResetCombat");
-        }
-
-        private static void Invoke(object target, string method, params object[] args) => target.GetType().GetMethod(method, Private).Invoke(target, args);
-
-        private static void ValidateDefense(FightCombatController fight)
-        {
-            int[] defense = { 0, 2, 3, 5, 6, 8, 9, 10 };
-            float[] armor = { 0, 2, 3, 5, 6, 8, 9, 10 };
-            for (int i = 0; i < defense.Length; i++)
-                Require(Mathf.Approximately(fight.ArmorForDefense(defense[i]), armor[i]), "DEF must convert to armor 1:1.");
-            Require(fight.FrontHero.UnitSlot.MaxHp == 3 && fight.SecondHero.UnitSlot.MaxHp == 1 && fight.ThirdHero.UnitSlot.MaxHp == 1, "Default hero HP must be 3 / 1 / 1.");
-            Require(fight.FrontHero.UnitSlot.CharacterDefinition.Defense == 3 && fight.SecondHero.UnitSlot.CharacterDefinition.Defense == 1 && fight.ThirdHero.UnitSlot.CharacterDefinition.Defense == 1, "Default hero DEF must be 3 / 1 / 1.");
-            Require(fight.MaxPartyHp == 5 && fight.MaxPartyArmor == 3, "Default party must have 5 HP and 3 frontline armor.");
-            float fullHp = fight.MaxPartyHp;
-            float fullArmor = fight.MaxPartyArmor;
-            fight.ApplyPartyDamage(fullArmor + 1, 10);
-            Require(fight.PartyArmor == 0 && fight.PartyHp == fullHp - 1, "Armor must absorb damage before HP, including overflow.");
-            fight.AdvanceArmorRecovery(13);
-            Require(fight.PartyArmor == 0, "Armor recovered before the delay.");
-            fight.AdvanceArmorRecovery(14);
-            Require(fight.PartyArmor == 0.5f, "First recovery must occur at damage beat + delay.");
-            fight.AdvanceArmorRecovery(14);
-            fight.AdvanceArmorRecovery(15);
-            Require(fight.PartyArmor == 0.5f, "Recovery must not duplicate on the same beat or occur before the interval.");
-            fight.AdvanceArmorRecovery(16);
-            Require(fight.PartyArmor == 1f, "Recovery interval mismatch.");
-            fight.ApplyPartyDamage(0.5f, 17);
-            fight.AdvanceArmorRecovery(20);
-            Require(fight.PartyArmor == 0.5f, "New armor damage must reset the entire delay.");
-            fight.ApplyPartyDamage(0f, 20);
-            fight.AdvanceArmorRecovery(21);
-            Require(fight.PartyArmor == 1f, "Zero/blocked damage must not reset recovery.");
-            fight.AdvanceArmorRecovery(100);
-            Require(fight.PartyArmor == fullArmor && fight.PartyHp == fullHp - 1, "Recovery must cap armor and never regenerate HP.");
-            fight.ApplyPartyDamage(fullArmor, 110);
-            Invoke(fight, "HealPartyHealth", fight.SecondHero.UnitSlot, 100f);
-            Require(fight.PartyHp == fullHp && fight.PartyArmor == 0, "Healing must cap HP without restoring armor.");
-            typeof(FightCombatController).GetField("pendingEnemyAttack", Private).SetValue(fight, true);
-            fight.AdvanceArmorRecovery(114);
-            Require(fight.PartyArmor == 0, "Recovery must wait for pending damage resolution.");
-            typeof(FightCombatController).GetField("pendingEnemyAttack", Private).SetValue(fight, false);
-            fight.AdvanceArmorRecovery(114);
-            Require(fight.PartyArmor == 0.5f, "Recovery did not resume after resolution.");
-            fight.ApplyPartyDamage(999f, 115);
-            Require(fight.PartyHp == 0 && fight.PartyArmor == 0 && !fight.BattleEnded, "Zero team HP must not lock prototype combat.");
-            bool inputDispatched = false;
-            Action<FightCombatController.HeroCallResult> onInput = result => inputDispatched = true;
-            fight.HeroCalled += onInput;
-            fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Back);
-            fight.HeroCalled -= onInput;
-            Require(inputDispatched, "Basic input must still reach judgement at zero HP.");
-            fight.AdvanceArmorRecovery(200);
-            Invoke(fight, "HealPartyHealth", fight.SecondHero.UnitSlot, 100f);
-            Require(fight.PartyHp == fullHp && fight.PartyArmor == fullArmor, "Zero-HP parties must still heal and recover armor.");
-            Invoke(fight, "RebuildRosterAndResetCombat");
-        }
+        private static object Invoke(object target, string name, params object[] args) => target.GetType().GetMethod(name, Private).Invoke(target, args);
 
         private static void ValidateDefenseHud(FightCombatController fight, FightScenePresenter presenter)
         {

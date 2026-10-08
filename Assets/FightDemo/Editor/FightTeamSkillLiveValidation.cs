@@ -24,6 +24,9 @@ namespace RhythmHunter.FightDemoEditor
         static FightCombatController fight;
         static FightPauseController pause;
         static float ultimateTargetHp;
+        static float chainTargetHp;
+        static bool previousRunInBackground;
+        static readonly List<long> effectBeats = new();
         static FightTeamSkillLiveValidation()
         {
             EditorApplication.update += Tick;
@@ -48,7 +51,6 @@ namespace RhythmHunter.FightDemoEditor
             {
                 if (deadline == 0) deadline = EditorApplication.timeSinceStartup + 70;
                 Require(EditorApplication.timeSinceStartup < deadline, "Timed out.");
-                Application.runInBackground = true;
                 var clock = UnityEngine.Object.FindFirstObjectByType<FmodBeatClock>();
                 if (clock == null) return;
                 FMODUnity.RuntimeManager.CoreSystem.mixerResume();
@@ -56,9 +58,20 @@ namespace RhythmHunter.FightDemoEditor
                 {
                     if (clock.ReceivedBeatCount < 3) return;
                     fight = UnityEngine.Object.FindFirstObjectByType<FightCombatController>();
+                    previousRunInBackground = Application.runInBackground;
+                    Application.runInBackground = true;
+                    Require(fight.TryBeginBattle(), "Party preparation must explicitly start before live input.");
+                    Require(fight.MaxPartyHp == 4 && fight.MaxPartyArmor == 3 && fight.TeamSkillGaugeMax == 60, "Current shared party resources.");
                     // Keep this resource/timing test independent of Boss damage modifiers.
                     foreach (var enemy in fight.RosterManager.ActiveEnemies)
+                    {
                         enemy.CharacterDefinition.BossPattern.enabled = false;
+                        typeof(FightUnitSlot).GetField("maxHp", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(enemy, 100f);
+                        typeof(FightUnitSlot).GetField("attackIntervalBeats", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(enemy, 10000);
+                        enemy.RestoreFullHealth();
+                    }
+                    chainTargetHp = fight.ActiveEnemySlot.CurrentHp;
+                    fight.ApplyPartyDamage(2, clock.LatestBeat.GlobalBeat);
                     pause = UnityEngine.Object.FindFirstObjectByType<FightPauseController>();
                     fight.TeamSkillStepResolved += OnStep;
                     // Logic validation separately covers real Basic actions; prime only
@@ -105,7 +118,11 @@ namespace RhythmHunter.FightDemoEditor
                 if (phase == 6 && order.Count == 3 && !fight.TeamSkillRunning)
                 {
                     Require(!fight.TeamSkillRunning && order[0] == fight.FrontHero.UnitSlot && order[1] == fight.SecondHero.UnitSlot && order[2] == fight.ThirdHero.UnitSlot, "Resumed chain must complete in formation order.");
-                    Require(Math.Abs(clock.LatestBeat.Tempo - 121.15f) < .01f, "Music tempo changed.");
+                    Require(Math.Abs(clock.LatestBeat.Tempo - 121f) < .01f, "Expected the user's updated 121 BPM bank.");
+                    Require(effectBeats[1] - effectBeats[0] == 2 && effectBeats[2] - effectBeats[1] == 2,
+                        "Each character reserves two FMOD beats.");
+                    Require(fight.ActiveEnemySlot.CurrentHp == chainTargetHp - 14 && fight.PartyArmor == 3 && fight.PartyHp == 4,
+                        "Live chain resolves 14 damage, restores DEF and never heals/damages party HP.");
                     ScreenCapture.CaptureScreenshot("Temp/TeamSkill-complete.png");
                     phase = 7; checkpoint = EditorApplication.timeSinceStartup + .4; return;
                 }
@@ -157,21 +174,26 @@ namespace RhythmHunter.FightDemoEditor
                     phase = 14; return;
                 }
                 if (phase == 14 && !fight.TeamUltimateRunning)
-                    Finish("PASS: Team Skill and Ultimate A/RB+A routing, 30 mana, charge icons, FMOD 121.15, completed-chain charge, pause/resume both performances, exactly one 3-damage Ultimate impact.");
+                    Finish("PASS: actual FMOD 121 BPM, simulated Input System gamepad A/RB+A routing, 60 MP, two beats per hero, 14 damage, armor-only recovery, completed-chain charge, pause/resume and preserved legacy Ultimate single impact. Physical controller latency and final animation assets not verified.");
             }
             catch (Exception e) { Finish("FAIL: " + e); }
         }
-        static void OnStep(FightUnitSlot slot) => order.Add(slot);
+        static void OnStep(FightUnitSlot slot)
+        {
+            order.Add(slot);
+            effectBeats.Add(UnityEngine.Object.FindFirstObjectByType<FmodBeatClock>().LatestBeat.GlobalBeat);
+        }
         static void Finish(string result)
         {
             File.AppendAllText(Result, result + "\n"); File.Delete(Request);
             if (fight != null) fight.TeamSkillStepResolved -= OnStep;
             if (pause != null) pause.SetPaused(false);
             if (pad != null && pad.added) InputSystem.RemoveDevice(pad);
+            if (fight != null) Application.runInBackground = previousRunInBackground;
             string previous = SessionState.GetString(Previous, "");
             EditorSceneManager.playModeStartScene = string.IsNullOrEmpty(previous) ? null : AssetDatabase.LoadAssetAtPath<SceneAsset>(previous);
             SessionState.SetBool(Running, false); EditorApplication.isPlaying = false;
-            phase = 0; deadline = 0; order.Clear(); pad = null; fight = null; pause = null;
+            phase = 0; deadline = 0; order.Clear(); effectBeats.Clear(); pad = null; fight = null; pause = null;
         }
     }
 }

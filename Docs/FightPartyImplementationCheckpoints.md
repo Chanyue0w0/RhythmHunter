@@ -186,6 +186,8 @@
 5. 用 Team Skill 清波：待剩餘演出完成才出現下一波，下一波滿血。受到致命傷害後應顯示 DEFEAT，清完最後一波顯示 VICTORY；重開場景進行新戰鬥。
 6. `Rhythm Hunter > Validate Party Checkpoint 4 - Lifecycle`，或編輯模式寫入 `Temp/FightPartyLifecycleValidation.request` 為 `run`，執行確定性測試。
 
+測試用敗北開關：`FightDemoController > Fight Combat Controller > Battle Testing > End Battle On Zero Hp`。目前依使用者要求，FightScene3 設為關閉：HP 仍正常扣到 0，但不觸發敗北，普通能力、MP 與 Team Skill 可继续操作；勝利與換波規則不變。勾選後恢復零血量敗北。若在 0 HP 時重新勾選，下一次戰鬥檢查會觸發敗北；已結束的戰鬥不會因取消勾選自動復活，需要重開 Play Mode。非 Play Mode 修改並存場景才會保留設定。
+
 ### 主要檔案與限制
 
 - Unity 編譯成功；第 4 關 **31 項檢查通過**，前 3 關回歸 **170 + 91 + 110 項通過**，合計 402 項。第 4 關結果在 `Temp/FightPartyLifecycleValidation.result`；涵蓋既有盾窗與 Break 期限、表演中的格擋保留，以及避免新敵人排程與舊普通攻擊同時出招。
@@ -195,9 +197,43 @@
 - 正式外部 VFX 若自帶獨立移動／自毀腳本，仍需第 5 關逐資產檢查並接入暫停契約；本次保證內建效果及已接管的粒子／Animator，尚未驗證所有第三方特效。
 - 本關測試未使用真實 FMOD 音訊／手把。Preview Scene 仍可能出現先前記錄的 URP 重複 Global Light 訊息，不能宣稱完整實機或正式美術驗收完成。
 
-## 5. 完整回歸與演出
+## 5. 完整回歸與演出（程式／自動驗證已確認，正式素材待補）
 
 - 實際 FMOD、鍵盤／手把與早晚输入操作。
 - 狀態／技能／編隊 UI、正式角色素材與特效掛點檢視。
 - 更新失效的舊測試假設（5 HP、回血、自然回甲、零 HP 繼續玩）。
 - 分列自動驗證、實際操作與未驗證項目，經確認後才 push。
+
+### 已驗證
+
+- 第 4 關已 push：`f4d3202`。前四關確定性檢查共 402 項通過。
+- `FightScene3BeatValidation` 已移除 5 HP、自然回甲、回血及零血量繼續操作的舊斷言，改為當前 4 HP／戰士前衛 DEF 3／明確開戰。多 BPM 節拍 UI、敵我血甲顯示、開發面板與校準回歸通過。
+- 舊 `FightTeamSkillValidation.request` 入口改為執行目前的技能／生命週期套件；不再用 30 MP、4+4+4 或超過 4 拍的舊技能資料驗證新角色。
+- `FightTeamSkillLiveValidation` 使用真正的 FMOD 音樂播放及模擬 Input System 手把：確認 **121 BPM、60 MP、三人各 2 拍、14 傷害、法師滿甲而 HP 不變**，A／RB+A 路由、暫停與恢復通過。原有 Ultimate 僅做相容性回歸，沒有重新設計。
+- `FightPartyInputLiveValidation` 使用真正的 FMOD 時鐘及模擬鍵盤／手把，依序送出 Q/W/E 與 X/Y/B，跨早晚窗口完成兩輪三拍射擊。實測十筆有效輸入偏差約 **-58.9 至 +78.0 ms**，共 **10 MP、4 傷害**；沒有以假判定結果代替普通輸入。
+- 這兩份 live 測試只在 Play Mode 調整測試敵人的 HP／攻擊間隔，不保存场景，不寫入個人校準檔；结束移除模拟裝置、解除事件並恢復 Play Mode 起始場景。
+- 已檢視防禦 HUD 預覽與 Team Skill 完成截圖。FightScene3 序列化初始提示仍寫著 Guard／Heal／Damage，已修正為 Front／Middle／Back，避免進場誤導玩家。
+
+### 素材與掛點狀態
+
+使用者已確認三位角色正式演出素材尚未完成，因此本關不宣稱正式美術整合完成，也不自行製作替代正式素材。
+
+| 角色 | 已有 | 待素材完成後接入 |
+| --- | --- | --- |
+| 戰士 | 兩拍排程、第二拍斬擊、Cast／Impact 掛點 | 第一拍跳躍、第二拍斬擊正式圖組與效果 |
+| 法師 | 一拍格擋、兩拍技能、第二拍爆破與補甲 | 正式外觀、舉手／爆破動畫、防護罩及能量波特效 |
+| 射手 | 1/3、2/3 HUD、三拍普攻、兩拍技能 | 骷髏燧發槍外觀、準備／瞄準／射擊圖組與槍口掛點 |
+
+- 三份資料 Prefab 仍共用 `HeroSwordsman_Visual`；角色專用 `Normal Ability Effect Prefab`／`Skill Effect Prefab` 目前未配置，使用既有後備演出。
+- 替換素材後須逐項確認自帶移動、自毀、粒子和 Animator 是否遵守 `FightBattleEffect` 暫停；目前不存在「所有外部特效都已通過」的驗證結論。
+- 脆弱目前有 HUD `◆ x2`，角色身上的正式狀態特效仍待掛點與素材。
+
+### 重跑與尚待人工驗收
+
+- 編輯模式執行 `Rhythm Hunter > Validate FightScene3 Equal Beats` 檢查 UI／校準；寫入 `Temp/FightTeamSkillValidation.request` 的 `run` 重跑技能／生命週期。
+- 將 `run` 寫入 `Temp/FightTeamSkillLiveValidation.request` 或 `Temp/FightPartyInputLiveValidation.request`，一次只執行一個。工具會自動進入 Play Mode 並在結束後退出。
+- 結果為對應 `.result`；截圖：`Temp/FightDefenseHud-preview.png`、`Temp/TeamSkill-complete.png`、`Temp/PartyInput-live.png`。
+- 尚待：實體鍵盤／手把、耳機／喇叭延遲、真人聽拍與操作手感、正式動畫／特效素材，以及敵人正式配置後的難度平衡。
+- Unity 開發環境的 FMOD Debug Overlay 會覆蓋部分左上敵人資訊；Preview Scene 仍有既有重複 Global Light 訊息。它們沒有讓本輪數值或 live 測試失敗，但截圖不作最終美術驗收。
+
+第 5 關的程式與可自動化項目已完成，使用者已授權連同零血量敗北開關一起 push；正式素材掛接與人工操作驗收仍待後續，未列為全部完成。加入敗北開關後，生命週期套件通過 35 項檢查。

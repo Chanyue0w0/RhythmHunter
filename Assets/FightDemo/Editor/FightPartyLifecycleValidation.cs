@@ -131,6 +131,17 @@ namespace RhythmHunter.FightDemoEditor
                 for (int beat = 3; beat <= 7; beat++) f.Beat(beat);
                 Check(fight.CurrentWave == 2 && fight.RosterManager.ActiveEnemies.All(e => e.CurrentHp == e.MaxHp), "Remaining skills never hit freshly spawned wave.");
 
+                f.Reset(); Quiet(f);
+                Set(fight, "endBattleOnZeroHp", false);
+                fight.ApplyPartyDamage(99, 0); f.Beat(1);
+                Check(fight.PartyHp == 0 && !fight.BattleEnded, "Testing toggle keeps 0 HP playable through damage and beat checks.");
+                f.GunInput(2); f.GunInput(3); f.GunInput(4);
+                Check(fight.TeamSkillGauge == 3 && f.Enemies[0].CurrentHp == 99, "At 0 HP, valid inputs still gain MP and complete a three-beat shot.");
+                f.StartChain();
+                Check(fight.TeamSkillRunning, "At 0 HP, Team Skill is still available in testing mode.");
+                Set(fight, "endBattleOnZeroHp", true); f.Beat(5);
+                Check(fight.BattleEnded && !fight.TeamSkillRunning, "Re-enabling defeat at 0 HP ends the battle on the next check.");
+
                 f.Reset(); Quiet(f); int defeats = 0; fight.BattleLost += () => defeats++;
                 fight.ScheduleEnemyHits(source, new[] { 2 }, 1, true, true); f.StartChain();
                 fight.ApplyPartyDamage(99, 0); f.Beat(1); fight.ApplyPartyDamage(99, 1);

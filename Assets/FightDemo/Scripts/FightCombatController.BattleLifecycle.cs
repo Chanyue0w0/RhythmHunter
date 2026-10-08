@@ -19,7 +19,7 @@ namespace RhythmHunter.FightDemo
         private void CheckWaveCompletion()
         {
             if (!UsesBattlePreparation || AwaitingBattleStart || battleEnded || AwaitingNextWave || !HealthSystemEnabled) return;
-            if (partyHp <= 0) { FinishBattle(false); return; }
+            if (endBattleOnZeroHp && partyHp <= 0) { FinishBattle(false); return; }
             if (FindFrontLivingEnemy() != null) return;
             AwaitingNextWave = true;
             ResetBasicAbilityProgress();
