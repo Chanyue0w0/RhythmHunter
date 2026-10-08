@@ -23,10 +23,7 @@ namespace RhythmHunter.TopDownBeatCombatEditor
             if (SessionState.GetBool(ActiveKey, false))
                 RegisterCallbacks();
 
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(TopDownBeatCombatSceneBuilder.ScenePath) == null)
-                EditorApplication.delayCall += BuildMissingScene;
-            else
-                EditorApplication.delayCall += TopDownBeatCombatSceneBuilder.ApplyBuildSettings;
+            // Reload only resumes explicitly started validation; never rebuild scenes or change the user's build list.
         }
 
         [MenuItem("Rhythm Hunter/Validate Top Down Beat Combat Prototype")]
@@ -44,16 +41,6 @@ namespace RhythmHunter.TopDownBeatCombatEditor
             SessionState.SetString(FailureKey, "Validation timed out.");
             RegisterCallbacks();
             EditorApplication.EnterPlaymode();
-        }
-
-        private static void BuildMissingScene()
-        {
-            if (EditorApplication.isCompiling || EditorApplication.isPlayingOrWillChangePlaymode ||
-                AssetDatabase.LoadAssetAtPath<SceneAsset>(TopDownBeatCombatSceneBuilder.ScenePath) != null)
-            {
-                return;
-            }
-            TopDownBeatCombatSceneBuilder.BuildScene();
         }
 
         private static void ValidateStructure()

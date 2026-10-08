@@ -15,6 +15,14 @@
 7. `ENTER BATTLE` 進入 FightScene3，戰鬥直接讀取已保存數值。未保存的試用不會帶入戰鬥。
 8. 歌曲播完或想重新開始時，按 `REPLAY MUSIC`。
 
+### 校準結果恢復與段落偏差
+
+- 收滿 32 筆但不合格時，繼續取最近 32 筆重新評估；不再停止收集並永久停在無法 Save 的狀態。首次取得可靠結果後凍結結果，供 Preview／Save；要測其他段落請 Retry。
+- Save 不可用時顯示具體原因：有效集中樣本少於 24、Spread 超過 30 ms、Drift 絕對值超過 30 ms，或偏移超過 ±150 ms。保留原門檻，不將 ±180 ms 默默截成 ±150 ms 後保存。
+- 面板顯示歌曲秒數及 FMOD 回報的 BPM，方便重播定位異常段落。RAW 是相對 FMOD 拍點的偏差，COMPENSATED 扣除目前試用的個人補償；下方 Measured habit 是整組樣本統計，不是剛剛那次按鍵。
+- 本次修正處理取樣與 Save 流程，並未證明歌曲音訊與 Tempo Marker 對齊。局部或逐漸增加的 ±180 ms 偏差仍需比對指定段落與 FMOD 拍點，不應以放寬保存門檻或固定個人 Offset 掩蓋。
+- `Rhythm Hunter > Validate Calibration Recovery` 驗證滑動取樣恢復、重複拍拒絕、可靠結果凍結、超範圍拒絕及 Save UI，不更改已保存個人校準。
+
 此數值包含習慣與裝置延遲，不是純粹的反應速度；換耳機／輸出裝置後應重新校正。
 結果若持續漂移，先檢查 Tempo Map，不要用個人 offset 補償歌曲變速。
 

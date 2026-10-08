@@ -12,33 +12,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         public const string PrefabFolder = "Assets/OtterAquariumPrototype/Prefabs/BeatProjectiles";
         private const int ExpectedItemCount = 27;
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialConversion()
-        {
-            EditorApplication.delayCall += TryCreateMissingPrefabs;
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.EnteredEditMode)
-                EditorApplication.delayCall += TryCreateMissingPrefabs;
-        }
-
-        private static void TryCreateMissingPrefabs()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryCreateMissingPrefabs;
-                return;
-            }
-            if (EditorApplication.isPlayingOrWillChangePlaymode || HasCompletePrefabSet())
-                return;
-
-            CreateMissingPrefabsFromItemTmp(false);
-        }
-
         [MenuItem("Rhythm Hunter/Otter Aquarium/Create Missing Beat Projectile Prefabs From ItemTMP")]
         public static void CreateMissingPrefabsFromMenu()
         {

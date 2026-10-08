@@ -42,29 +42,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static readonly Color OtterLight = new(0.76f, 0.56f, 0.34f, 1f);
         private static readonly Color Accent = new(1f, 0.62f, 0.22f, 1f);
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.delayCall += TryBuildInitialScene;
-        }
-
-        private static void TryBuildInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryBuildInitialScene;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null || !SceneUsesAuthoringLayout())
-            {
-                BuildScene();
-            }
-        }
-
         [MenuItem("Rhythm Hunter/Otter Aquarium/Rebuild Prototype Scene...")]
         private static void RebuildSceneFromMenu()
         {

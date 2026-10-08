@@ -122,9 +122,9 @@ namespace RhythmHunter.FightDemo
             { message = "Tap once per beat. Duplicate or far-off taps are ignored."; return; }
             message = samples.Complete
                 ? samples.Reliable ? "Ready. Preview the compensation, then Save if it feels right."
-                    : "Not stable enough to save. Retry; if the timing drifts, check the song's tempo map."
+                    : "Keep tapping: checking the latest 32 samples."
                 : "Keep following the music at a steady pace.";
-            if (samples.Complete) measuring = false;
+            if (samples.Reliable) measuring = false;
         }
 
         public void Preview()
@@ -156,11 +156,13 @@ namespace RhythmHunter.FightDemo
 
         void Refresh()
         {
-            readout.text = $"{clock.MusicEventPath}\n{clock.LatestBeat.Tempo:0.00} BPM   |   {profile}   |   Applied habit: {Direction(judge.PersonalDelayMs)}\n" +
+            string songPosition = clock.TryGetTimelinePositionMs(out int songMs) ? $"{songMs / 1000.0:0.00}s" : "waiting";
+            readout.text = $"{clock.MusicEventPath}  |  {songPosition}\n{clock.LatestBeat.Tempo:0.00} BPM   |   {profile}   |   Applied habit: {Direction(judge.PersonalDelayMs)}\n" +
                 $"Measured habit: {Direction(samples.MedianMs)}   |   Spread: {samples.SpreadMs:0} ms   |   Drift: {samples.DriftMs:+0;-0;0} ms\n" +
-                "Positive habit = late taps; compensation moves INPUT only. Audio and visual beats stay fixed.";
+                "RAW = FMOD beat error; COMPENSATED = raw minus preview. Ready results freeze until RETRY.";
             progress.text = (samples.WarmupRemaining > 0 && measuring ? $"WARMUP: {samples.WarmupRemaining} taps left" :
-                $"SAMPLES {samples.Count}/{RhythmTimingSamples.TargetCount}  |  Consistent samples: {samples.InlierCount}") + "\n" + message;
+                $"SAMPLES {samples.Count}/{RhythmTimingSamples.TargetCount}  |  Consistent samples: {samples.InlierCount}") + "\n" +
+                (measuring && samples.Complete && !samples.Reliable ? "SAVE blocked: " + samples.SaveBlockedReason + "\nKeep tapping; latest 32 samples are rechecked." : message);
             progressFill.rectTransform.sizeDelta = new Vector2(700f * samples.Count / RhythmTimingSamples.TargetCount, 6);
             previewButton.interactable = saveButton.interactable = samples.Reliable;
         }
@@ -182,7 +184,7 @@ namespace RhythmHunter.FightDemo
             Label(box, Standalone ? "Tap Q / W / E or X / Y / B once per beat. SAVE before entering battle."
                 : "Battle paused. Tap Q / W / E or X / Y / B once per beat.   ESC / F8: close", new Vector2(30,-62),new Vector2(720,26),16);
             readout = Label(box,"",new Vector2(30,-102),new Vector2(720,108),17);
-            progress = Label(box,"",new Vector2(30,-219),new Vector2(720,66),17);
+            progress = Label(box,"",new Vector2(30,-209),new Vector2(720,80),15);
             var bar=Rect("Progress",box,new Vector2(30,-290),new Vector2(700,6));
             bar.gameObject.AddComponent<Image>().color=new Color(.1f,.2f,.3f);
             progressFill=Rect("Fill",bar,Vector2.zero,new Vector2(0,6)).gameObject.AddComponent<Image>();

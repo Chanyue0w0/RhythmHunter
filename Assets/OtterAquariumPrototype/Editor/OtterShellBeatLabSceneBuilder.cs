@@ -41,25 +41,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public TextMesh Statistics;
         }
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.delayCall += TryBuildInitialScene;
-        }
-
-        private static void TryBuildInitialScene()
-        {
-            if (EditorApplication.isCompiling)
-            {
-                EditorApplication.delayCall += TryBuildInitialScene;
-                return;
-            }
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-                BuildScene();
-        }
-
         [MenuItem("Rhythm Hunter/Otter Aquarium/Build Shell Beat Lab")]
         public static void BuildScene()
         {

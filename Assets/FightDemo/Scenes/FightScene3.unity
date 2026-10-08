@@ -650,7 +650,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: beatSource
-      value:
+      value: 
       objectReference: {fileID: 2021200326}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.size
@@ -662,7 +662,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[10].target
-      value:
+      value: 
       objectReference: {fileID: 1423671222}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[11].amount
@@ -670,7 +670,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[11].target
-      value:
+      value: 
       objectReference: {fileID: 790028219}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[12].amount
@@ -678,7 +678,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[12].target
-      value:
+      value: 
       objectReference: {fileID: 462921676}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[13].amount
@@ -686,7 +686,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[13].target
-      value:
+      value: 
       objectReference: {fileID: 1905371429}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[14].amount
@@ -694,7 +694,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[14].target
-      value:
+      value: 
       objectReference: {fileID: 1258807903}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[15].amount
@@ -702,7 +702,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[15].target
-      value:
+      value: 
       objectReference: {fileID: 295788700}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[10].durationInBeats
@@ -9503,6 +9503,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
+  teamSkillGaugeGain: 1
+  teamUltimateRequiredCharges: 3
+  teamUltimatePerformanceBeats: 4
+  teamUltimateImpactBeat: 4
+  teamUltimateDamage: 3
   beatClock: {fileID: 2021200329}
   rhythmJudge: {fileID: 2021200328}
   inputRouter: {fileID: 2021200327}
@@ -9553,7 +9558,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodRhythmJudge
   beatClock: {fileID: 2021200329}
-  perfectWindowMs: 120
+  perfectWindowMs: 150
   judgementOffsetMs: 0
   duplicatePerfectBecomesMiss: 1
 --- !u!114 &2021200329
@@ -9600,9 +9605,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dd05245035e4803bc6e8ae3535f39c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightRosterManager
+  requireBattlePreparation: 1
   fightController: {fileID: 2021200326}
   beatClock: {fileID: 2021200329}
-  requireBattlePreparation: 1
   heroSpawnSlots:
   - {fileID: 2037638511}
   - {fileID: 287245178}

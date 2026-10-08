@@ -22,22 +22,7 @@ namespace RhythmHunter.RhythmArenaEditor
             if (SessionState.GetBool(ActiveKey, false))
                 RegisterCallbacks();
 
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(RhythmArenaPrototypeSceneBuilder.ScenePath) == null)
-                EditorApplication.delayCall += BuildMissingPrototypeScene;
-            else if (AssetDatabase.LoadAssetAtPath<SceneAsset>(
-                         "Assets/Prototype/TopDownBeatCombat/Scenes/TopDownBeatCombatPrototype.unity") == null)
-                EditorApplication.delayCall += RhythmArenaPrototypeSceneBuilder.ApplyBuildSettings;
-        }
-
-        private static void BuildMissingPrototypeScene()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling ||
-                AssetDatabase.LoadAssetAtPath<SceneAsset>(RhythmArenaPrototypeSceneBuilder.ScenePath) != null)
-            {
-                return;
-            }
-
-            RhythmArenaPrototypeSceneBuilder.BuildScene();
+            // Reload only resumes explicitly started validation; never rebuild scenes or change the user's build list.
         }
 
         [MenuItem("Rhythm Hunter/Validate Rhythm Arena Prototype")]

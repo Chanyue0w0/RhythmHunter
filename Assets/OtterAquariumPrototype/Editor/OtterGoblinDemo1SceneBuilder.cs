@@ -62,26 +62,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
             public TextMesh Status;
         }
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-            EditorApplication.delayCall += TryInitialBuild;
-            EditorApplication.delayCall += TryEnsureAxePrefab;
-            EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
-            EditorApplication.delayCall += TryUpgradeSharedSceneOtterAnimation;
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.EnteredEditMode)
-            {
-                EditorApplication.delayCall += TryRedirectRemovedOtterVsScene;
-                EditorApplication.delayCall += TryUpgradeSharedSceneOtterAnimation;
-            }
-        }
-
         [MenuItem("Rhythm Hunter/Otter Aquarium/Upgrade Shared Demo1 Otter Animation")]
         public static void UpgradeSharedSceneOtterAnimation()
         {

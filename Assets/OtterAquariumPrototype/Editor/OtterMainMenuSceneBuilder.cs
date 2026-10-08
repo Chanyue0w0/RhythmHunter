@@ -33,36 +33,6 @@ namespace RhythmHunter.OtterAquariumPrototypeEditor
         private static readonly Color Cream = new(1f, 0.94f, 0.72f, 1f);
         private static readonly Color ButtonBlue = new(0.06f, 0.35f, 0.43f, 0.88f);
 
-        [InitializeOnLoadMethod]
-        private static void QueueInitialBuild()
-        {
-            EditorApplication.delayCall += TryInitialBuild;
-            EditorApplication.delayCall += TryUpgradeMenuMusic;
-        }
-
-        private static void TryInitialBuild()
-        {
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                EditorApplication.delayCall += TryInitialBuild;
-                return;
-            }
-
-            if (EditorApplication.isPlayingOrWillChangePlaymode || Application.isBatchMode)
-                return;
-
-            // Rhythm Arena is an isolated prototype and owns the active Build scene while present.
-            // Keep the legacy menu builder available without letting its reload hook re-enable Otter scenes.
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(
-                    "Assets/Prototype/RhythmArena/Scenes/RhythmArenaPrototype.unity") != null)
-                return;
-
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-                BuildSceneInternal();
-            else
-                EnsureBuildSettings();
-        }
-
         [MenuItem("Rhythm Hunter/Otter Aquarium/Build Main Menu Scene")]
         public static void BuildScene()
         {
