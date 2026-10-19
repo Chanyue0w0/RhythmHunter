@@ -1,5 +1,27 @@
 # FightScene 美術循環整合
 
+## FightScene3 角色生成位置
+
+`FightDemoController → FightRosterManager` 指定角色 Prefab；執行時由 `FightUnitSlot` 生成在各位置的 `ActorRoot` 下，實例名稱為 `角色Prefab名稱 (Runtime)`。
+玩家位置為 `HeroSlot_Front`、`HeroSlot_Middle`、`HeroSlot_Rear`；敵方對應 `EnemySlot_Front`、`EnemySlot_Middle`、`EnemySlot_Rear`。名稱代表位置，不代表職業，戰前交換仍沿用原生成點引用。
+六組舊 `PrototypePlaceholder`（含 Body、Core、PrefabLabel）已移除。敵方暫時沒有指派 Prefab 的位置仍保留給編隊與後續 Wave，執行時由 `ClearCharacter()` 關閉。
+
+## 角色逐張圖片拍數
+
+角色視覺 Prefab 的 `FightCharacterCombatAnimator` 統一控制待機與戰鬥序列。
+
+- Inspector 分為 `Idle`（待機）、`Normal`（普通能力）、`TeamSkill`（隊伍技能）、`GetHurt`（受傷）、`Die`（死亡）五個主分類；Guard、Heavy Attack、舊版 Light Attack 保留於其他動作區。
+- 展開分類，每個「圖片 1／2／3」區塊內直接指定 Sprite、持續拍數，以及進入這張圖片時是否發出 Warning／攻擊特效／舊流程傷害事件。待機沒有戰鬥事件欄位。拍數模式關閉時仍沿用整套動畫的 FPS／循環速度。
+- 使用「新增圖片」「上移」「下移」「刪除圖片」管理圖片；排序會同步搬移拍數與事件，刪除圖片會解除它的事件。每種事件沿用一套動畫一次的規則，勾選另一張會移動該事件，不會新增多次攻擊。
+- 下方顯示單次正向總拍數，Ping Pong 的返回行程另外計算。尚無資料的分類可用「新增此類動畫」建立，新建序列預設使用拍數模式。
+- Idle 拍數模式不使用 Cycles Per Beat，但保留 Ping Pong 與 Phase Offset。
+- 顯示名稱保留原 enum 數值（NormalAttack=0、Skill=4、Hit=5、Death=6），既有 Prefab 不需搬移。FightScene3 普通攻擊改用 Normal 分類，舊場景仍保留 Light Attack。Die 分類只是提供素材設定，不新增死亡觸發流程。
+- 支援 0.25、0.5、1、1.5 等拍數；最小 0.01 拍，缺少的項目預設 0.5 拍。新增圖片時 Inspector 驗證會補齊拍數欄位。
+- 例如三張圖填 0.5、0.25、1.25，總長為 2 拍；120 BPM 時分別為 0.25、0.125、0.625 秒。
+- 預設不啟用新模式，因此現有 Prefab 保持原 FPS／待機循環設定。戰鬥動畫沿用戰鬥節拍提供的 tempo 與暫停機制；沒有節拍來源時才使用 Fallback BPM。
+- 事件內部保留原圖片索引資料，Inspector 以圖片內勾選框編輯；既有 Prefab 不需搬移。事件必須由播放端傳入對應 callback 才產生效果。隊伍模式的實際傷害與 Team Skill 總拍數仍由戰鬥系統決定，調整圖片不會自動修改技能時程；請使技能圖片總長及效果圖片起點配合角色技能的演出／效果拍數。
+- 目前三名新角色共用視覺 Prefab。要分別設定圖片，先複製各自的視覺 Prefab 再接至各角色資料，避免修改共用資產影響三人。
+
 ## 閃現原因
 
 `ArtTest` (`6b4c557`) 的 `LoopingBackgroundScroller` 使用左右副本接續背景。

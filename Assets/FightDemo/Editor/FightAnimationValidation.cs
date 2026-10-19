@@ -128,6 +128,28 @@ namespace RhythmHunter.FightDemoEditor
                 root.SetActive(true);
                 player.SendMessage("Update");
                 Require(renderer.sprite == idle, "Idle was not restored after re-enable.");
+
+                normal.ConfigureFrameBeats(new[] { 0.5f, 0.25f, 1.25f });
+                int beatEffects = 0, beatCompleted = 0;
+                player.Play(normal.Animation, onAttackEffect: () => beatEffects++, onCompleted: () => beatCompleted++);
+                Advance(player, 0.125f);
+                Require(player.ActiveFrame == 0, "Half-beat frame ended early at 120 BPM.");
+                player.SetPlaybackPaused(true);
+                Advance(player, 5f);
+                Require(player.ActiveFrame == 0 && beatEffects == 0, "Paused beat animation advanced.");
+                player.SetPlaybackPaused(false);
+                Advance(player, 0.125f);
+                Require(player.ActiveFrame == 1 && beatEffects == 1, "Half-beat frame did not advance at 0.25 seconds.");
+                Advance(player, 0.125f);
+                Require(player.ActiveFrame == 2, "Quarter-beat frame duration was ignored.");
+                Advance(player, 0.5f);
+                Require(player.IsPlaying && beatCompleted == 0, "Last frame did not retain its full duration.");
+                Advance(player, 0.125f);
+                Require(!player.IsPlaying && beatCompleted == 1 && beatEffects == 1,
+                    "Two-beat animation should finish once at one second.");
+                normal.ConfigureFrameBeats(new[] { 0f, -1f, float.NaN });
+                Require(normal.GetFrameBeats(0) > 0 && normal.GetFrameBeats(1) > 0 && normal.GetFrameBeats(2) > 0,
+                    "Invalid frame durations must not stall playback.");
             }
             finally
             {
@@ -143,6 +165,12 @@ namespace RhythmHunter.FightDemoEditor
             var result = new FightCharacterCombatAnimator.Sequence();
             result.Configure(animation, new[] { sprite, sprite, sprite }, 16f, warning, effect, damage);
             return result;
+        }
+
+        private static void Advance(FightCharacterCombatAnimator player, float seconds)
+        {
+            typeof(FightCharacterCombatAnimator).GetMethod("AdvancePlayback", PrivateInstance)
+                .Invoke(player, new object[] { seconds });
         }
 
         private static void AdvanceToEnd(FightCharacterCombatAnimator player)

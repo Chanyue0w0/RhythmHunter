@@ -14,13 +14,13 @@ namespace RhythmHunter.FightDemo
     {
         public enum CombatAnimation
         {
-            NormalAttack,
-            LightAttack,
-            HeavyAttack,
-            Guard,
-            Skill,
-            Hit,
-            Death
+            [InspectorName("Normal")] NormalAttack = 0,
+            [InspectorName("Light Attack (Legacy)")] LightAttack = 1,
+            HeavyAttack = 2,
+            Guard = 3,
+            [InspectorName("TeamSkill")] Skill = 4,
+            [InspectorName("GetHurt")] Hit = 5,
+            [InspectorName("Die")] Death = 6
         }
 
         [Serializable]
@@ -29,6 +29,10 @@ namespace RhythmHunter.FightDemo
             [SerializeField] private CombatAnimation animation;
             [SerializeField] private List<Sprite> frames = new();
             [SerializeField, Min(1f)] private float framesPerSecond = 16f;
+            [Tooltip("Use individual frame durations in beats instead of FPS.")]
+            [SerializeField] private bool useFrameBeatDurations;
+            [Tooltip("Matches Frames by index. 0.5 = half a beat. Missing entries default to 0.5.")]
+            [SerializeField] private List<float> frameBeatDurations = new();
             [Tooltip("-1 disables the warning event for this sequence.")]
             [SerializeField] private int warningFrame = -1;
             [Tooltip("-1 disables the attack VFX event for this sequence.")]
@@ -39,6 +43,15 @@ namespace RhythmHunter.FightDemo
             public CombatAnimation Animation => animation;
             public IReadOnlyList<Sprite> Frames => frames;
             public float FramesPerSecond => framesPerSecond;
+            public bool UseFrameBeatDurations => useFrameBeatDurations;
+            public float GetFrameBeats(int index) => FrameBeats(frameBeatDurations, index);
+
+            public void ConfigureFrameBeats(IEnumerable<float> durations)
+            {
+                useFrameBeatDurations = true;
+                frameBeatDurations = durations != null ? new List<float>(durations) : new List<float>();
+                ClampEventFrames();
+            }
             public int WarningFrame => warningFrame;
             public int AttackEffectFrame => attackEffectFrame;
             public int DamageFrame => damageFrame;
@@ -63,10 +76,11 @@ namespace RhythmHunter.FightDemo
             public void ClampEventFrames()
             {
                 framesPerSecond = Mathf.Max(1f, framesPerSecond);
+                NormalizeDurations(frameBeatDurations, frames.Count);
                 int lastFrame = Mathf.Max(0, frames.Count - 1);
                 warningFrame = Mathf.Clamp(warningFrame, -1, lastFrame);
                 attackEffectFrame = Mathf.Clamp(attackEffectFrame, -1, lastFrame);
-                damageFrame = Mathf.Clamp(damageFrame, 0, lastFrame);
+                damageFrame = Mathf.Clamp(damageFrame, -1, lastFrame);
             }
         }
 
@@ -77,6 +91,9 @@ namespace RhythmHunter.FightDemo
 
         [Header("Editable Idle Sequence")]
         [SerializeField] private List<Sprite> frames = new();
+        [Tooltip("Use individual idle frame durations instead of Cycles Per Beat. Ping Pong still applies.")]
+        [SerializeField] private bool useIdleFrameBeatDurations;
+        [SerializeField] private List<float> idleFrameBeatDurations = new();
         [Tooltip("Complete animation loops per beat. 1 = one loop each beat; 0.5 = one loop every two beats.")]
         [SerializeField, Min(0.01f)] private float cyclesPerBeat = 1f;
         [Tooltip("Plays the sequence forward, then backward, without duplicating its end frames.")]
@@ -200,6 +217,21 @@ namespace RhythmHunter.FightDemo
             double beatPosition = CurrentIdleBeatPosition() - idlePausedBeats;
             double cyclePosition = beatPosition * Math.Max(0.01d, cyclesPerBeat) + phaseOffset;
             int sequenceLength = pingPong && frames.Count > 2 ? frames.Count * 2 - 2 : frames.Count;
+            if (useIdleFrameBeatDurations)
+            {
+                double totalBeats = 0;
+                for (int i = 0; i < sequenceLength; i++)
+                    totalBeats += FrameBeats(idleFrameBeatDurations, i < frames.Count ? i : sequenceLength - i);
+                double position = (beatPosition + phaseOffset * totalBeats) % totalBeats;
+                if (position < 0) position += totalBeats;
+                for (int i = 0; i < sequenceLength; i++)
+                {
+                    int index = i < frames.Count ? i : sequenceLength - i;
+                    position -= FrameBeats(idleFrameBeatDurations, index);
+                    if (position < 0) { ShowFrame(index); return; }
+                }
+                return;
+            }
             int sequenceFrame = PositiveModulo((int)Math.Floor(cyclePosition * sequenceLength), sequenceLength);
             int frameIndex = pingPong && sequenceFrame >= frames.Count
                 ? sequenceLength - sequenceFrame
@@ -209,6 +241,10 @@ namespace RhythmHunter.FightDemo
 
         private double CurrentIdleBeatPosition()
         {
+            FmodBeatClock clock = beatSource != null ? beatSource.BeatClock : null;
+            if (clock != null && clock.HasTimingAnchor && clock.TryGetTimelinePositionMs(out int timelineMs))
+                return clock.LatestBeat.GlobalBeat +
+                    (timelineMs - clock.LatestBeat.TimelinePositionMs) / Math.Max(1d, clock.MillisecondsPerBeat);
             double now = Time.timeAsDouble;
             return hasBeatAnchor
                 ? beatAnchorIndex + Math.Max(0d, now - beatAnchorTime) / Math.Max(0.001d, secondsPerBeat)
@@ -313,10 +349,20 @@ namespace RhythmHunter.FightDemo
             }
 
             int version = playbackVersion;
-            frameElapsed += deltaTime;
-            float frameDuration = 1f / Mathf.Max(1f, activeSequence.FramesPerSecond);
-            while (activeSequence != null && playbackVersion == version && frameElapsed >= frameDuration)
+            // Reuse the tempo delivered by the combat beat source. Accumulating beat
+            // fractions preserves progress if the music tempo changes mid-frame.
+            float pitch = beatSource != null && beatSource.BeatClock != null ? beatSource.BeatClock.MusicPitch : 1f;
+            if (beatSource != null && beatSource.BeatClock != null && beatSource.BeatClock.HasTimingAnchor)
+                secondsPerBeat = beatSource.BeatClock.MillisecondsPerBeat / 1000d;
+            frameElapsed += activeSequence.UseFrameBeatDurations
+                ? deltaTime * pitch / (float)Math.Max(0.001d, secondsPerBeat)
+                : deltaTime;
+            while (activeSequence != null && playbackVersion == version)
             {
+                float frameDuration = activeSequence.UseFrameBeatDurations
+                    ? activeSequence.GetFrameBeats(activeFrame)
+                    : 1f / Mathf.Max(1f, activeSequence.FramesPerSecond);
+                if (frameElapsed < frameDuration) break;
                 frameElapsed -= frameDuration;
                 int nextFrame = activeFrame + 1;
                 if (nextFrame >= activeSequence.Frames.Count)
@@ -373,10 +419,10 @@ namespace RhythmHunter.FightDemo
             // Detach before invoking callbacks: damage can synchronously start a hit animation.
             Action effect = flushGameplayEvents && !effectRaised && activeSequence.AttackEffectFrame >= 0
                 ? attackEffectCallback : null;
-            Action damage = flushGameplayEvents && !damageRaised ? damageCallback : null;
+            Action damage = flushGameplayEvents && !damageRaised && activeSequence.DamageFrame >= 0 ? damageCallback : null;
             Action finished = flushGameplayEvents ? completedCallback : null;
             bool raiseEffect = flushGameplayEvents && !effectRaised && activeSequence.AttackEffectFrame >= 0;
-            bool raiseDamage = flushGameplayEvents && !damageRaised;
+            bool raiseDamage = flushGameplayEvents && !damageRaised && activeSequence.DamageFrame >= 0;
             playbackVersion++;
             activeSequence = null;
             warningCallback = null;
@@ -403,12 +449,26 @@ namespace RhythmHunter.FightDemo
             return null;
         }
 
+        private static float FrameBeats(List<float> durations, int index)
+        {
+            float value = durations != null && index >= 0 && index < durations.Count ? durations[index] : 0.5f;
+            return float.IsNaN(value) || float.IsInfinity(value) ? 0.5f : Mathf.Max(0.01f, value);
+        }
+
+        private static void NormalizeDurations(List<float> durations, int count)
+        {
+            if (durations == null) return;
+            while (durations.Count < count) durations.Add(0.5f);
+            for (int i = 0; i < durations.Count; i++) durations[i] = FrameBeats(durations, i);
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
             fallbackBpm = Mathf.Max(1f, fallbackBpm);
             cyclesPerBeat = Mathf.Max(0.01f, cyclesPerBeat);
             phaseOffset = Mathf.Repeat(phaseOffset, 1f);
+            NormalizeDurations(idleFrameBeatDurations, frames.Count);
             shownFrame = -1;
             if (!IsPlaying) ShowFrame(0);
             foreach (Sequence sequence in sequences)

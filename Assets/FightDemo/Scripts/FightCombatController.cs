@@ -137,6 +137,7 @@ namespace RhythmHunter.FightDemo
         [Tooltip("In prepared party battles, end combat when shared HP reaches zero. Disable to keep testing at 0 HP. Does not restart an already ended battle.")]
         [SerializeField] private bool endBattleOnZeroHp = true;
         public bool EndBattleOnZeroHp => endBattleOnZeroHp;
+        public FmodBeatClock BeatClock => beatClock;
 
         [Header("Successful Input Audio")]
         [Tooltip("Play once when a character input passes rhythm judgement, including preparation and guard inputs.")]
@@ -536,7 +537,8 @@ namespace RhythmHunter.FightDemo
             power = QuantizeCombatValue(power);
             FightCharacterCombatAnimator.CombatAnimation animation = skill
                 ? FightCharacterCombatAnimator.CombatAnimation.Skill
-                : FightCharacterCombatAnimator.CombatAnimation.LightAttack;
+                : UsesEqualBeats ? FightCharacterCombatAnimator.CombatAnimation.NormalAttack
+                    : FightCharacterCombatAnimator.CombatAnimation.LightAttack;
             Action playEffect = skill
                 ? () => actor.PlaySkillAttackAt(actor.CastEffectAnchor)
                 : () => actor.PlayLightAttackAt(actor.CastEffectAnchor);
@@ -563,7 +565,7 @@ namespace RhythmHunter.FightDemo
                     ArmGuard(globalBeat, skill ? 1 : actor.CharacterDefinition?.BasicGuardBeats ?? 1);
                     PlayAnimatedHeroUtility(
                         actor,
-                        FightCharacterCombatAnimator.CombatAnimation.Guard,
+                        UsesEqualBeats ? animation : FightCharacterCombatAnimator.CombatAnimation.Guard,
                         () => actor.PlayGuardAt(skill, UsesEqualBeats ? tankSlot : null),
                         null);
                     return UsesEqualBeats ? $"{abilityName} blocks enemy damage on this beat only"
@@ -1190,7 +1192,8 @@ namespace RhythmHunter.FightDemo
             {
                 ActionType.HeavyAttack => FightCharacterCombatAnimator.CombatAnimation.HeavyAttack,
                 ActionType.Skill => FightCharacterCombatAnimator.CombatAnimation.Skill,
-                _ => FightCharacterCombatAnimator.CombatAnimation.LightAttack
+                _ => UsesEqualBeats ? FightCharacterCombatAnimator.CombatAnimation.NormalAttack
+                    : FightCharacterCombatAnimator.CombatAnimation.LightAttack
             };
             int actionRosterVersion = rosterVersion;
             // The rhythm judgement owns damage timing. Resolve before starting any
