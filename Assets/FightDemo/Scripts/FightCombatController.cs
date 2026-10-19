@@ -141,10 +141,12 @@ namespace RhythmHunter.FightDemo
 
         [Header("Battle Entrance")]
         [SerializeField] private bool autoPlayBattleEntrance;
-        [SerializeField, Min(0.01f)] private float entranceDelaySeconds = 3f;
-        [SerializeField, Min(0f)] private float openingIdleSeconds = 1f;
+        [Tooltip("Minimum entrance length. Play Opening Idle once, then Drink; keep sober Idle looping until music and battle start.")]
+        [SerializeField, Min(0f)] private float minimumEntranceSeconds = 3f;
+        public bool AutoPlayBattleEntrance => autoPlayBattleEntrance;
         private float entranceElapsed;
-        private bool entrancePending, entranceDrinking;
+        private bool entrancePending, entranceDrinking, entranceTempoReady;
+        private double entranceIdleDuration;
         public bool BattleEntranceRunning => entrancePending;
 
         private void BeginBattleEntrance()
@@ -153,27 +155,54 @@ namespace RhythmHunter.FightDemo
             entrancePending = true;
             entranceElapsed = 0;
             entranceDrinking = false;
+            entranceTempoReady = false;
             beatClock?.SetAutomaticPlayback(false);
-            if (beatClock != null && beatClock.IsPlaying) beatClock.StopMusic();
-            foreach (var hero in rosterManager.ActiveHeroes) hero.CombatAnimator?.BeginOpeningIdle();
+            beatClock?.PrepareOpeningTempo();
         }
 
         private void UpdateBattleEntrance()
         {
             if (!entrancePending || IsPaused || TimingCalibrationActive) return;
+            if (!entranceTempoReady)
+            {
+                if (beatClock == null || beatClock.OpeningTempoFailed)
+                {
+                    entrancePending = false;
+                    Debug.LogWarning("Opening tempo unavailable; returned to manual battle preparation.", this);
+                    return;
+                }
+                if (!beatClock.HasOpeningTempo) return;
+                entranceTempoReady = true;
+                entranceIdleDuration = 0;
+                foreach (var hero in rosterManager.ActiveHeroes)
+                {
+                    var animator = hero.CombatAnimator;
+                    if (animator == null) continue;
+                    animator.BeginOpeningIdle();
+                    entranceIdleDuration = Math.Max(entranceIdleDuration,
+                        animator.GetSequenceDurationSeconds(FightCharacterCombatAnimator.CombatAnimation.OpeningIdle));
+                }
+                return;
+            }
             entranceElapsed += UnityEngine.Time.deltaTime;
-            float duration = Mathf.Max(0.01f, entranceDelaySeconds);
-            float idle = Mathf.Clamp(openingIdleSeconds, 0f, Mathf.Max(0f, duration - 0.01f));
-            if (!entranceDrinking && entranceElapsed >= idle)
+            if (!entranceDrinking && entranceElapsed >= entranceIdleDuration)
             {
                 entranceDrinking = true;
                 foreach (var hero in rosterManager.ActiveHeroes)
-                    hero.CombatAnimator?.PlayDrinkForSeconds(Mathf.Max(0.01f, duration - entranceElapsed));
+                    hero.CombatAnimator?.PlayDrink(returnToOpeningIdle: true);
+                return;
             }
-            if (entranceElapsed < duration) return;
-            foreach (var hero in rosterManager.ActiveHeroes) hero.CombatAnimator?.EndOpeningPresentation();
+            if (!entranceDrinking) return;
+            foreach (var hero in rosterManager.ActiveHeroes)
+                if (hero.CombatAnimator != null && hero.CombatAnimator.IsPlaying &&
+                    hero.CombatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Drink) return;
+            if (entranceElapsed < minimumEntranceSeconds) return;
             entrancePending = false;
-            if (!TryBeginBattle()) Debug.LogWarning("Battle entrance could not start: check all three hero slots.", this);
+            if (TryBeginBattle())
+            {
+                foreach (var hero in rosterManager.ActiveHeroes) hero.CombatAnimator?.EndOpeningPresentation();
+            }
+            else Debug.LogWarning("Battle entrance could not start: check all three hero slots.", this);
         }
 
         [Header("Successful Input Audio")]

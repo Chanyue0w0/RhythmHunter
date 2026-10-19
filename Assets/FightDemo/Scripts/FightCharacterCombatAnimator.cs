@@ -125,13 +125,13 @@ namespace RhythmHunter.FightDemo
         private bool damageRaised;
         private bool playbackPaused;
         private bool openingIdle;
-        private float presentationSpeed = 1f;
         private double openingIdleStartBeat;
         public bool IsOpeningIdle => openingIdle;
 
         // Entry presentation is opt-in. Existing enemies and prefabs keep their normal idle.
         public void BeginOpeningIdle()
         {
+            RefreshSongTempo();
             FinishActiveSequence(false);
             openingIdle = true;
             openingIdleStartBeat = CurrentIdleBeatPosition() - idlePausedBeats;
@@ -139,11 +139,12 @@ namespace RhythmHunter.FightDemo
             UpdateIdle();
         }
 
-        public bool PlayDrink(Action onCompleted = null)
+        public bool PlayDrink(Action onCompleted = null, bool returnToOpeningIdle = false)
         {
             return Play(CombatAnimation.Drink, onCompleted: () =>
             {
-                openingIdle = false;
+                openingIdle = returnToOpeningIdle;
+                openingIdleStartBeat = CurrentIdleBeatPosition() - idlePausedBeats;
                 shownFrame = -1;
                 UpdateIdle();
                 onCompleted?.Invoke();
@@ -154,20 +155,29 @@ namespace RhythmHunter.FightDemo
         {
             FinishActiveSequence(false);
             openingIdle = false;
-            presentationSpeed = 1f;
             shownFrame = -1;
             UpdateIdle();
         }
 
-        public void PlayDrinkForSeconds(float seconds)
+        public double GetSequenceDurationSeconds(CombatAnimation animation)
         {
-            Sequence drink = FindSequence(CombatAnimation.Drink);
-            if (drink == null || drink.Frames.Count == 0) return;
-            float duration = 0;
-            for (int i = 0; i < drink.Frames.Count; i++)
-                duration += drink.UseFrameBeatDurations ? drink.GetFrameBeats(i) * (float)secondsPerBeat
-                    : 1f / Mathf.Max(1f, drink.FramesPerSecond);
-            if (PlayDrink()) presentationSpeed = duration / Mathf.Max(0.01f, seconds);
+            RefreshSongTempo();
+            Sequence sequence = FindSequence(animation);
+            if (sequence == null) return 0;
+            double duration = 0;
+            float pitch = beatSource != null && beatSource.BeatClock != null ? beatSource.BeatClock.MusicPitch : 1f;
+            for (int i = 0; i < sequence.Frames.Count; i++)
+                duration += sequence.UseFrameBeatDurations ? sequence.GetFrameBeats(i) * secondsPerBeat / pitch
+                    : 1d / Mathf.Max(1f, sequence.FramesPerSecond);
+            return duration;
+        }
+
+        private void RefreshSongTempo()
+        {
+            FmodBeatClock clock = beatSource != null ? beatSource.BeatClock : null;
+            if (clock == null) return;
+            if (clock.HasTimingAnchor) secondsPerBeat = clock.MillisecondsPerBeat / 1000d;
+            else if (clock.HasOpeningTempo) secondsPerBeat = clock.OpeningSecondsPerBeat;
         }
         private double idlePausedBeats, pauseBeatPosition;
         public bool PlaybackPaused => playbackPaused;
@@ -258,6 +268,7 @@ namespace RhythmHunter.FightDemo
 
         private void UpdateIdle()
         {
+            RefreshSongTempo();
             Sequence entry = openingIdle ? FindSequence(CombatAnimation.OpeningIdle) : null;
             if (entry != null && entry.Frames.Count > 0 && targetRenderer != null)
             {
@@ -314,6 +325,8 @@ namespace RhythmHunter.FightDemo
                 return clock.LatestBeat.GlobalBeat +
                     (timelineMs - clock.LatestBeat.TimelinePositionMs) / Math.Max(1d, clock.MillisecondsPerBeat);
             double now = Time.timeAsDouble;
+            if (clock != null && clock.HasOpeningTempo && !hasBeatAnchor)
+                return now * clock.MusicPitch / Math.Max(0.001d, secondsPerBeat);
             return hasBeatAnchor
                 ? beatAnchorIndex + Math.Max(0d, now - beatAnchorTime) / Math.Max(0.001d, secondsPerBeat)
                 : now / Math.Max(0.001d, secondsPerBeat);
@@ -389,7 +402,6 @@ namespace RhythmHunter.FightDemo
 
             playbackVersion++;
             activeSequence = sequence;
-            presentationSpeed = 1f;
             activeFrame = 0;
             frameElapsed = 0f;
             warningCallback = onWarning;
@@ -411,7 +423,7 @@ namespace RhythmHunter.FightDemo
         private void AdvancePlayback(float deltaTime)
         {
             if (playbackPaused) return;
-            deltaTime *= presentationSpeed;
+            RefreshSongTempo();
             if (activeSequence == null)
             {
                 UpdateIdle();

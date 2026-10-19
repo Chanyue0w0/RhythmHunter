@@ -8,12 +8,15 @@
 
 ## 角色逐張圖片拍數
 
+`FightSpriteImportDefaults` 為 Assets 下首次匯入、尚無匯入設定的 Sprite 圖片設定 Single + Full Rect。既有 .meta、Reimport、已製作的 Multiple 圖集與非 Sprite 紋理不會被覆寫；新素材請等 Unity 編譯完成後再匯入。若連同 .meta 搬入，會保留來源設定，須在 Inspector 手動選 Single / Full Rect 並 Apply。
+
 角色動畫使用原圖完整畫布與透明邊界，不以不透明像素自動裁切。`hero` 目前 10 張圖均為 776×528，Sprite Rect 統一為 (0,0,776,528)，Mesh Type 為 Full Rect，中心 Pivot；保留既有 Multiple 單切片的 GUID／internalID，避免 Prefab 引用失效。新加入的單張動畫可使用 Single + Full Rect；若沿用 Multiple，切片需涵蓋完整畫布，不使用 Automatic Slice 裁邊。
 
 新增可選的 `Opening Idle`（開場清醒待機）與 `Drink`（喝酒）分類，均支援逐張拍數。原 `Idle` 作為酒醉後主要待機；Normal／TeamSkill 等使用酒醉版戰鬥素材。未提供新素材時不自動複製其他圖片。
-FightScene3 啟用 `FightCombatController → Battle Entrance → Auto Play Battle Entrance`：進場清醒待機 1 秒，全員同步喝酒 2 秒，滿 3 秒才啟動 FMOD 音樂與戰鬥。Entrance Delay Seconds 控制總長，Opening Idle Seconds 控制清醒待機時間。這段進場倒數不替代戰鬥音樂節拍時鐘。
-喝酒序列以各張圖片的相對時長縮放至剩餘開場時間，因此不同角色可以同時開始及結束。開場期間不接受普通能力或編隊操作；暫停／校正期間倒數停止。缺少喝酒圖片時維持待機直到時間到，不阻塞開戰；缺少 Opening Idle 則暫用原 Idle。
-關閉自動開場後保留原戰前編隊與手動開始流程。開場只在進入場景時播放，Wave 切換不重播。`BeginOpeningIdle()`、`PlayDrink(onCompleted)`、`PlayDrinkForSeconds()`、`EndOpeningPresentation()` 提供演出控制；既有敵人不要求提供這兩類動畫。
+FightScene3 開場不再試播靜音事件等待 Beat 回呼。Editor 依目前音樂 event GUID 讀取 ProjectFMOD 下對應事件 XML 的第一個 Tempo Marker；建置場景時將 BPM 與 event path 一併保存至 FmodBeatClock，執行檔不需讀取 FMOD 專案檔。來源缺失時明確回報；建置時不允許缺少開場 BPM 的場景悄悄使用預設值。正式音樂仍在喝酒結束後從頭播放，保留 AHDSR 開頭淡入。
+Opening Idle 播放一輪，採全隊最長序列時間後同步開始 Drink。喝酒依每張圖片原本設定的拍數播放，不縮放、不截斷；喝完後回到清醒 Opening Idle 持續循環，開場至少 3 秒且全員喝完後才啟動音樂與戰鬥，同時切換酒醉主要 Idle。不要求第二輪清醒 Idle 播完，不停留喝酒末幀，也不提前切換酒醉 Idle。Minimum Entrance Seconds 可調整最低開場秒數；動畫超過此時間時不會被截斷。BPM 取自目前載入 Bank 的歌曲節拍；更改 FMOD Tempo Marker 後必須重建 Bank。
+逐張拍數未開啟的序列仍按原 FPS；要以圖片拍數播放，須勾選「逐張設定拍數」。缺少 Opening Idle 或 Drink 的角色不會阻塞其他人。開場期間不接受普通能力或編隊操作，Wave 切換不重播。關閉 Auto Play Battle Entrance 保留手動編隊流程。
+FMOD 淡入：音樂 Event 的 Master Track 音量加入 AHDSR，Initial=-∞、Attack 為所需淡入秒數、Peak/Sustain=0 dB、Hold/Decay=0，再 Build Bank。不要為了淡入移動音檔起點或 Tempo Marker。
 
 LongswordWarrior 的 Normal 已接入 `hero/attack/attack_1～4`；第 4 張觸發普通攻擊特效，位置為敵人的 ImpactEffectAnchor，原目標若已死亡則往後尋找存活首位。未製作特效時保持 Normal Ability Effect Prefab 空白，並關閉 Use Fallback Ability Effects，因此不生成替代圖形。完成後只需指定該特效 Prefab。
 TeamSkill 已接入 `hero/skill/attack_5～7`，暫不啟用 Warning、攻擊特效或舊流程傷害事件。兩組先保留 10 FPS；技能的實際傷害仍由戰鬥節拍結算。

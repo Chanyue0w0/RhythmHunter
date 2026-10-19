@@ -114,6 +114,35 @@ namespace RhythmHunter.RhythmDemo
         private BeatSnapshot latestBeat;
         private long receivedBeatCount;
         private string lastError = string.Empty;
+        [SerializeField, HideInInspector] private float openingSongTempo;
+        [SerializeField, HideInInspector] private string openingTempoEventPath;
+        private float openingTempo;
+        public bool OpeningTempoFailed { get; private set; }
+        public bool HasOpeningTempo => openingTempo > 0;
+        public double OpeningSecondsPerBeat => HasOpeningTempo ? 60d / openingTempo : 0;
+#if UNITY_EDITOR
+        public static Func<string, float> EditorOpeningTempoResolver;
+#endif
+        public void ConfigureOpeningTempo(float tempo)
+        {
+            openingSongTempo = tempo;
+            openingTempoEventPath = musicEventPath;
+        }
+
+        public void PrepareOpeningTempo()
+        {
+            // Do not start a muted event: FMOD may virtualize it and never send beats.
+            ShutdownMusic();
+            receivedBeatCount = 0;
+#if UNITY_EDITOR
+            if (EditorOpeningTempoResolver != null)
+                ConfigureOpeningTempo(EditorOpeningTempoResolver(musicEventPath));
+#endif
+            openingTempo = openingTempoEventPath == musicEventPath ? openingSongTempo : 0;
+            OpeningTempoFailed = openingTempo <= 0;
+            if (OpeningTempoFailed)
+                ReportError("Opening tempo metadata missing. Check the FMOD event Tempo Marker and rebuild.");
+        }
 
         public event Action<BeatSnapshot> Beat;
         public event Action<string> PlaybackError;
