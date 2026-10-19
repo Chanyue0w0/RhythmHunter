@@ -53,6 +53,16 @@ FightScene3 不再提供校正面板。按手把 Start、鍵盤 Escape／F8，�
 
 ## 驗證
 
+### 聽覺節拍檢查（BeatTapping）
+
+- FightScene3 選取 `FightDemoController`；FightCalibrationScene 選取 `CalibrationController`。
+- 在 `FmodBeatClock → Beat Diagnostics` 勾選 `Enable Beat Tapping`，預設關閉，可在 Play Mode 隨時切換。
+- `Beat Tapping Volume` 控制點拍音量，預設 0.5；事件預設為 `event:/SoundEffects/BeatTapping`。
+- 跟隨既有 FMOD `TIMELINE_BEAT`，不另建計時器、不套用輸入校正 Offset，也不修改 BPM 或判定區間。Team Skill 期間音樂繼續，點拍也繼續；音樂暫停／停止時點拍停止。
+- 關閉開關或停用元件會停止並釋放點拍音效。卡頓時只考慮最新回呼；超過 100ms 或四分之一拍的舊拍點不補播，避免連續爆音。
+- 這是人工聽辨工具，不會分析 AI 歌曲的實際 BPM。點拍經 Unity 主執行緒及 FMOD 音訊輸出，仍有影格與音訊緩衝延遲，不適合作為毫秒級校正基準。若某段逐漸偏離，可回 FMOD 檢查該段音樂與 Tempo Marker。
+- 點拍沿用既有音效混音／全域 `SFXOnOff` 設定，不強制解除靜音。Play Mode 中調整不會在退出後自動保存；需要常駐啟用時，於編輯模式勾選並儲存場景。
+
 - `Rhythm Hunter → Validate FightScene3 Equal Beats`：隔離場景的戰鬥與校正回歸檢查。
 - `Rhythm Hunter → Validate Calibration To Battle And Pause`：短暫進入 Play Mode，驗證跨場景讀取、
   音樂實例、暫停與恢復；結束後還原原本編輯場景，不保存或重設校正值。

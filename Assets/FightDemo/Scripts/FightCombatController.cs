@@ -138,6 +138,12 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private bool endBattleOnZeroHp = true;
         public bool EndBattleOnZeroHp => endBattleOnZeroHp;
 
+        [Header("Successful Input Audio")]
+        [Tooltip("Play once when a character input passes rhythm judgement, including preparation and guard inputs.")]
+        [SerializeField] private bool enableSuccessfulInputSound = true;
+        [SerializeField] private string successfulInputSoundEventPath = "event:/SoundEffects/BeatTapping";
+        [SerializeField, Range(0f, 1f)] private float successfulInputSoundVolume = 0.5f;
+
         [Header("Combat Mode")]
         [FormerlySerializedAs("enableFrontHeroModeInFightScene2")]
         [SerializeField] private CombatMode combatMode;
@@ -453,6 +459,7 @@ namespace RhythmHunter.FightDemo
                 return;
             }
 
+            PlaySuccessfulInputSound(judgement);
             ActionType action = GetHeroActionForBeat(judgement.NearestBeat.Beat);
             bool heavyBeat = action == ActionType.Skill;
             PerformHeroAction(
@@ -629,6 +636,7 @@ namespace RhythmHunter.FightDemo
                 return;
 
             FmodRhythmJudge.Result judgement = rhythmJudge.JudgeNow();
+            PlaySuccessfulInputSound(judgement);
             bool perfect = judgement.Judgement == FmodRhythmJudge.Grade.Perfect;
             bool heavyBeat = perfect && judgement.NearestBeat.Beat == 4;
             bool skillActivated = false;
@@ -664,6 +672,34 @@ namespace RhythmHunter.FightDemo
             }
 
             HeroCalled?.Invoke(new HeroCallResult(command, judgement, heavyBeat, skillActivated, message));
+        }
+
+        private void PlaySuccessfulInputSound(FmodRhythmJudge.Result judgement)
+        {
+            if (!enableSuccessfulInputSound || judgement.Judgement != FmodRhythmJudge.Grade.Perfect ||
+                judgement.DuplicateBeat || string.IsNullOrWhiteSpace(successfulInputSoundEventPath))
+                return;
+
+            try
+            {
+                FMOD.Studio.EventInstance sound = FMODUnity.RuntimeManager.CreateInstance(successfulInputSoundEventPath);
+                FMOD.RESULT result = sound.setVolume(Mathf.Clamp01(successfulInputSoundVolume));
+                if (result == FMOD.RESULT.OK) result = sound.start();
+                // BeatTapping is a one-shot; FMOD releases it after playback finishes.
+                sound.release();
+                if (result != FMOD.RESULT.OK)
+                    DisableSuccessfulInputSound(result.ToString());
+            }
+            catch (FMODUnity.EventNotFoundException exception)
+            {
+                DisableSuccessfulInputSound(exception.Message);
+            }
+        }
+
+        private void DisableSuccessfulInputSound(string reason)
+        {
+            enableSuccessfulInputSound = false;
+            Debug.LogWarning($"[FightCombatController] Successful input sound disabled: {reason}", this);
         }
 
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)

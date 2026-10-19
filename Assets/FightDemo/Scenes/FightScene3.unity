@@ -9579,6 +9579,9 @@ MonoBehaviour:
   musicVolume: 0.673
   musicPitch: 1
   playOnStart: 1
+  enableBeatTapping: 0
+  beatTappingEventPath: event:/SoundEffects/BeatTapping
+  beatTappingVolume: 0.5
 --- !u!4 &2021200330
 Transform:
   m_ObjectHideFlags: 0

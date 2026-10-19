@@ -94,8 +94,16 @@ namespace RhythmHunter.RhythmDemo
         [SerializeField, Range(0.25f, 4f)] private float musicPitch = 1f;
         [SerializeField] private bool playOnStart = true;
 
+        [Header("Beat Diagnostics")]
+        [Tooltip("Play BeatTapping on the existing FMOD beat grid. Can be toggled during Play Mode; does not analyse the song or change input calibration.")]
+        [SerializeField] private bool enableBeatTapping;
+        [SerializeField] private string beatTappingEventPath = "event:/SoundEffects/BeatTapping";
+        [SerializeField, Range(0f, 1f)] private float beatTappingVolume = 0.5f;
+
         private readonly ConcurrentQueue<CallbackBeatData> pendingBeats = new();
         private EventInstance musicInstance;
+        private EventInstance beatTappingInstance;
+        private string activeBeatTappingPath;
         private EVENT_CALLBACK timelineBeatCallback;
         private GCHandle selfHandle;
         private bool selfHandleAllocated;
@@ -143,7 +151,16 @@ namespace RhythmHunter.RhythmDemo
 
         private void Update()
         {
+            if (!enableBeatTapping || paused || !IsPlaying || activeBeatTappingPath != beatTappingEventPath)
+                ReleaseBeatTapping();
+            if (beatTappingInstance.isValid())
+                beatTappingInstance.setVolume(Mathf.Clamp01(beatTappingVolume));
             if (!paused) ProcessPendingBeats();
+        }
+
+        private void OnDisable()
+        {
+            ReleaseBeatTapping();
         }
 
         public bool SetPaused(bool value)
@@ -154,6 +171,7 @@ namespace RhythmHunter.RhythmDemo
                 if (result != RESULT.OK) { ReportError("FMOD pause failed: " + result); return false; }
             }
             paused = value;
+            if (paused) ReleaseBeatTapping();
             return true;
         }
 
@@ -338,6 +356,7 @@ namespace RhythmHunter.RhythmDemo
 
         private void ProcessPendingBeats()
         {
+            bool receivedBeat = false;
             while (pendingBeats.TryDequeue(out CallbackBeatData data))
             {
                 int upper = Mathf.Max(1, data.TimeSignatureUpper);
@@ -355,12 +374,65 @@ namespace RhythmHunter.RhythmDemo
 
                 receivedBeatCount++;
                 hasAnchor = true;
+                receivedBeat = true;
                 Beat?.Invoke(latestBeat);
             }
+
+            // Never replay a burst of old clicks after a frame stall or pause.
+            // Gameplay still receives every queued beat above.
+            if (receivedBeat && enableBeatTapping && IsPlaying && !paused && isActiveAndEnabled &&
+                TryGetTimelinePositionMs(out int positionMs))
+            {
+                double ageMs = positionMs - latestBeat.TimelinePositionMs;
+                if (ageMs >= 0 && ageMs <= Math.Min(100.0, MillisecondsPerBeat * 0.25))
+                    PlayBeatTapping();
+            }
+        }
+
+        private void PlayBeatTapping()
+        {
+            try
+            {
+                if (!beatTappingInstance.isValid())
+                {
+                    beatTappingInstance = RuntimeManager.CreateInstance(beatTappingEventPath);
+                    activeBeatTappingPath = beatTappingEventPath;
+                }
+
+                RESULT result = beatTappingInstance.setVolume(Mathf.Clamp01(beatTappingVolume));
+                if (result == RESULT.OK) result = beatTappingInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                if (result == RESULT.OK) result = beatTappingInstance.start();
+                if (result != RESULT.OK)
+                    DisableBeatTapping(result.ToString());
+            }
+            catch (EventNotFoundException exception)
+            {
+                DisableBeatTapping(exception.Message);
+            }
+        }
+
+        private void DisableBeatTapping(string reason)
+        {
+            enableBeatTapping = false;
+            ReleaseBeatTapping();
+            // A diagnostic sound failure must not stop music or gameplay.
+            UnityEngine.Debug.LogWarning($"[FmodBeatClock] Beat tapping disabled: {reason}", this);
+        }
+
+        private void ReleaseBeatTapping()
+        {
+            if (beatTappingInstance.isValid())
+            {
+                beatTappingInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                beatTappingInstance.release();
+                beatTappingInstance.clearHandle();
+            }
+            activeBeatTappingPath = null;
         }
 
         private void ShutdownMusic()
         {
+            ReleaseBeatTapping();
             initialized = false;
             playbackStarted = false;
             paused = false;
