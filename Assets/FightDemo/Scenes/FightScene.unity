@@ -2330,9 +2330,9 @@ MonoBehaviour:
   fallbackBpm: 120
   targetRenderer: {fileID: 434017961}
   frames:
-  - {fileID: 1226492259313273041, guid: b12b9206d6d941d4dacc6841fcda9a81, type: 3}
-  - {fileID: 613771753500962085, guid: 163961edee854bf47b1c6400ab5c64e1, type: 3}
-  - {fileID: 9131432010456110297, guid: a524847294b7f1b46abfa961442f98a7, type: 3}
+  - {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
+  - {fileID: -4357705645274307756, guid: 241a0e8fe37899e489d4023c22c99b30, type: 3}
+  - {fileID: 2244847242733787956, guid: cdbbed3de40539242b800c1f4f96f423, type: 3}
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.19999999
@@ -2385,7 +2385,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1226492259313273041, guid: b12b9206d6d941d4dacc6841fcda9a81, type: 3}
+  m_Sprite: {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5803,9 +5803,9 @@ MonoBehaviour:
   fallbackBpm: 120
   targetRenderer: {fileID: 1115074070}
   frames:
-  - {fileID: 1226492259313273041, guid: b12b9206d6d941d4dacc6841fcda9a81, type: 3}
-  - {fileID: 613771753500962085, guid: 163961edee854bf47b1c6400ab5c64e1, type: 3}
-  - {fileID: 9131432010456110297, guid: a524847294b7f1b46abfa961442f98a7, type: 3}
+  - {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
+  - {fileID: -4357705645274307756, guid: 241a0e8fe37899e489d4023c22c99b30, type: 3}
+  - {fileID: 2244847242733787956, guid: cdbbed3de40539242b800c1f4f96f423, type: 3}
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.12
@@ -5858,7 +5858,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1226492259313273041, guid: b12b9206d6d941d4dacc6841fcda9a81, type: 3}
+  m_Sprite: {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -6902,9 +6902,9 @@ MonoBehaviour:
   fallbackBpm: 120
   targetRenderer: {fileID: 1309611263}
   frames:
-  - {fileID: 1226492259313273041, guid: b12b9206d6d941d4dacc6841fcda9a81, type: 3}
-  - {fileID: 613771753500962085, guid: 163961edee854bf47b1c6400ab5c64e1, type: 3}
-  - {fileID: 9131432010456110297, guid: a524847294b7f1b46abfa961442f98a7, type: 3}
+  - {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
+  - {fileID: -4357705645274307756, guid: 241a0e8fe37899e489d4023c22c99b30, type: 3}
+  - {fileID: 2244847242733787956, guid: cdbbed3de40539242b800c1f4f96f423, type: 3}
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0.16
@@ -6957,7 +6957,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1226492259313273041, guid: b12b9206d6d941d4dacc6841fcda9a81, type: 3}
+  m_Sprite: {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

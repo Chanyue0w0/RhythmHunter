@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a524847294b7f1b46abfa961442f98a7
+guid: 31b436a02d1f2d749a2cef0d78581d70
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9131432010456110297
-    second: hero_3_0
+      213: -3488042933814449837
+    second: attack_4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,7 +48,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -96,27 +96,40 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: hero_3_0
+      name: attack_4_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 368
-        height: 328
+        width: 776
+        height: 528
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9d41ed9780d59be70800000000000000
-      internalID: 9131432010456110297
+      spriteID: 359ada0ae6bf79fc0800000000000000
+      internalID: -3488042933814449837
       vertices: []
       indices: 
       edges: []
@@ -135,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      hero_3_0: 9131432010456110297
+      attack_4_0: -3488042933814449837
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

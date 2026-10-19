@@ -7,7 +7,7 @@ namespace RhythmHunter.FightDemoEditor
     [CustomEditor(typeof(FightCharacterCombatAnimator))]
     public sealed class FightCharacterCombatAnimatorEditor : Editor
     {
-        private readonly bool[] expanded = { true, true, false, false, false, false, false, false };
+        private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false };
 
         public override void OnInspectorGUI()
         {
@@ -18,7 +18,10 @@ namespace RhythmHunter.FightDemoEditor
             Field("beatSource");
             Field("fallbackBpm");
 
-            expanded[0] = EditorGUILayout.Foldout(expanded[0], "Idle — 待機循環", true);
+            DrawSequence(8, 7, "Opening Idle — 開場清醒待機");
+            DrawSequence(9, 8, "Drink — 喝酒");
+
+            expanded[0] = EditorGUILayout.Foldout(expanded[0], "Idle — 主要待機（酒醉）", true);
             if (expanded[0])
             {
                 EditorGUI.indentLevel++;
@@ -81,7 +84,7 @@ namespace RhythmHunter.FightDemoEditor
             if (sequence != null)
             {
                 DrawFrames(sequence.FindPropertyRelative("frames"), sequence.FindPropertyRelative("useFrameBeatDurations"),
-                    sequence.FindPropertyRelative("frameBeatDurations"), sequence);
+                    sequence.FindPropertyRelative("frameBeatDurations"), type == 7 || type == 8 ? null : sequence);
                 if (!sequence.FindPropertyRelative("useFrameBeatDurations").boolValue)
                     EditorGUILayout.PropertyField(sequence.FindPropertyRelative("framesPerSecond"));
             }

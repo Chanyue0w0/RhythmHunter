@@ -20,7 +20,9 @@ namespace RhythmHunter.FightDemo
             Guard = 3,
             [InspectorName("TeamSkill")] Skill = 4,
             [InspectorName("GetHurt")] Hit = 5,
-            [InspectorName("Die")] Death = 6
+            [InspectorName("Die")] Death = 6,
+            [InspectorName("Opening Idle")] OpeningIdle = 7,
+            [InspectorName("Drink")] Drink = 8
         }
 
         [Serializable]
@@ -122,6 +124,51 @@ namespace RhythmHunter.FightDemo
         private bool effectRaised;
         private bool damageRaised;
         private bool playbackPaused;
+        private bool openingIdle;
+        private float presentationSpeed = 1f;
+        private double openingIdleStartBeat;
+        public bool IsOpeningIdle => openingIdle;
+
+        // Entry presentation is opt-in. Existing enemies and prefabs keep their normal idle.
+        public void BeginOpeningIdle()
+        {
+            FinishActiveSequence(false);
+            openingIdle = true;
+            openingIdleStartBeat = CurrentIdleBeatPosition() - idlePausedBeats;
+            shownFrame = -1;
+            UpdateIdle();
+        }
+
+        public bool PlayDrink(Action onCompleted = null)
+        {
+            return Play(CombatAnimation.Drink, onCompleted: () =>
+            {
+                openingIdle = false;
+                shownFrame = -1;
+                UpdateIdle();
+                onCompleted?.Invoke();
+            });
+        }
+
+        public void EndOpeningPresentation()
+        {
+            FinishActiveSequence(false);
+            openingIdle = false;
+            presentationSpeed = 1f;
+            shownFrame = -1;
+            UpdateIdle();
+        }
+
+        public void PlayDrinkForSeconds(float seconds)
+        {
+            Sequence drink = FindSequence(CombatAnimation.Drink);
+            if (drink == null || drink.Frames.Count == 0) return;
+            float duration = 0;
+            for (int i = 0; i < drink.Frames.Count; i++)
+                duration += drink.UseFrameBeatDurations ? drink.GetFrameBeats(i) * (float)secondsPerBeat
+                    : 1f / Mathf.Max(1f, drink.FramesPerSecond);
+            if (PlayDrink()) presentationSpeed = duration / Mathf.Max(0.01f, seconds);
+        }
         private double idlePausedBeats, pauseBeatPosition;
         public bool PlaybackPaused => playbackPaused;
 
@@ -211,6 +258,27 @@ namespace RhythmHunter.FightDemo
 
         private void UpdateIdle()
         {
+            Sequence entry = openingIdle ? FindSequence(CombatAnimation.OpeningIdle) : null;
+            if (entry != null && entry.Frames.Count > 0 && targetRenderer != null)
+            {
+                double totalBeats = 0;
+                for (int i = 0; i < entry.Frames.Count; i++)
+                    totalBeats += entry.UseFrameBeatDurations ? entry.GetFrameBeats(i)
+                        : 1d / Math.Max(1f, entry.FramesPerSecond) / Math.Max(0.001d, secondsPerBeat);
+                double position = (CurrentIdleBeatPosition() - idlePausedBeats - openingIdleStartBeat) % totalBeats;
+                if (position < 0) position += totalBeats;
+                for (int i = 0; i < entry.Frames.Count; i++)
+                {
+                    position -= entry.UseFrameBeatDurations ? entry.GetFrameBeats(i)
+                        : 1d / Math.Max(1f, entry.FramesPerSecond) / Math.Max(0.001d, secondsPerBeat);
+                    if (position < 0)
+                    {
+                        targetRenderer.sprite = entry.Frames[i];
+                        shownFrame = -1;
+                        return;
+                    }
+                }
+            }
             if (targetRenderer == null || frames == null || frames.Count == 0)
                 return;
 
@@ -321,6 +389,7 @@ namespace RhythmHunter.FightDemo
 
             playbackVersion++;
             activeSequence = sequence;
+            presentationSpeed = 1f;
             activeFrame = 0;
             frameElapsed = 0f;
             warningCallback = onWarning;
@@ -342,6 +411,7 @@ namespace RhythmHunter.FightDemo
         private void AdvancePlayback(float deltaTime)
         {
             if (playbackPaused) return;
+            deltaTime *= presentationSpeed;
             if (activeSequence == null)
             {
                 UpdateIdle();

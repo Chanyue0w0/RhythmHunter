@@ -124,7 +124,7 @@ namespace RhythmHunter.FightDemo
         public bool TrySwapHeroes(PartyPosition first, PartyPosition second)
         {
             int a = (int)first, b = (int)second;
-            if (FormationLocked || a < 0 || b < 0 || a >= heroPrefabs.Length ||
+            if ((fightController != null && fightController.BattleEntranceRunning) || FormationLocked || a < 0 || b < 0 || a >= heroPrefabs.Length ||
                 b >= heroPrefabs.Length || a == b) return false;
             (heroPrefabs[a], heroPrefabs[b]) = (heroPrefabs[b], heroPrefabs[a]);
             SpawnConfiguredRoster();

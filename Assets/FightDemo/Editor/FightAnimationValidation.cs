@@ -67,7 +67,11 @@ namespace RhythmHunter.FightDemoEditor
                 FightCharacterCombatAnimator player = players[0];
                 Require(player.FrameCount > 0 && player.TargetRenderer != null, prefab.name + ": idle data missing.");
                 foreach (FightCharacterCombatAnimator.CombatAnimation animation in Enum.GetValues(typeof(FightCharacterCombatAnimator.CombatAnimation)))
+                {
+                    if (animation == FightCharacterCombatAnimator.CombatAnimation.OpeningIdle ||
+                        animation == FightCharacterCombatAnimator.CombatAnimation.Drink) continue;
                     Require(player.HasSequence(animation), prefab.name + ": missing " + animation);
+                }
             }
         }
 

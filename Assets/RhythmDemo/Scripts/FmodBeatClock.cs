@@ -146,8 +146,10 @@ namespace RhythmHunter.RhythmDemo
             if (musicStartDelaySeconds > 0f)
                 yield return new WaitForSecondsRealtime(musicStartDelaySeconds);
 
-            StartMusic();
+            if (playOnStart) StartMusic();
         }
+
+        public void SetAutomaticPlayback(bool value) => playOnStart = value;
 
         private void Update()
         {

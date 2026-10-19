@@ -139,6 +139,43 @@ namespace RhythmHunter.FightDemo
         public bool EndBattleOnZeroHp => endBattleOnZeroHp;
         public FmodBeatClock BeatClock => beatClock;
 
+        [Header("Battle Entrance")]
+        [SerializeField] private bool autoPlayBattleEntrance;
+        [SerializeField, Min(0.01f)] private float entranceDelaySeconds = 3f;
+        [SerializeField, Min(0f)] private float openingIdleSeconds = 1f;
+        private float entranceElapsed;
+        private bool entrancePending, entranceDrinking;
+        public bool BattleEntranceRunning => entrancePending;
+
+        private void BeginBattleEntrance()
+        {
+            if (!autoPlayBattleEntrance || !AwaitingBattleStart) return;
+            entrancePending = true;
+            entranceElapsed = 0;
+            entranceDrinking = false;
+            beatClock?.SetAutomaticPlayback(false);
+            if (beatClock != null && beatClock.IsPlaying) beatClock.StopMusic();
+            foreach (var hero in rosterManager.ActiveHeroes) hero.CombatAnimator?.BeginOpeningIdle();
+        }
+
+        private void UpdateBattleEntrance()
+        {
+            if (!entrancePending || IsPaused || TimingCalibrationActive) return;
+            entranceElapsed += UnityEngine.Time.deltaTime;
+            float duration = Mathf.Max(0.01f, entranceDelaySeconds);
+            float idle = Mathf.Clamp(openingIdleSeconds, 0f, Mathf.Max(0f, duration - 0.01f));
+            if (!entranceDrinking && entranceElapsed >= idle)
+            {
+                entranceDrinking = true;
+                foreach (var hero in rosterManager.ActiveHeroes)
+                    hero.CombatAnimator?.PlayDrinkForSeconds(Mathf.Max(0.01f, duration - entranceElapsed));
+            }
+            if (entranceElapsed < duration) return;
+            foreach (var hero in rosterManager.ActiveHeroes) hero.CombatAnimator?.EndOpeningPresentation();
+            entrancePending = false;
+            if (!TryBeginBattle()) Debug.LogWarning("Battle entrance could not start: check all three hero slots.", this);
+        }
+
         [Header("Successful Input Audio")]
         [Tooltip("Play once when a character input passes rhythm judgement, including preparation and guard inputs.")]
         [SerializeField] private bool enableSuccessfulInputSound = true;
@@ -230,10 +267,11 @@ namespace RhythmHunter.FightDemo
 
         public bool TryBeginBattle()
         {
-            if (!AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
+            if (entrancePending || !AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
             ResetBattleStateForRoster();
             rhythmJudge?.ResetDuplicateTracking();
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
+            if (beatClock != null && !beatClock.IsPlaying) beatClock.RestartMusic();
             return true;
         }
         public bool HasPendingEnemyAttack => pendingEnemyAttack;
@@ -334,6 +372,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            if (autoPlayBattleEntrance) beatClock?.SetAutomaticPlayback(false);
             if (UsesFrontHeroControls)
                 RebuildRosterAndResetCombat();
 
@@ -353,11 +392,13 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
+            BeginBattleEntrance();
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
         }
 
         private void Update()
         {
+            UpdateBattleEntrance();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
             CheckWaveCompletion();
@@ -369,6 +410,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            entrancePending = false;
             ResetTeamSkill();
             CancelEnemyCombatWork();
             UnsubscribeDependencies();
@@ -1051,7 +1093,7 @@ namespace RhythmHunter.FightDemo
             for (int i = 0; i < fightScene2Enemies.Count; i++)
             {
                 FightUnitSlot slot = fightScene2Enemies[i];
-                if (slot != null && slot.CurrentHp > 0)
+                if (slot != null && slot.HasCharacter && slot.CurrentHp > 0)
                     return slot;
             }
 
@@ -1089,6 +1131,11 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot target,
             ActionType action)
         {
+            // Slots never close gaps after a death. Resolve a valid front target
+            // again if the original target died before the animation's VFX frame.
+            if (UsesEqualBeats && action != ActionType.Skill &&
+                (target == null || !target.HasCharacter || target.CurrentHp <= 0))
+                target = FindFrontLivingEnemy();
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
                 return;
 

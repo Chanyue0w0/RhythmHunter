@@ -49,6 +49,17 @@ namespace RhythmHunter.FightDemoEditor
                     f.Reset(); Set(front, "currentHp", 1f); f.Skill(f.Warrior);
                     Check(front.CurrentHp == 0 && !front.IsFragile && !middle.IsFragile, "Killing slash does not transfer Fragile.");
                     Check(!front.ApplyFragile(), "Dead enemies reject status application.");
+                    var middlePosition = middle.transform.position;
+                    var backPosition = back.transform.position;
+                    f.Skill(f.Warrior);
+                    Check(middle.CurrentHp == 98 && middle.IsFragile && back.CurrentHp == 100,
+                        "After front death, the next living enemy becomes the front target.");
+                    Check(middle.transform.position == middlePosition && back.transform.position == backPosition,
+                        "Enemy deaths do not move remaining slots forward.");
+                    Set(middle, "currentHp", 0f);
+                    f.Skill(f.Warrior);
+                    Check(back.CurrentHp == 98 && back.IsFragile,
+                        "Front targeting skips both dead front and middle enemies.");
 
                     f.Reset(); middle.ApplyFragile(); back.ApplyFragile(); f.Skill(f.Mage);
                     Check(front.CurrentHp == 100 && middle.CurrentHp == 92 && back.CurrentHp == 100, "Mage selects the foremost Fragile enemy, including behind front.");

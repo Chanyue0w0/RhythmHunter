@@ -76,8 +76,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  basicBreakPower: 0
+  skillBreakPower: 0
+  bossPattern:
+    enabled: 0
+    neutralBeats: 4
+    armorBeats: 4
+    chargeBeats: 4
+    vulnerableBeats: 4
+    rageWindupBeats: 2
+    rageAttackBeats: 6
+    rageAttackInterval: 2
+    breakBeats: 4
+    breakThreshold: 3
+    armorReduction: 0.5
+    vulnerableBonus: 0.5
+    chargeDamage: 2
+    rageFinisherDamage: 3
+    successfulGuardBreakPower: 1
   characterId: EnergyMage
   displayName: ENERGY MAGE
   team: 1
@@ -90,12 +108,13 @@ MonoBehaviour:
   armorRecoveryAmount: 0.5
   basicAbilityName: Protective Barrier
   normalAbilityBehavior: 1
-  basicGuardBeats: 1
   normalAbilityPower: 0
+  consecutiveInputBeats: 3
+  basicGuardBeats: 1
+  basicInterruptsEnemy: 0
+  successfulInterruptDamageBonus: 0
   attackPower: 1
   teamSkillManaCost: 20
-  basicBreakPower: 0
-  skillBreakPower: 0
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1
   skillName: Energy Surge
@@ -103,7 +122,9 @@ MonoBehaviour:
   skillPower: 2
   conditionalSkillPower: 4
   restoreArmorAfterTeamSkill: 1
+  attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
+  useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 1354775231306750794}

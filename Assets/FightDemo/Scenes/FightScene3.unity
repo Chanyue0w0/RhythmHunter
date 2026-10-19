@@ -7869,6 +7869,9 @@ MonoBehaviour:
   enemyAttackDamage: 1
   resolutionSafetyMs: 12
   endBattleOnZeroHp: 0
+  autoPlayBattleEntrance: 1
+  entranceDelaySeconds: 3
+  openingIdleSeconds: 1
   enableSuccessfulInputSound: 1
   successfulInputSoundEventPath: event:/SoundEffects/BeatTapping
   successfulInputSoundVolume: 0.5

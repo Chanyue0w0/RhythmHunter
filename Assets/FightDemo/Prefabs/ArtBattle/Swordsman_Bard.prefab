@@ -107,27 +107,55 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  basicBreakPower: 0
+  skillBreakPower: 0
+  bossPattern:
+    enabled: 0
+    neutralBeats: 4
+    armorBeats: 4
+    chargeBeats: 4
+    vulnerableBeats: 4
+    rageWindupBeats: 2
+    rageAttackBeats: 6
+    rageAttackInterval: 2
+    breakBeats: 4
+    breakThreshold: 3
+    armorReduction: 0.5
+    vulnerableBonus: 0.5
+    chargeDamage: 2
+    rageFinisherDamage: 3
+    successfulGuardBreakPower: 1
   characterId: Bard
   displayName: BARD
   team: 1
   role: 2
   maxHp: 1
   defense: 1
+  frontlineDefenseBonus: 0
   armorRecoveryDelay: 4
   armorRecoveryInterval: 2
   armorRecoveryAmount: 0.5
   basicAbilityName: Heal
   normalAbilityBehavior: 2
   normalAbilityPower: 0.5
+  consecutiveInputBeats: 3
+  basicGuardBeats: 1
+  basicInterruptsEnemy: 0
+  successfulInterruptDamageBonus: 0
   attackPower: 1
   teamSkillManaCost: 10
   teamSkillPerformanceBeats: 4
+  teamSkillEffectBeatOffset: 0
   skillName: Healing Chorus
   skillBehavior: 2
   skillPower: 1
+  conditionalSkillPower: 4
+  restoreArmorAfterTeamSkill: 0
+  attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
+  useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 8051251566155585380, guid: 5dbd5598d6ff1ab4c8915e39f9f6fa53, type: 3}
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 5144665940529118379}

@@ -381,7 +381,8 @@ namespace RhythmHunter.FightDemo
             normalAttackPlayCount++;
             lightAttackPlayCount++;
             Color lightColor = Color.Lerp(accentColor, new Color(0.2f, 0.95f, 1f, 1f), 0.72f);
-            if (!SpawnConfiguredAbilityEffects(false, FightAttackEffect.VisualStyle.Light, lightColor, effectAnchors))
+            if (!SpawnConfiguredAbilityEffects(false, FightAttackEffect.VisualStyle.Light, lightColor, effectAnchors) &&
+                (characterDefinition == null || characterDefinition.UseFallbackAbilityEffects))
                 SpawnAttackEffect(FightAttackEffect.VisualStyle.Light, lightColor, 0f);
         }
 
@@ -405,7 +406,8 @@ namespace RhythmHunter.FightDemo
             normalAttackPlayCount++;
             skillAttackPlayCount++;
             Color skillColor = Color.Lerp(accentColor, new Color(1f, 0.82f, 0.2f, 1f), 0.42f);
-            if (!SpawnConfiguredAbilityEffects(true, FightAttackEffect.VisualStyle.Skill, skillColor, effectAnchors))
+            if (!SpawnConfiguredAbilityEffects(true, FightAttackEffect.VisualStyle.Skill, skillColor, effectAnchors) &&
+                (characterDefinition == null || characterDefinition.UseFallbackAbilityEffects))
             {
                 SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(0.86f, 0.38f, 1f, 1f), -0.22f, skillEffectPrefab);
                 SpawnAttackEffect(FightAttackEffect.VisualStyle.Skill, new Color(1f, 0.82f, 0.2f, 1f), 0.22f, skillEffectPrefab);

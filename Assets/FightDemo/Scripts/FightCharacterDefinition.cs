@@ -71,6 +71,8 @@ namespace RhythmHunter.FightDemo
         [Header("Replaceable Ability Effects")]
         [Tooltip("Optional visual-only Basic Ability prefab. Damage never depends on this prefab or projectile travel.")]
         [SerializeField] private GameObject normalAbilityEffectPrefab;
+        [Tooltip("Show prototype attack visuals when no ability effect prefab is assigned.")]
+        [SerializeField] private bool useFallbackAbilityEffects = true;
         [Tooltip("Optional replaceable VFX prefab spawned when this character uses its skill.")]
         [SerializeField] private GameObject skillEffectPrefab;
         [Tooltip("Visual lifetime in seconds. Set to 0 when the effect prefab destroys itself.")]
@@ -116,6 +118,7 @@ namespace RhythmHunter.FightDemo
         public AbilityBehavior SkillType => skillBehavior;
         public float SkillPower => skillPower;
         public GameObject NormalAbilityEffectPrefab => normalAbilityEffectPrefab;
+        public bool UseFallbackAbilityEffects => useFallbackAbilityEffects;
         public GameObject SkillEffectPrefab => skillEffectPrefab;
         public float AbilityEffectLifetime => abilityEffectLifetime;
         public Transform AuthoredCastEffectAnchor => castEffectAnchor;

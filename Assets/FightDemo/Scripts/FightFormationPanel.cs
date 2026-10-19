@@ -56,7 +56,7 @@ namespace RhythmHunter.FightDemo
             if (panel == null || fight == null) return;
             bool preparing = fight.AwaitingBattleStart;
             // Keep pause/calibration menus accessible above the formation screen.
-            panel.gameObject.SetActive(preparing && !fight.IsPaused && !fight.TimingCalibrationActive);
+            panel.gameObject.SetActive(preparing && !fight.BattleEntranceRunning && !fight.IsPaused && !fight.TimingCalibrationActive);
             lockedLabel.gameObject.SetActive(!preparing);
             lockedLabel.text = "FORMATION LOCKED  |  Changes available before the next battle";
             if (!preparing) return;

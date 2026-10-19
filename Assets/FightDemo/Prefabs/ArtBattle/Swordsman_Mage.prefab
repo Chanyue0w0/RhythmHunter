@@ -76,29 +76,55 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  basicBreakPower: 1
+  skillBreakPower: 2
+  bossPattern:
+    enabled: 0
+    neutralBeats: 4
+    armorBeats: 4
+    chargeBeats: 4
+    vulnerableBeats: 4
+    rageWindupBeats: 2
+    rageAttackBeats: 6
+    rageAttackInterval: 2
+    breakBeats: 4
+    breakThreshold: 3
+    armorReduction: 0.5
+    vulnerableBonus: 0.5
+    chargeDamage: 2
+    rageFinisherDamage: 3
+    successfulGuardBreakPower: 1
   characterId: Mage
   displayName: MAGE
   team: 1
   role: 3
   maxHp: 1
   defense: 1
+  frontlineDefenseBonus: 0
   armorRecoveryDelay: 4
   armorRecoveryInterval: 2
   armorRecoveryAmount: 0.5
   basicAbilityName: Arcane Bolt
   normalAbilityBehavior: 0
   normalAbilityPower: 1
+  consecutiveInputBeats: 3
+  basicGuardBeats: 1
+  basicInterruptsEnemy: 0
+  successfulInterruptDamageBonus: 0
   attackPower: 1
   teamSkillManaCost: 10
-  basicBreakPower: 1
-  skillBreakPower: 2
   teamSkillPerformanceBeats: 4
+  teamSkillEffectBeatOffset: 0
   skillName: Arcane Burst
   skillBehavior: 3
   skillPower: 1
+  conditionalSkillPower: 4
+  restoreArmorAfterTeamSkill: 0
+  attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
+  useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 1533513433225352677, guid: 4b90ddde63a4da7469b9e61591b39fea, type: 3}
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 1354775231306750794}

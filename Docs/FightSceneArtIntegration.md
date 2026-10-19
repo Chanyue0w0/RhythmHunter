@@ -8,6 +8,17 @@
 
 ## 角色逐張圖片拍數
 
+角色動畫使用原圖完整畫布與透明邊界，不以不透明像素自動裁切。`hero` 目前 10 張圖均為 776×528，Sprite Rect 統一為 (0,0,776,528)，Mesh Type 為 Full Rect，中心 Pivot；保留既有 Multiple 單切片的 GUID／internalID，避免 Prefab 引用失效。新加入的單張動畫可使用 Single + Full Rect；若沿用 Multiple，切片需涵蓋完整畫布，不使用 Automatic Slice 裁邊。
+
+新增可選的 `Opening Idle`（開場清醒待機）與 `Drink`（喝酒）分類，均支援逐張拍數。原 `Idle` 作為酒醉後主要待機；Normal／TeamSkill 等使用酒醉版戰鬥素材。未提供新素材時不自動複製其他圖片。
+FightScene3 啟用 `FightCombatController → Battle Entrance → Auto Play Battle Entrance`：進場清醒待機 1 秒，全員同步喝酒 2 秒，滿 3 秒才啟動 FMOD 音樂與戰鬥。Entrance Delay Seconds 控制總長，Opening Idle Seconds 控制清醒待機時間。這段進場倒數不替代戰鬥音樂節拍時鐘。
+喝酒序列以各張圖片的相對時長縮放至剩餘開場時間，因此不同角色可以同時開始及結束。開場期間不接受普通能力或編隊操作；暫停／校正期間倒數停止。缺少喝酒圖片時維持待機直到時間到，不阻塞開戰；缺少 Opening Idle 則暫用原 Idle。
+關閉自動開場後保留原戰前編隊與手動開始流程。開場只在進入場景時播放，Wave 切換不重播。`BeginOpeningIdle()`、`PlayDrink(onCompleted)`、`PlayDrinkForSeconds()`、`EndOpeningPresentation()` 提供演出控制；既有敵人不要求提供這兩類動畫。
+
+LongswordWarrior 的 Normal 已接入 `hero/attack/attack_1～4`；第 4 張觸發普通攻擊特效，位置為敵人的 ImpactEffectAnchor，原目標若已死亡則往後尋找存活首位。未製作特效時保持 Normal Ability Effect Prefab 空白，並關閉 Use Fallback Ability Effects，因此不生成替代圖形。完成後只需指定該特效 Prefab。
+TeamSkill 已接入 `hero/skill/attack_5～7`，暫不啟用 Warning、攻擊特效或舊流程傷害事件。兩組先保留 10 FPS；技能的實際傷害仍由戰鬥節拍結算。
+敵人死亡不移動其他敵人的 Transform、不壓縮隊形；首位代表依前到後順序找到的第一個存活且有角色的 Slot。後續攻擊依此繼續往後找，不能跨 Wave 沿用舊動畫回呼。
+
 角色視覺 Prefab 的 `FightCharacterCombatAnimator` 統一控制待機與戰鬥序列。
 
 - Inspector 分為 `Idle`（待機）、`Normal`（普通能力）、`TeamSkill`（隊伍技能）、`GetHurt`（受傷）、`Die`（死亡）五個主分類；Guard、Heavy Attack、舊版 Light Attack 保留於其他動作區。
