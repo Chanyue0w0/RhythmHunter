@@ -1,6 +1,7 @@
 using RhythmHunter.RhythmDemo;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace RhythmHunter.FightDemo
@@ -11,6 +12,7 @@ namespace RhythmHunter.FightDemo
         FmodBeatClock clock;
         GameObject overlay, toggle;
         float previousTimeScale;
+        bool restarting;
         public bool IsPaused { get; private set; }
 
         public void Configure(FmodBeatClock source, Canvas canvas, Font font)
@@ -30,6 +32,8 @@ namespace RhythmHunter.FightDemo
             Center(hint.rectTransform);
             var resume = FightMenuUi.Button(panel,"RESUME",new Vector2(0,-80),new Vector2(260,54),font,TogglePause);
             Center((RectTransform)resume.transform);
+            var restart = FightMenuUi.Button(panel, "RESTART BATTLE  [F9]", new Vector2(0,-150),new Vector2(300,54),font,RestartBattle);
+            Center((RectTransform)restart.transform);
             overlay.SetActive(false);
         }
 
@@ -40,6 +44,12 @@ namespace RhythmHunter.FightDemo
 
         void Update()
         {
+            if (restarting) return;
+            if (Keyboard.current?.f9Key.wasPressedThisFrame ?? false)
+            {
+                RestartBattle();
+                return;
+            }
             if ((Gamepad.current?.startButton.wasPressedThisFrame ?? false) ||
                 (Keyboard.current?.escapeKey.wasPressedThisFrame ?? false) ||
                 (Keyboard.current?.f8Key.wasPressedThisFrame ?? false)) TogglePause();
@@ -49,11 +59,54 @@ namespace RhythmHunter.FightDemo
 
         public void SetPaused(bool value)
         {
+            if (restarting) return;
             if (clock == null || value == IsPaused || !clock.SetPaused(value)) return;
             if (value) { previousTimeScale = Time.timeScale; Time.timeScale = 0; }
             else Time.timeScale = previousTimeScale;
             IsPaused = value;
             if (overlay != null) { overlay.SetActive(value); if (value) overlay.transform.SetAsLastSibling(); }
+        }
+
+        public void RestartBattle()
+        {
+            if (!Application.isPlaying || restarting) return;
+            Scene scene = gameObject.scene;
+            if (string.IsNullOrEmpty(scene.path))
+            {
+                Debug.LogWarning("Save the battle scene before restarting it.", this);
+                return;
+            }
+#if !UNITY_EDITOR
+            if (!Application.CanStreamedLevelBeLoaded(scene.path))
+            {
+                Debug.LogError("Cannot restart: the battle scene is missing from the build scene list.", this);
+                return;
+            }
+#endif
+            restarting = true;
+            // Restore global time before unloading. OnDisable must not restore it twice.
+            if (IsPaused) Time.timeScale = previousTimeScale;
+            IsPaused = false;
+            clock?.StopMusic();
+            // Reload authored formation, resources, waves and entrance/debug settings.
+            // In the Editor this also supports saved scenes outside the build list.
+#if UNITY_EDITOR
+            // Runtime scene objects are about to be destroyed. Do not leave their
+            // built-in inspectors targeting the old instances during scene reload.
+            var selected = UnityEditor.Selection.objects;
+            var retained = new System.Collections.Generic.List<Object>();
+            foreach (var item in selected)
+                if (item != null && UnityEditor.EditorUtility.IsPersistent(item)) retained.Add(item);
+            if (retained.Count != selected.Length)
+            {
+                UnityEditor.Selection.objects = retained.ToArray();
+                UnityEditor.ActiveEditorTracker.sharedTracker.ForceRebuild();
+            }
+            UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(scene.path,
+                new LoadSceneParameters(LoadSceneMode.Single));
+#else
+            SceneManager.LoadScene(scene.path, LoadSceneMode.Single);
+#endif
         }
 
         void OnDisable()

@@ -618,7 +618,7 @@ PrefabInstance:
     - target: {fileID: 5342629655095800664, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
       propertyPath: sequences.Array.data[4].frameEffects.Array.data[0].effects.Array.data[0].prefab
       value: 
-      objectReference: {fileID: 8873411573075826000, guid: 8184888684558e543aebeaf815a28b9d, type: 3}
+      objectReference: {fileID: 517028590110841671, guid: f84393202a1f9f14b943ea585159f625, type: 3}
     - target: {fileID: 5342629655095800664, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[3].effects.Array.data[0].location
       value: 1

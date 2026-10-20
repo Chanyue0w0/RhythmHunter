@@ -80,3 +80,4 @@ Team Skill 測試：Fight Combat Controller → Team Skill (Equal Beat) → Star
 逐張特效清單：角色 Prefab 的 Fight Character Combat Animator → Normal / TeamSkill → 圖片 → 生成特效 → 新增特效。每項可指定 Prefab、自身或本次攻擊目標、自訂自身掛點、掛點座標偏移、旋轉偏移、跟隨及存活秒數。空白自身掛點使用 CastEffectAnchor；目標使用本次命中的 ImpactEffectAnchor，群體技能對本次存活目標快照各生成一次，自身特效只生成一次。沒有目標的輔助技能不會生成目標特效。
 清單於進入圖片時執行，與「生成攻擊特效」勾選各自獨立，不改變傷害時間。勾選會生成原本 Normal Ability Effect Prefab／Skill Effect Prefab 的特效，清單用於額外的 ChargeEffect、SwordSlash 等；不要把同一個命中特效再加入清單，除非刻意需要兩次。已移除 Inspector 的舊圖片傷害事件選項；底層相容介面保留給舊資料及驗證，不負責目前戰鬥扣血。
 上移、下移、刪除圖片會一起處理清單。動畫中斷不補播未到達圖片的清單；已生成特效僅在勾選「限制存活時間」時按秒數清除；預設關閉，由 Prefab 自行消失，仍沿用戰鬥結束、Wave 切換與暫停管理。角色 Prefab 內的自訂掛點應引用該角色自己的子物件。正式測試選單 Rhythm Hunter/Validate Fight Character Animations 包含清單多事件、原攻擊特效與清單獨立觸發、暫停、中斷及重播檢查。
+戰鬥重開：暫停選單 RESTART BATTLE，或鍵盤 F9（不必先暫停）。重新載入目前戰鬥場景，停止舊音樂並恢復暫停前的時間倍率，所有資源、敵人、Wave、開場與進場滿 Team Skill 測試設定依儲存場景重新初始化。Play 模式中的臨時修改不保留。Editor 支援尚未加入 Build 的已儲存場景；Build 必須包含該場景。

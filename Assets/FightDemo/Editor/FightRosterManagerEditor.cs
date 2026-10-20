@@ -11,6 +11,7 @@ namespace RhythmHunter.FightDemoEditor
 
         public override void OnInspectorGUI()
         {
+            foreach (var inspected in targets) if (inspected == null) return;
             serializedObject.Update();
             DrawPropertiesExcluding(serializedObject, "heroSpawnSlots", "heroPrefabs");
             EditorGUILayout.Space();
