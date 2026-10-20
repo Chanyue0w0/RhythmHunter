@@ -312,13 +312,24 @@ namespace RhythmHunter.FightDemo
             FightCharacterCombatAnimator.CombatAnimation animation,
             Action onWarning,
             Action onAttackEffect,
-            Action onDamage)
+            Action onDamage,
+            Action<FightCharacterCombatAnimator.FrameEffect> onFrameEffect = null)
         {
             return combatAnimator != null && combatAnimator.Play(
                 animation,
                 onWarning,
                 onAttackEffect,
-                onDamage);
+                onDamage,
+                onFrameEffect: onFrameEffect);
+        }
+
+        public void PlayFrameEffect(FightCharacterCombatAnimator.FrameEffect effect, params Transform[] targets)
+        {
+            if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self)
+                EffectPlayer.SpawnFrameEffect(effect, effect.selfAnchor != null ? effect.selfAnchor : CastEffectAnchor);
+            else if (targets != null)
+                foreach (var target in targets)
+                    if (target != null) EffectPlayer.SpawnFrameEffect(effect, target);
         }
 
         public void PlayAttackFrameWarning(bool enemy)

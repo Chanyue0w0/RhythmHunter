@@ -25,11 +25,47 @@ namespace RhythmHunter.FightDemo
             [InspectorName("Drink")] Drink = 8
         }
 
+        public enum EffectLocation { Self, AttackTarget }
+
+        [Serializable]
+        public sealed class FrameEffect
+        {
+            public GameObject prefab;
+            public EffectLocation location;
+            [Tooltip("Self only. Empty uses the character CastEffectAnchor.")]
+            public Transform selfAnchor;
+            public Vector3 positionOffset;
+            public Vector3 rotationOffset;
+            public bool followAnchor;
+            [Tooltip("Off: let the prefab manage its own lifetime. Wave and battle cleanup still apply.")]
+            public bool limitLifetime;
+            [Min(0.01f)] public float lifetimeSeconds = 1.5f;
+        }
+
+        [Serializable]
+        public sealed class FrameEffects
+        {
+            public List<FrameEffect> effects = new();
+        }
+
         [Serializable]
         public sealed class Sequence
         {
             [SerializeField] private CombatAnimation animation;
             [SerializeField] private List<Sprite> frames = new();
+            [SerializeField] private List<FrameEffects> frameEffects = new();
+            public IReadOnlyList<FrameEffect> EffectsAt(int index) => index < frameEffects.Count ? frameEffects[index]?.effects : null;
+            public bool HasFrameEffects
+            {
+                get
+                {
+                    for (int i = 0; i < frames.Count; i++)
+                        if (EffectsAt(i) is { } effects)
+                            foreach (var effect in effects)
+                                if (effect != null && effect.prefab != null) return true;
+                    return false;
+                }
+            }
             [SerializeField, Min(1f)] private float framesPerSecond = 16f;
             [Tooltip("Use individual frame durations in beats instead of FPS.")]
             [SerializeField] private bool useFrameBeatDurations;
@@ -92,6 +128,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1f)] private float fallbackBpm = 120f;
 
         [Header("Editable Idle Sequence")]
+        [Tooltip("Use the optional drunk idle after the entrance. Disabled: keep the ordinary Opening Idle sequence throughout battle. Prefabs without Opening Idle retain their existing idle.")]
+        [SerializeField] private bool useDrunkIdle;
         [SerializeField] private List<Sprite> frames = new();
         [Tooltip("Use individual idle frame durations instead of Cycles Per Beat. Ping Pong still applies.")]
         [SerializeField] private bool useIdleFrameBeatDurations;
@@ -118,6 +156,7 @@ namespace RhythmHunter.FightDemo
         private float frameElapsed;
         private Action warningCallback;
         private Action attackEffectCallback;
+        private Action<FrameEffect> frameEffectCallback;
         private Action damageCallback;
         private Action completedCallback;
         private bool warningRaised;
@@ -269,7 +308,7 @@ namespace RhythmHunter.FightDemo
         private void UpdateIdle()
         {
             RefreshSongTempo();
-            Sequence entry = openingIdle ? FindSequence(CombatAnimation.OpeningIdle) : null;
+            Sequence entry = openingIdle || !useDrunkIdle ? FindSequence(CombatAnimation.OpeningIdle) : null;
             if (entry != null && entry.Frames.Count > 0 && targetRenderer != null)
             {
                 double totalBeats = 0;
@@ -385,7 +424,8 @@ namespace RhythmHunter.FightDemo
             Action onWarning = null,
             Action onAttackEffect = null,
             Action onDamage = null,
-            Action onCompleted = null)
+            Action onCompleted = null,
+            Action<FrameEffect> onFrameEffect = null)
         {
             Sequence sequence = FindSequence(animation);
             if (!isActiveAndEnabled || sequence == null || sequence.Frames.Count == 0 || targetRenderer == null)
@@ -406,6 +446,7 @@ namespace RhythmHunter.FightDemo
             frameElapsed = 0f;
             warningCallback = onWarning;
             attackEffectCallback = onAttackEffect;
+            frameEffectCallback = onFrameEffect;
             damageCallback = onDamage;
             completedCallback = onCompleted;
             warningRaised = false;
@@ -469,6 +510,15 @@ namespace RhythmHunter.FightDemo
             int version = playbackVersion;
             activeFrame = frameIndex;
             targetRenderer.sprite = activeSequence.Frames[frameIndex];
+            var effects = activeSequence.EffectsAt(frameIndex);
+            if (effects != null)
+                foreach (var effect in effects)
+                {
+                    if (effect == null || effect.prefab == null) continue;
+                    if (frameEffectCallback != null) frameEffectCallback(effect);
+                    else GetComponentInParent<FightUnitSlot>()?.PlayFrameEffect(effect);
+                    if (version != playbackVersion) return;
+                }
             if (!warningRaised && frameIndex == activeSequence.WarningFrame)
             {
                 warningRaised = true;
@@ -509,6 +559,7 @@ namespace RhythmHunter.FightDemo
             activeSequence = null;
             warningCallback = null;
             attackEffectCallback = null;
+            frameEffectCallback = null;
             damageCallback = null;
             completedCallback = null;
             shownFrame = -1;

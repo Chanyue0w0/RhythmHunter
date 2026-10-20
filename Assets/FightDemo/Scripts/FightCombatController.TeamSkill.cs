@@ -6,6 +6,8 @@ namespace RhythmHunter.FightDemo
     public sealed partial class FightCombatController
     {
         [Header("Team Skill (Equal Beat)")]
+        [Tooltip("Testing: start a new battle with full shared MP. Off starts at 0. Does not refill on wave changes or after casting.")]
+        [SerializeField] private bool startWithFullTeamSkill = false;
         [SerializeField, Min(1)] private int teamSkillGaugeGain = 1;
         private int teamSkillGauge, teamSkillStep;
         private long nextTeamSkillBeat = long.MaxValue;

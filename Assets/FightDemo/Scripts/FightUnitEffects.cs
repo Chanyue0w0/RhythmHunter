@@ -43,6 +43,25 @@ namespace RhythmHunter.FightDemo
             TrackEffect(effect, lifetime);
         }
 
+        public void SpawnFrameEffect(FightCharacterCombatAnimator.FrameEffect entry, Transform anchor)
+        {
+            if (entry == null || entry.prefab == null || anchor == null) return;
+            var effect = Instantiate(entry.prefab, anchor.TransformPoint(entry.positionOffset),
+                anchor.rotation * Quaternion.Euler(entry.rotationOffset));
+            SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
+            if (entry.followAnchor) effect.transform.SetParent(anchor, true);
+            effect.SetActive(true);
+            float lifetime = entry.limitLifetime
+                ? (float.IsNaN(entry.lifetimeSeconds) || float.IsInfinity(entry.lifetimeSeconds)
+                    ? 1.5f : Mathf.Max(0.01f, entry.lifetimeSeconds))
+                : 0f;
+            var attack = effect.GetComponent<FightAttackEffect>();
+            // Legacy procedural visuals need initialization and own their animation's cleanup.
+            if (attack != null) attack.PlayInPlace(entry.limitLifetime ? lifetime : 1.5f,
+                FightAttackEffect.VisualStyle.Light, Color.white);
+            TrackEffect(effect, lifetime);
+        }
+
         public void SpawnAttack(
             string unitName,
             FightUnitSlot.UnitTeam team,

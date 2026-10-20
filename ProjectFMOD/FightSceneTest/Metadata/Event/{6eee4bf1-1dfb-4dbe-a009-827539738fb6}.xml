@@ -140,9 +140,6 @@
 		<property name="initialValue">
 			<value>-80</value>
 		</property>
-		<property name="attackTime">
-			<value>3000</value>
-		</property>
 		<property name="holdTime">
 			<value>0</value>
 		</property>

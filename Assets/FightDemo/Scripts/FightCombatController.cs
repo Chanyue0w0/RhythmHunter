@@ -141,11 +141,13 @@ namespace RhythmHunter.FightDemo
 
         [Header("Battle Entrance")]
         [SerializeField] private bool autoPlayBattleEntrance;
-        [Tooltip("Minimum entrance length. Play Opening Idle once, then Drink; keep sober Idle looping until music and battle start.")]
-        [SerializeField, Min(0f)] private float minimumEntranceSeconds = 3f;
+        [Tooltip("Seconds before music starts, independent of Opening Idle and Drink. Battle controls unlock after the entrance animation and music start.")]
+        [UnityEngine.Serialization.FormerlySerializedAs("minimumEntranceSeconds")]
+        [SerializeField, Min(0f)] private float musicStartDelaySeconds = 0f;
         public bool AutoPlayBattleEntrance => autoPlayBattleEntrance;
         private float entranceElapsed;
-        private bool entrancePending, entranceDrinking, entranceTempoReady;
+        private bool entrancePending;
+        private bool entranceMusicStarted, entranceDrinking;
         private double entranceIdleDuration;
         public bool BattleEntranceRunning => entrancePending;
 
@@ -154,49 +156,48 @@ namespace RhythmHunter.FightDemo
             if (!autoPlayBattleEntrance || !AwaitingBattleStart) return;
             entrancePending = true;
             entranceElapsed = 0;
-            entranceDrinking = false;
-            entranceTempoReady = false;
+            entranceMusicStarted = entranceDrinking = false;
             beatClock?.SetAutomaticPlayback(false);
             beatClock?.PrepareOpeningTempo();
+            if (musicStartDelaySeconds <= 0f) StartEntranceMusic();
+            entranceIdleDuration = 0;
+            foreach (var hero in rosterManager.ActiveHeroes)
+            {
+                hero.CombatAnimator?.BeginOpeningIdle();
+                if (hero.CombatAnimator != null)
+                    entranceIdleDuration = Math.Max(entranceIdleDuration,
+                        hero.CombatAnimator.GetSequenceDurationSeconds(FightCharacterCombatAnimator.CombatAnimation.OpeningIdle));
+            }
+        }
+
+        private void StartEntranceMusic()
+        {
+            if (entranceMusicStarted) return;
+            beatClock?.RestartMusic();
+            entranceMusicStarted = true;
         }
 
         private void UpdateBattleEntrance()
         {
             if (!entrancePending || IsPaused || TimingCalibrationActive) return;
-            if (!entranceTempoReady)
-            {
-                if (beatClock == null || beatClock.OpeningTempoFailed)
-                {
-                    entrancePending = false;
-                    Debug.LogWarning("Opening tempo unavailable; returned to manual battle preparation.", this);
-                    return;
-                }
-                if (!beatClock.HasOpeningTempo) return;
-                entranceTempoReady = true;
-                entranceIdleDuration = 0;
-                foreach (var hero in rosterManager.ActiveHeroes)
-                {
-                    var animator = hero.CombatAnimator;
-                    if (animator == null) continue;
-                    animator.BeginOpeningIdle();
-                    entranceIdleDuration = Math.Max(entranceIdleDuration,
-                        animator.GetSequenceDurationSeconds(FightCharacterCombatAnimator.CombatAnimation.OpeningIdle));
-                }
-                return;
-            }
             entranceElapsed += UnityEngine.Time.deltaTime;
+            if (!entranceMusicStarted && entranceElapsed >= musicStartDelaySeconds) StartEntranceMusic();
             if (!entranceDrinking && entranceElapsed >= entranceIdleDuration)
             {
                 entranceDrinking = true;
                 foreach (var hero in rosterManager.ActiveHeroes)
                     hero.CombatAnimator?.PlayDrink(returnToOpeningIdle: true);
-                return;
             }
-            if (!entranceDrinking) return;
+            if (!entranceDrinking || !entranceMusicStarted) return;
             foreach (var hero in rosterManager.ActiveHeroes)
                 if (hero.CombatAnimator != null && hero.CombatAnimator.IsPlaying &&
                     hero.CombatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Drink) return;
-            if (entranceElapsed < minimumEntranceSeconds) return;
+            CompleteBattleEntrance();
+        }
+
+        private void CompleteBattleEntrance()
+        {
+            if (IsPaused || TimingCalibrationActive) return;
             entrancePending = false;
             if (TryBeginBattle())
             {
@@ -299,6 +300,11 @@ namespace RhythmHunter.FightDemo
             if (entrancePending || !AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
             ResetBattleStateForRoster();
             rhythmJudge?.ResetDuplicateTracking();
+            if (startWithFullTeamSkill)
+            {
+                teamSkillGauge = TeamSkillGaugeMax;
+                TeamSkillStatus = "READY  A / R";
+            }
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             if (beatClock != null && !beatClock.IsPlaying) beatClock.RestartMusic();
             return true;
@@ -1276,7 +1282,12 @@ namespace RhythmHunter.FightDemo
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
                 () => PlayHeroActionVisual(actionRosterVersion, attacker, target, action),
-                null);
+                null,
+                effect =>
+                {
+                    if (IsCurrentHeroAction(actionRosterVersion, attacker, target))
+                        attacker.PlayFrameEffect(effect, target.ImpactEffectAnchor);
+                });
             if (animated)
                 return;
 
@@ -1290,12 +1301,23 @@ namespace RhythmHunter.FightDemo
             float damage)
         {
             int actionRosterVersion = rosterVersion;
+            var effectTargets = fightScene2Enemies.FindAll(enemy => enemy != null && enemy.HasCharacter && enemy.CurrentHp > 0).ToArray();
             ApplyAreaDamage(actionRosterVersion, attacker, damage);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
                 () => PlayHeroAreaVisual(actionRosterVersion, attacker, action),
-                null);
+                null,
+                effect =>
+                {
+                    if (!IsCurrentHero(actionRosterVersion, attacker)) return;
+                    if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self)
+                        attacker.PlayFrameEffect(effect);
+                    else
+                        foreach (var target in effectTargets)
+                            if (IsCurrentHeroAction(actionRosterVersion, attacker, target))
+                                attacker.PlayFrameEffect(effect, target.ImpactEffectAnchor);
+                });
             if (animated)
                 return;
 
@@ -1326,7 +1348,11 @@ namespace RhythmHunter.FightDemo
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, actor),
                 guardedEffect,
-                guardedResolution);
+                guardedResolution,
+                effect =>
+                {
+                    if (IsCurrentHero(actionRosterVersion, actor)) actor.PlayFrameEffect(effect);
+                });
             if (animated)
                 return;
 

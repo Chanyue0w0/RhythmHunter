@@ -18,10 +18,12 @@ namespace RhythmHunter.FightDemoEditor
             Field("beatSource");
             Field("fallbackBpm");
 
-            DrawSequence(8, 7, "Opening Idle — 開場清醒待機");
+            DrawSequence(8, 7, "Idle / Opening Idle — 普通待機（開場與戰鬥）");
             DrawSequence(9, 8, "Drink — 喝酒");
 
-            expanded[0] = EditorGUILayout.Foldout(expanded[0], "Idle — 主要待機（酒醉）", true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("useDrunkIdle"),
+                new GUIContent("啟用酒醉 Idle", "開場結束後使用附加酒醉待機；關閉時繼續普通 Idle。"));
+            expanded[0] = EditorGUILayout.Foldout(expanded[0], "附加 Idle — 酒醉／舊角色預設待機", true);
             if (expanded[0])
             {
                 EditorGUI.indentLevel++;
@@ -73,12 +75,13 @@ namespace RhythmHunter.FightDemoEditor
                     sequence = list.GetArrayElementAtIndex(index);
                     sequence.FindPropertyRelative("animation").intValue = type;
                     sequence.FindPropertyRelative("frames").ClearArray();
+                    sequence.FindPropertyRelative("frameEffects").ClearArray();
                     sequence.FindPropertyRelative("frameBeatDurations").ClearArray();
                     sequence.FindPropertyRelative("useFrameBeatDurations").boolValue = true;
                     sequence.FindPropertyRelative("framesPerSecond").floatValue = 16;
                     sequence.FindPropertyRelative("warningFrame").intValue = -1;
                     sequence.FindPropertyRelative("attackEffectFrame").intValue = -1;
-                    sequence.FindPropertyRelative("damageFrame").intValue = 0;
+                    sequence.FindPropertyRelative("damageFrame").intValue = -1;
                 }
             }
             if (sequence != null)
@@ -95,6 +98,17 @@ namespace RhythmHunter.FightDemoEditor
             SerializedProperty sequence = null)
         {
             EditorGUILayout.PropertyField(useBeats, new GUIContent("逐張設定拍數"));
+            SerializedProperty effectsByFrame = sequence?.FindPropertyRelative("frameEffects");
+            if (effectsByFrame != null)
+            {
+                while (effectsByFrame.arraySize < frames.arraySize)
+                {
+                    int index = effectsByFrame.arraySize;
+                    effectsByFrame.InsertArrayElementAtIndex(index);
+                    effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("effects").ClearArray();
+                }
+                effectsByFrame.arraySize = frames.arraySize;
+            }
             while (durations.arraySize < frames.arraySize)
             {
                 int index = durations.arraySize;
@@ -122,7 +136,7 @@ namespace RhythmHunter.FightDemoEditor
                     {
                         FrameEvent(sequence, "warningFrame", "進入圖片時生成 Warning", i);
                         FrameEvent(sequence, "attackEffectFrame", "進入圖片時生成攻擊特效", i);
-                        FrameEvent(sequence, "damageFrame", "進入圖片時發出傷害事件（舊流程）", i);
+                        DrawEffects(effectsByFrame.GetArrayElementAtIndex(i).FindPropertyRelative("effects"));
                     }
                     using (new EditorGUILayout.HorizontalScope())
                     {
@@ -138,6 +152,7 @@ namespace RhythmHunter.FightDemoEditor
                     frames.GetArrayElementAtIndex(i).objectReferenceValue = null;
                     frames.DeleteArrayElementAtIndex(i);
                     durations.DeleteArrayElementAtIndex(i);
+                    effectsByFrame?.DeleteArrayElementAtIndex(i);
                     RemapEvents(sequence, i, -1);
                     break;
                 }
@@ -145,6 +160,7 @@ namespace RhythmHunter.FightDemoEditor
                 {
                     frames.MoveArrayElement(i, i + move);
                     durations.MoveArrayElement(i, i + move);
+                    effectsByFrame?.MoveArrayElement(i, i + move);
                     RemapEvents(sequence, i, i + move);
                     break;
                 }
@@ -156,6 +172,11 @@ namespace RhythmHunter.FightDemoEditor
                 frames.GetArrayElementAtIndex(index).objectReferenceValue = null;
                 if (durations.arraySize <= index) durations.InsertArrayElementAtIndex(index);
                 durations.GetArrayElementAtIndex(index).floatValue = 0.5f;
+                if (effectsByFrame != null)
+                {
+                    effectsByFrame.InsertArrayElementAtIndex(index);
+                    effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("effects").ClearArray();
+                }
             }
             if (useBeats.boolValue)
             {
@@ -165,7 +186,50 @@ namespace RhythmHunter.FightDemoEditor
                 EditorGUILayout.LabelField("單次正向總長", $"{total:0.###} 拍");
             }
             if (sequence != null)
-                EditorGUILayout.HelpBox("每種事件每套動畫各觸發一次；勾選另一張會移動該事件。上移／下移會一起移動圖片、拍數與事件。", MessageType.None);
+                EditorGUILayout.HelpBox("特效清單與『生成攻擊特效』勾選獨立運作：清單生成附加特效，勾選則生成角色原本設定的普通攻擊／技能特效。不要在清單再放同一命中特效，除非需要播放兩次。傷害由戰鬥系統結算。圖片排序與刪除會同步處理清單。", MessageType.None);
+        }
+
+        private static void DrawEffects(SerializedProperty effects)
+        {
+            effects.isExpanded = EditorGUILayout.Foldout(effects.isExpanded, $"生成特效（{effects.arraySize}）", true);
+            if (!effects.isExpanded) return;
+            for (int i = 0; i < effects.arraySize; i++)
+            {
+                var entry = effects.GetArrayElementAtIndex(i);
+                using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                {
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("prefab"), new GUIContent("特效 Prefab"));
+                    var location = entry.FindPropertyRelative("location");
+                    location.enumValueIndex = EditorGUILayout.Popup("生成位置", location.enumValueIndex, new[] { "自身掛點", "本次攻擊目標掛點" });
+                    if (location.enumValueIndex == 0)
+                        EditorGUILayout.PropertyField(entry.FindPropertyRelative("selfAnchor"), new GUIContent("自訂自身掛點（選填）"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("positionOffset"), new GUIContent("位置偏移（掛點座標）"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("rotationOffset"), new GUIContent("旋轉偏移"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("followAnchor"), new GUIContent("跟隨掛點"));
+                    var limitLifetime = entry.FindPropertyRelative("limitLifetime");
+                    EditorGUILayout.PropertyField(limitLifetime, new GUIContent("限制存活時間"));
+                    if (limitLifetime.boolValue)
+                    {
+                        var lifetime = entry.FindPropertyRelative("lifetimeSeconds");
+                        lifetime.floatValue = Mathf.Max(0.01f, EditorGUILayout.FloatField("存活秒數", lifetime.floatValue));
+                    }
+                    if (GUILayout.Button("刪除此特效")) { effects.DeleteArrayElementAtIndex(i); break; }
+                }
+            }
+            if (GUILayout.Button("新增特效"))
+            {
+                int index = effects.arraySize;
+                effects.InsertArrayElementAtIndex(index);
+                var entry = effects.GetArrayElementAtIndex(index);
+                entry.FindPropertyRelative("prefab").objectReferenceValue = null;
+                entry.FindPropertyRelative("location").enumValueIndex = 0;
+                entry.FindPropertyRelative("selfAnchor").objectReferenceValue = null;
+                entry.FindPropertyRelative("positionOffset").vector3Value = Vector3.zero;
+                entry.FindPropertyRelative("rotationOffset").vector3Value = Vector3.zero;
+                entry.FindPropertyRelative("followAnchor").boolValue = false;
+                entry.FindPropertyRelative("limitLifetime").boolValue = false;
+                entry.FindPropertyRelative("lifetimeSeconds").floatValue = 1.5f;
+            }
         }
 
         private static void FrameEvent(SerializedProperty sequence, string name, string label, int index)

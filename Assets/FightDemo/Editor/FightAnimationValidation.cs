@@ -154,6 +154,31 @@ namespace RhythmHunter.FightDemoEditor
                 normal.ConfigureFrameBeats(new[] { 0f, -1f, float.NaN });
                 Require(normal.GetFrameBeats(0) > 0 && normal.GetFrameBeats(1) > 0 && normal.GetFrameBeats(2) > 0,
                     "Invalid frame durations must not stall playback.");
+                normal.ConfigureFrameBeats(new[] { 0.5f, 0.5f, 0.5f });
+                var self = new FightCharacterCombatAnimator.FrameEffect { prefab = root };
+                var target = new FightCharacterCombatAnimator.FrameEffect
+                    { prefab = root, location = FightCharacterCombatAnimator.EffectLocation.AttackTarget };
+                typeof(FightCharacterCombatAnimator.Sequence).GetField("frameEffects", PrivateInstance).SetValue(normal,
+                    new System.Collections.Generic.List<FightCharacterCombatAnimator.FrameEffects>
+                    {
+                        new(),
+                        new() { effects = new() { self, target } },
+                        new() { effects = new() { self } }
+                    });
+                int entries = 0, legacyEffects = 0;
+                player.Play(normal.Animation, onAttackEffect: () => legacyEffects++, onFrameEffect: _ => entries++);
+                Advance(player, 0.25f);
+                Require(entries == 2 && legacyEffects == 1, "Frame list and checked original attack VFX must both dispatch once.");
+                player.SetPlaybackPaused(true);
+                Advance(player, 2f);
+                Require(entries == 2, "Paused frame list must not advance.");
+                player.SetPlaybackPaused(false);
+                player.InterruptPlayback();
+                Advance(player, 1f);
+                Require(entries == 2 && legacyEffects == 1, "Interruption must not flush future frame effects or repeat original VFX.");
+                player.Play(normal.Animation, onFrameEffect: _ => entries++);
+                Advance(player, 1f);
+                Require(entries == 5, "Replaying a sequence must emit each frame list exactly once, including skipped frames.");
             }
             finally
             {

@@ -12,9 +12,9 @@
 
 角色動畫使用原圖完整畫布與透明邊界，不以不透明像素自動裁切。`hero` 目前 10 張圖均為 776×528，Sprite Rect 統一為 (0,0,776,528)，Mesh Type 為 Full Rect，中心 Pivot；保留既有 Multiple 單切片的 GUID／internalID，避免 Prefab 引用失效。新加入的單張動畫可使用 Single + Full Rect；若沿用 Multiple，切片需涵蓋完整畫布，不使用 Automatic Slice 裁邊。
 
-新增可選的 `Opening Idle`（開場清醒待機）與 `Drink`（喝酒）分類，均支援逐張拍數。原 `Idle` 作為酒醉後主要待機；Normal／TeamSkill 等使用酒醉版戰鬥素材。未提供新素材時不自動複製其他圖片。
+新增可選的 `Opening Idle`（開場清醒待機）與 `Drink`（喝酒）分類，均支援逐張拍數。`Opening Idle` 現為開場與戰鬥共用的普通 Idle。原酒醉 `Idle` 保留為附加項目，Inspector「啟用酒醉 Idle」預設關閉；開啟後才在開場結束時使用。未設定 Opening Idle 的舊角色沿用原待機素材。Normal／TeamSkill 素材不變。未提供新素材時不自動複製其他圖片。
 FightScene3 開場不再試播靜音事件等待 Beat 回呼。Editor 依目前音樂 event GUID 讀取 ProjectFMOD 下對應事件 XML 的第一個 Tempo Marker；建置場景時將 BPM 與 event path 一併保存至 FmodBeatClock，執行檔不需讀取 FMOD 專案檔。來源缺失時明確回報；建置時不允許缺少開場 BPM 的場景悄悄使用預設值。正式音樂仍在喝酒結束後從頭播放，保留 AHDSR 開頭淡入。
-Opening Idle 播放一輪，採全隊最長序列時間後同步開始 Drink。喝酒依每張圖片原本設定的拍數播放，不縮放、不截斷；喝完後回到清醒 Opening Idle 持續循環，開場至少 3 秒且全員喝完後才啟動音樂與戰鬥，同時切換酒醉主要 Idle。不要求第二輪清醒 Idle 播完，不停留喝酒末幀，也不提前切換酒醉 Idle。Minimum Entrance Seconds 可調整最低開場秒數；動畫超過此時間時不會被截斷。BPM 取自目前載入 Bank 的歌曲節拍；更改 FMOD Tempo Marker 後必須重建 Bank。
+FightDemoController → Fight Combat Controller → Battle Entrance 的 Music Start Delay Seconds 只控制音樂開始的延遲，FightScene3 為 0，進場即播放。開場動畫獨立保留：普通 Idle 一輪 → 全員同步 Drink → 普通 Idle。Drink 依各張圖片拍數播放；全員喝完且音樂已啟動後才解鎖戰鬥操作，不重播或重啟音樂。等待較長的音樂延遲時持續普通 Idle。關閉 Auto Play Battle Entrance 時保留手動編隊開始流程。
 逐張拍數未開啟的序列仍按原 FPS；要以圖片拍數播放，須勾選「逐張設定拍數」。缺少 Opening Idle 或 Drink 的角色不會阻塞其他人。開場期間不接受普通能力或編隊操作，Wave 切換不重播。關閉 Auto Play Battle Entrance 保留手動編隊流程。
 FMOD 淡入：音樂 Event 的 Master Track 音量加入 AHDSR，Initial=-∞、Attack 為所需淡入秒數、Peak/Sustain=0 dB、Hold/Decay=0，再 Build Bank。不要為了淡入移動音檔起點或 Tempo Marker。
 
@@ -74,3 +74,9 @@ Unity 選單 **Rhythm Hunter → Validate Art Background Motion**。
 `Background_08 (Loop Copy Left)` 偵測到缺少貼圖綁定而失敗；結果留於
 `Temp/ArtTestTextureBindingRegression.result`。恢復修正版後，11 層循環邊界的
 畫面像素比對皆通過。這確認檢查能攔截本次缺陷，而非只確認物件存在。
+
+Team Skill 測試：Fight Combat Controller → Team Skill (Equal Beat) → Start With Full Team Skill 預設關閉（進場 0 MP），FightScene3 暫時開啟（新戰鬥滿 MP）。僅在戰鬥開始時套用，施放消耗與跨 Wave 保留規則不變。
+
+逐張特效清單：角色 Prefab 的 Fight Character Combat Animator → Normal / TeamSkill → 圖片 → 生成特效 → 新增特效。每項可指定 Prefab、自身或本次攻擊目標、自訂自身掛點、掛點座標偏移、旋轉偏移、跟隨及存活秒數。空白自身掛點使用 CastEffectAnchor；目標使用本次命中的 ImpactEffectAnchor，群體技能對本次存活目標快照各生成一次，自身特效只生成一次。沒有目標的輔助技能不會生成目標特效。
+清單於進入圖片時執行，與「生成攻擊特效」勾選各自獨立，不改變傷害時間。勾選會生成原本 Normal Ability Effect Prefab／Skill Effect Prefab 的特效，清單用於額外的 ChargeEffect、SwordSlash 等；不要把同一個命中特效再加入清單，除非刻意需要兩次。已移除 Inspector 的舊圖片傷害事件選項；底層相容介面保留給舊資料及驗證，不負責目前戰鬥扣血。
+上移、下移、刪除圖片會一起處理清單。動畫中斷不補播未到達圖片的清單；已生成特效僅在勾選「限制存活時間」時按秒數清除；預設關閉，由 Prefab 自行消失，仍沿用戰鬥結束、Wave 切換與暫停管理。角色 Prefab 內的自訂掛點應引用該角色自己的子物件。正式測試選單 Rhythm Hunter/Validate Fight Character Animations 包含清單多事件、原攻擊特效與清單獨立觸發、暫停、中斷及重播檢查。

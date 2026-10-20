@@ -7854,6 +7854,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
+  startWithFullTeamSkill: 1
   teamSkillGaugeGain: 1
   teamUltimateRequiredCharges: 3
   teamUltimatePerformanceBeats: 4
@@ -7870,7 +7871,7 @@ MonoBehaviour:
   resolutionSafetyMs: 12
   endBattleOnZeroHp: 0
   autoPlayBattleEntrance: 1
-  minimumEntranceSeconds: 3
+  musicStartDelaySeconds: 0
   enableSuccessfulInputSound: 1
   successfulInputSoundEventPath: event:/SoundEffects/BeatTapping
   successfulInputSoundVolume: 0.5
