@@ -1160,11 +1160,8 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot target,
             ActionType action)
         {
-            // Slots never close gaps after a death. Resolve a valid front target
-            // again if the original target died before the animation's VFX frame.
-            if (UsesEqualBeats && action != ActionType.Skill &&
-                (target == null || !target.HasCharacter || target.CurrentHp <= 0))
-                target = FindFrontLivingEnemy();
+            // This visual belongs to the already resolved hit, including a lethal hit.
+            // Only a subsequent attack selects the next living front enemy.
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
                 return;
 

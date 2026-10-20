@@ -321,16 +321,6 @@ namespace RhythmHunter.FightDemo
             {
                 receivedAttacks++;
                 flashTimer = 0.55f;
-                string guardHint = EqualBeats ? "X/Y/B = Basic Ability on every beat"
-                    : fight != null && fight.UsesFrontHeroControls
-                    ? "beat 4 activates hero skills"
-                    : "press X / Q on beat 4";
-                SetResult(
-                    "PARTY HIT",
-                    Red,
-                    fight.BossActive ? $"Boss attack • {attack.Damage:0.#} damage • {guardHint}"
-                        : $"Enemy normal attack • Mana {fight.EnemyCurrentMana}/{fight.EnemyMaxMana} • {guardHint}",
-                    1.4f);
             }
 
             UpdateStatistics();

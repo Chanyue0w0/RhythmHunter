@@ -5970,7 +5970,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1465678668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7938,6 +7938,8 @@ MonoBehaviour:
   enableBeatTapping: 0
   beatTappingEventPath: event:/SoundEffects/BeatTapping
   beatTappingVolume: 0.5
+  openingSongTempo: 0
+  openingTempoEventPath: 
 --- !u!4 &2021200330
 Transform:
   m_ObjectHideFlags: 0

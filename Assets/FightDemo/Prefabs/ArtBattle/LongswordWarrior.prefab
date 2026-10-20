@@ -92,7 +92,7 @@ MonoBehaviour:
   conditionalSkillPower: 4
   restoreArmorAfterTeamSkill: 0
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 0}
+  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
   useFallbackAbilityEffects: 0
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5

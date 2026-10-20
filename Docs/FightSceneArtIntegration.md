@@ -18,7 +18,7 @@ Opening Idle 播放一輪，採全隊最長序列時間後同步開始 Drink。�
 逐張拍數未開啟的序列仍按原 FPS；要以圖片拍數播放，須勾選「逐張設定拍數」。缺少 Opening Idle 或 Drink 的角色不會阻塞其他人。開場期間不接受普通能力或編隊操作，Wave 切換不重播。關閉 Auto Play Battle Entrance 保留手動編隊流程。
 FMOD 淡入：音樂 Event 的 Master Track 音量加入 AHDSR，Initial=-∞、Attack 為所需淡入秒數、Peak/Sustain=0 dB、Hold/Decay=0，再 Build Bank。不要為了淡入移動音檔起點或 Tempo Marker。
 
-LongswordWarrior 的 Normal 已接入 `hero/attack/attack_1～4`；第 4 張觸發普通攻擊特效，位置為敵人的 ImpactEffectAnchor，原目標若已死亡則往後尋找存活首位。未製作特效時保持 Normal Ability Effect Prefab 空白，並關閉 Use Fallback Ability Effects，因此不生成替代圖形。完成後只需指定該特效 Prefab。
+LongswordWarrior 的 Normal 已接入 `hero/attack/attack_1～4`；第 4 張觸發 `Assets/FightDemo/Prefabs/VFX/SwordHit.prefab`，已指定於戰士的 Normal Ability Effect Prefab。生成位置為這次命中敵人的 ImpactEffectAnchor，即使該次傷害致死也不將特效轉移至其他敵人；下一次攻擊才重新尋找存活首位。Wave 切換後舊回呼失效。特效只負責畫面，不額外結算傷害。
 TeamSkill 已接入 `hero/skill/attack_5～7`，暫不啟用 Warning、攻擊特效或舊流程傷害事件。兩組先保留 10 FPS；技能的實際傷害仍由戰鬥節拍結算。
 敵人死亡不移動其他敵人的 Transform、不壓縮隊形；首位代表依前到後順序找到的第一個存活且有角色的 Slot。後續攻擊依此繼續往後找，不能跨 Wave 沿用舊動畫回呼。
 
