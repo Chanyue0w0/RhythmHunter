@@ -103,7 +103,7 @@ namespace RhythmHunter.FightDemoEditor
                 Queue(3); Resolve();
                 Check(fight.PartyHp == 5, "Guard must protect HP when armor is empty.");
                 fight.AdvanceArmorRecovery(4);
-                Check(fight.PartyArmor == 0.5f, "A blocked attack must not reset armor recovery.");
+                Check(fight.PartyArmor == 0, "Time and blocked attacks must never regenerate armor.");
 
                 roster.SetRoster(new[] { heroes[2], heroes[0], heroes[1] }, enemies);
                 Reset();

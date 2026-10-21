@@ -103,9 +103,6 @@ MonoBehaviour:
   maxHp: 1
   defense: 1
   frontlineDefenseBonus: 0
-  armorRecoveryDelay: 4
-  armorRecoveryInterval: 2
-  armorRecoveryAmount: 0.5
   basicAbilityName: Arcane Bolt
   normalAbilityBehavior: 0
   normalAbilityPower: 1
@@ -121,7 +118,8 @@ MonoBehaviour:
   skillBehavior: 3
   skillPower: 1
   conditionalSkillPower: 4
-  restoreArmorAfterTeamSkill: 0
+  teamSkillArmorRecovery: 0
+  teamSkillArmorRecoveryAmount: 1
   attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
   useFallbackAbilityEffects: 1

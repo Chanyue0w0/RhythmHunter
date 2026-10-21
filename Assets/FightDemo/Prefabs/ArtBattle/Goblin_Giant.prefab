@@ -115,9 +115,6 @@ MonoBehaviour:
   role: 0
   maxHp: 20
   defense: 0
-  armorRecoveryDelay: 4
-  armorRecoveryInterval: 2
-  armorRecoveryAmount: 0.5
   basicAbilityName: Basic Ability
   normalAbilityBehavior: 0
   normalAbilityPower: 1

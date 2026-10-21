@@ -111,9 +111,6 @@ MonoBehaviour:
   role: 2
   maxHp: 1
   defense: 1
-  armorRecoveryDelay: 4
-  armorRecoveryInterval: 2
-  armorRecoveryAmount: 0.5
   basicAbilityName: Heal
   normalAbilityBehavior: 2
   normalAbilityPower: 0.5

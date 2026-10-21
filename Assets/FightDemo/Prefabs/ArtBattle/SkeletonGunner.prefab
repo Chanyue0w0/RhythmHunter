@@ -134,9 +134,6 @@ MonoBehaviour:
   maxHp: 1
   defense: 1
   frontlineDefenseBonus: 0
-  armorRecoveryDelay: 4
-  armorRecoveryInterval: 2
-  armorRecoveryAmount: 0.5
   basicAbilityName: Aimed Shot
   normalAbilityBehavior: 6
   normalAbilityPower: 1
@@ -152,7 +149,8 @@ MonoBehaviour:
   skillBehavior: 9
   skillPower: 4
   conditionalSkillPower: 2
-  restoreArmorAfterTeamSkill: 0
+  teamSkillArmorRecovery: 0
+  teamSkillArmorRecoveryAmount: 1
   attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
   useFallbackAbilityEffects: 1

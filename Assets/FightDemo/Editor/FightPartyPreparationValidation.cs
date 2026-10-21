@@ -129,6 +129,18 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.ApplyPartyDamage(2, 21) == 2 && fight.PartyArmor == 0 && fight.PartyHp == 3, "Armor overflow reaches shared HP.");
                 fight.AdvanceArmorRecovery(10000);
                 Check(fight.PartyArmor == 0 && fight.PartyHp == 3, "No natural armor recovery or healing.");
+                Check(fight.RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.FixedAmount, 1) == 1 &&
+                    fight.PartyArmor == 1 && fight.PartyHp == 3, "Configured recovery restores exactly one armor, never HP.");
+                fight.AdvanceArmorRecovery(20000);
+                Check(fight.PartyArmor == 1, "Triggered recovery must not start a passive recovery timer.");
+                Check(fight.RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.FixedAmount, 100) == 2 &&
+                    fight.PartyArmor == 3, "Fixed recovery clamps to current armor maximum.");
+                fight.ApplyPartyDamage(2, 20001);
+                Check(fight.RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.None, 10) == 0 &&
+                    fight.RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.FixedAmount, float.NaN) == 0,
+                    "Disabled or invalid recovery cannot change resources.");
+                fight.RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.Full);
+                Check(fight.PartyArmor == fight.MaxPartyArmor && fight.PartyHp == 3, "Full recovery restores armor only.");
                 Check(heroHp.SequenceEqual(roster.ActiveHeroes.Select(h => h.CurrentHp)), "No independent hero HP was spent.");
                 // The future encouragement input must not pass through Basic judgement.
                 typeof(FightCombatController).GetField("nextTeamSkillBeat", Private).SetValue(fight, 10001L);

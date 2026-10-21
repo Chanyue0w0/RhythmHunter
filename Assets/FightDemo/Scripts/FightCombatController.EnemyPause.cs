@@ -57,7 +57,7 @@ namespace RhythmHunter.FightDemo
             foreach (var animator in frozenEnemyAnimators)
                 if (animator != null) animator.SetPlaybackPaused(false);
             frozenEnemyAnimators.Clear();
-            if (resumeAttack && pendingEnemyAttack && beatClock != null && beatClock.HasTimingAnchor)
+            if (resumeAttack && pendingEnemyAttack && !pendingEnemyWindup && beatClock != null && beatClock.HasTimingAnchor)
             {
                 // Resume on this musical beat with its FULL judgement window, rather
                 // than instantly applying a damage deadline that passed while frozen.

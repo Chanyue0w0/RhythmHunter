@@ -6,9 +6,26 @@ namespace RhythmHunter.FightDemo
     {
         private void RestorePartyArmor()
         {
-            partyArmor = maxPartyArmor;
-            nextArmorRecoveryBeat = long.MaxValue;
+            RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.Full);
+        }
+
+        public float RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode mode, float amount = 0)
+        {
+            if (!HealthSystemEnabled || battleEnded || AwaitingBattleStart || mode == FightCharacterDefinition.ArmorRestoreMode.None) return 0;
+            if (mode != FightCharacterDefinition.ArmorRestoreMode.Full &&
+                (float.IsNaN(amount) || float.IsInfinity(amount) || amount <= 0)) return 0;
+            float previous = partyArmor;
+            partyArmor = mode == FightCharacterDefinition.ArmorRestoreMode.Full ? maxPartyArmor
+                : Mathf.Min(maxPartyArmor, partyArmor + Mathf.Max(0, Mathf.Round(amount * 2f) * .5f));
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
+            return partyArmor - previous;
+        }
+
+        private void ApplyAbilityArmorRecovery(FightCharacterDefinition definition, bool skill)
+        {
+            if (definition == null) return;
+            RecoverPartyArmor(skill ? definition.TeamSkillArmorRecovery : definition.BasicArmorRecovery,
+                skill ? definition.TeamSkillArmorRecoveryAmount : definition.BasicArmorRecoveryAmount);
         }
 
         private string PerformPartySkill(FightUnitSlot actor, FightCharacterDefinition.AbilityBehavior behavior, float power)

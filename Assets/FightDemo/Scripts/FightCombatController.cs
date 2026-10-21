@@ -236,8 +236,9 @@ namespace RhythmHunter.FightDemo
         private float partyArmor;
         private float maxPartyArmor;
         private long latestCombatBeat = -1;
-        private long nextArmorRecoveryBeat = long.MaxValue;
         private bool pendingEnemyAttack;
+        private bool pendingEnemyWindup;
+        private long pendingEnemyHitCombatBeat;
         private bool pendingEnemyAnimationDriven;
         private FightUnitSlot pendingEnemyAttacker;
         private int pendingAttackRosterVersion = -1;
@@ -271,8 +272,6 @@ namespace RhythmHunter.FightDemo
             if (active) calibrationStartBeat = latestCombatBeat;
             else
             {
-                if (nextArmorRecoveryBeat != long.MaxValue)
-                    nextArmorRecoveryBeat += Math.Max(0, latestCombatBeat - calibrationStartBeat);
                 resumeAfterCalibrationBeat = latestCombatBeat;
             }
         }
@@ -288,12 +287,11 @@ namespace RhythmHunter.FightDemo
         public float MaxPartyHp => maxPartyHp;
         public float PartyArmor => partyArmor;
         public float MaxPartyArmor => maxPartyArmor;
-        public int ArmorRecoveryBeatsRemaining => nextArmorRecoveryBeat == long.MaxValue ? 0
-            : (int)Math.Max(0, nextArmorRecoveryBeat - latestCombatBeat);
+        public int ArmorRecoveryBeatsRemaining => 0;
         public bool BattleEnded => battleEnded;
         public bool UsesBattlePreparation => UsesEqualBeats && rosterManager != null && rosterManager.RequiresBattlePreparation;
         public bool AwaitingBattleStart => UsesBattlePreparation && !rosterManager.BattleStarted;
-        public bool NaturalArmorRecoveryEnabled => !UsesBattlePreparation;
+        public bool NaturalArmorRecoveryEnabled => false;
 
         public bool TryBeginBattle()
         {
@@ -440,7 +438,6 @@ namespace RhythmHunter.FightDemo
             UpdateBasicAbilityProgress();
             TryResolvePendingAttack();
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int impactTime)) ResolveEnemyCombatWork(impactTime);
-            AdvanceArmorRecovery(latestCombatBeat);
         }
 
         private void OnDisable()
@@ -593,7 +590,11 @@ namespace RhythmHunter.FightDemo
                 judgement.NearestBeat.GlobalBeat);
 
             activeEnemySlot = FindFrontLivingEnemy();
-            if (!skill && UsesEqualBeats) GainTeamSkill(judgement);
+            if (!skill && UsesEqualBeats)
+            {
+                ApplyAbilityArmorRecovery(actor.CharacterDefinition, false);
+                GainTeamSkill(judgement);
+            }
             HeroCalled?.Invoke(new HeroCallResult(
                 command,
                 judgement,
@@ -638,6 +639,9 @@ namespace RhythmHunter.FightDemo
                     return PerformPartySkill(actor, behavior, power);
                 case FightCharacterDefinition.AbilityBehavior.Unavailable:
                     return $"{abilityName} is not available in this checkpoint";
+                case FightCharacterDefinition.AbilityBehavior.RestoreArmor:
+                    PlayAnimatedHeroUtility(actor, animation, playEffect, null);
+                    return $"{abilityName} restores shared armor according to its configured recovery";
                 case FightCharacterDefinition.AbilityBehavior.Guard:
                     ArmGuard(globalBeat, skill ? 1 : actor.CharacterDefinition?.BasicGuardBeats ?? 1);
                     PlayAnimatedHeroUtility(
@@ -840,6 +844,12 @@ namespace RhythmHunter.FightDemo
             pendingAttackTimelineMs = beat.TimelinePositionMs;
             pendingEnemyAttacker = activeEnemySlot;
             pendingEnemyAnimationDriven = false;
+            int windup = activeEnemySlot != null && activeEnemySlot.CharacterDefinition != null
+                ? activeEnemySlot.CharacterDefinition.AttackWindupBeats : 0;
+            pendingEnemyWindup = windup > 0;
+            pendingEnemyHitCombatBeat = NormalBattleBeatCount + windup;
+            pendingAttackGlobalBeat += windup;
+            if (beatClock != null) pendingAttackTimelineMs += Mathf.RoundToInt(windup * (float)beatClock.MillisecondsPerBeat);
         }
 
         private void StartEnemyAttackAnimation()
@@ -873,7 +883,7 @@ namespace RhythmHunter.FightDemo
         private void TryResolvePendingAttack()
         {
             if (EnemyActionsPaused) return;
-            if (!pendingEnemyAttack || pendingEnemyAnimationDriven || beatClock == null || rhythmJudge == null ||
+            if (!pendingEnemyAttack || pendingEnemyWindup || pendingEnemyAnimationDriven || beatClock == null || rhythmJudge == null ||
                 !beatClock.TryGetTimelinePositionMs(out int timelineMs))
             {
                 return;
@@ -891,7 +901,7 @@ namespace RhythmHunter.FightDemo
             long expectedActionId,
             FightUnitSlot expectedAttacker)
         {
-            if (IsPaused || EnemyActionsPaused) return;
+            if (IsPaused || EnemyActionsPaused || pendingEnemyWindup) return;
             if (!IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, expectedAttacker))
                 return;
 
@@ -1066,7 +1076,6 @@ namespace RhythmHunter.FightDemo
                 ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) + tankSlot.CharacterDefinition.FrontlineDefenseBonus : 0f;
             partyArmor = maxPartyArmor;
             latestCombatBeat = beatClock != null && beatClock.HasTimingAnchor ? beatClock.LatestBeat.GlobalBeat : -1;
-            nextArmorRecoveryBeat = long.MaxValue;
             if (tankSlot != null)
                 tankSlot.RestoreFullHealth();
             partyHp = maxPartyHp;
@@ -1089,29 +1098,13 @@ namespace RhythmHunter.FightDemo
             partyArmor -= armorDamage;
             float hpDamage = Mathf.Min(partyHp, damage - armorDamage);
             partyHp -= hpDamage;
-            var definition = tankSlot != null ? tankSlot.CharacterDefinition : null;
-            nextArmorRecoveryBeat = NaturalArmorRecoveryEnabled && definition != null && partyArmor < maxPartyArmor
-                ? globalBeat + definition.ArmorRecoveryDelay : long.MaxValue;
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             if (UsesBattlePreparation && endBattleOnZeroHp && partyHp <= 0) FinishBattle(false);
             return armorDamage + hpDamage;
         }
 
-        public void AdvanceArmorRecovery(long globalBeat)
-        {
-            if (TimingCalibrationActive || IsPaused || !NaturalArmorRecoveryEnabled) return;
-            latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
-            if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || pendingEnemyAttack ||
-                nextArmorRecoveryBeat == long.MaxValue || globalBeat < nextArmorRecoveryBeat)
-                return;
-            var definition = tankSlot != null ? tankSlot.CharacterDefinition : null;
-            if (definition == null)
-                return;
-            long ticks = 1 + (globalBeat - nextArmorRecoveryBeat) / definition.ArmorRecoveryInterval;
-            partyArmor = Mathf.Min(maxPartyArmor, partyArmor + ticks * definition.ArmorRecoveryAmount);
-            nextArmorRecoveryBeat = partyArmor >= maxPartyArmor ? long.MaxValue
-                : nextArmorRecoveryBeat + ticks * definition.ArmorRecoveryInterval;
-        }
+        // Compatibility entry point for existing validation tools. Time never restores armor.
+        public void AdvanceArmorRecovery(long globalBeat) { }
 
         private void OnRosterChanged()
         {

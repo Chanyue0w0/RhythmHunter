@@ -72,9 +72,6 @@ MonoBehaviour:
   maxHp: 2
   defense: 2
   frontlineDefenseBonus: 1
-  armorRecoveryDelay: 4
-  armorRecoveryInterval: 2
-  armorRecoveryAmount: 0.5
   basicAbilityName: Slash
   normalAbilityBehavior: 0
   normalAbilityPower: 1
@@ -90,7 +87,8 @@ MonoBehaviour:
   skillBehavior: 7
   skillPower: 2
   conditionalSkillPower: 4
-  restoreArmorAfterTeamSkill: 0
+  teamSkillArmorRecovery: 0
+  teamSkillArmorRecoveryAmount: 1
   attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
   useFallbackAbilityEffects: 0

@@ -81,3 +81,7 @@ Team Skill 測試：Fight Combat Controller → Team Skill (Equal Beat) → Star
 清單於進入圖片時執行，與「生成攻擊特效」勾選各自獨立，不改變傷害時間。勾選會生成原本 Normal Ability Effect Prefab／Skill Effect Prefab 的特效，清單用於額外的 ChargeEffect、SwordSlash 等；不要把同一個命中特效再加入清單，除非刻意需要兩次。已移除 Inspector 的舊圖片傷害事件選項；底層相容介面保留給舊資料及驗證，不負責目前戰鬥扣血。
 上移、下移、刪除圖片會一起處理清單。動畫中斷不補播未到達圖片的清單；已生成特效僅在勾選「限制存活時間」時按秒數清除；預設關閉，由 Prefab 自行消失，仍沿用戰鬥結束、Wave 切換與暫停管理。角色 Prefab 內的自訂掛點應引用該角色自己的子物件。正式測試選單 Rhythm Hunter/Validate Fight Character Animations 包含清單多事件、原攻擊特效與清單獨立觸發、暫停、中斷及重播檢查。
 戰鬥重開：暫停選單 RESTART BATTLE，或鍵盤 F9（不必先暫停）。重新載入目前戰鬥場景，停止舊音樂並恢復暫停前的時間倍率，所有資源、敵人、Wave、開場與進場滿 Team Skill 測試設定依儲存場景重新初始化。Play 模式中的臨時修改不保留。Editor 支援尚未加入 Build 的已儲存場景；Build 必須包含該場景。
+
+普通哥布林：ArtBattle/Goblin_Normal.prefab（GoblinNormal_Visual）使用 goblin_normal 圖片，10 HP、0 DEF、0.5 攻擊、Attack Interval Beats=16、Attack Windup Beats=2。attack_1/2/3 各 1 拍；第 2 張警告，第 3 張進入命中拍並等同拍輸入窗口結束後扣共用 DEF/HP。Idle 三張合計 1 拍。FightScene3 首位敵人已替換，沒有新增特殊技能。Team Skill 暫停保留準備進度，成功中斷或死亡取消未結算攻擊。此類敵人不顯示舊每拍倒數光效。調整動畫命中圖片時間時，請同步調整 Attack Windup Beats。驗證選單：Rhythm Hunter/Validate Normal Goblin。
+
+護甲恢復：已移除自然回甲的 Delay／Interval／Amount 設定與計時。FightCharacterDefinition → Triggered Shared Armor Recovery 分別設定 Basic Armor Recovery、Team Skill Armor Recovery：None 不恢復、Fixed Amount 依對應 Amount 恢復（例如 1）、Full 補滿。固定量沿用 0.5 單位，最多補至目前 DEF 上限，不治療 HP。普通能力於成功輸入後觸發（射手準備輸入也算成功輸入），Team Skill 於該角色效果結算後觸發；法師保持 Full，其餘現有角色為 None。清完 Wave 固定 Full。純補甲角色可選 Ability Behavior=RestoreArmor 並設定恢復模式與數量。舊 AdvanceArmorRecovery 僅為驗證工具保留空介面，不會回甲。

@@ -7986,7 +7986,7 @@ MonoBehaviour:
   enemyPrefabs:
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 2418354018728722847, guid: dfccd1a744e64584b8e72fdc1b7f935e, type: 3}
+  - {fileID: 2418354018728722847, guid: 58027208f6f64c22a1c628b184a89f77, type: 3}
   additionalWaves: []
 --- !u!1 &2037638509
 GameObject:

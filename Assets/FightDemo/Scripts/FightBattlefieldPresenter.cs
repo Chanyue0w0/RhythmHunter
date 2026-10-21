@@ -132,6 +132,13 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot attacker = fight != null && fight.UsesFrontHeroControls
                 ? fight.ActiveEnemySlot
                 : SlotAt(enemySlots, 1);
+            // Windup enemies own their warning frame; do not overlay the legacy
+            // every-beat countdown/attack flash before that authored warning.
+            if (attacker != null && attacker.CharacterDefinition != null && attacker.CharacterDefinition.AttackWindupBeats > 0)
+            {
+                telegraphTimer = 0;
+                return;
+            }
             bool attackBeat = fight != null && fight.UsesFrontHeroControls
                 ? fight.IsEnemyAttackBeat(beat.GlobalBeat)
                 : beat.Beat == 4;

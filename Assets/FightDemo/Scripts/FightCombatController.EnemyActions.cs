@@ -40,6 +40,13 @@ namespace RhythmHunter.FightDemo
 
         private void AdvanceEnemyCombatWork(FmodBeatClock.BeatSnapshot beat)
         {
+            if (pendingEnemyAttack && pendingEnemyWindup && NormalBattleBeatCount >= pendingEnemyHitCombatBeat)
+            {
+                pendingEnemyWindup = false;
+                pendingAttackGlobalBeat = beat.GlobalBeat;
+                pendingAttackTimelineMs = beat.TimelinePositionMs;
+                pendingAttackBar = beat.Bar;
+            }
             enemyHits.RemoveAll(hit => hit.version != rosterVersion || (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)));
             foreach (var hit in enemyHits)
             {

@@ -21,8 +21,11 @@ namespace RhythmHunter.FightDemo
             AimedShot,
             BreakingSlash,
             EnergySurge,
-            FormationBreaker
+            FormationBreaker,
+            RestoreArmor
         }
+
+        public enum ArmorRestoreMode { None, FixedAmount, Full }
 
         [Header("Identity")]
         [SerializeField] private string characterId = "character";
@@ -35,10 +38,6 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(0, 10)] private int defense;
         [Tooltip("Added to shared armor capacity only while this character occupies the front position.")]
         [SerializeField, Min(0)] private int frontlineDefenseBonus;
-        [Header("Frontline Armor Recovery")]
-        [SerializeField, Min(1)] private int armorRecoveryDelay = 4;
-        [SerializeField, Min(1)] private int armorRecoveryInterval = 2;
-        [SerializeField, Min(0.5f)] private float armorRecoveryAmount = 0.5f;
         [Header("Basic Ability")]
         [SerializeField] private string basicAbilityName = "Basic Ability";
         [Tooltip("Character-owned Basic behavior on every beat, independent of party position. In EqualBeat mode Guard protects only the successfully judged beat, never a later attack.")]
@@ -64,8 +63,21 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private float skillPower = 1f;
         [Tooltip("Energy Surge focused damage or Formation Breaker piercing damage, before Fragile.")]
         [SerializeField, Min(0)] private float conditionalSkillPower = 4f;
-        [SerializeField] private bool restoreArmorAfterTeamSkill;
+        [Header("Triggered Shared Armor Recovery")]
+        [Tooltip("After a successful Basic input; never passive regeneration.")]
+        [SerializeField] private ArmorRestoreMode basicArmorRecovery;
+        [SerializeField, Min(0)] private float basicArmorRecoveryAmount = 1f;
+        [Tooltip("After this character's Team Skill resolves, not after every party member.")]
+        [SerializeField] private ArmorRestoreMode teamSkillArmorRecovery;
+        [SerializeField, Min(0)] private float teamSkillArmorRecoveryAmount = 1f;
+        public ArmorRestoreMode BasicArmorRecovery => basicArmorRecovery;
+        public ArmorRestoreMode TeamSkillArmorRecovery => teamSkillArmorRecovery;
+        public float BasicArmorRecoveryAmount => basicArmorRecoveryAmount;
+        public float TeamSkillArmorRecoveryAmount => teamSkillArmorRecoveryAmount;
         [Header("Enemy Action")]
+        [Tooltip("Ordinary combat beats between starting the attack animation and its hit. 2 means attack frame 3 for one-beat frames.")]
+        [SerializeField, Min(0)] private int attackWindupBeats;
+        public int AttackWindupBeats => Mathf.Max(0, attackWindupBeats);
         [Tooltip("Whether the currently pending attack / active windup can be interrupted. Idle and recovery never qualify.")]
         [SerializeField] private bool attackInterruptible = true;
         [Header("Replaceable Ability Effects")]
@@ -95,9 +107,6 @@ namespace RhythmHunter.FightDemo
         public float MaxHp => maxHp;
         public int Defense => Mathf.Clamp(defense, 0, 10);
         public int FrontlineDefenseBonus => Mathf.Max(0, frontlineDefenseBonus);
-        public int ArmorRecoveryDelay => Mathf.Max(1, armorRecoveryDelay);
-        public int ArmorRecoveryInterval => Mathf.Max(1, armorRecoveryInterval);
-        public float ArmorRecoveryAmount => QuantizePositive(armorRecoveryAmount);
         public string BasicAbilityName => string.IsNullOrWhiteSpace(basicAbilityName) ? "Basic Ability" : basicAbilityName;
         public AbilityBehavior BasicAbilityType => normalAbilityBehavior;
         public float BasicAbilityPower => normalAbilityPower;
@@ -106,7 +115,6 @@ namespace RhythmHunter.FightDemo
         public bool BasicInterruptsEnemy => basicInterruptsEnemy;
         public float SuccessfulInterruptDamageBonus => Mathf.Max(0, successfulInterruptDamageBonus);
         public float ConditionalSkillPower => Mathf.Max(0, conditionalSkillPower);
-        public bool RestoreArmorAfterTeamSkill => restoreArmorAfterTeamSkill;
         public bool AttackInterruptible => attackInterruptible;
         public AbilityBehavior NormalAbilityType => normalAbilityBehavior;
         public float NormalAbilityPower => normalAbilityPower;
@@ -188,9 +196,6 @@ namespace RhythmHunter.FightDemo
         {
             maxHp = QuantizePositive(maxHp);
             defense = Mathf.Clamp(defense, 0, 10);
-            armorRecoveryDelay = Mathf.Max(1, armorRecoveryDelay);
-            armorRecoveryInterval = Mathf.Max(1, armorRecoveryInterval);
-            armorRecoveryAmount = QuantizePositive(armorRecoveryAmount);
             normalAbilityPower = normalAbilityBehavior == AbilityBehavior.Guard
                 ? 0f
                 : QuantizePositive(normalAbilityPower);

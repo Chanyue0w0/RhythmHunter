@@ -72,9 +72,6 @@ MonoBehaviour:
   maxHp: 3
   defense: 3
   frontlineDefenseBonus: 0
-  armorRecoveryDelay: 4
-  armorRecoveryInterval: 2
-  armorRecoveryAmount: 0.5
   basicAbilityName: Guard
   normalAbilityBehavior: 1
   normalAbilityPower: 0
@@ -90,7 +87,8 @@ MonoBehaviour:
   skillBehavior: 4
   skillPower: 1
   conditionalSkillPower: 4
-  restoreArmorAfterTeamSkill: 0
+  teamSkillArmorRecovery: 0
+  teamSkillArmorRecoveryAmount: 1
   attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
   useFallbackAbilityEffects: 1

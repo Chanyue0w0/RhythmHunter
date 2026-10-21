@@ -110,8 +110,7 @@ namespace RhythmHunter.FightDemo
             int expectedRosterVersion = rosterVersion;
             string effect = PerformConfiguredAbility(hero, ActionType.Skill, hero.UnitSlot.SkillBehavior, hero.UnitSlot.SkillPower, beat);
             if (!TeamSkillRunning || rosterVersion != expectedRosterVersion) return;
-            if (hero.UnitSlot.CharacterDefinition != null && hero.UnitSlot.CharacterDefinition.RestoreArmorAfterTeamSkill)
-                RestorePartyArmor();
+            ApplyAbilityArmorRecovery(hero.UnitSlot.CharacterDefinition, true);
             if (!TeamSkillRunning || rosterVersion != expectedRosterVersion) return;
             TeamSkillStatus = hero.HeroLabel + ": " + effect;
             activeEnemySlot = FindFrontLivingEnemy();
