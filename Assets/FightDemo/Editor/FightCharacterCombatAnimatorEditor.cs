@@ -107,6 +107,7 @@ namespace RhythmHunter.FightDemoEditor
                     int index = effectsByFrame.arraySize;
                     effectsByFrame.InsertArrayElementAtIndex(index);
                     effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("effects").ClearArray();
+                    effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("playAttackEffect").boolValue = false;
                 }
                 effectsByFrame.arraySize = frames.arraySize;
             }
@@ -136,7 +137,15 @@ namespace RhythmHunter.FightDemoEditor
                     if (sequence != null)
                     {
                         FrameEvent(sequence, "warningFrame", "進入圖片時生成 Warning", i);
-                        FrameEvent(sequence, "attackEffectFrame", "進入圖片時生成攻擊特效", i);
+                        var legacyEffect = sequence.FindPropertyRelative("attackEffectFrame");
+                        var frameEffect = effectsByFrame.GetArrayElementAtIndex(i).FindPropertyRelative("playAttackEffect");
+                        bool wasEnabled = legacyEffect.intValue == i || frameEffect.boolValue;
+                        bool enabled = EditorGUILayout.ToggleLeft("進入圖片時生成攻擊特效", wasEnabled);
+                        if (enabled != wasEnabled)
+                        {
+                            if (legacyEffect.intValue == i) legacyEffect.intValue = -1;
+                            frameEffect.boolValue = enabled;
+                        }
                         DrawEffects(effectsByFrame.GetArrayElementAtIndex(i).FindPropertyRelative("effects"));
                     }
                     using (new EditorGUILayout.HorizontalScope())
@@ -177,6 +186,7 @@ namespace RhythmHunter.FightDemoEditor
                 {
                     effectsByFrame.InsertArrayElementAtIndex(index);
                     effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("effects").ClearArray();
+                    effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("playAttackEffect").boolValue = false;
                 }
             }
             if (useBeats.boolValue)

@@ -107,27 +107,62 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  basicBreakPower: 0
+  skillBreakPower: 0
+  bossPattern:
+    enabled: 0
+    neutralBeats: 4
+    armorBeats: 4
+    chargeBeats: 4
+    vulnerableBeats: 4
+    rageWindupBeats: 2
+    rageAttackBeats: 6
+    rageAttackInterval: 2
+    breakBeats: 4
+    breakThreshold: 3
+    armorReduction: 0.5
+    vulnerableBonus: 0.5
+    chargeDamage: 2
+    rageFinisherDamage: 3
+    successfulGuardBreakPower: 1
   characterId: Goblin_Killer
   displayName: KILLER GOBLIN
   team: 0
   role: 0
   maxHp: 20
   defense: 0
+  frontlineDefenseBonus: 0
   basicAbilityName: Basic Ability
   normalAbilityBehavior: 0
   normalAbilityPower: 1
+  consecutiveInputBeats: 3
+  basicGuardBeats: 1
+  basicInterruptsEnemy: 0
+  successfulInterruptDamageBonus: 0
   attackPower: 1
+  teamSkillManaCost: 10
+  teamSkillPerformanceBeats: 4
+  teamSkillEffectBeatOffset: 0
   skillName: Mercenary Cleave
   skillBehavior: 0
   skillPower: 1
-  normalAbilityEffectPrefab: {fileID: 0}
+  conditionalSkillPower: 4
+  basicArmorRecovery: 0
+  basicArmorRecoveryAmount: 1
+  teamSkillArmorRecovery: 0
+  teamSkillArmorRecoveryAmount: 1
+  enemyAttackUsesEffectFrames: 1
+  attackWindupBeats: 0
+  attackInterruptible: 1
+  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
+  useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 2574835647068987013, guid: 49cb9df558623204ca97c8b6d74b7639, type: 3}
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 7844641504107683177}
   impactEffectAnchor: {fileID: 8765688678766679457}
-  attackIntervalBeats: 999
+  attackIntervalBeats: 16
   maxMana: 4
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
 --- !u!1001 &2396406856950555279

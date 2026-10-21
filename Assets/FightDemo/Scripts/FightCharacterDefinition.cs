@@ -75,6 +75,9 @@ namespace RhythmHunter.FightDemo
         public float BasicArmorRecoveryAmount => basicArmorRecoveryAmount;
         public float TeamSkillArmorRecoveryAmount => teamSkillArmorRecoveryAmount;
         [Header("Enemy Action")]
+        [Tooltip("Schedule one hit at each Normal animation attack-effect frame using its beat durations. Supports multi-hit attacks and interruption.")]
+        [SerializeField] private bool enemyAttackUsesEffectFrames;
+        public bool EnemyAttackUsesEffectFrames => enemyAttackUsesEffectFrames;
         [Tooltip("Ordinary combat beats between starting the attack animation and its hit. 2 means attack frame 3 for one-beat frames.")]
         [SerializeField, Min(0)] private int attackWindupBeats;
         public int AttackWindupBeats => Mathf.Max(0, attackWindupBeats);

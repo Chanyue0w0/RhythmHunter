@@ -46,6 +46,7 @@ namespace RhythmHunter.FightDemo
         public sealed class FrameEffects
         {
             public List<FrameEffect> effects = new();
+            public bool playAttackEffect;
         }
 
         [Serializable]
@@ -92,6 +93,8 @@ namespace RhythmHunter.FightDemo
             }
             public int WarningFrame => warningFrame;
             public int AttackEffectFrame => attackEffectFrame;
+            public bool PlaysAttackEffectAt(int index) => index == attackEffectFrame ||
+                (index >= 0 && index < frameEffects.Count && frameEffects[index] != null && frameEffects[index].playAttackEffect);
             public int DamageFrame => damageFrame;
 
             public void Configure(
@@ -527,7 +530,7 @@ namespace RhythmHunter.FightDemo
                 if (version != playbackVersion) return;
             }
 
-            if (!effectRaised && frameIndex == activeSequence.AttackEffectFrame)
+            if (activeSequence.PlaysAttackEffectAt(frameIndex))
             {
                 effectRaised = true;
                 AttackEffectEventCount++;
@@ -571,7 +574,7 @@ namespace RhythmHunter.FightDemo
             finished?.Invoke();
         }
 
-        private Sequence FindSequence(CombatAnimation animation)
+        public Sequence FindSequence(CombatAnimation animation)
         {
             foreach (Sequence sequence in sequences)
             {

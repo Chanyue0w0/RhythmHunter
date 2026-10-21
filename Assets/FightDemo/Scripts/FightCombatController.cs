@@ -816,7 +816,12 @@ namespace RhythmHunter.FightDemo
             if (UsesFrontHeroControls)
             {
                 activeEnemySlot = FindFrontLivingEnemy();
+                // Authored enemies act from every formation position. Front selection
+                // determines player targets, not which enemies are allowed to attack.
+                StartAuthoredEnemyTurns(beat.GlobalBeat);
                 if (!pendingEnemyAttack && lastEnemyQueuedBeat != beat.GlobalBeat && activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
+                    (activeEnemySlot.CharacterDefinition == null || !activeEnemySlot.CharacterDefinition.EnemyAttackUsesEffectFrames ||
+                     (BossActive && activeEnemySlot == bossActor)) &&
                     !enemyHits.Exists(hit => hit.source == activeEnemySlot && !hit.launched) &&
                     (!BossActive || lastBossAttackBeat != beat.GlobalBeat))
                 {
@@ -834,6 +839,7 @@ namespace RhythmHunter.FightDemo
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
         {
             lastEnemyQueuedBeat = beat.GlobalBeat;
+            if (TryStartAuthoredEnemyAttack(activeEnemySlot)) return;
             pendingBossDamage = BossAttackDamage(beat.GlobalBeat);
             if (BossActive) lastBossAttackBeat = beat.GlobalBeat;
             pendingEnemyActionId = ++nextActionId;
@@ -854,7 +860,7 @@ namespace RhythmHunter.FightDemo
 
         private void StartEnemyAttackAnimation()
         {
-            if (!UsesFrontHeroControls || pendingEnemyAttacker == null)
+            if (!pendingEnemyAttack || !UsesFrontHeroControls || pendingEnemyAttacker == null)
                 return;
 
             FightUnitSlot attacker = pendingEnemyAttacker;

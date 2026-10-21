@@ -114,7 +114,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3107d2b0f11b3d1458103154d2257ee3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -140,73 +140,64 @@ MonoBehaviour:
   beatSource: {fileID: 0}
   fallbackBpm: 120
   frames:
-  - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-  - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-  - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
+  - {fileID: 21300000, guid: 3107d2b0f11b3d1458103154d2257ee3, type: 3}
+  - {fileID: 21300000, guid: d088032b65b81da4f834069d6a278008, type: 3}
+  - {fileID: 21300000, guid: 8fc8922da7cf80c419bab1fcec77eea3, type: 3}
+  useIdleFrameBeatDurations: 1
+  idleFrameBeatDurations:
+  - 0.33
+  - 0.33
+  - 0.34
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0
   sequences:
   - animation: 0
     frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
-  - animation: 1
-    frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
-  - animation: 2
-    frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
-  - animation: 3
-    frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
-  - animation: 4
-    frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
-  - animation: 5
-    frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
-  - animation: 6
-    frames:
-    - {fileID: 887104005361667852, guid: 2656aa6b84b10464e9a566c01f5718a3, type: 3}
-    - {fileID: -8327037445474809380, guid: 6dee3fdb703e9ee43be6b77e64def674, type: 3}
-    - {fileID: 4887131815365979529, guid: d778d68c914a0de45b8d343496118f85, type: 3}
-    framesPerSecond: 10
-    warningFrame: -1
-    attackEffectFrame: 0
-    damageFrame: 1
+    - {fileID: 21300000, guid: 5da5948b5828d7149a4ddad7343bb0df, type: 3}
+    - {fileID: 21300000, guid: 19306c54813e5fa428f4b82c874e20fe, type: 3}
+    - {fileID: 21300000, guid: c2501809d8a3e7646aac3c5d4648ad29, type: 3}
+    - {fileID: 21300000, guid: 16d6152f5c6ac8343bd5bcfbd13ccc72, type: 3}
+    - {fileID: 21300000, guid: 6b08a1984bdb8634f92caf2a309b7f76, type: 3}
+    - {fileID: 21300000, guid: 6455ea3170962334db91238d6af2a577, type: 3}
+    - {fileID: 21300000, guid: 187d122f85d189a4c97cabb310136e5e, type: 3}
+    - {fileID: 21300000, guid: 6d36c7a495023d549b8d4bac5e5324f8, type: 3}
+    - {fileID: 21300000, guid: 4f0cc4d9a4a769e4aa908c3b3ed4ec83, type: 3}
+    - {fileID: 21300000, guid: 0895ea76ec86da6408fe24293c451b95, type: 3}
+    frameEffects:
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 1
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 1
+    framesPerSecond: 16
+    useFrameBeatDurations: 1
+    frameBeatDurations:
+    - 1
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.33
+    - 0.33
+    - 0.34
+    warningFrame: 1
+    attackEffectFrame: -1
+    damageFrame: -1

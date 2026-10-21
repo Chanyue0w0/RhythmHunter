@@ -134,7 +134,7 @@ namespace RhythmHunter.FightDemo
                 : SlotAt(enemySlots, 1);
             // Windup enemies own their warning frame; do not overlay the legacy
             // every-beat countdown/attack flash before that authored warning.
-            if (attacker != null && attacker.CharacterDefinition != null && attacker.CharacterDefinition.AttackWindupBeats > 0)
+            if (attacker != null && attacker.CharacterDefinition != null && (attacker.CharacterDefinition.AttackWindupBeats > 0 || attacker.CharacterDefinition.EnemyAttackUsesEffectFrames))
             {
                 telegraphTimer = 0;
                 return;

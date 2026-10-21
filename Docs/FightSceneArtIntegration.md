@@ -85,3 +85,17 @@ Team Skill 測試：Fight Combat Controller → Team Skill (Equal Beat) → Star
 普通哥布林：ArtBattle/Goblin_Normal.prefab（GoblinNormal_Visual）使用 goblin_normal 圖片，10 HP、0 DEF、0.5 攻擊、Attack Interval Beats=16、Attack Windup Beats=2。attack_1/2/3 各 1 拍；第 2 張警告，第 3 張進入命中拍並等同拍輸入窗口結束後扣共用 DEF/HP。Idle 三張合計 1 拍。FightScene3 首位敵人已替換，沒有新增特殊技能。Team Skill 暫停保留準備進度，成功中斷或死亡取消未結算攻擊。此類敵人不顯示舊每拍倒數光效。調整動畫命中圖片時間時，請同步調整 Attack Windup Beats。驗證選單：Rhythm Hunter/Validate Normal Goblin。
 
 護甲恢復：已移除自然回甲的 Delay／Interval／Amount 設定與計時。FightCharacterDefinition → Triggered Shared Armor Recovery 分別設定 Basic Armor Recovery、Team Skill Armor Recovery：None 不恢復、Fixed Amount 依對應 Amount 恢復（例如 1）、Full 補滿。固定量沿用 0.5 單位，最多補至目前 DEF 上限，不治療 HP。普通能力於成功輸入後觸發（射手準備輸入也算成功輸入），Team Skill 於該角色效果結算後觸發；法師保持 Full，其餘現有角色為 None。清完 Wave 固定 Full。純補甲角色可選 Ability Behavior=RestoreArmor 並設定恢復模式與數量。舊 AdvanceArmorRecovery 僅為驗證工具保留空介面，不會回甲。
+
+### Killer / Giant authored attacks
+
+`Goblin_Killer` and `Goblin_Giant` retain 20 HP. Their old 999-beat placeholder interval is now 16 beats (provisional, editable). Both target the front hero presentation and damage shared DEF/HP. FightScene3 roster is unchanged; assign these prefabs to enemy slots for testing.
+
+- Killer: attack_1 = 1 beat; attack_2..5 = 0.5 each; attack_6..7 = 0.5 each; attack_8..10 = 0.33 / 0.33 / 0.34. Warning on attack_2; attack VFX and one 1-heart hit each at attack_7 and attack_10 (offsets 3.5 and 4.66 beats). Total 5 beats.
+- Giant: attack_1, attack_2, attack_3, attack_3, attack_4, each 1 beat. Warning on the second attack_3; one 2-heart hit on attack_4 (offset 4 beats). Total 5 beats.
+- Idle: 0.33 / 0.33 / 0.34, total 1 beat. Sprites remain Single / Full Rect.
+
+On the definition, `Enemy Attack Uses Effect Frames` enables beat-authoritative hit scheduling from the Normal sequence. Use per-frame `生成攻擊特效` checkboxes for multiple hits, and `Attack Power` for damage per hit. The frame callbacks only render VFX; the controller applies damage after the existing judgement window. Fractional hits use the containing ordinary beat's guard. This option is off for existing heroes and Normal Goblin, preserving their damage paths. Enemy Team Skill pause freezes pending hits; successful interruption removes remaining non-projectile slashes. No new timer is introduced.
+
+Editor validation: `Rhythm Hunter > Validate Killer And Giant` checks sprite mapping, total duration, damage, pause and interruption using a preview scene. Compile/static asset checks passed; this menu and actual FMOD Play Mode still require execution in Unity.
+
+Killer/Giant back-row fix: frame-authored enemy turns now iterate all living enemy slots and use each definition's attack interval. Normal Goblin can remain in front while Killer and Giant start their own animations and scheduled hits from middle/rear. The front-target lookup no longer gates these enemies' actions. Duplicate beat callbacks, active attacks/recovery, pause, death and wave cleanup are guarded. Existing front-only legacy enemy and test-boss paths are preserved. `Validate Killer And Giant` now also constructs a Normal-front / Killer-middle / Giant-rear preview roster and checks concurrent attack startup, duplicate-beat prevention, isolated interruption and cleanup. Compilation passed; the Unity validation menu has not been executed in this session.

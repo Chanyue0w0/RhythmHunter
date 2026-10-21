@@ -100,6 +100,7 @@ namespace RhythmHunter.FightDemo
         {
             if (enemy == null || !fightScene2Enemies.Contains(enemy)) return;
             enemy.CombatAnimator?.InterruptPlayback();
+            InterruptScheduledEnemyAction(enemy);
             if (pendingEnemyAttacker != enemy) return;
             pendingEnemyAttack = false; pendingEnemyAnimationDriven = false;
             pendingEnemyAttacker = null; pendingEnemyActionId = long.MinValue;

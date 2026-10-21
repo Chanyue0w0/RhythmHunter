@@ -7984,8 +7984,8 @@ MonoBehaviour:
   - {fileID: 616141045}
   - {fileID: 928599}
   enemyPrefabs:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1049329208925010419, guid: d1687460d02df1b47bac316481cf4276, type: 3}
+  - {fileID: 2418354018728722847, guid: f6f5612f6468ef340a4e2d9422b3fbb2, type: 3}
   - {fileID: 2418354018728722847, guid: 58027208f6f64c22a1c628b184a89f77, type: 3}
   additionalWaves: []
 --- !u!1 &2037638509
