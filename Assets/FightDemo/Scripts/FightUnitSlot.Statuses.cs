@@ -75,7 +75,7 @@ namespace RhythmHunter.FightDemo
                     else hit.caster.PlaySkillAttackAt(ImpactEffectAnchor);
                 }
                 TakeDamage(hit.damage, DamageKind.Secondary);
-                if (currentHp <= 0) CombatController?.InterruptEnemyAttack(this);
+                if (currentHp <= 0 && CombatController != null) CombatController.InterruptEnemyAttack(this);
                 // Death/restart callbacks can clear the queue while a hit resolves.
                 if (i > slimeDetonations.Count) return;
             }
@@ -87,6 +87,7 @@ namespace RhythmHunter.FightDemo
             bleedingDamage = Mathf.Max(.5f, damage);
             bleedRemaining = Mathf.Max(1, beats);
             lastBleedBeat = StatusBeat;
+            if (CombatController != null) CombatController.RefreshStatusIcons(this);
             return true;
         }
 
@@ -95,7 +96,7 @@ namespace RhythmHunter.FightDemo
             if (!CanHaveStatus || (characterDefinition != null && characterDefinition.CrowdControlImmune)) return false;
             stunDuration = Mathf.Max(1, beats);
             stunUntil = StatusBeat + stunDuration;
-            CombatController?.CancelEnemyActionForStun(this);
+            if (CombatController != null) CombatController.CancelEnemyActionForStun(this);
             return true;
         }
 
@@ -107,10 +108,12 @@ namespace RhythmHunter.FightDemo
             if (beat > stunUntil) stunUntil = long.MinValue;
             if (bleedRemaining <= 0 || beat <= lastBleedBeat) return;
             lastBleedBeat = beat;
+            if (CombatController != null) CombatController.PlayStatusIconTrigger(this, true, bleedRemaining == 1);
             bleedRemaining--;
+            if (CombatController != null) CombatController.RefreshStatusIcons(this);
             // TakeDamage handles HP and Fragile; deliberately bypass boss armor/guard.
             TakeDamage(bleedingDamage, DamageKind.DamageOverTime);
-            if (currentHp <= 0) CombatController?.InterruptEnemyAttack(this);
+            if (currentHp <= 0 && CombatController != null) CombatController.InterruptEnemyAttack(this);
         }
 
         public void ClearTimedStatuses()
@@ -119,6 +122,7 @@ namespace RhythmHunter.FightDemo
             slimeCaster = null;
             slimeUntil = stunUntil = lastBleedBeat = long.MinValue;
             bleedRemaining = 0;
+            if (CombatController != null) CombatController.RefreshStatusIcons(this);
         }
     }
 }

@@ -405,6 +405,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            EnsureStatusIconPool();
             EnsureDamageNumberPool();
             if (autoPlayBattleEntrance) beatClock?.SetAutomaticPlayback(false);
             if (UsesFrontHeroControls)
@@ -936,7 +937,10 @@ namespace RhythmHunter.FightDemo
             float damage = blocked || !HealthSystemEnabled ? 0f : QuantizeCombatValue(configuredDamage);
 
             if (blocked)
+            {
                 blockedAttackCount++;
+                ShowBlockedEffectIcon();
+            }
             else
                 receivedAttackCount++;
 

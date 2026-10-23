@@ -90,10 +90,15 @@ namespace RhythmHunter.FightDemo
         {
             if (team != UnitTeam.Enemy || !hasCharacter || currentHp <= 0) return false;
             fragile = true;
+            if (CombatController != null) CombatController.RefreshStatusIcons(this);
             return true;
         }
 
-        public void ClearFragile() => fragile = false;
+        public void ClearFragile()
+        {
+            fragile = false;
+            if (CombatController != null) CombatController.RefreshStatusIcons(this);
+        }
         private int normalAttackPlayCount;
         private int lightAttackPlayCount;
         private int heavyAttackPlayCount;
@@ -288,10 +293,14 @@ namespace RhythmHunter.FightDemo
             bool consumeFragile = IsFragile && damage > 0;
             float applied = Mathf.Clamp(consumeFragile ? damage * 2f : damage, 0f, currentHp);
             // Clear before notifications: reentrant damage must not reuse the status.
-            if (consumeFragile && applied > 0) ClearFragile();
+            if (consumeFragile && applied > 0)
+            {
+                if (CombatController != null) CombatController.PlayStatusIconTrigger(this, false, true);
+                ClearFragile();
+            }
             currentHp -= applied;
             // Display the final HP loss once, before lethal-hit callbacks hide/rebuild the target.
-            CombatController?.ShowEnemyDamageNumber(this, applied);
+            if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, applied);
             // Consume before callbacks; secondary damage and DoT cannot trigger fragments.
             if (applied > 0 && kind == DamageKind.Direct && HasSlimeFragment)
             {

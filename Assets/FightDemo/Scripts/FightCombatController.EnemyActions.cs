@@ -133,7 +133,7 @@ namespace RhythmHunter.FightDemo
                 if (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
                 bool blocked = guardedBeats.Contains(hit.hitBeat);
                 float damage = blocked || !HealthSystemEnabled ? 0 : QuantizeCombatValue(hit.damage);
-                if (blocked) blockedAttackCount++; else receivedAttackCount++;
+                if (blocked) { blockedAttackCount++; ShowBlockedEffectIcon(); } else receivedAttackCount++;
                 ApplyPartyDamage(damage, hit.hitBeat);
                 if (!blocked && !battleEnded) tankSlot?.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Hit, null, null, null);
                 EnemyAttackResolved?.Invoke(new EnemyAttackResult(hit.hitBeat, hit.bar, blocked, damage, partyHp));

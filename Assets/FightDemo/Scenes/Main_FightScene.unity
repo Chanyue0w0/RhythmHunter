@@ -4312,12 +4312,12 @@ GameObject:
   - component: {fileID: 1041651203}
   - component: {fileID: 1041651204}
   m_Layer: 0
-  m_Name: fc597
+  m_Name: BlockedEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1041651203
 Transform:
   m_ObjectHideFlags: 0
@@ -4327,8 +4327,8 @@ Transform:
   m_GameObject: {fileID: 1041651202}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6810144, y: -0.05534619, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 2.19, y: 0.07, z: 0}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1209692342}
@@ -4382,7 +4382,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 028d9967adc4b2e43b84807bf5e9d114, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7d3c3118a210d1f449f540b5830ee203, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -5196,7 +5196,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1209692342
 Transform:
   m_ObjectHideFlags: 0
@@ -7738,12 +7738,12 @@ GameObject:
   - component: {fileID: 1826500652}
   - component: {fileID: 1826500653}
   m_Layer: 0
-  m_Name: fc621
+  m_Name: WeakEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1826500652
 Transform:
   m_ObjectHideFlags: 0
@@ -7754,7 +7754,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -1.6158386, y: -0.3162479, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1209692342}
@@ -8474,6 +8474,14 @@ MonoBehaviour:
   damageGlyphPrewarmPerDigit: 4
   damageNumberMaxActive: 64
   damageGlyphMaxCachedPerDigit: 64
+  enableCharacterPassives: 0
+  showStatusIcons: 1
+  blockedEffectIcon: {fileID: 11400000, guid: 2a00d1707c09407c9e7e402ded2978fc, type: 3}
+  weakEffectIcon: {fileID: 11400000, guid: 9ff13082aa054a0ca58cfafa99f96b14, type: 3}
+  bleedEffectIcon: {fileID: 11400000, guid: 442cd5d6d1e442719285852463c374f4, type: 3}
+  statusIconPrewarmPerType: 4
+  maxBlockedEffectIcons: 32
+  statusIconSpacing: 0.55
   startWithFullTeamSkill: 1
   teamSkillGaugeGain: 1
   teamUltimateRequiredCharges: 3
@@ -8890,12 +8898,12 @@ GameObject:
   - component: {fileID: 2134979161}
   - component: {fileID: 2134979162}
   m_Layer: 0
-  m_Name: fc677
+  m_Name: BleedEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2134979161
 Transform:
   m_ObjectHideFlags: 0
@@ -8906,7 +8914,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -2.2411647, y: -0.3909867, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1209692342}
