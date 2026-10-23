@@ -107,7 +107,11 @@ namespace RhythmHunter.FightDemo
                 if (enemy != null)
                 {
                     enemyLabels[i].text = $"{enemy.DisplayName}   HP {enemy.CurrentHp:0.#} / {enemy.MaxHp:0.#}" +
-                        (enemy.IsFragile ? " <color=#FFCF55>◆ x2</color>" : "");
+                        (enemy.IsFragile ? " <color=#FFCF55>◆ x2</color>" : "") +
+                        (enemy.HasSlimeFragment ? $" <color=#77EE99>SLIME {enemy.SlimeBeatsRemaining}</color>" : "") +
+                        (enemy.SlimeDetonationPending ? " <color=#77EE99>DETONATING</color>" : "") +
+                        (enemy.BleedBeatsRemaining > 0 ? $" <color=#FF7777>BLEED {enemy.BleedBeatsRemaining}</color>" : "") +
+                        (enemy.IsStunned ? $" <color=#FFEE77>STUN {enemy.StunBeatsRemaining}</color>" : "");
                     enemyFills[i].rectTransform.sizeDelta = new Vector2(508 * Mathf.Clamp01(enemy.CurrentHp / enemy.MaxHp), 9);
                 }
                 if (developerPanel.activeSelf)
@@ -124,7 +128,7 @@ namespace RhythmHunter.FightDemo
                 var data = actor != null ? actor.CharacterDefinition : null;
                 if (data == null || data.BasicAbilityType != FightCharacterDefinition.AbilityBehavior.AimedShot) continue;
                 int progress = fight.GetAimedShotProgress(actor);
-                string phase = progress == 0 ? "READY" : progress == 1 ? "PREPARING" : "AIMING";
+                string phase = progress == 0 ? "READY" : "AIMING";
                 if (fight.TeamSkillRunning && progress > 0) phase = "PAUSED";
                 status += (status.Length > 0 ? "  |  " : "") +
                     $"AIM {new[] { "X / Q", "Y / W", "B / E" }[i]}  {progress}/{data.ConsecutiveInputBeats}  {phase}";

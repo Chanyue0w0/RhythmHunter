@@ -82,6 +82,7 @@ namespace RhythmHunter.FightDemo
         public bool TryInterruptEnemyAttack(FightUnitSlot enemy)
         {
             if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || !fightScene2Enemies.Contains(enemy) ||
+                (enemy.CharacterDefinition != null && enemy.CharacterDefinition.CrowdControlImmune) ||
                 (enemy.CharacterDefinition != null && !enemy.CharacterDefinition.AttackInterruptible)) return false;
             bool pending = pendingEnemyAttack && pendingEnemyAttacker == enemy;
             bool activeBossAction = BossActive && enemy == bossActor && latestCombatBeat < bossPhaseEnd &&
@@ -93,6 +94,17 @@ namespace RhythmHunter.FightDemo
             // Already emitted visual/projectile objects are not owned or deleted here.
             if (activeBossAction) EnterBossPhase(BossPhase.Neutral, latestCombatBeat);
             return true;
+        }
+
+        public void CancelEnemyActionForStun(FightUnitSlot enemy)
+        {
+            if (enemy == null || !fightScene2Enemies.Contains(enemy) ||
+                (enemy.CharacterDefinition != null && enemy.CharacterDefinition.CrowdControlImmune)) return;
+            // Stun cancels all unlaunched work, including non-interruptible attacks.
+            // Already launched projectiles remain independent of their source.
+            enemyHits.RemoveAll(hit => hit.source == enemy && !hit.launched);
+            InterruptEnemyAttack(enemy);
+            if (BossActive && enemy == bossActor) EnterBossPhase(BossPhase.Neutral, latestCombatBeat);
         }
 
         /// <summary>Unconditional cancellation for death, Break and teardown; not evidence of a successful player interrupt.</summary>

@@ -49,6 +49,11 @@ namespace RhythmHunter.FightDemo
                 if (BossActive) EnterBossPhase(BossPhase.Neutral, beat);
             }
             if (!BossActive || beat <= lastBossBeat) return;
+            if (bossActor.IsStunned)
+            {
+                bossPhaseStart++; bossPhaseEnd++; lastBossBeat = beat;
+                return;
+            }
             lastBossBeat = beat;
             if (beat < bossPhaseEnd) return;
             EnterBossPhase(CurrentBossPhase switch

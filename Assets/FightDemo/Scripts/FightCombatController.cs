@@ -435,6 +435,7 @@ namespace RhythmHunter.FightDemo
             UpdateBattleEntrance();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
+            AdvanceSlimeDetonations(Time.deltaTime);
             CheckWaveCompletion();
             UpdateBasicAbilityProgress();
             TryResolvePendingAttack();
@@ -638,6 +639,8 @@ namespace RhythmHunter.FightDemo
                 case FightCharacterDefinition.AbilityBehavior.BreakingSlash:
                 case FightCharacterDefinition.AbilityBehavior.EnergySurge:
                 case FightCharacterDefinition.AbilityBehavior.FormationBreaker:
+                case FightCharacterDefinition.AbilityBehavior.SlimeFragments:
+                case FightCharacterDefinition.AbilityBehavior.SmallBombs:
                     return PerformPartySkill(actor, behavior, power);
                 case FightCharacterDefinition.AbilityBehavior.Unavailable:
                     return $"{abilityName} is not available in this checkpoint";
@@ -810,7 +813,7 @@ namespace RhythmHunter.FightDemo
                     !enemyHits.Exists(hit => hit.hitBeat == guardBeat));
             FightBeat?.Invoke(beat);
 
-            if (battleEnded)
+            if (battleEnded || AwaitingNextWave)
                 return;
 
             if (EnemyActionsPaused) return;
@@ -840,6 +843,7 @@ namespace RhythmHunter.FightDemo
 
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
         {
+            if (activeEnemySlot != null && activeEnemySlot.IsStunned) return;
             lastEnemyQueuedBeat = beat.GlobalBeat;
             if (TryStartAuthoredEnemyAttack(activeEnemySlot)) return;
             pendingBossDamage = BossAttackDamage(beat.GlobalBeat);
@@ -1081,7 +1085,7 @@ namespace RhythmHunter.FightDemo
                   + (thirdHero.UnitSlot != null ? thirdHero.UnitSlot.MaxHp : 0f)
                 : tankSlot != null ? tankSlot.MaxHp : Mathf.Max(0.5f, maxPartyHp);
             maxPartyArmor = UsesEqualBeats && tankSlot != null && tankSlot.CharacterDefinition != null
-                ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) + tankSlot.CharacterDefinition.FrontlineDefenseBonus : 0f;
+                ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) + (enableCharacterPassives ? tankSlot.CharacterDefinition.FrontlineDefenseBonus : 0) : 0f;
             partyArmor = maxPartyArmor;
             latestCombatBeat = beatClock != null && beatClock.HasTimingAnchor ? beatClock.LatestBeat.GlobalBeat : -1;
             if (tankSlot != null)

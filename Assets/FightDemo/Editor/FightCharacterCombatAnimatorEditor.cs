@@ -7,7 +7,7 @@ namespace RhythmHunter.FightDemoEditor
     [CustomEditor(typeof(FightCharacterCombatAnimator))]
     public sealed class FightCharacterCombatAnimatorEditor : Editor
     {
-        private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false };
+        private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false, false };
 
         public override void OnInspectorGUI()
         {
@@ -38,6 +38,7 @@ namespace RhythmHunter.FightDemoEditor
             }
 
             DrawSequence(1, 0, "Normal — 普通能力");
+            DrawSequence(10, 9, "Aim — 射手舉槍瞄準（準備拍）");
             DrawSequence(2, 4, "TeamSkill — 隊伍技能");
             DrawSequence(3, 5, "GetHurt — 受傷");
             DrawSequence(4, 6, "Die — 死亡");
@@ -46,7 +47,7 @@ namespace RhythmHunter.FightDemoEditor
             DrawSequence(5, 3, "Guard — 防禦");
             DrawSequence(6, 2, "Heavy Attack — 重擊");
             DrawSequence(7, 1, "Light Attack — 舊版輕擊");
-            EditorGUILayout.HelpBox("圖片拍數控制演出；Team Skill 總拍數與傷害時機仍由戰鬥系統設定。分類不會新增死亡等戰鬥觸發流程。", MessageType.Info);
+            EditorGUILayout.HelpBox("Team Skill 在第一張勾選『生成攻擊特效』的圖片結算能力；附加特效不會觸發傷害。Aim 只負責準備演出；Normal 播放射擊。", MessageType.Info);
             serializedObject.ApplyModifiedProperties();
         }
 

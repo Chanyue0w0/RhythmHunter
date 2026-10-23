@@ -7,7 +7,7 @@ namespace RhythmHunter.FightDemo
 {
     /// <summary>
     /// Owns all character sprite playback: beat-synced idle and frame-driven combat.
-    /// Sequence events time presentation callbacks only; FightCombatController owns beat-authoritative gameplay.
+    /// FightCombatController handles damage; Team Skill attack-effect frames request skill resolution.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class FightCharacterCombatAnimator : MonoBehaviour
@@ -22,7 +22,8 @@ namespace RhythmHunter.FightDemo
             [InspectorName("GetHurt")] Hit = 5,
             [InspectorName("Die")] Death = 6,
             [InspectorName("Opening Idle")] OpeningIdle = 7,
-            [InspectorName("Drink")] Drink = 8
+            [InspectorName("Drink")] Drink = 8,
+            [InspectorName("Aim")] Aim = 9
         }
 
         public enum EffectLocation { Self, AttackTarget }

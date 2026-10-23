@@ -114,13 +114,19 @@ MonoBehaviour:
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1
-  skillName: Energy Surge
-  skillBehavior: 8
-  skillPower: 2
+  skillName: Slime Fragments
+  skillBehavior: 11
+  skillPower: 0
+  fragmentDamage: 1
+  fragmentBeats: 4
+  fragmentDetonationDelayBeats: 0.5
+  fragmentExplosionEffectPrefab: {fileID: 0}
+  fragmentExplosionLifetime: 0
+  statusSkillTargetLimit: 3
   conditionalSkillPower: 4
   basicArmorRecovery: 0
   basicArmorRecoveryAmount: 1
-  teamSkillArmorRecovery: 2
+  teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
   enemyAttackUsesEffectFrames: 0
   attackWindupBeats: 0

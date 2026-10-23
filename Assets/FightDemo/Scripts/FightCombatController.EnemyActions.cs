@@ -26,7 +26,7 @@ namespace RhythmHunter.FightDemo
             lastAuthoredEnemyBeat = globalBeat;
             foreach (var enemy in fightScene2Enemies)
             {
-                if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 ||
+                if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || enemy.IsStunned ||
                     enemy.CharacterDefinition == null || !enemy.CharacterDefinition.EnemyAttackUsesEffectFrames ||
                     (BossActive && enemy == bossActor) ||
                     !IsScheduledAttackBeat(globalBeat - enemyPausedBeats, enemy.AttackIntervalBeats) ||
@@ -42,7 +42,7 @@ namespace RhythmHunter.FightDemo
             bool interruptible = true, bool launchedProjectile = false)
         {
             if (battleEnded || AwaitingBattleStart || AwaitingNextWave || EnemyActionsPaused || IsPaused || TimingCalibrationActive ||
-                source == null || source.CurrentHp <= 0 || !fightScene2Enemies.Contains(source) ||
+                source == null || source.CurrentHp <= 0 || source.IsStunned || !fightScene2Enemies.Contains(source) ||
                 beatOffsets == null || beatOffsets.Length == 0 || damage <= 0 || float.IsNaN(damage) || float.IsInfinity(damage)) return false;
             foreach (int offset in beatOffsets) if (offset < 1) return false;
             foreach (int offset in beatOffsets)
@@ -56,7 +56,7 @@ namespace RhythmHunter.FightDemo
         private bool TryStartAuthoredEnemyAttack(FightUnitSlot source)
         {
             var definition = source != null ? source.CharacterDefinition : null;
-            if (definition == null || !definition.EnemyAttackUsesEffectFrames) return false;
+            if (definition == null || source.IsStunned || !definition.EnemyAttackUsesEffectFrames) return false;
             var animation = FightCharacterCombatAnimator.CombatAnimation.NormalAttack;
             var sequence = source.CombatAnimator != null ? source.CombatAnimator.FindSequence(animation) : null;
             if (sequence == null || !sequence.UseFrameBeatDurations) return false;

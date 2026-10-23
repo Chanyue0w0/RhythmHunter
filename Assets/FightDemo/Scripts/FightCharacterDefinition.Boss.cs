@@ -7,6 +7,8 @@ namespace RhythmHunter.FightDemo
     public sealed class FightBossPattern
     {
         public bool enabled;
+        [Tooltip("Boss super armor prevents interruption and stun, not damage.")]
+        public bool superArmor = true;
         [Min(1)] public int neutralBeats = 4;
         [Min(1)] public int armorBeats = 4;
         [Min(2)] public int chargeBeats = 4;

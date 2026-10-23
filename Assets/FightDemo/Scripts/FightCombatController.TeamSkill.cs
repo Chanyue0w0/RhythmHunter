@@ -172,6 +172,12 @@ namespace RhythmHunter.FightDemo
             var living = fightScene2Enemies.FindAll(enemy => enemy != null && enemy.HasCharacter && enemy.CurrentHp > 0);
             var target = living.Count > 0 ? living[0] : null;
             var behavior = actor.SkillBehavior;
+            if (behavior == FightCharacterDefinition.AbilityBehavior.SlimeFragments ||
+                behavior == FightCharacterDefinition.AbilityBehavior.SmallBombs)
+            {
+                int limit = actor.CharacterDefinition != null ? actor.CharacterDefinition.StatusSkillTargetLimit : 3;
+                return living.GetRange(0, Mathf.Min(limit, living.Count)).ToArray();
+            }
             if (behavior == FightCharacterDefinition.AbilityBehavior.EnergySurge)
                 target = living.Find(enemy => enemy.IsFragile) ?? target;
             bool all = behavior == FightCharacterDefinition.AbilityBehavior.DamageAll ||
@@ -210,7 +216,7 @@ namespace RhythmHunter.FightDemo
             teamSkillAnimator = null;
             pendingTeamSkillUsesAnimation = false;
             ClearEnemyScheduledActions();
-            foreach (var enemy in fightScene2Enemies) if (enemy != null) enemy.ClearFragile();
+            foreach (var enemy in fightScene2Enemies) if (enemy != null) { enemy.ClearFragile(); enemy.ClearTimedStatuses(); }
             ResetBasicAbilityProgress();
             ResetEnemyPause();
             ResetBossState();

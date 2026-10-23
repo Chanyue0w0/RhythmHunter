@@ -4,6 +4,20 @@ namespace RhythmHunter.FightDemo
 {
     public sealed partial class FightCombatController
     {
+        [Header("Character Passives")]
+        [Tooltip("Prototype passives are disabled for the current design: frontline armor bonus, after-skill armor recovery and interrupt bonus damage.")]
+        [SerializeField] private bool enableCharacterPassives;
+        private void AdvanceSlimeDetonations(float deltaTime)
+        {
+            if (beatClock == null || !beatClock.HasTimingAnchor || IsPaused || TimingCalibrationActive || battleEnded || AwaitingNextWave) return;
+            float elapsedBeats = deltaTime * beatClock.MusicPitch / (float)System.Math.Max(.001, beatClock.MillisecondsPerBeat / 1000d);
+            int version = rosterVersion;
+            foreach (var enemy in fightScene2Enemies)
+            {
+                if (enemy != null) enemy.AdvanceFragmentDetonations(elapsedBeats);
+                if (version != rosterVersion || battleEnded) return;
+            }
+        }
         private void RestorePartyArmor()
         {
             RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.Full);
@@ -23,7 +37,8 @@ namespace RhythmHunter.FightDemo
 
         private void ApplyAbilityArmorRecovery(FightCharacterDefinition definition, bool skill)
         {
-            if (definition == null) return;
+            if (definition == null || (!enableCharacterPassives &&
+                (skill ? definition.SkillType : definition.BasicAbilityType) != FightCharacterDefinition.AbilityBehavior.RestoreArmor)) return;
             RecoverPartyArmor(skill ? definition.TeamSkillArmorRecovery : definition.BasicArmorRecovery,
                 skill ? definition.TeamSkillArmorRecoveryAmount : definition.BasicArmorRecoveryAmount);
         }
@@ -35,6 +50,32 @@ namespace RhythmHunter.FightDemo
             float alternative = actor.CharacterDefinition != null ? actor.CharacterDefinition.ConditionalSkillPower : power;
             switch (behavior)
             {
+                case FightCharacterDefinition.AbilityBehavior.SlimeFragments:
+                case FightCharacterDefinition.AbilityBehavior.SmallBombs:
+                    var targets = GetTeamSkillEffectTargets(actor);
+                    PlayAnimatedHeroUtility(actor, FightCharacterCombatAnimator.CombatAnimation.Skill,
+                        () =>
+                        {
+                            foreach (var enemy in targets)
+                                if (IsCurrentHeroAction(version, actor, enemy)) actor.PlaySkillAttackAt(enemy.ImpactEffectAnchor);
+                        },
+                        () =>
+                        {
+                            foreach (var enemy in targets)
+                            {
+                                if (!IsCurrentHeroAction(version, actor, enemy) || enemy.CurrentHp <= 0 || !HealthSystemEnabled) continue;
+                                var data = actor.CharacterDefinition;
+                                if (behavior == FightCharacterDefinition.AbilityBehavior.SlimeFragments)
+                                    enemy.AttachSlime(data.FragmentDamage, data.FragmentBeats, actor);
+                                else
+                                {
+                                    ApplyHeroDamage(version, actor, enemy, power);
+                                    if (IsCurrentHeroAction(version, actor, enemy)) enemy.ApplyStun(data.StunBeats);
+                                }
+                            }
+                        });
+                    return behavior == FightCharacterDefinition.AbilityBehavior.SlimeFragments
+                        ? "Slime Fragments — attached; direct damage detonates" : "Small Bombs — damage and stun";
                 case FightCharacterDefinition.AbilityBehavior.BreakingSlash:
                     if (target == null) return "Breaking Slash — no target";
                     PlayAnimatedHeroAction(actor, target, ActionType.Skill, power);

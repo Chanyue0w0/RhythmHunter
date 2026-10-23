@@ -9,7 +9,7 @@ namespace RhythmHunter.FightDemo
     /// A world-space battlefield slot and the data hook for a future hero/enemy prefab.
     /// Assign Actor Prefab later; the scene placeholder is hidden automatically at runtime.
     /// </summary>
-    public sealed class FightUnitSlot : MonoBehaviour
+    public sealed partial class FightUnitSlot : MonoBehaviour
     {
         public enum UnitTeam
         {
@@ -212,6 +212,7 @@ namespace RhythmHunter.FightDemo
 
         public void SpawnCharacter(FightCharacterDefinition prefab, FightCombatController beatSource)
         {
+            ClearTimedStatuses();
             CombatController = beatSource;
             ClearFragile();
             CacheLegacyPresentationReferences();
@@ -244,6 +245,7 @@ namespace RhythmHunter.FightDemo
 
         public void ClearCharacter()
         {
+            ClearTimedStatuses();
             ClearFragile();
             RemoveSpawnedActor();
             characterDefinition = null;
@@ -264,19 +266,23 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            ClearTimedStatuses();
             ClearFragile();
             ResetInputFeedback();
         }
 
         public void RestoreFullHealth()
         {
+            ClearTimedStatuses();
             ClearFragile();
             currentHp = maxHp;
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
         }
 
-        public float TakeDamage(float amount)
+        public float TakeDamage(float amount) => TakeDamage(amount, DamageKind.Direct);
+
+        public float TakeDamage(float amount, DamageKind kind)
         {
             float damage = QuantizeNonNegative(amount);
             bool consumeFragile = IsFragile && damage > 0;
@@ -286,6 +292,12 @@ namespace RhythmHunter.FightDemo
             currentHp -= applied;
             // Display the final HP loss once, before lethal-hit callbacks hide/rebuild the target.
             CombatController?.ShowEnemyDamageNumber(this, applied);
+            // Consume before callbacks; secondary damage and DoT cannot trigger fragments.
+            if (applied > 0 && kind == DamageKind.Direct && HasSlimeFragment)
+            {
+                ArmSlimeDetonation();
+            }
+            if (currentHp <= 0) ClearTimedStatuses();
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;

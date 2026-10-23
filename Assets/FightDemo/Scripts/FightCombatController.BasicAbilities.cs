@@ -15,6 +15,9 @@ namespace RhythmHunter.FightDemo
         /// <summary>Also used by battle/wave teardown; never modifies shared MP.</summary>
         public void ResetBasicAbilityProgress()
         {
+            var animator = aimedShotActor != null ? aimedShotActor.CombatAnimator : null;
+            if (animator != null && animator.IsPlaying && animator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Aim)
+                animator.InterruptPlayback();
             aimedShotActor = null;
             aimedShotProgress = 0;
             lastAimedShotBeat = long.MinValue;
@@ -50,20 +53,27 @@ namespace RhythmHunter.FightDemo
             int required = actor.CharacterDefinition != null ? actor.CharacterDefinition.ConsecutiveInputBeats : 3;
             if (aimedShotProgress < required)
             {
-                actor.PlayAttackFrameWarning(false);
-                return $"Aimed Shot {aimedShotProgress}/{required} — {(aimedShotProgress == 1 ? "prepare" : "aim")}; input again next beat";
+                bool animated = actor.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Aim, null, null, null,
+                    effect => { if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self) actor.PlayFrameEffect(effect); });
+                if (!animated) actor.PlayAttackFrameWarning(false);
+                return $"Aimed Shot {aimedShotProgress}/{required} — aim; input again next beat";
             }
 
             ResetBasicAbilityProgress();
-            // Reacquire on the third input; never retain a target from preparation.
+            // Reacquire on the final input; never retain a target from preparation.
             var target = FindFrontLivingEnemy();
             if (target == null) return "Aimed Shot found no target";
-            bool interrupted = actor.CharacterDefinition != null && actor.CharacterDefinition.BasicInterruptsEnemy &&
+            bool interrupted = actor.CharacterDefinition != null && !actor.CharacterDefinition.BasicAppliesBleeding && actor.CharacterDefinition.BasicInterruptsEnemy &&
                 TryInterruptEnemyAttack(target);
-            if (interrupted) power += actor.CharacterDefinition.SuccessfulInterruptDamageBonus;
+            if (interrupted && enableCharacterPassives) power += actor.CharacterDefinition.SuccessfulInterruptDamageBonus;
             if (actor.CharacterDefinition != null)
                 ApplyBossBreak(actor.CharacterDefinition.BasicBreakPower, beat);
+            float previousHp = target.CurrentHp;
+            int version = rosterVersion;
             PlayAnimatedHeroAction(actor, target, ActionType.LightAttack, power);
+            if (IsCurrentHeroAction(version, actor, target) && target.CurrentHp < previousHp &&
+                actor.CharacterDefinition != null && actor.CharacterDefinition.BasicAppliesBleeding)
+                target.ApplyBleeding(actor.CharacterDefinition.BleedDamage, actor.CharacterDefinition.BleedBeats);
             return $"Aimed Shot fires for {power:0.#} base damage" + (interrupted ? " — INTERRUPTED" : "");
         }
 

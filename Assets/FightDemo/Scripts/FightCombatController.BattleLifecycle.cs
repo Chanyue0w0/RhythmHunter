@@ -55,6 +55,13 @@ namespace RhythmHunter.FightDemo
                 beat.GlobalBeat <= lastNormalBattleBeat) return;
             lastNormalBattleBeat = beat.GlobalBeat;
             NormalBattleBeatCount++;
+            foreach (var enemy in fightScene2Enemies.ToArray())
+            {
+                if (enemy != null) enemy.AdvanceTimedStatuses(NormalBattleBeatCount);
+                if (battleEnded || AwaitingNextWave) return;
+            }
+            CheckWaveCompletion();
+            if (battleEnded || AwaitingNextWave) return;
             NormalBattleBeat?.Invoke(NormalBattleBeatCount);
             AdvanceEnemyCombatWork(beat);
         }
@@ -68,7 +75,7 @@ namespace RhythmHunter.FightDemo
             ResetBossState();
             ClearEnemyScheduledActions();
             foreach (var enemy in fightScene2Enemies)
-                if (enemy != null) { enemy.ClearFragile(); enemy.CombatAnimator?.InterruptPlayback(); }
+                if (enemy != null) { enemy.ClearFragile(); enemy.ClearTimedStatuses(); enemy.CombatAnimator?.InterruptPlayback(); }
             ClearCombatEffectsKeepingDamageNumbers();
         }
 

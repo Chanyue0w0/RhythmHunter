@@ -22,7 +22,9 @@ namespace RhythmHunter.FightDemo
             BreakingSlash,
             EnergySurge,
             FormationBreaker,
-            RestoreArmor
+            RestoreArmor,
+            SlimeFragments,
+            SmallBombs
         }
 
         public enum ArmorRestoreMode { None, FixedAmount, Full }
@@ -74,6 +76,32 @@ namespace RhythmHunter.FightDemo
         public ArmorRestoreMode TeamSkillArmorRecovery => teamSkillArmorRecovery;
         public float BasicArmorRecoveryAmount => basicArmorRecoveryAmount;
         public float TeamSkillArmorRecoveryAmount => teamSkillArmorRecoveryAmount;
+        [Header("On-hit Status Parameters")]
+        [SerializeField] private bool basicAppliesBleeding;
+        [SerializeField, Min(0.5f)] private float bleedDamage = .5f;
+        [SerializeField, Min(1)] private int bleedBeats = 4;
+        [SerializeField, Min(0.5f)] private float fragmentDamage = 1f;
+        [SerializeField, Min(1)] private int fragmentBeats = 4;
+        [SerializeField, Min(0)] private float fragmentDetonationDelayBeats = .5f;
+        [Tooltip("Explosion VFX at the victim after the beat delay. Empty uses the caster's existing skill effect.")]
+        [SerializeField] private GameObject fragmentExplosionEffectPrefab;
+        [Tooltip("0 lets the explosion prefab manage its own lifetime.")]
+        [SerializeField, Min(0)] private float fragmentExplosionLifetime;
+        [SerializeField, Min(1)] private int stunBeats = 4;
+        [SerializeField, Range(1, 3)] private int statusSkillTargetLimit = 3;
+        [Tooltip("Immune to interruption and stun. Does not prevent incoming damage.")]
+        [SerializeField] private bool crowdControlImmune;
+        public bool BasicAppliesBleeding => basicAppliesBleeding;
+        public float BleedDamage => Mathf.Max(.5f, bleedDamage);
+        public int BleedBeats => Mathf.Max(1, bleedBeats);
+        public float FragmentDamage => Mathf.Max(.5f, fragmentDamage);
+        public int FragmentBeats => Mathf.Max(1, fragmentBeats);
+        public float FragmentDetonationDelayBeats => Mathf.Max(0, fragmentDetonationDelayBeats);
+        public GameObject FragmentExplosionEffectPrefab => fragmentExplosionEffectPrefab;
+        public float FragmentExplosionLifetime => Mathf.Max(0, fragmentExplosionLifetime);
+        public int StunBeats => Mathf.Max(1, stunBeats);
+        public int StatusSkillTargetLimit => Mathf.Clamp(statusSkillTargetLimit, 1, 3);
+        public bool CrowdControlImmune => crowdControlImmune || (bossPattern.enabled && bossPattern.superArmor);
         [Header("Enemy Action")]
         [Tooltip("Schedule one hit at each Normal animation attack-effect frame using its beat durations. Supports multi-hit attacks and interruption.")]
         [SerializeField] private bool enemyAttackUsesEffectFrames;
