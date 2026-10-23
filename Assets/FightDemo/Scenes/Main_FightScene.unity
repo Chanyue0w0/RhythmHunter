@@ -7854,6 +7854,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
+  showEnemyDamageNumbers: 1
+  damageDigitPrefabs:
+  - {fileID: 8059646611630442008, guid: 65e346b2be0cd6f4e98a21f618c84252, type: 3}
+  - {fileID: 821659882305050408, guid: 33830a29953a8a94db86312d69a514e5, type: 3}
+  - {fileID: 3387627009911684426, guid: 433ee73351e8a6244803ba28bccc3bdf, type: 3}
+  - {fileID: 3346009242134115890, guid: 1701385fd0b8a6b438db3b0e8caf8923, type: 3}
+  - {fileID: 7816833423727273069, guid: bed62489476db6a45b171d2ae7dae00d, type: 3}
+  - {fileID: 8133363191223406634, guid: a15113e8d46c0c845bc7e18ffdc3b8cf, type: 3}
+  - {fileID: 2482282291809049268, guid: 8419c973d1928824f93b421394e9ea49, type: 3}
+  - {fileID: 173090391683368173, guid: e168d4ee2dc573643b98e2af87b750c5, type: 3}
+  - {fileID: 5612388837414510471, guid: d7cd6bc43cadc7c4daa7f5c349e2c045, type: 3}
+  - {fileID: 5543003937174842591, guid: f7c8ce6b5d3a91240b7ecdedbd76e6b8, type: 3}
+  damageNumberOffset: {x: 0.5, y: 0, z: 0}
+  damageNumberLifetime: 0.8
+  damageNumberScale: 1
+  damageDigitSpacing: 0.3
+  damageNumberRise: 0.6
+  damageNumberSortingOrder: 100
+  damageNumberPrewarm: 8
+  damageGlyphPrewarmPerDigit: 4
+  damageNumberMaxActive: 64
+  damageGlyphMaxCachedPerDigit: 64
   startWithFullTeamSkill: 1
   teamSkillGaugeGain: 1
   teamUltimateRequiredCharges: 3
@@ -7890,28 +7912,6 @@ MonoBehaviour:
     heroLabel: MAGE
     unitSlot: {fileID: 828184398}
     skillActivationCount: 0
-  damageNumberPrewarm: 8
-  damageGlyphPrewarmPerDigit: 4
-  damageNumberMaxActive: 64
-  damageGlyphMaxCachedPerDigit: 64
-  showEnemyDamageNumbers: 1
-  damageDigitPrefabs:
-  - {fileID: 8059646611630442008, guid: 65e346b2be0cd6f4e98a21f618c84252, type: 3}
-  - {fileID: 821659882305050408, guid: 33830a29953a8a94db86312d69a514e5, type: 3}
-  - {fileID: 3387627009911684426, guid: 433ee73351e8a6244803ba28bccc3bdf, type: 3}
-  - {fileID: 3346009242134115890, guid: 1701385fd0b8a6b438db3b0e8caf8923, type: 3}
-  - {fileID: 7816833423727273069, guid: bed62489476db6a45b171d2ae7dae00d, type: 3}
-  - {fileID: 8133363191223406634, guid: a15113e8d46c0c845bc7e18ffdc3b8cf, type: 3}
-  - {fileID: 2482282291809049268, guid: 8419c973d1928824f93b421394e9ea49, type: 3}
-  - {fileID: 173090391683368173, guid: e168d4ee2dc573643b98e2af87b750c5, type: 3}
-  - {fileID: 5612388837414510471, guid: d7cd6bc43cadc7c4daa7f5c349e2c045, type: 3}
-  - {fileID: 5543003937174842591, guid: f7c8ce6b5d3a91240b7ecdedbd76e6b8, type: 3}
-  damageNumberOffset: {x: 0, y: 0.25, z: -0.5}
-  damageNumberLifetime: 0.8
-  damageNumberScale: 1
-  damageDigitSpacing: 0.3
-  damageNumberRise: 0.6
-  damageNumberSortingOrder: 100
 --- !u!114 &2021200327
 MonoBehaviour:
   m_ObjectHideFlags: 0
