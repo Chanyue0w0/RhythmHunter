@@ -83,7 +83,7 @@ Material:
     - _MaskAngle: 90
     - _MaskColumns: 8
     - _MaskEnabled: 1
-    - _MaskLeftAlpha: 0.241
+    - _MaskLeftAlpha: 0.553
     - _MaskRightAlpha: 1
     - _MaskRows: 2
     - _MaskSoftness: 0.1

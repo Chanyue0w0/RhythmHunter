@@ -156,7 +156,7 @@ MonoBehaviour:
   enemyAttackUsesEffectFrames: 1
   attackWindupBeats: 0
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
+  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 08166c26e8781d8449ee84139f5d70aa, type: 3}
   useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 2574835647068987013, guid: 49cb9df558623204ca97c8b6d74b7639, type: 3}
   abilityEffectLifetime: 1.5
@@ -179,11 +179,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.41
       objectReference: {fileID: 0}
     - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.38
       objectReference: {fileID: 0}
     - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
       propertyPath: m_LocalPosition.z

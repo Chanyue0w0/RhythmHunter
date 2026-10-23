@@ -18,6 +18,10 @@ namespace RhythmHunter.FightDemo
         private readonly int[] teamSkillEffectOffsets = new int[3];
         private HeroBeatSettings pendingTeamSkillHero;
         private long pendingTeamSkillEffectBeat = long.MaxValue;
+        private bool pendingTeamSkillUsesAnimation;
+        private bool resolvingTeamSkillFrame;
+        private FightCharacterCombatAnimator teamSkillAnimator;
+        private int teamSkillPlaybackVersion;
         public FightUnitSlot TeamSkillPerformingHero { get; private set; }
         public int TeamSkillBeatsRemaining => TeamSkillRunning ? (int)System.Math.Max(0, nextTeamSkillBeat - latestCombatBeat) : 0;
         public int TeamSkillGauge => teamSkillGauge;
@@ -62,6 +66,7 @@ namespace RhythmHunter.FightDemo
                 teamSkillEffectOffsets[i] = teamSkillActors[i]?.UnitSlot?.CharacterDefinition?.TeamSkillEffectBeatOffset ?? 0;
             }
             teamSkillGauge = 0; teamSkillStep = 0;
+            teamSkillPlaybackVersion++;
             nextTeamSkillBeat = latestCombatBeat + 1;
             BeginEnemyPause();
             TeamSkillStatus = "QUEUED — next beat";
@@ -73,6 +78,15 @@ namespace RhythmHunter.FightDemo
             if (!UsesEqualBeats || !TeamSkillRunning) return;
             ResolvePendingTeamSkill(beat);
             if (!TeamSkillRunning || beat < nextTeamSkillBeat) return;
+            // Preserve formation order even when authored animation outlasts its reserved beats.
+            if (teamSkillAnimator != null && teamSkillAnimator.IsPlaying) return;
+            if (pendingTeamSkillUsesAnimation)
+            {
+                // An interrupted/unfinished animation must never synthesize a hit.
+                pendingTeamSkillHero = null;
+                pendingTeamSkillUsesAnimation = false;
+            }
+            teamSkillAnimator = null;
             while (teamSkillStep < teamSkillActors.Length &&
                 (teamSkillActors[teamSkillStep]?.UnitSlot == null || !teamSkillActors[teamSkillStep].UnitSlot.HasCharacter)) teamSkillStep++;
             if (teamSkillStep >= teamSkillActors.Length)
@@ -96,19 +110,89 @@ namespace RhythmHunter.FightDemo
             pendingTeamSkillHero = hero;
             pendingTeamSkillEffectBeat = beat + effectOffset;
             TeamSkillStatus = hero.HeroLabel + ": PREPARING";
+            StartTeamSkillPresentation(hero);
             ResolvePendingTeamSkill(beat);
         }
 
-        private void ResolvePendingTeamSkill(long beat)
+        private void StartTeamSkillPresentation(HeroBeatSettings hero)
         {
-            if (pendingTeamSkillHero == null || beat < pendingTeamSkillEffectBeat) return;
+            var actor = hero.UnitSlot;
+            var animator = actor.CombatAnimator;
+            var sequence = animator != null ? animator.FindSequence(FightCharacterCombatAnimator.CombatAnimation.Skill) : null;
+            pendingTeamSkillUsesAnimation = sequence != null && sequence.Frames.Count > 0;
+            if (!pendingTeamSkillUsesAnimation) return;
+            teamSkillAnimator = animator;
+            int version = rosterVersion, playback = teamSkillPlaybackVersion, step = teamSkillStep;
+            FightUnitSlot[] hitTargets = null;
+            bool Valid() => animator.IsPlaying && TeamSkillRunning && playback == teamSkillPlaybackVersion && step == teamSkillStep &&
+                IsCurrentHero(version, actor) && !battleEnded && TeamSkillPerformingHero == actor;
+            bool hasHitFrame = false;
+            for (int i = 0; i < sequence.Frames.Count; i++) hasHitFrame |= sequence.PlaysAttackEffectAt(i);
+            if (!hasHitFrame)
+                Debug.LogWarning($"[TeamSkill] {actor.DisplayName}: no attack-effect frame selected. This animation will not deal damage.", actor);
+            bool started = actor.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Skill,
+                () => { if (Valid()) PlayHeroAttackWarning(version, actor); },
+                () =>
+                {
+                    if (!Valid()) return;
+                    if (pendingTeamSkillHero == hero)
+                    {
+                        hitTargets = GetTeamSkillEffectTargets(actor);
+                        ResolvePendingTeamSkill(latestCombatBeat, true);
+                    }
+                    else if (hitTargets != null)
+                    {
+                        // Later marked frames retain their VFX, without another damage event.
+                        var anchors = new System.Collections.Generic.List<Transform>();
+                        foreach (var target in hitTargets)
+                            if (IsCurrentHeroAction(version, actor, target)) anchors.Add(target.ImpactEffectAnchor);
+                        if (anchors.Count > 0) actor.PlaySkillAttackAt(anchors.ToArray());
+                    }
+                },
+                null,
+                effect =>
+                {
+                    if (!Valid()) return;
+                    if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self) actor.PlayFrameEffect(effect);
+                    else
+                    {
+                        foreach (var target in hitTargets ?? GetTeamSkillEffectTargets(actor))
+                            if (IsCurrentHeroAction(version, actor, target)) actor.PlayFrameEffect(effect, target.ImpactEffectAnchor);
+                    }
+                });
+            if (!started)
+            {
+                pendingTeamSkillUsesAnimation = false;
+                teamSkillAnimator = null;
+            }
+        }
+
+        private FightUnitSlot[] GetTeamSkillEffectTargets(FightUnitSlot actor)
+        {
+            var living = fightScene2Enemies.FindAll(enemy => enemy != null && enemy.HasCharacter && enemy.CurrentHp > 0);
+            var target = living.Count > 0 ? living[0] : null;
+            var behavior = actor.SkillBehavior;
+            if (behavior == FightCharacterDefinition.AbilityBehavior.EnergySurge)
+                target = living.Find(enemy => enemy.IsFragile) ?? target;
+            bool all = behavior == FightCharacterDefinition.AbilityBehavior.DamageAll ||
+                (behavior == FightCharacterDefinition.AbilityBehavior.EnergySurge && (target == null || !target.IsFragile)) ||
+                (behavior == FightCharacterDefinition.AbilityBehavior.FormationBreaker && target != null && target.IsFragile);
+            return all ? living.ToArray() : target != null ? new[] { target } : System.Array.Empty<FightUnitSlot>();
+        }
+
+        private void ResolvePendingTeamSkill(long beat, bool fromAttackEffect = false)
+        {
+            if (pendingTeamSkillHero == null || (pendingTeamSkillUsesAnimation ? !fromAttackEffect : beat < pendingTeamSkillEffectBeat)) return;
             var hero = pendingTeamSkillHero;
             // Clear before callbacks so repeated beats and reentrant resets cannot double-cast.
             pendingTeamSkillHero = null;
             pendingTeamSkillEffectBeat = long.MaxValue;
             if (hero.UnitSlot == null || !hero.UnitSlot.HasCharacter) return;
             int expectedRosterVersion = rosterVersion;
-            string effect = PerformConfiguredAbility(hero, ActionType.Skill, hero.UnitSlot.SkillBehavior, hero.UnitSlot.SkillPower, beat);
+            string effect;
+            resolvingTeamSkillFrame = true;
+            try { effect = PerformConfiguredAbility(hero, ActionType.Skill, hero.UnitSlot.SkillBehavior, hero.UnitSlot.SkillPower, beat); }
+            finally { resolvingTeamSkillFrame = false; }
             if (!TeamSkillRunning || rosterVersion != expectedRosterVersion) return;
             ApplyAbilityArmorRecovery(hero.UnitSlot.CharacterDefinition, true);
             if (!TeamSkillRunning || rosterVersion != expectedRosterVersion) return;
@@ -121,6 +205,10 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            teamSkillPlaybackVersion++;
+            if (teamSkillAnimator != null) teamSkillAnimator.InterruptPlayback();
+            teamSkillAnimator = null;
+            pendingTeamSkillUsesAnimation = false;
             ClearEnemyScheduledActions();
             foreach (var enemy in fightScene2Enemies) if (enemy != null) enemy.ClearFragile();
             ResetBasicAbilityProgress();

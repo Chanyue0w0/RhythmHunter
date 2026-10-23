@@ -54,7 +54,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int teamSkillManaCost = 10;
         [Tooltip("Beats reserved for this character's Team Skill performance before the next character starts.")]
         [SerializeField, Range(1, 4)] private int teamSkillPerformanceBeats = 4;
-        [Tooltip("Zero-based effect beat within the performance: 0 = first beat, 1 = second beat.")]
+        [Tooltip("Fallback when no Team Skill animation exists: 0 = first beat, 1 = second beat. Animated Team Skills resolve on their first attack-effect frame instead.")]
         [SerializeField, Range(0, 3)] private int teamSkillEffectBeatOffset;
         [SerializeField] private string skillName = "Beat Skill";
         [Tooltip("Used by the EqualBeat Team Skill chain in formation order, and by legacy fourth-beat skills.")]

@@ -87,8 +87,12 @@ MonoBehaviour:
   skillBehavior: 7
   skillPower: 2
   conditionalSkillPower: 4
+  basicArmorRecovery: 0
+  basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
+  enemyAttackUsesEffectFrames: 0
+  attackWindupBeats: 0
   attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
   useFallbackAbilityEffects: 0
@@ -655,7 +659,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.14
       objectReference: {fileID: 0}
     - target: {fileID: 6204897831710636519, guid: 0fe9d14d565d8c141b4786c79d7d417d, type: 3}
       propertyPath: m_LocalPosition.z

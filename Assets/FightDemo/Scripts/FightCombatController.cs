@@ -1276,6 +1276,12 @@ namespace RhythmHunter.FightDemo
                     : FightCharacterCombatAnimator.CombatAnimation.LightAttack
             };
             int actionRosterVersion = rosterVersion;
+            if (resolvingTeamSkillFrame && action == ActionType.Skill)
+            {
+                PlayHeroActionVisual(actionRosterVersion, attacker, target, action);
+                ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
+                return;
+            }
             // The rhythm judgement owns damage timing. Resolve before starting any
             // animation so projectile speed, effect lifetime, and frame events are visual-only.
             ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
@@ -1303,6 +1309,12 @@ namespace RhythmHunter.FightDemo
         {
             int actionRosterVersion = rosterVersion;
             var effectTargets = fightScene2Enemies.FindAll(enemy => enemy != null && enemy.HasCharacter && enemy.CurrentHp > 0).ToArray();
+            if (resolvingTeamSkillFrame && action == ActionType.Skill)
+            {
+                PlayHeroAreaVisual(actionRosterVersion, attacker, action);
+                ApplyAreaDamage(actionRosterVersion, attacker, damage);
+                return;
+            }
             ApplyAreaDamage(actionRosterVersion, attacker, damage);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
@@ -1345,6 +1357,12 @@ namespace RhythmHunter.FightDemo
                 if (IsCurrentHero(actionRosterVersion, actor))
                     onResolve?.Invoke();
             };
+            if (resolvingTeamSkillFrame)
+            {
+                guardedEffect();
+                guardedResolution();
+                return;
+            }
             bool animated = actor.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, actor),

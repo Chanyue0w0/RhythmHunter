@@ -88,7 +88,7 @@ Transform:
   m_GameObject: {fileID: 7851057040622904946}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.089, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -153,9 +153,10 @@ MonoBehaviour:
   basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
+  enemyAttackUsesEffectFrames: 0
   attackWindupBeats: 2
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
+  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 08166c26e8781d8449ee84139f5d70aa, type: 3}
   useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5
@@ -178,11 +179,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3573340130233267179, guid: 80c514241aed43898480363815605cb2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.139
       objectReference: {fileID: 0}
     - target: {fileID: 3573340130233267179, guid: 80c514241aed43898480363815605cb2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.128
       objectReference: {fileID: 0}
     - target: {fileID: 3573340130233267179, guid: 80c514241aed43898480363815605cb2, type: 3}
       propertyPath: m_LocalPosition.z
