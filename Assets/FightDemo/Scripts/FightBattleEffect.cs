@@ -58,8 +58,20 @@ namespace RhythmHunter.FightDemo
         private readonly HashSet<FightBattleEffect> battleEffects = new();
         internal void RegisterBattleEffect(FightBattleEffect effect) => battleEffects.Add(effect);
         internal void UnregisterBattleEffect(FightBattleEffect effect) => battleEffects.Remove(effect);
+        private void ClearCombatEffectsKeepingDamageNumbers()
+        {
+            // Let lethal-hit feedback finish its short lifetime at the old target's
+            // position. Full combat reset still clears every effect immediately.
+            foreach (var effect in new List<FightBattleEffect>(battleEffects))
+            {
+                // Pooled damage numbers have their own short lifetime and are not in this registry.
+                battleEffects.Remove(effect);
+                if (effect != null) effect.Cancel();
+            }
+        }
         private void ClearBattleEffects()
         {
+            ResetDamageNumberPool();
             foreach (var effect in new List<FightBattleEffect>(battleEffects)) if (effect != null) effect.Cancel();
             battleEffects.Clear();
         }

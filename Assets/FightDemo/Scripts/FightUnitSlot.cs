@@ -284,6 +284,8 @@ namespace RhythmHunter.FightDemo
             // Clear before notifications: reentrant damage must not reuse the status.
             if (consumeFragile && applied > 0) ClearFragile();
             currentHp -= applied;
+            // Display the final HP loss once, before lethal-hit callbacks hide/rebuild the target.
+            CombatController?.ShowEnemyDamageNumber(this, applied);
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;

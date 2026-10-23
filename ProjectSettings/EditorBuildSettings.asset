@@ -5,42 +5,18 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Prototype/TopDownBeatCombat/Scenes/TopDownBeatCombatPrototype.unity
-    guid: 679ac78ed8297b349862ac42655fec3d
+  - enabled: 1
+    path: Assets/FightDemo/Scenes/Main_FightScene.unity
+    guid: c8e462ba90db4cc4ad314ddcb4e5ff47
+  - enabled: 1
+    path: Assets/FightDemo/Scenes/FightCalibrationScene.unity
+    guid: 97e57dff16c872e4594af611b6831fd8
   - enabled: 1
     path: Assets/FightDemo/Scenes/Art_FightScene.unity
     guid: 684d6754bf3bae64c9fd000158b93fc7
   - enabled: 1
     path: Assets/FightDemo/Scenes/Single_FightScene.unity
     guid: 5af7bcf5d12e4fb6a9f0c4d8a3b72e11
-  - enabled: 0
-    path: Assets/Prototype/RhythmArena/Scenes/RhythmArenaPrototype.unity
-    guid: ea6252c921ba6c4448d92ae0760c7ad6
-  - enabled: 0
-    path: Assets/OtterAquariumPrototype/Scenes/OtterMainMenu.unity
-    guid: fd3050d20b1864a4d85ba4a67b23eda6
-  - enabled: 0
-    path: Assets/OtterAquariumPrototype/Scenes/OtterAquarium.unity
-    guid: 72d9685db07efdf409c01279752c1372
-  - enabled: 0
-    path: Assets/OtterAquariumPrototype/Scenes/old/OtterAquariumCombat.unity
-    guid: aade6b3556baf7d4194c708efd2cf6eb
-  - enabled: 0
-    path: Assets/OtterAquariumPrototype/Scenes/old/OtterShellBeatLab.unity
-    guid: 6dfc6c80a8dd9f1468c28e6355db8915
-  - enabled: 0
-    path: Assets/OtterAquariumPrototype/Scenes/OtterZooGoblinDemo1.unity
-    guid: 5a1f2f4eaa201d14a9f73f109deb2423
-  - enabled: 0
-    path: Assets/OtterAquariumPrototype/Scenes/OtterShellBeatLab.unity
-    guid: 2a4c98089ff3ce643a12001baabda0b6
-  - enabled: 1
-    path: Assets/FightDemo/Scenes/FightCalibrationScene.unity
-    guid: 97e57dff16c872e4594af611b6831fd8
-  - enabled: 1
-    path: Assets/FightDemo/Scenes/Main_FightScene.unity
-    guid: c8e462ba90db4cc4ad314ddcb4e5ff47
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

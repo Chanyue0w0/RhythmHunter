@@ -118,10 +118,14 @@ MonoBehaviour:
   skillBehavior: 8
   skillPower: 2
   conditionalSkillPower: 4
+  basicArmorRecovery: 0
+  basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 2
   teamSkillArmorRecoveryAmount: 1
+  enemyAttackUsesEffectFrames: 0
+  attackWindupBeats: 0
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 0}
+  normalAbilityEffectPrefab: {fileID: 2243853975527601220, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
   useFallbackAbilityEffects: 0
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5
@@ -172,6 +176,74 @@ PrefabInstance:
     - target: {fileID: 2574302599794239125, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
       propertyPath: m_Name
       value: Mage_Visual
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].damageFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].warningFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].framesPerSecond
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].attackEffectFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frames.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: 'sequences.Array.data[0].frames.Array.data[0]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 8426ab1c1b8010a468eb82e2ffffdeda, type: 3}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].useFrameBeatDurations
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameBeatDurations.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[0]'
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].playAttackEffect
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].effects.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].effects.Array.data[0].prefab
+      value: 
+      objectReference: {fileID: 2243853975527601220, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].effects.Array.data[0].location
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].effects.Array.data[0].followAnchor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].effects.Array.data[0].lifetimeSeconds
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 6204897831710636519, guid: 83c919b6ef214fa2b89d05879ed55a5b, type: 3}
       propertyPath: m_LocalPosition.x

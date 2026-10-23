@@ -405,6 +405,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            EnsureDamageNumberPool();
             if (autoPlayBattleEntrance) beatClock?.SetAutomaticPlayback(false);
             if (UsesFrontHeroControls)
                 RebuildRosterAndResetCombat();
@@ -442,6 +443,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            ResetDamageNumberPool();
             entrancePending = false;
             ResetTeamSkill();
             CancelEnemyCombatWork();

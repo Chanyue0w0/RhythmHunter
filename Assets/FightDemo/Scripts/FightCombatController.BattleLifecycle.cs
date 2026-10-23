@@ -69,7 +69,7 @@ namespace RhythmHunter.FightDemo
             ClearEnemyScheduledActions();
             foreach (var enemy in fightScene2Enemies)
                 if (enemy != null) { enemy.ClearFragile(); enemy.CombatAnimator?.InterruptPlayback(); }
-            ClearBattleEffects();
+            ClearCombatEffectsKeepingDamageNumbers();
         }
 
         private void FinishBattle(bool won)
