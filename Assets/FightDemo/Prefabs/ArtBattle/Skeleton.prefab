@@ -425,23 +425,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: 'sequences.Array.data[2].frameBeatDurations.Array.data[0]'
-      value: 0.4
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: 'sequences.Array.data[2].frameBeatDurations.Array.data[1]'
-      value: 0.4
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: 'sequences.Array.data[2].frameBeatDurations.Array.data[2]'
-      value: 0.4
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: 'sequences.Array.data[2].frameBeatDurations.Array.data[3]'
-      value: 0.4
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: 'sequences.Array.data[2].frameBeatDurations.Array.data[4]'
-      value: 0.4
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[1].playAttackEffect

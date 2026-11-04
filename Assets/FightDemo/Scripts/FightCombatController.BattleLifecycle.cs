@@ -20,6 +20,8 @@ namespace RhythmHunter.FightDemo
         {
             if (!UsesBattlePreparation || AwaitingBattleStart || battleEnded || AwaitingNextWave || !HealthSystemEnabled) return;
             if (endBattleOnZeroHp && partyHp <= 0) { FinishBattle(false); return; }
+            // Zero HP still means defeated; keep this wave available for burst overkill presentation.
+            if (TeamSkillRunning) return;
             if (FindFrontLivingEnemy() != null) return;
             AwaitingNextWave = true;
             ResetBasicAbilityProgress();

@@ -437,11 +437,7 @@ namespace RhythmHunter.FightDemo
             UpdateSkillVisualPause();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
-            UpdateTeamSkillQte();
-            // Finish/start on this same musical boundary when the animation's last
-            // Update runs just after OnBeat, rather than reserving an extra full beat.
-            if (TeamSkillRunning && latestCombatBeat >= nextTeamSkillBeat &&
-                (teamSkillAnimator == null || !teamSkillAnimator.IsPlaying)) AdvanceTeamSkill(latestCombatBeat);
+            UpdateTeamSkillBurst();
             AdvanceSkillVisualLifetimes(Time.deltaTime);
             AdvanceSlimeDetonations(Time.deltaTime);
             CheckWaveCompletion();
@@ -498,9 +494,10 @@ namespace RhythmHunter.FightDemo
             if (command == FightInputRouter.HeroCommand.TeamSkill)
             {
                 if (UsesEqualBeats && rhythmJudge != null && inputRouter != null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
-                if (UsesEqualBeats) { if (TeamSkillRunning) SubmitTeamSkillQte(); else TryStartTeamSkill(); return; }
+                if (UsesEqualBeats) { if (TeamSkillRunning) SubmitTeamSkillBurst(); else TryStartTeamSkill(); return; }
                 command = FightInputRouter.HeroCommand.Ultimate;
             }
+            if (TeamSkillRunning) return;
             if (UsesEqualBeats && command == FightInputRouter.HeroCommand.Ultimate)
             {
                 TryStartTeamUltimate();
@@ -1415,10 +1412,11 @@ namespace RhythmHunter.FightDemo
             foreach (FightUnitSlot target in fightScene2Enemies.ToArray())
             {
                 if (!IsCurrentHero(expectedRosterVersion, attacker)) return;
-                if (target == null || !target.HasCharacter || target.CurrentHp <= 0f)
+                if (!CanHitBurstTarget(target))
                     continue;
+                bool wasAlive = target.CurrentHp > 0;
                 target.TakeDamage(ModifyBossDamage(target, damage));
-                CancelDefeatedEnemyAttack(target);
+                if (wasAlive) CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
                     null,
@@ -1437,10 +1435,11 @@ namespace RhythmHunter.FightDemo
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
                 return;
 
-            if (HealthSystemEnabled && target != null && target.HasCharacter && target.CurrentHp > 0)
+            if (HealthSystemEnabled && CanHitBurstTarget(target))
             {
+                bool wasAlive = target.CurrentHp > 0;
                 target.TakeDamage(ModifyBossDamage(target, damage));
-                CancelDefeatedEnemyAttack(target);
+                if (wasAlive) CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
                     null,

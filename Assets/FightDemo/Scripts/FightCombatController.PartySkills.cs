@@ -46,7 +46,7 @@ namespace RhythmHunter.FightDemo
         private string PerformPartySkill(FightUnitSlot actor, FightCharacterDefinition.AbilityBehavior behavior, float power)
         {
             int version = rosterVersion;
-            var target = FindFrontLivingEnemy();
+            var target = TeamSkillRunning ? FindBurstSingleTarget() : FindFrontLivingEnemy();
             float alternative = actor.CharacterDefinition != null ? actor.CharacterDefinition.ConditionalSkillPower : power;
             switch (behavior)
             {
@@ -79,7 +79,7 @@ namespace RhythmHunter.FightDemo
                 case FightCharacterDefinition.AbilityBehavior.BreakingSlash:
                     if (target == null) return "Breaking Slash — no target";
                     PlayAnimatedHeroAction(actor, target, ActionType.Skill, power);
-                    if (HealthSystemEnabled && IsCurrentHeroAction(version, actor, target) && target.CurrentHp > 0)
+                    if (HealthSystemEnabled && IsCurrentHeroAction(version, actor, target) && CanHitBurstTarget(target))
                         target.ApplyFragile();
                     return $"Breaking Slash — {power:0.#} base damage, then Fragile if target survives";
 

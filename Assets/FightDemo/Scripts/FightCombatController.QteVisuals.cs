@@ -110,7 +110,7 @@ namespace RhythmHunter.FightDemo
 
         private void LaunchQteProjectile(FightUnitSlot actor, FightUnitSlot target, bool slime, double now)
         {
-            if (target == null || !target.HasCharacter || target.CurrentHp <= 0 || !fightScene2Enemies.Contains(target)) return;
+            if (!CanHitBurstTarget(target) || !fightScene2Enemies.Contains(target)) return;
             var data = actor.CharacterDefinition;
             Vector3 start = actor.CastEffectAnchor.position;
             skillFlights.Add(new SkillFlight { actor = actor, target = target, start = start, startBeat = now,
@@ -125,7 +125,7 @@ namespace RhythmHunter.FightDemo
             {
                 var flight = skillFlights[i];
                 bool valid = flight.playback == teamSkillPlaybackVersion && IsCurrentHeroAction(flight.roster, flight.actor, flight.target)
-                    && flight.target.CurrentHp > 0 && !battleEnded;
+                    && CanHitBurstTarget(flight.target) && !battleEnded;
                 float t = Mathf.Clamp01((float)((now - flight.startBeat) / flight.duration));
                 if (valid && flight.visual != null)
                     flight.visual.transform.position = Vector3.Lerp(flight.start, flight.target.ImpactEffectAnchor.position, t)

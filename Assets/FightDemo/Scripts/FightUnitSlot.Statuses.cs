@@ -23,7 +23,7 @@ namespace RhythmHunter.FightDemo
         private readonly List<SlimeDetonation> slimeDetonations = new();
         public bool SlimeDetonationPending => slimeDetonations.Count > 0;
         private long StatusBeat => CombatController != null ? CombatController.NormalBattleBeatCount : 0;
-        private bool CanHaveStatus => team == UnitTeam.Enemy && hasCharacter && currentHp > 0;
+        private bool CanHaveStatus => team == UnitTeam.Enemy && hasCharacter && (currentHp > 0 || RetainedForBurst);
         // The first ordinary beat starts duration 1. Expire at the boundary after
         // the fourth protected interval, never during Team Skill presentation.
         public bool HasSlimeFragment => CanHaveStatus && StatusBeat <= slimeUntil;

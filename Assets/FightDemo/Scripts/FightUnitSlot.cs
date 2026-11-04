@@ -84,11 +84,12 @@ namespace RhythmHunter.FightDemo
         private bool hasCharacter = true;
         private float currentHp;
         private bool fragile;
-        public bool IsFragile => fragile && team == UnitTeam.Enemy && hasCharacter && currentHp > 0;
+        private bool RetainedForBurst => CombatController != null && CombatController.IsBurstRetainedTarget(this);
+        public bool IsFragile => fragile && team == UnitTeam.Enemy && hasCharacter && (currentHp > 0 || RetainedForBurst);
 
         public bool ApplyFragile()
         {
-            if (team != UnitTeam.Enemy || !hasCharacter || currentHp <= 0) return false;
+            if (team != UnitTeam.Enemy || !hasCharacter || (currentHp <= 0 && !RetainedForBurst)) return false;
             fragile = true;
             if (CombatController != null) CombatController.RefreshStatusIcons(this);
             return true;
@@ -290,25 +291,31 @@ namespace RhythmHunter.FightDemo
         public float TakeDamage(float amount, DamageKind kind)
         {
             float damage = QuantizeNonNegative(amount);
+            bool retained = RetainedForBurst;
+            bool wasAlive = currentHp > 0;
+            if (!wasAlive && !retained) return 0;
             bool consumeFragile = IsFragile && damage > 0;
-            float applied = Mathf.Clamp(consumeFragile ? damage * 2f : damage, 0f, currentHp);
+            float resolvedDamage = consumeFragile ? damage * 2f : damage;
+            float applied = Mathf.Clamp(resolvedDamage, 0f, currentHp);
             // Clear before notifications: reentrant damage must not reuse the status.
-            if (consumeFragile && applied > 0)
+            if (consumeFragile && resolvedDamage > 0)
             {
                 if (CombatController != null) CombatController.PlayStatusIconTrigger(this, false, true);
                 ClearFragile();
             }
             currentHp -= applied;
-            // Display the final HP loss once, before lethal-hit callbacks hide/rebuild the target.
-            if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, applied);
+            // Burst presentation shows full resolved damage; actual HP loss remains capped at zero.
+            if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained ? resolvedDamage : applied);
             // Consume before callbacks; secondary damage and DoT cannot trigger fragments.
-            if (applied > 0 && kind == DamageKind.Direct && HasSlimeFragment)
+            if ((applied > 0 || retained && resolvedDamage > 0) && kind == DamageKind.Direct && HasSlimeFragment)
             {
                 ArmSlimeDetonation();
             }
-            if (currentHp <= 0) ClearTimedStatuses();
+            if (wasAlive && currentHp <= 0 && CombatController != null) CombatController.RecordBurstDefeat(this);
+            if (currentHp <= 0 && !retained) ClearTimedStatuses();
             RefreshHealthVisuals();
-            HealthChanged?.Invoke(this, currentHp, maxHp);
+            // Only the lethal transition emits zero HP; overkill must not repeat kill/reward callbacks.
+            if (wasAlive) HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;
         }
 

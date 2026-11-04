@@ -23,7 +23,7 @@ namespace RhythmHunter.FightDemo
         private FightCharacterCombatAnimator teamSkillAnimator;
         private int teamSkillPlaybackVersion;
         public FightUnitSlot TeamSkillPerformingHero { get; private set; }
-        public int TeamSkillBeatsRemaining => TeamSkillRunning ? (int)System.Math.Max(0, nextTeamSkillBeat - latestCombatBeat) : 0;
+        public int TeamSkillBeatsRemaining => Mathf.CeilToInt(TeamSkillBurstRemaining);
         public int TeamSkillGauge => teamSkillGauge;
         public int TeamSkillGaugeMax => ManaCost(frontHero) + ManaCost(secondHero) + ManaCost(thirdHero);
         private static int ManaCost(HeroBeatSettings hero) => hero?.UnitSlot != null && hero.UnitSlot.HasCharacter
@@ -67,7 +67,11 @@ namespace RhythmHunter.FightDemo
             }
             teamSkillGauge = 0; teamSkillStep = 0;
             teamSkillPlaybackVersion++;
-            nextTeamSkillBeat = latestCombatBeat + 1;
+            teamSkillWindow.Begin(latestCombatBeat + 1, teamSkillBurstBeats);
+            burstFrameEvents.Clear();
+            nextTeamSkillBeat = (long)teamSkillWindow.End;
+            BeginBurstTargets();
+            lastTeamSkillBeat = nextTeamSkillBeat - 1;
             BeginEnemyPause();
             TeamSkillStatus = "QUEUED — next beat";
             return true;
@@ -75,45 +79,7 @@ namespace RhythmHunter.FightDemo
 
         private void AdvanceTeamSkill(long beat)
         {
-            if (!UsesEqualBeats || !TeamSkillRunning) return;
-            UpdateTeamSkillQte();
-            ResolvePendingTeamSkill(beat);
-            if (!TeamSkillRunning || beat < nextTeamSkillBeat) return;
-            if (TeamQteActive || skillFlights.Count > 0) return;
-            // Preserve formation order even when authored animation outlasts its reserved beats.
-            if (teamSkillAnimator != null && teamSkillAnimator.IsPlaying) return;
-            if (pendingTeamSkillUsesAnimation)
-            {
-                // An interrupted/unfinished animation must never synthesize a hit.
-                pendingTeamSkillHero = null;
-                pendingTeamSkillUsesAnimation = false;
-            }
-            teamSkillAnimator = null;
-            while (teamSkillStep < teamSkillActors.Length &&
-                (teamSkillActors[teamSkillStep]?.UnitSlot == null || !teamSkillActors[teamSkillStep].UnitSlot.HasCharacter)) teamSkillStep++;
-            if (teamSkillStep >= teamSkillActors.Length)
-            {
-                nextTeamSkillBeat = long.MaxValue;
-                EndEnemyPause(true);
-                TeamSkillPerformingHero = null;
-                TeamSkillStatus = "CHAIN COMPLETE — build mana with Basic abilities";
-                GainTeamUltimateCharge();
-                return;
-            }
-            int duration = teamSkillDurations[teamSkillStep];
-            int effectOffset = teamSkillEffectOffsets[teamSkillStep];
-            var hero = teamSkillActors[teamSkillStep++];
-            // The interval is [start, start + duration). Basic on the completion
-            // beat may charge again, but every performance beat stays reserved.
-            lastTeamSkillBeat = beat + duration - 1;
-            TeamSkillPerformingHero = hero.UnitSlot;
-            hero.RecordSkillActivation();
-            nextTeamSkillBeat = beat + duration;
-            pendingTeamSkillHero = hero;
-            pendingTeamSkillEffectBeat = beat + effectOffset;
-            TeamSkillStatus = hero.HeroLabel + ": PREPARING";
-            if (!BeginTeamSkillQte(hero, beat)) StartTeamSkillPresentation(hero);
-            ResolvePendingTeamSkill(beat);
+            if (UsesEqualBeats && TeamSkillRunning) UpdateTeamSkillBurst();
         }
 
         private void StartTeamSkillPresentation(HeroBeatSettings hero)
@@ -171,8 +137,8 @@ namespace RhythmHunter.FightDemo
 
         private FightUnitSlot[] GetTeamSkillEffectTargets(FightUnitSlot actor)
         {
-            var living = fightScene2Enemies.FindAll(enemy => enemy != null && enemy.HasCharacter && enemy.CurrentHp > 0);
-            var target = living.Count > 0 ? living[0] : null;
+            var living = fightScene2Enemies.FindAll(CanHitBurstTarget);
+            var target = TeamSkillRunning ? FindBurstSingleTarget() : FindFrontLivingEnemy();
             var behavior = actor.SkillBehavior;
             if (behavior == FightCharacterDefinition.AbilityBehavior.SlimeFragments ||
                 behavior == FightCharacterDefinition.AbilityBehavior.SmallBombs)
@@ -218,6 +184,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            CancelBurstAnimations();
             ResetTeamSkillQte();
             teamSkillPlaybackVersion++;
             if (teamSkillAnimator != null) teamSkillAnimator.InterruptPlayback();

@@ -41,7 +41,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(0f, 1f)] private float centerFlashStrength = 0.8f;
 
         private RectTransform timelineRoot;
-        private Image timelineCenter;
+        private Image timelineCenter, timelineFrame;
         private Image[] approachingPoints;
         private bool EqualBeats => fight != null && fight.UsesEqualBeats;
 
@@ -501,9 +501,9 @@ namespace RhythmHunter.FightDemo
                 statisticsText.alignment = TextAnchor.MiddleCenter;
             }
             CreateTimelineImage("Track", new Vector2(timelineWidth, 2f), Dim);
-            CreateTimelineImage("CenterFrame", new Vector2(32f, 44f), beatPointColor);
+            timelineFrame = CreateTimelineImage("CenterFrame", new Vector2(32f, 44f), beatPointColor);
             timelineCenter = CreateTimelineImage("Center", new Vector2(26f, 38f), Background);
-            approachingPoints = new Image[Mathf.Clamp(previewBeats, 1, 8) * 2];
+            approachingPoints = new Image[Mathf.Clamp(previewBeats, 1, 8) * 4];
             for (int i = 0; i < approachingPoints.Length; i++)
             {
                 approachingPoints[i] = CreateTimelineImage($"BeatPoint_{i}", Vector2.one * beatPointSize, beatPointColor);
@@ -561,18 +561,25 @@ namespace RhythmHunter.FightDemo
 
         private void RenderEqualBeatTimeline(double evaluatedMs, double anchorMs, double intervalMs)
         {
-            double beatPosition = (evaluatedMs - anchorMs) / intervalMs;
+            bool burst = fight != null && fight.TeamSkillBurstActive;
+            Color color = burst ? Gold : beatPointColor;
+            double spacingMs = intervalMs * (burst ? .5 : 1);
+            double beatPosition = (evaluatedMs - anchorMs) / spacingMs;
             float phase = (float)(beatPosition - System.Math.Floor(beatPosition));
-            int count = approachingPoints.Length / 2;
+            int count = approachingPoints.Length / (burst ? 2 : 4);
+            if (timelineFrame != null) timelineFrame.color = color;
+            for (int i = 0; i < approachingPoints.Length; i++)
+                approachingPoints[i].enabled = i < count * 2;
             for (int i = 0; i < count; i++)
             {
                 float distance = (i + 1f - phase) / count * timelineWidth * 0.5f;
                 approachingPoints[i * 2].rectTransform.anchoredPosition = new Vector2(-distance, 0f);
                 approachingPoints[i * 2 + 1].rectTransform.anchoredPosition = new Vector2(distance, 0f);
+                approachingPoints[i * 2].color = approachingPoints[i * 2 + 1].color = color;
             }
             // Timeline-driven pulse freezes with paused audio and resets with a new anchor.
-            float pulse = Mathf.Clamp01(1f - (float)(phase * intervalMs / 110.0));
-            timelineCenter.color = Color.Lerp(Background, beatPointColor, pulse * centerFlashStrength);
+            float pulse = Mathf.Clamp01(1f - (float)(phase * spacingMs / 110.0));
+            timelineCenter.color = Color.Lerp(Background, color, pulse * centerFlashStrength);
             timelineCenter.rectTransform.localScale = Vector3.one * (1f + pulse * 0.12f);
         }
 
