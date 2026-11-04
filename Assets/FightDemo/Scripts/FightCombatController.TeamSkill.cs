@@ -76,8 +76,10 @@ namespace RhythmHunter.FightDemo
         private void AdvanceTeamSkill(long beat)
         {
             if (!UsesEqualBeats || !TeamSkillRunning) return;
+            UpdateTeamSkillQte();
             ResolvePendingTeamSkill(beat);
             if (!TeamSkillRunning || beat < nextTeamSkillBeat) return;
+            if (TeamQteActive || skillFlights.Count > 0) return;
             // Preserve formation order even when authored animation outlasts its reserved beats.
             if (teamSkillAnimator != null && teamSkillAnimator.IsPlaying) return;
             if (pendingTeamSkillUsesAnimation)
@@ -110,7 +112,7 @@ namespace RhythmHunter.FightDemo
             pendingTeamSkillHero = hero;
             pendingTeamSkillEffectBeat = beat + effectOffset;
             TeamSkillStatus = hero.HeroLabel + ": PREPARING";
-            StartTeamSkillPresentation(hero);
+            if (!BeginTeamSkillQte(hero, beat)) StartTeamSkillPresentation(hero);
             ResolvePendingTeamSkill(beat);
         }
 
@@ -140,7 +142,7 @@ namespace RhythmHunter.FightDemo
                         hitTargets = GetTeamSkillEffectTargets(actor);
                         ResolvePendingTeamSkill(latestCombatBeat, true);
                     }
-                    else if (hitTargets != null)
+                    else if (hitTargets != null && teamQte == null)
                     {
                         // Later marked frames retain their VFX, without another damage event.
                         var anchors = new System.Collections.Generic.List<Transform>();
@@ -188,6 +190,11 @@ namespace RhythmHunter.FightDemo
 
         private void ResolvePendingTeamSkill(long beat, bool fromAttackEffect = false)
         {
+            if (teamQte != null && teamQte.hero == pendingTeamSkillHero)
+            {
+                if (fromAttackEffect || (teamQte.animationStarted && !pendingTeamSkillUsesAnimation && beat >= pendingTeamSkillEffectBeat)) OnQteImpact();
+                return;
+            }
             if (pendingTeamSkillHero == null || (pendingTeamSkillUsesAnimation ? !fromAttackEffect : beat < pendingTeamSkillEffectBeat)) return;
             var hero = pendingTeamSkillHero;
             // Clear before callbacks so repeated beats and reentrant resets cannot double-cast.
@@ -211,6 +218,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            ResetTeamSkillQte();
             teamSkillPlaybackVersion++;
             if (teamSkillAnimator != null) teamSkillAnimator.InterruptPlayback();
             teamSkillAnimator = null;

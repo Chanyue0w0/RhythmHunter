@@ -112,6 +112,12 @@ MonoBehaviour:
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1
+  teamQteMode: 2
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 1041651202, guid: 3b3097ed4af44339ba0a518bed28b0fe, type: 3}
+  slimeFloorPrefab: {fileID: 1041651202, guid: 5992d79d9aed4e0593f8679a075eebf4, type: 3}
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1

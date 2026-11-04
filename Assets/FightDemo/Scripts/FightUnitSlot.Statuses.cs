@@ -12,11 +12,13 @@ namespace RhythmHunter.FightDemo
         private int slimeDuration, stunDuration;
         private float slimeDamage, bleedingDamage;
         private FightUnitSlot slimeCaster;
+        private GameObject slimeFloorVisual;
         private struct SlimeDetonation
         {
             public float remainingBeats, damage, lifetime;
             public FightUnitSlot caster;
             public GameObject effect;
+            public GameObject floor;
         }
         private readonly List<SlimeDetonation> slimeDetonations = new();
         public bool SlimeDetonationPending => slimeDetonations.Count > 0;
@@ -37,6 +39,14 @@ namespace RhythmHunter.FightDemo
             slimeCaster = caster;
             slimeDuration = Mathf.Max(1, beats);
             slimeUntil = StatusBeat + slimeDuration;
+            ReleaseSlimeFloor(ref slimeFloorVisual);
+            if (CombatController != null && caster != null && caster.CharacterDefinition.SlimeFloorPrefab != null)
+            {
+                var data = caster.CharacterDefinition;
+                slimeFloorVisual = CombatController.RentSkillVisual(data.SlimeFloorPrefab,
+                    CombatController.SlimeFloorPosition(this, data.SlimeFloorOffset));
+                if (slimeFloorVisual != null) slimeFloorVisual.transform.SetParent(transform, true);
+            }
             return true; // Reapplication refreshes one attachment, never stacks it.
         }
 
@@ -50,8 +60,16 @@ namespace RhythmHunter.FightDemo
                 remainingBeats = data != null ? data.FragmentDetonationDelayBeats : .5f,
                 damage = slimeDamage, caster = slimeCaster,
                 effect = data != null ? data.FragmentExplosionEffectPrefab : null,
+                floor = slimeFloorVisual,
                 lifetime = data != null ? data.FragmentExplosionLifetime : 0
             });
+            slimeFloorVisual = null;
+        }
+
+        private void ReleaseSlimeFloor(ref GameObject visual)
+        {
+            if (visual != null && CombatController != null) CombatController.ReturnSkillVisual(visual);
+            visual = null;
         }
 
         // Uses song beat fractions like combat animations. Triggered explosions
@@ -67,6 +85,7 @@ namespace RhythmHunter.FightDemo
                 hit.remainingBeats -= elapsedBeats;
                 if (hit.remainingBeats > .00001f) { slimeDetonations[i] = hit; continue; }
                 slimeDetonations.RemoveAt(i);
+                ReleaseSlimeFloor(ref hit.floor);
                 if (hit.caster != null && hit.caster.HasCharacter)
                 {
                     if (hit.effect != null)
@@ -104,7 +123,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!CanHaveStatus) { ClearTimedStatuses(); return; }
             if (CombatController != null && (CombatController.EnemyActionsPaused || CombatController.TeamSkillRunning)) return;
-            if (beat > slimeUntil) slimeUntil = long.MinValue;
+            if (beat > slimeUntil) { slimeUntil = long.MinValue; ReleaseSlimeFloor(ref slimeFloorVisual); }
             if (beat > stunUntil) stunUntil = long.MinValue;
             if (bleedRemaining <= 0 || beat <= lastBleedBeat) return;
             lastBleedBeat = beat;
@@ -118,6 +137,12 @@ namespace RhythmHunter.FightDemo
 
         public void ClearTimedStatuses()
         {
+            ReleaseSlimeFloor(ref slimeFloorVisual);
+            foreach (var hit in slimeDetonations)
+            {
+                var floor = hit.floor;
+                ReleaseSlimeFloor(ref floor);
+            }
             slimeDetonations.Clear();
             slimeCaster = null;
             slimeUntil = stunUntil = lastBleedBeat = long.MinValue;

@@ -138,6 +138,10 @@ namespace RhythmHunter.FightDemo
 
         private void OnDestroy()
         {
+            if (qteRingMaterial != null)
+            {
+                if (Application.isPlaying) Destroy(qteRingMaterial); else DestroyImmediate(qteRingMaterial);
+            }
             // All pooled GameObjects are controller children and die with their scene.
             if (damageDotSprite != null)
             {

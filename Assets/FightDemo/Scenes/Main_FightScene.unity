@@ -7249,7 +7249,7 @@ PrefabInstance:
     - target: {fileID: 3114776657493095983, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: -4753702385071775785, guid: 0bf61d77b2a16e946bb24d04504aa65f, type: 3}
+      objectReference: {fileID: 21300000, guid: 0566d12addda8704bbd6ef7886cd15a4, type: 3}
     - target: {fileID: 4424178650152436019, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.6
@@ -8484,6 +8484,8 @@ MonoBehaviour:
   statusIconSpacing: 0.55
   startWithFullTeamSkill: 1
   teamSkillGaugeGain: 1
+  teamQteOffset: {x: 0, y: 0.25, z: -1}
+  teamQteInnerRadius: 0.45
   teamUltimateRequiredCharges: 3
   teamUltimatePerformanceBeats: 4
   teamUltimateImpactBeat: 4

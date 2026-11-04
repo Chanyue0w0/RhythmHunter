@@ -143,6 +143,12 @@ MonoBehaviour:
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1
+  teamQteMode: 3
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 1041651202, guid: 9d4279746d1c4363ae65cd837da07473, type: 3}
+  qteImpactEffectPrefab: {fileID: 8570011679727861798, guid: 478aabbdfa8b1d142a5d6b0539092450, type: 3}
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1

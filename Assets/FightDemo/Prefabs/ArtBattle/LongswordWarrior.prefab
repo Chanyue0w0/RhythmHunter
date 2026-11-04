@@ -80,6 +80,10 @@ MonoBehaviour:
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1
+  teamQteMode: 1
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 0.5
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1

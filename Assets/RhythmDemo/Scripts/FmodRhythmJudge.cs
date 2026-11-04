@@ -122,6 +122,17 @@ namespace RhythmHunter.RhythmDemo
 
         public Result JudgeNow() => JudgeInput(0);
 
+        // Fractional-beat QTEs share the same device calibration and input timestamp,
+        // but do not consume the ordinary ability's once-per-beat input slot or MP.
+        public bool TryGetEvaluatedBeat(double inputAgeMs, out double beat)
+        {
+            beat = 0;
+            if (!TryGetInputTimeline(inputAgeMs, out int rawMs)) return false;
+            var anchor = beatClock.LatestBeat;
+            beat = anchor.GlobalBeat + (rawMs + JudgementOffsetMs - anchor.TimelinePositionMs) / beatClock.MillisecondsPerBeat;
+            return true;
+        }
+
         public Result JudgeInput(double inputAgeMs)
         {
             if (!TryGetInputTimeline(inputAgeMs, out int rawTimelineMs))

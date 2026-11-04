@@ -434,8 +434,15 @@ namespace RhythmHunter.FightDemo
         private void Update()
         {
             UpdateBattleEntrance();
+            UpdateSkillVisualPause();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
+            UpdateTeamSkillQte();
+            // Finish/start on this same musical boundary when the animation's last
+            // Update runs just after OnBeat, rather than reserving an extra full beat.
+            if (TeamSkillRunning && latestCombatBeat >= nextTeamSkillBeat &&
+                (teamSkillAnimator == null || !teamSkillAnimator.IsPlaying)) AdvanceTeamSkill(latestCombatBeat);
+            AdvanceSkillVisualLifetimes(Time.deltaTime);
             AdvanceSlimeDetonations(Time.deltaTime);
             CheckWaveCompletion();
             UpdateBasicAbilityProgress();
@@ -490,7 +497,8 @@ namespace RhythmHunter.FightDemo
 
             if (command == FightInputRouter.HeroCommand.TeamSkill)
             {
-                if (UsesEqualBeats) { TryStartTeamSkill(); return; }
+                if (UsesEqualBeats && rhythmJudge != null && inputRouter != null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
+                if (UsesEqualBeats) { if (TeamSkillRunning) SubmitTeamSkillQte(); else TryStartTeamSkill(); return; }
                 command = FightInputRouter.HeroCommand.Ultimate;
             }
             if (UsesEqualBeats && command == FightInputRouter.HeroCommand.Ultimate)
