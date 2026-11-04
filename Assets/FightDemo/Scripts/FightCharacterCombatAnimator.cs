@@ -319,7 +319,10 @@ namespace RhythmHunter.FightDemo
                 for (int i = 0; i < entry.Frames.Count; i++)
                     totalBeats += entry.UseFrameBeatDurations ? entry.GetFrameBeats(i)
                         : 1d / Math.Max(1f, entry.FramesPerSecond) / Math.Max(0.001d, secondsPerBeat);
-                double position = (CurrentIdleBeatPosition() - idlePausedBeats - openingIdleStartBeat) % totalBeats;
+                // Only the entrance starts its idle loop locally. Reusing sober
+                // sprites in battle must follow the song, not the drink completion time.
+                double position = (CurrentIdleBeatPosition() - idlePausedBeats -
+                    (openingIdle ? openingIdleStartBeat : 0d)) % totalBeats;
                 if (position < 0) position += totalBeats;
                 for (int i = 0; i < entry.Frames.Count; i++)
                 {
