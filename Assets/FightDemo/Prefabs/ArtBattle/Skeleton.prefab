@@ -128,6 +128,17 @@ MonoBehaviour:
     chargeDamage: 2
     rageFinisherDamage: 3
     successfulGuardBreakPower: 1
+  teamQteMode: 3
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 1041651202, guid: 9d4279746d1c4363ae65cd837da07473, type: 3}
+  qteProjectileFlightBeats: 0.35
+  qteProjectileArcHeight: 1.2
+  qteImpactEffectPrefab: {fileID: 8570011679727861798, guid: 478aabbdfa8b1d142a5d6b0539092450, type: 3}
+  qteImpactEffectLifetime: 1.5
+  slimeFloorPrefab: {fileID: 0}
+  slimeFloorOffset: {x: 0, y: 0, z: -0.1}
   characterId: SkeletonGunner
   displayName: SKELETON GUNNER
   team: 1
@@ -143,12 +154,6 @@ MonoBehaviour:
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1
-  teamQteMode: 3
-  qteFailureDamageMultiplier: 0.5
-  qteFailureAppliesStatus: 1
-  rapidQteIntervalBeats: 1
-  qteProjectilePrefab: {fileID: 1041651202, guid: 9d4279746d1c4363ae65cd837da07473, type: 3}
-  qteImpactEffectPrefab: {fileID: 8570011679727861798, guid: 478aabbdfa8b1d142a5d6b0539092450, type: 3}
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1
@@ -212,11 +217,27 @@ PrefabInstance:
       value: -0.71
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: frames.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: 'frames.Array.data[0]'
       value: 
-      objectReference: {fileID: 21300000, guid: 0720b5f9a0ba18944adbf949229b8802, type: 3}
+      objectReference: {fileID: 21300000, guid: 5d1f531a40cd8274fb1f907658adfc9c, type: 3}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: 'frames.Array.data[1]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 9fabf38bc5c172e458f3bf2981ca567d, type: 3}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: 'frames.Array.data[2]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 0696a4751759f0a4c953a9de9d04cf65, type: 3}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: sequences.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: idleFrameBeatDurations.Array.size
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
@@ -238,6 +259,18 @@ PrefabInstance:
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: sequences.Array.data[2].damageFrame
       value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: 'idleFrameBeatDurations.Array.data[0]'
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: 'idleFrameBeatDurations.Array.data[1]'
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
+      propertyPath: 'idleFrameBeatDurations.Array.data[2]'
+      value: 0.34
       objectReference: {fileID: 0}
     - target: {fileID: 5342629655095800664, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: sequences.Array.data[0].warningFrame
@@ -466,7 +499,7 @@ PrefabInstance:
     - target: {fileID: 5644419418753089985, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 0720b5f9a0ba18944adbf949229b8802, type: 3}
+      objectReference: {fileID: 21300000, guid: 5d1f531a40cd8274fb1f907658adfc9c, type: 3}
     - target: {fileID: 5644419418753089985, guid: b97f130b954b43278a7be22499ee5aa2, type: 3}
       propertyPath: m_WasSpriteAssigned
       value: 1
