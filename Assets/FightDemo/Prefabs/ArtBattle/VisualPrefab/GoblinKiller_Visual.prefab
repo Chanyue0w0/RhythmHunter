@@ -167,7 +167,17 @@ MonoBehaviour:
     frameEffects:
     - effects: []
       playAttackEffect: 0
-    - effects: []
+    - effects:
+      - prefab: {fileID: 6593023544061229464, guid: 2e1c2f459c628474c9a7928b57b34a9c, type: 3}
+        soundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
+        soundVolume: 1
+        location: 0
+        selfAnchor: {fileID: 0}
+        positionOffset: {x: 0, y: 0, z: 0}
+        rotationOffset: {x: 0, y: 0, z: 0}
+        followAnchor: 1
+        limitLifetime: 1
+        lifetimeSeconds: 2.1
       playAttackEffect: 0
     - effects: []
       playAttackEffect: 0
@@ -198,6 +208,6 @@ MonoBehaviour:
     - 0.33
     - 0.33
     - 0.34
-    warningFrame: 1
+    warningFrame: -1
     attackEffectFrame: -1
     damageFrame: -1

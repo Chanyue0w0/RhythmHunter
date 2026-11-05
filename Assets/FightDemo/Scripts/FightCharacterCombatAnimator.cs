@@ -32,6 +32,9 @@ namespace RhythmHunter.FightDemo
         public sealed class FrameEffect
         {
             public GameObject prefab;
+            [Tooltip("Optional FMOD one-shot played when this frame effect spawns. Empty disables audio.")]
+            public string soundEventPath;
+            [Range(0f, 1f)] public float soundVolume = 1f;
             public EffectLocation location;
             [Tooltip("Self only. Empty uses the character CastEffectAnchor.")]
             public Transform selfAnchor;

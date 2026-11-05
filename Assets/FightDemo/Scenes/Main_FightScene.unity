@@ -8374,6 +8374,7 @@ GameObject:
   - component: {fileID: 2021200325}
   - component: {fileID: 2021200324}
   - component: {fileID: 2021200331}
+  - component: {fileID: 2021200333}
   m_Layer: 0
   m_Name: FightDemoController
   m_TagString: Untagged
@@ -8381,6 +8382,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &2021200333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021200323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50ef773be6c94a44b108e27f935cc8f2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightAudioPlayer
+  soundEnabled: 1
+  masterVolume: 1
+  maxActiveSounds: 64
 --- !u!114 &2021200324
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8484,6 +8500,7 @@ MonoBehaviour:
   statusIconSpacing: 0.55
   startWithFullTeamSkill: 1
   teamSkillGaugeGain: 1
+  teamSkillBurstBeats: 16
   teamQteOffset: {x: 0, y: 0.25, z: -1}
   teamQteInnerRadius: 0.45
   teamUltimateRequiredCharges: 3

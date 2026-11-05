@@ -211,6 +211,8 @@ namespace RhythmHunter.FightDemoEditor
                 using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                 {
                     EditorGUILayout.PropertyField(entry.FindPropertyRelative("prefab"), new GUIContent("特效 Prefab"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("soundEventPath"), new GUIContent("同步音效（FMOD 路徑，留空關閉）"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("soundVolume"), new GUIContent("音效音量"));
                     var location = entry.FindPropertyRelative("location");
                     location.enumValueIndex = EditorGUILayout.Popup("生成位置", location.enumValueIndex, new[] { "自身掛點", "本次攻擊目標掛點" });
                     if (location.enumValueIndex == 0)
@@ -234,6 +236,8 @@ namespace RhythmHunter.FightDemoEditor
                 effects.InsertArrayElementAtIndex(index);
                 var entry = effects.GetArrayElementAtIndex(index);
                 entry.FindPropertyRelative("prefab").objectReferenceValue = null;
+                entry.FindPropertyRelative("soundEventPath").stringValue = string.Empty;
+                entry.FindPropertyRelative("soundVolume").floatValue = 1f;
                 entry.FindPropertyRelative("location").enumValueIndex = 0;
                 entry.FindPropertyRelative("selfAnchor").objectReferenceValue = null;
                 entry.FindPropertyRelative("positionOffset").vector3Value = Vector3.zero;

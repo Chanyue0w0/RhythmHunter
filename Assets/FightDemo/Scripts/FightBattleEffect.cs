@@ -60,6 +60,7 @@ namespace RhythmHunter.FightDemo
         internal void UnregisterBattleEffect(FightBattleEffect effect) => battleEffects.Remove(effect);
         private void ClearCombatEffectsKeepingDamageNumbers()
         {
+            StopBattleAudio();
             ClearSkillVisuals();
             ClearStatusIcons();
             // Let lethal-hit feedback finish its short lifetime at the old target's
@@ -73,6 +74,7 @@ namespace RhythmHunter.FightDemo
         }
         private void ClearBattleEffects()
         {
+            StopBattleAudio();
             ClearSkillVisuals();
             ClearStatusIcons();
             ResetDamageNumberPool();

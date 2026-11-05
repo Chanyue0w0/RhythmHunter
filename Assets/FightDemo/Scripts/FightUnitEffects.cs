@@ -6,6 +6,14 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightUnitEffects : MonoBehaviour
     {
+        private void PlayFrameSound(FightCharacterCombatAnimator.FrameEffect entry, Vector3 position)
+        {
+            var slot = GetComponent<FightUnitSlot>();
+            if (slot == null) slot = GetComponentInParent<FightUnitSlot>();
+            if (slot != null && slot.CombatController != null)
+                slot.CombatController.AudioPlayer.Play(entry.soundEventPath, entry.soundVolume, position,
+                    slot.Team == FightUnitSlot.UnitTeam.Enemy);
+        }
         private void TrackEffect(GameObject effect, float lifetime = 0)
         {
             var slot = GetComponent<FightUnitSlot>();
@@ -51,6 +59,7 @@ namespace RhythmHunter.FightDemo
             SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
             if (entry.followAnchor) effect.transform.SetParent(anchor, true);
             effect.SetActive(true);
+            PlayFrameSound(entry, effect.transform.position);
             float lifetime = entry.limitLifetime
                 ? (float.IsNaN(entry.lifetimeSeconds) || float.IsInfinity(entry.lifetimeSeconds)
                     ? 1.5f : Mathf.Max(0.01f, entry.lifetimeSeconds))

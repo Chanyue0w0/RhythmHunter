@@ -184,6 +184,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetTeamSkill()
         {
+            StopBattleAudio();
             CancelBurstAnimations();
             ResetTeamSkillQte();
             teamSkillPlaybackVersion++;

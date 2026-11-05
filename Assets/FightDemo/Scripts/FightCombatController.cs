@@ -774,28 +774,8 @@ namespace RhythmHunter.FightDemo
                 judgement.DuplicateBeat || string.IsNullOrWhiteSpace(successfulInputSoundEventPath))
                 return;
 
-            try
-            {
-                FMOD.Studio.EventInstance sound = FMODUnity.RuntimeManager.CreateInstance(successfulInputSoundEventPath);
-                FMOD.RESULT result = sound.setVolume(Mathf.Clamp01(successfulInputSoundVolume));
-                if (result == FMOD.RESULT.OK) result = sound.start();
-                // BeatTapping is a one-shot; FMOD releases it after playback finishes.
-                sound.release();
-                if (result != FMOD.RESULT.OK)
-                    DisableSuccessfulInputSound(result.ToString());
-            }
-            catch (FMODUnity.EventNotFoundException exception)
-            {
-                DisableSuccessfulInputSound(exception.Message);
-            }
+            AudioPlayer.Play(successfulInputSoundEventPath, successfulInputSoundVolume, transform.position);
         }
-
-        private void DisableSuccessfulInputSound(string reason)
-        {
-            enableSuccessfulInputSound = false;
-            Debug.LogWarning($"[FightCombatController] Successful input sound disabled: {reason}", this);
-        }
-
         private void OnBeat(FmodBeatClock.BeatSnapshot beat)
         {
             if (IsPaused) return;
