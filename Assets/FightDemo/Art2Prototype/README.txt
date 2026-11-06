@@ -19,7 +19,7 @@ All cards have a 45-degree visual tilt. GroundAnchor objects control placement.
 Art2_TestCamera:
 - Perspective by default, FOV 40, pitch 45, framing half-height 5.35.
 - Focus (0,0,0), focus distance approximately 14.699.
-- Existing URP renderer index 1; post-processing and MSAA disabled on this camera.
+- Existing URP renderer index 1; post-processing enabled, MSAA disabled on this camera.
 - One Unity AudioListener and one FMOD StudioListener on the test camera.
 
 Play Mode controls (Game view focused):
@@ -43,7 +43,8 @@ child effect anchors to inherit that angle. Combat ordering and rules remain unc
 
 Known limits:
 - Source art includes painted perspective; it is still a layered-card scene, not a 3D cave mesh.
-- No blur-based depth of field, HD-2D lighting or shadows have been added.
+- Uses material-based distant blur and wrapped diffuse lighting, not full-screen depth of field.
+- Ground contact uses soft blob shadows, not shadow maps or per-pixel normal maps.
 - Moving/zooming can expose canvas edges or transparent sorting intersections.
 - Fixed orthographic translation alone cannot create perspective motion parallax.
 - Legacy world-space damage numbers, status icons and detached projectile effects keep
@@ -68,3 +69,35 @@ Keep Position Y unchanged so characters do not sink below the ground.
 For heroes only, select HeroSlot_Front/Middle/Rear together and drag the blue Z-axis
 Move gizmo with Global orientation (use a shared movement delta, not one absolute Z
 value, to preserve the existing depth spacing). Make persistent edits outside Play Mode.
+
+Atmosphere controls (Art2 only):
+- Hierarchy Art2_2_5D_Prototype > Art2_Atmosphere contains a cool directional fill,
+  three warm point lights and Art2_PostProcessing. Lights cast no shadow maps.
+- Art2_PostProcessing > Volume > Weight: 0 disables grading/Bloom for comparison.
+- Profile: Art2AtmosphereProfile.asset. Bloom intensity 0.16, threshold 1.1,
+  scatter 0.5, clamp 4; exposure +0.1, contrast +4, saturation -4;
+  Neutral tonemapping, vignette intensity 0.08.
+- Volume uses existing TransparentFX layer; Art2 camera volume mask selects only
+  that layer. Main camera's existing Default-only volume mask remains unchanged.
+- Art2ActorLit.mat: Ambient Tint/Strength and Light Influence control actor shading.
+  Materials replace only spawned Art2 renderer instances and restore on disable.
+- CaveDistantLit.mat: Distant Blur (Source Pixels)=1.1 and Atmosphere Mix=0.06.
+  Set both to 0 for crisp/clear distant art. Only wall/moss/sidewalls/door use it.
+- CaveMiddleLit.mat keeps rocks/barricades sharp; original black foreground stays unlit.
+- CaveTorchLit.mat: Emission Strength=1.8 supplies bright pixels for restrained Bloom.
+- CaveGround.mat: ground lighting strength and ambient tint; original floor texture retained.
+- Art2ActorPresentation > Show Contact Shadows toggles six reusable slot shadows.
+  Shadow Size, Shadow Ground Offset and Ground Height align the floor contacts.
+  Art2ContactShadow.mat > Shadow Color alpha controls darkness (default 0.35).
+
+Performance/quality:
+- Far cards use nine alpha-aware texture samples; sharp materials use one.
+- No full-screen DoF blur, additional cameras, real-time shadow maps or extra depth passes.
+- One shadow object per slot with one shared quad mesh, reused across attacks/waves.
+- Original Point filtering, sprite PPU and shared role prefabs are unchanged.
+- New shaders preserve SpriteRenderer color/alpha/flip for actor feedback.
+- Scene preview: Rhythm Hunter > Art2 > Frame Scene Preview enables scene lights/effects.
+- Check menus: Validate Cave Layout, Validate Atmosphere.
+- C# compilation and serialized references verified. Unity batch startup still exits
+  before project import, so GPU shader compilation, appearance, runtime restoration and
+  actual frame-time measurements require Unity Editor verification.

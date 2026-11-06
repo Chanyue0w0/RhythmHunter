@@ -48,6 +48,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AmbientStrength: 0.85
+    - _LightInfluence: 0.65
     - _FloorTopV: 0.6388889
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
@@ -66,6 +68,7 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
+    - _AmbientTint: {r: 0.82, g: 0.9, b: 1, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.10499997, g: 0.15499997, b: 0.15999997, a: 1}
   m_BuildTextureStacks: []

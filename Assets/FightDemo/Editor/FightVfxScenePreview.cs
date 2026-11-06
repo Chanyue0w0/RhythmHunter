@@ -94,6 +94,8 @@ namespace RhythmHunter.FightDemoEditor
             var view = SceneView.lastActiveSceneView ?? EditorWindow.GetWindow<SceneView>();
             view.in2DMode = false;
             view.cameraMode = SceneView.GetBuiltinCameraMode(DrawCameraMode.Textured);
+            view.sceneLighting = true;
+            view.sceneViewState.showImageEffects = true;
             view.sceneViewState.showParticleSystems = true;
             view.sceneViewState.alwaysRefresh = true;
             float distance = camera.orthographicSize /
