@@ -608,6 +608,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ForestEnvironment
       objectReference: {fileID: 0}
+    - target: {fileID: 2590117269222512684, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4759022393303432754, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -7859,6 +7863,7 @@ Transform:
   - {fileID: 287245177}
   - {fileID: 828184397}
   - {fileID: 144549492}
+  - {fileID: 2147000001}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1833135287
@@ -9007,3 +9012,29 @@ SceneRoots:
   - {fileID: 1649508002}
   - {fileID: 2021200330}
   - {fileID: 1209692342}
+--- !u!1001 &2147000000
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1829794760}
+    m_Modifications:
+    - target: {fileID: 1000, guid: d4efe608d19c484d85b9cd6da7037766, type: 3}
+      propertyPath: m_Name
+      value: CaveEnvironment
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: d4efe608d19c484d85b9cd6da7037766, type: 3}
+      propertyPath: beatSource
+      value:
+      objectReference: {fileID: 2021200326}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d4efe608d19c484d85b9cd6da7037766, type: 3}
+--- !u!4 &2147000001 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1001, guid: d4efe608d19c484d85b9cd6da7037766, type: 3}
+  m_PrefabInstance: {fileID: 2147000000}
+  m_PrefabAsset: {fileID: 0}
