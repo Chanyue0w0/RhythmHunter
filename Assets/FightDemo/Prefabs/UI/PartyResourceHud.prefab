@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1001}
+  - component: {fileID: 1002}
+  m_Layer: 5
+  m_Name: PartyResourceHud
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!224 &1001
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -32, y: -28}
+  m_SizeDelta: {x: 400, y: 140}
+  m_Pivot: {x: 1, y: 1}
+--- !u!114 &1002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed9184cb63474723900e360037a61258, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  hpEmpty: {fileID: 21300000, guid: fc451aeaa8ccf28458aec593084eaf5b, type: 3}
+  hpFull: {fileID: 21300000, guid: 774cb9151c84dd448b674dd1c7a24edb, type: 3}
+  armorEmpty: {fileID: 21300000, guid: 6b0d69c8d64178545b215969928d11f8, type: 3}
+  armorFull: {fileID: 21300000, guid: ded25b33df1c9ff4990cb09e65b8d3da, type: 3}
+  iconSize: 64
+  iconGap: 8
+  rowGap: 12
+  beatBounceEnabled: 1
+  bounceHeight: 4
+  bounceDurationBeats: 0.45

@@ -9,12 +9,15 @@ namespace RhythmHunter.FightDemo
         private Text bossLabel;
         private void UpdateBossHud()
         {
-            bool visible = fight != null && fight.BossActive;
+            EnsureUiGroups();
+            bool visible = showEnemyStatusUi && fight != null && fight.BossActive;
             if (!visible) { if (bossPanel != null) bossPanel.gameObject.SetActive(false); return; }
             if (bossPanel == null)
             {
-                if (healthText == null || healthText.canvas == null) return;
-                bossPanel = FightMenuUi.Rect("BossState", healthText.canvas.transform, new Vector2(0, -140), new Vector2(720, 84));
+                if (healthText == null || playerUiCanvas == null) return;
+                bossPanel = FightMenuUi.Rect("BossState", playerUiCanvas.transform, new Vector2(0, -140), new Vector2(720, 84));
+                EnsureUiGroups();
+                if (developerUiRoot != null) bossPanel.SetParent(developerUiRoot, false);
                 bossPanel.anchorMin = bossPanel.anchorMax = bossPanel.pivot = new Vector2(.5f, 1);
                 bossPanel.gameObject.AddComponent<Image>().color = new Color(.01f, .04f, .06f, .9f);
                 bossLabel = FightMenuUi.Label(bossPanel, "", new Vector2(12, -6), new Vector2(696, 72), healthText.font, 16);

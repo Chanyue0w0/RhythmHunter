@@ -7,6 +7,8 @@ namespace RhythmHunter.FightDemo
     {
         [Header("Team Skill Rhythm Burst")]
         [SerializeField, Min(1)] private int teamSkillBurstBeats = 16;
+        public event Action TeamSkillBeatAccepted;
+        public event Action<double> TeamSkillPointAccepted;
         private readonly FightTeamSkillBeatWindow teamSkillWindow = new();
         private readonly System.Collections.Generic.List<(double beat, Action action)> burstFrameEvents = new();
         private double burstPresentationBeat;
@@ -54,6 +56,10 @@ namespace RhythmHunter.FightDemo
             int playback = teamSkillPlaybackVersion;
             AdvanceBurstFrames(now);
             if (!TeamSkillRunning || playback != teamSkillPlaybackVersion || battleEnded) return;
+            TeamSkillBeatAccepted?.Invoke();
+            double acceptedBeat = teamSkillWindow.Start + Math.Round((evaluated - teamSkillWindow.Start) * 2,
+                MidpointRounding.AwayFromZero) * .5;
+            TeamSkillPointAccepted?.Invoke(acceptedBeat);
             foreach (var hero in teamSkillActors)
                 if (hero?.UnitSlot != null && hero.UnitSlot.HasCharacter) CastBurstSkill(hero, now);
             AdvanceBurstFrames(now);

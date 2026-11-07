@@ -17,6 +17,8 @@ namespace RhythmHunter.FightDemo
         private float shieldTimer;
         private float telegraphTimer;
         private FightCombatController subscribedFight;
+        private FightScenePresenter uiPresenter;
+        private bool lastEnemyHealthVisible = true;
 
         public FightUnitSlot[] EnemySlots => enemySlots;
         public FightUnitSlot[] HeroSlots => heroSlots;
@@ -57,6 +59,7 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
+            uiPresenter = fight != null ? fight.GetComponent<FightScenePresenter>() : null;
             SetAlpha(tankShield, 0f);
             SetAlpha(enemyTelegraph, 0f);
             RefreshFrontHeroPresentation();
@@ -85,7 +88,9 @@ namespace RhythmHunter.FightDemo
                 return;
 
             SetHealthDisplayMode(heroSlots, false, false);
-            SetHealthDisplayMode(enemySlots, fight.UsesEqualBeats && fight.HealthSystemEnabled, fight.HealthSystemEnabled);
+            lastEnemyHealthVisible = uiPresenter == null || uiPresenter.ShowEnemyHealthUi;
+            SetHealthDisplayMode(enemySlots, lastEnemyHealthVisible && fight.UsesEqualBeats && fight.HealthSystemEnabled,
+                lastEnemyHealthVisible && fight.HealthSystemEnabled);
             if (fight.UsesEqualBeats)
             {
                 SetPositionLabel(fight.FrontHero.UnitSlot, "FRONT", "X / Q");
@@ -116,6 +121,8 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (uiPresenter != null && lastEnemyHealthVisible != uiPresenter.ShowEnemyHealthUi)
+                RefreshFrontHeroPresentation();
             shieldTimer = Mathf.Max(0f, shieldTimer - Time.deltaTime);
             float shieldAlpha = Mathf.Clamp01(shieldTimer * 3f) * 0.75f;
             SetAlpha(tankShield, shieldAlpha);

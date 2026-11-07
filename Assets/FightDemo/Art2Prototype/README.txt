@@ -368,3 +368,105 @@ ArtBattle character head anchors and 3D information
   Align Slot Information can be disabled; authored positions/rotations are restored.
 - Tools > Rhythm Hunter > Art2 > Add Missing Character Head Anchors is idempotent:
   already assigned anchors retain their manually tuned positions.
+
+Player HP / armor UI
+- Prefabs/UI/PartyResourceHud.prefab is assigned to Art2 FightScenePresenter's
+  Party Resource Hud Prefab. It is created under the existing scaled FightHudCanvas.
+  The old TEAM DEFENSE debug panel is hidden when this prefab is assigned.
+- Upper row reads PartyHp/MaxPartyHp; lower row reads PartyArmor/MaxPartyArmor.
+  No separate resources are stored. Both icon order and horizontal fill run right
+  to left. Each icon represents one point, showing empty/half/full in 0.5 steps.
+- Prefab RectTransform controls the top-right margin (-32,-28). Icon Size (64),
+  Icon Gap (8), Row Gap (12), and all four sprites are editable on the component.
+- HP_empty / Armor_empty remain visible behind the filled sprites. Existing images
+  are reused when maximum values shrink/grow; no per-hit instantiate/destroy.
+- Validation: Rhythm Hunter > Validate Party Resource HUD. Covers 2.5/4 HP,
+  1.5/3 armor, zero/full values, changing armor maximum, and image reuse.
+
+Optional HUD sections and rhythm bounce
+- FightScenePresenter > UI Visibility > Show Enemy Health Ui controls the enemy
+  screen panel and enemy world health bars/numbers. Damage popups remain independent.
+  Show Team Skill Gauge toggles the mana/ready panel, without affecting skill input
+  or the separate active-Team-Skill remaining-beats display. Both default on and
+  support changes during Play Mode.
+- PartyResourceHud prefab > Beat Bounce: Enabled, Height (4 reference pixels),
+  Duration Beats (0.45). One icon per row jumps each beat, left to right, then wraps.
+  Both rows share the larger capacity as cycle length, including empty icons.
+- Bounce directly samples FightCombatController.BeatClock's FMOD timeline and beat
+  anchor; no separate clock or timer. Music pause holds phase; disabling restores
+  the baseline. Changes to maximum HP/armor immediately update the shared cycle length.
+
+Shared bounce example: 4 HP / 2 armor -> HP4, HP3, HP2+Armor2, HP1+Armor1.
+Shorter rows wait until the shared left-to-right sweep reaches their columns.
+
+Panel visibility buttons
+- Bottom-right HudVisibilityButtons contains DefenseHud and FormationLockStatus
+  ON/OFF buttons, outside the controlled panels so both can always be restored.
+- FightScenePresenter > UI Visibility also exposes Show Defense Hud,
+  Show Formation Lock Status, and Show Visibility Buttons for Inspector control.
+- Hiding DefenseHud does not hide the new player HP/armor UI. Hiding the formation
+  lock message does not change formation locking or the pre-battle controls.
+- Other panel-specific visibility preferences are preserved when DefenseHud is hidden.
+
+Player beat-timeline artwork (Art2)
+- FightScenePresenter > Beat Timeline Artwork references bar(5 ver), Beat bar(blue),
+  stone_1(blue), stone_2(blue), and stone_4(blue)_1..5. Original bottom offset,
+  timeline width, normal/burst point counts, calibrated movement and half-beat
+  burst spacing are unchanged. Other scenes without sprites retain the old visuals.
+- The stone reads shared TeamSkillGauge / TeamSkillGaugeMax, filling from the bottom.
+  At full MP, all five ready frames loop on the existing FMOD song grid. Default
+  Stone Ready Loop Beats = 1 (0.2 beat/frame); consuming MP restores the empty/fill art.
+- Successful Beat Stone Feedback controls Enabled, Direction (UI X/Y), Amplitude
+  (reference pixels), Beats and Cycles. Misses do not start feedback; accepted
+  Team Skill A half-beats also trigger it. No separate music timer is introduced.
+- StoneSuccessEffectAnchor is generated at the centre of the stone. The optional
+  Stone Success Effect Prefab is currently empty; it accepts a UI RectTransform
+  effect. Particle-only world VFX will need a canvas-compatible rendering setup when
+  the art is available. Lifetime 0 delegates cleanup to the effect prefab.
+- Rhythm Hunter > Validate Timeline Artwork checks original geometry/count,
+  shared MP fill, ready-frame sequence, directional shake/reset, misses and event
+  subscription cleanup. Preview: Temp/TimelineArt-preview.png.
+- The new artwork timeline is a direct child of FightHudCanvas at the same bottom
+  coordinates, so the disabled legacy Bottom UI debug group does not hide it.
+  Legacy statistics remain in the old hidden group.
+
+Player/developer UI isolation and live-scene repair
+- FightHudCanvas / PlayerUI: PartyResourceHud, EqualBeatTimeline, TeamSkillRemaining.
+- FightHudCanvas / DeveloperUI: legacy top/bottom debug groups, DefenseHud,
+  FormationLockStatus, visibility buttons, TeamSkillGauge, BossState and countdown text.
+- FightHudCanvas / BattleMenus: battle preparation, pause button and pause overlay.
+- FightScenePresenter > Player / Developer UI Groups > Show Developer Ui only toggles
+  DeveloperUI. PlayerUiCanvas is explicit; inactive legacy text is not a dependency.
+- Fixed the live Art2 scene's empty artwork references. Previously the disk scene
+  preview had valid sprites while the loaded editor scene still had null references,
+  causing fallback creation beneath the disabled legacy Bottom UI group.
+- Rhythm Hunter > Art2 > Configure Player UI Artwork repairs the loaded Art2 scene
+  references and saves that scene (use outside Play Mode). Existing layout settings
+  and unrelated scene objects are retained.
+- Verified in actual Play: player resource icons and stone timeline visible at
+  1920x1080; timeline position (960,76), width 840, active parent chain. Capture:
+  Temp/PlayerUI-Play.png. Returned Unity to Edit Mode after verification.
+
+Timeline dimensions and accepted-point removal
+- FightDemoController / FightScenePresenter / Equal Beat Timeline:
+  Timeline Width = lane width, Timeline Bottom Offset = screen-bottom distance.
+- Beat Timeline Artwork: Timeline Point Art Size = point width/height,
+  Stone Art Size = centre stone width/height, Timeline Bar Height = background height
+  (0 preserves its source aspect ratio). These values now update live in Play Mode.
+- Accepted Beat Point Feedback: Remove Accepted Beat Points, Beat Point Hit Effect
+  Prefab (optional UI effect), Beat Point Hit Effect Lifetime (0 = self-managed).
+- Each left/right pair represents one judged beat. Consume its global half-beat ID,
+  not the nearest pooled Image object: early input removes the approaching pair,
+  late input never removes the following pair, and duplicate success does not replay
+  the point effect. Normal beats and Team Skill half-beats use the same ID scale.
+- Early hit effects spawn at the two removed point positions. If the judged pair
+  has already passed the centre, one effect spawns at the centre instead. The existing
+  Stone Success Effect Prefab remains an independent centre-stone feedback slot.
+- Images remain pooled/reused for future beats; consumed IDs are bounded and reset
+  when the battle roster is rebuilt. Misses do not consume any point.
+
+Timeline tuning (Art2): FightScenePresenter Timeline Scale = 1.9, Timeline Bottom Offset = 200 (Canvas units from bottom to timeline center). Successful Beat Stone Feedback now uses Stone Bounce Enabled / Amount / Beats: 0.15 expansion, slight 0.03 undershoot, restored in 0.3 beat. Position remains fixed. Adjust presenter fields outside Play Mode to persist changes.
+
+Updated timeline: Art2 bottom offset = 150, scale stays 1.9. Preview Beats = 5. Artwork anchors (inner to outer) = 92/366, 148/366, 204/366, 260/366, 316/366 of half width. Timeline Step Travel Fraction = 0.25: hold for 75% of each interval, then SmoothStep into next anchor on the next beat. Burst uses half-beat intervals with midpoint positions. Stone bounce uses elapsed FMOD timeline milliseconds and captures beat duration on successful input, independent of callback beat anchor changes; starts visibly expanded even on repeated input.
+
+Timeline movement revision: restored original linear constant-speed convergence. Removed anchor stepping and its travel-fraction settings. Art2 retains preview 5, scale 1.9, bottom offset 150, successful stone bounce and Team Skill half-beat points.

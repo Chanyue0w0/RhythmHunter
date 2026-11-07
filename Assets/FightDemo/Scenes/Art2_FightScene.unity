@@ -2993,7 +2993,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &611917184
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7582,7 +7582,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1649508002
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8916,7 +8916,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1964457392
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9151,9 +9151,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3686a9e83f96b84b904c1223cd7b674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightScenePresenter
+  timelineScale: 1.9
+  timelineStepTravelFraction: 0.25
+  timelineAnchorPositions:
+  - 0.2513661
+  - 0.4043716
+  - 0.55737704
+  - 0.7103825
+  - 0.863388
+  timelineBarSprite: {fileID: 21300000, guid: 3364845ec05154c4b83eede94957e942, type: 3}
+  timelinePointSprite: {fileID: 21300000, guid: 5d43eb9f5d875f849a405800c5f58f78, type: 3}
+  stoneEmptySprite: {fileID: 21300000, guid: c52009719b5f35f46bbbad10c8943544, type: 3}
+  stoneFillSprite: {fileID: 21300000, guid: 63315626d9124774585cd363f137ac7a, type: 3}
+  stoneReadyFrames:
+  - {fileID: 21300000, guid: 53907aa8d7412114aacbed4970ed5e3d, type: 3}
+  - {fileID: 21300000, guid: 450f5bb6e402fac4b9c8637a561c7ee5, type: 3}
+  - {fileID: 21300000, guid: be905d538f69dfc44879677d2f77830a, type: 3}
+  - {fileID: 21300000, guid: 76510089599750f4eaa8aa51a80ae1c4, type: 3}
+  - {fileID: 21300000, guid: ea32bd1915aee1245a289d4b6af1fa02, type: 3}
+  timelinePointArtSize: {x: 6, y: 34}
+  stoneArtSize: {x: 70, y: 90}
+  timelineBarHeight: 0
+  stoneReadyLoopBeats: 1
+  stoneBounceEnabled: 1
+  stoneBounceAmount: 0.15
+  stoneBounceBeats: 0.3
+  stoneSuccessEffectPrefab: {fileID: 0}
+  stoneSuccessEffectLifetime: 0.5
+  removeAcceptedBeatPoints: 1
+  beatPointHitEffectPrefab: {fileID: 0}
+  beatPointHitEffectLifetime: 0.5
+  playerUiCanvas: {fileID: 1649508005}
+  showDeveloperUi: 1
   beatClock: {fileID: 2021200329}
   rhythmJudge: {fileID: 2021200328}
   fight: {fileID: 2021200326}
+  partyResourceHudPrefab: {fileID: 1002, guid: 3d004614dfe14804a27006c0bbab3ae5, type: 3}
+  showDefenseHud: 0
+  showFormationLockStatus: 0
+  showVisibilityButtons: 0
+  showEnemyHealthUi: 0
+  showEnemyStatusUi: 0
+  showTeamSkillGauge: 0
   playbackText: {fileID: 1151355355}
   cycleText: {fileID: 1803524084}
   warningText: {fileID: 180909938}
@@ -9169,8 +9208,8 @@ MonoBehaviour:
   beatProgress: {fileID: 1380923318}
   healthBar: {fileID: 455403627}
   timelineWidth: 840
-  timelineBottomOffset: 76
-  previewBeats: 3
+  timelineBottomOffset: 150
+  previewBeats: 5
   beatPointSize: 14
   beatPointColor: {r: 0.2, g: 0.92, b: 1, a: 1}
   centerFlashStrength: 0.8
@@ -9823,15 +9862,15 @@ MonoBehaviour:
   - {fileID: 828184398}
   - {fileID: 2037638511}
   actorMaterial: {fileID: 2100000, guid: ac283b04adc847bc80b3a500676dba2b, type: 2}
+  informationCamera: {fileID: 2147100302}
+  alignSlotInformation: 1
+  healthBarHeadGap: 0.25
   castSpriteShadows: 1
   showContactShadows: 1
   contactShadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   shadowSize: {x: 1.25, y: 0.65}
   shadowGroundOffset: {x: 0, y: 0}
   groundHeight: 0.025
-  informationCamera: {fileID: 2147100302}
-  alignSlotInformation: 1
-  healthBarHeadGap: 0.25
 --- !u!1001 &2147100100
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9840,6 +9879,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2147100001}
     m_Modifications:
+    - target: {fileID: 2001, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.04
+      objectReference: {fileID: 0}
     - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.76665
@@ -9854,7 +9897,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.24
+      value: 1.56
       objectReference: {fileID: 0}
     - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalPosition.z
@@ -9884,6 +9927,10 @@ PrefabInstance:
       propertyPath: frames.Array.data[2].sprite
       value: 
       objectReference: {fileID: 21300000, guid: 8962ef6c6c78e39469aa74254728e4a3, type: 3}
+    - target: {fileID: 2301, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.01
+      objectReference: {fileID: 0}
     - target: {fileID: 2421, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalPosition.y
       value: -1.32
@@ -10581,7 +10628,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 1.836772e-39}
+  m_BoundingSphereOverride: {x: 4.7428895e+30, y: 3221.3237, z: 7.0066985e+22, w: 5.5355213e-11}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -10745,7 +10792,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: -2.3859665e-35, z: 4.5907e-41, w: -2.3859298e-35}
+  m_BoundingSphereOverride: {x: 1.8007897e+25, y: 714647.25, z: 4.5448206e+30, w: 14.773787}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11209,7 +11256,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.3968e-41, y: 3.214242e-39, z: 1.0217e-41, w: 3.93419e+12}
+  m_BoundingSphereOverride: {x: 8.56e-43, y: NaN, z: 0, w: 4.776427e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11373,7 +11420,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: -1.49e-43, y: 1e-45, z: 7e-45, w: -1.490754e-38}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

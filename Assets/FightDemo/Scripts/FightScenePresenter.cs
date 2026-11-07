@@ -19,6 +19,24 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FmodBeatClock beatClock;
         [SerializeField] private FmodRhythmJudge rhythmJudge;
         [SerializeField] private FightCombatController fight;
+        [Header("Player Resource UI")]
+        [SerializeField] private FightPartyResourceHud partyResourceHudPrefab;
+        [Header("UI Visibility")]
+        [SerializeField] private bool showDefenseHud = true;
+        [SerializeField] private bool showFormationLockStatus = true;
+        [Tooltip("右下角顯示 DefenseHud 與 FormationLockStatus 的切換按鈕。")]
+        [SerializeField] private bool showVisibilityButtons = true;
+        [Tooltip("顯示敵方血量面板，以及敵人頭上的血條與血量文字；不影響傷害數字。")]
+        [SerializeField] private bool showEnemyHealthUi = true;
+        [Tooltip("顯示敵人攻擊倒數／暫停提示、Boss 狀態欄，以及敵人面板內的狀態文字。不影響場上警告特效或狀態圖示。")]
+        [SerializeField] private bool showEnemyStatusUi = true;
+        [Tooltip("顯示 Team Skill MP 累積面板；不影響技能使用或施放期間的剩餘拍數。")]
+        [SerializeField] private bool showTeamSkillGauge = true;
+        public bool ShowEnemyHealthUi => showEnemyHealthUi;
+        private FightDefenseHud defenseHud;
+        private FightFormationPanel formationPanel;
+        private RectTransform visibilityButtons;
+        private Text defenseToggleLabel, formationToggleLabel;
 
         [Header("Rhythm UI")]
         [SerializeField] private Text playbackText;
@@ -108,6 +126,9 @@ namespace RhythmHunter.FightDemo
             subscribedFight = fight;
             subscribedFight.FightBeat += OnFightBeat;
             subscribedFight.HeroCalled += OnHeroCalled;
+            subscribedFight.TeamSkillBeatAccepted += OnSuccessfulStoneBeat;
+            subscribedFight.TeamSkillPointAccepted += OnTeamSkillPointAccepted;
+            subscribedFight.RosterRebuilt += ResetConsumedTimelinePoints;
             subscribedFight.EnemyAttackResolved += OnEnemyAttackResolved;
             subscribedFight.PartyHealthChanged += OnPartyHealthChanged;
             subscribedFight.BattleLost += OnBattleLost;
@@ -116,16 +137,32 @@ namespace RhythmHunter.FightDemo
 
         private void Start()
         {
+            EnsureUiGroups();
             if (EqualBeats)
             {
                 BuildEqualBeatTimeline();
                 rhythmJudge.EnablePersonalCalibration();
-                if (healthText != null && healthText.canvas != null)
+                if (healthText != null && playerUiCanvas != null)
                 {
-                    gameObject.AddComponent<FightDefenseHud>().Configure(fight, healthText.canvas, healthText.font);
+                    defenseHud = gameObject.AddComponent<FightDefenseHud>();
+                    defenseHud.Configure(fight, playerUiCanvas, healthText.font, partyResourceHudPrefab == null);
+                    MoveUi("DefenseHud", developerUiRoot);
+                    defenseHud.SetEnemyHealthVisible(showEnemyHealthUi);
+                    if (partyResourceHudPrefab != null)
+                        Instantiate(partyResourceHudPrefab, playerUiRoot, false).Configure(fight);
                     if (fight.UsesBattlePreparation)
-                        gameObject.AddComponent<FightFormationPanel>().Configure(fight, healthText.canvas, healthText.font);
-                    gameObject.AddComponent<FightPauseController>().Configure(beatClock, healthText.canvas, healthText.font);
+                    {
+                        formationPanel = gameObject.AddComponent<FightFormationPanel>();
+                        formationPanel.Configure(fight, playerUiCanvas, healthText.font);
+                        MoveUi("BattlePreparation", battleMenuRoot);
+                        MoveUi("FormationLockStatus", developerUiRoot);
+                    }
+                    BuildVisibilityButtons(playerUiCanvas, healthText.font);
+                    MoveUi("HudVisibilityButtons", developerUiRoot);
+                    ApplyVisibilityControls();
+                    gameObject.AddComponent<FightPauseController>().Configure(beatClock, playerUiCanvas, healthText.font);
+                    MoveUi("PAUSE  [START / ESC]", battleMenuRoot);
+                    MoveUi("PauseOverlay", battleMenuRoot);
                 }
             }
             bool showHealth = fight == null || fight.HealthSystemEnabled;
@@ -162,6 +199,9 @@ namespace RhythmHunter.FightDemo
 
             subscribedFight.FightBeat -= OnFightBeat;
             subscribedFight.HeroCalled -= OnHeroCalled;
+            subscribedFight.TeamSkillBeatAccepted -= OnSuccessfulStoneBeat;
+            subscribedFight.TeamSkillPointAccepted -= OnTeamSkillPointAccepted;
+            subscribedFight.RosterRebuilt -= ResetConsumedTimelinePoints;
             subscribedFight.EnemyAttackResolved -= OnEnemyAttackResolved;
             subscribedFight.PartyHealthChanged -= OnPartyHealthChanged;
             subscribedFight.BattleLost -= OnBattleLost;
@@ -171,13 +211,44 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            ApplyVisibilityControls();
+            if (warningText != null && warningText.gameObject.activeSelf != showEnemyStatusUi)
+                warningText.gameObject.SetActive(showEnemyStatusUi);
+            if (defenseHud != null) defenseHud.ShowEnemyStatusText = showEnemyStatusUi;
+            if (defenseHud != null) defenseHud.SetEnemyHealthVisible(showEnemyHealthUi);
             UpdateTeamSkillHud();
             UpdateBossHud();
+            UpdateTimelineArtwork();
             if (fight != null && fight.IsPaused) return;
             UpdatePlaybackReadout();
             UpdateBeatProgress();
             UpdateEqualBeatTimeline();
             UpdateFades();
+        }
+
+        private void BuildVisibilityButtons(Canvas canvas, Font font)
+        {
+            if (visibilityButtons != null) return;
+            // Sibling of the controlled UI: hiding a panel never hides its restore button.
+            visibilityButtons = FightMenuUi.Rect("HudVisibilityButtons", canvas.transform, new Vector2(-24, 24), new Vector2(300, 76));
+            visibilityButtons.anchorMin = visibilityButtons.anchorMax = visibilityButtons.pivot = new Vector2(1, 0);
+            var defense = FightMenuUi.Button(visibilityButtons, "DefenseHudToggle", Vector2.zero, new Vector2(300, 34), font,
+                () => { showDefenseHud = !showDefenseHud; ApplyVisibilityControls(); });
+            defenseToggleLabel = defense.GetComponentInChildren<Text>();
+            var formation = FightMenuUi.Button(visibilityButtons, "FormationLockStatusToggle", new Vector2(0, -42), new Vector2(300, 34), font,
+                () => { showFormationLockStatus = !showFormationLockStatus; ApplyVisibilityControls(); });
+            formationToggleLabel = formation.GetComponentInChildren<Text>();
+            formation.gameObject.SetActive(formationPanel != null);
+        }
+
+        private void ApplyVisibilityControls()
+        {
+            if (developerUiRoot != null) developerUiRoot.gameObject.SetActive(showDeveloperUi);
+            if (defenseHud != null) defenseHud.SetHudVisible(showDefenseHud);
+            if (formationPanel != null) formationPanel.SetLockStatusVisible(showFormationLockStatus);
+            if (visibilityButtons != null) visibilityButtons.gameObject.SetActive(showVisibilityButtons);
+            if (defenseToggleLabel != null) defenseToggleLabel.text = showDefenseHud ? "DefenseHud: ON" : "DefenseHud: OFF";
+            if (formationToggleLabel != null) formationToggleLabel.text = showFormationLockStatus ? "FormationLockStatus: ON" : "FormationLockStatus: OFF";
         }
 
         private void OnFightBeat(FmodBeatClock.BeatSnapshot beat)
@@ -245,6 +316,11 @@ namespace RhythmHunter.FightDemo
 
         private void OnHeroCalled(FightCombatController.HeroCallResult call)
         {
+            if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
+            {
+                OnSuccessfulStoneBeat();
+                ConsumeTimelinePoint(call.RhythmResult.NearestBeat.GlobalBeat * 2);
+            }
             if (fight != null && fight.UsesFrontHeroControls)
             {
                 if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
@@ -479,9 +555,11 @@ namespace RhythmHunter.FightDemo
             if (timelineRoot != null || beatProgress == null)
                 return;
 
-            // Keep the new HUD under the same optional bottom-UI group as the old HUD.
+            // Player art stays visible even when the legacy debug bottom group is hidden.
             Transform oldPanel = beatProgress.transform.parent;
             Transform parent = oldPanel.parent;
+            EnsureUiGroups();
+            if (playerUiRoot != null) parent = playerUiRoot;
             oldPanel.gameObject.SetActive(false);
             Text legend = parent.Find("InputLegend")?.GetComponent<Text>();
             if (legend != null)
@@ -492,7 +570,7 @@ namespace RhythmHunter.FightDemo
             timelineRoot.anchorMin = timelineRoot.anchorMax = new Vector2(0.5f, 0f);
             timelineRoot.anchoredPosition = new Vector2(0f, timelineBottomOffset);
             timelineRoot.sizeDelta = new Vector2(timelineWidth, 64f);
-            if (statisticsText != null)
+            if (statisticsText != null && !HasTimelineArt)
             {
                 statisticsText.transform.SetParent(timelineRoot, false);
                 statisticsText.rectTransform.anchorMin = statisticsText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
@@ -500,10 +578,12 @@ namespace RhythmHunter.FightDemo
                 statisticsText.rectTransform.sizeDelta = new Vector2(timelineWidth, 22f);
                 statisticsText.alignment = TextAnchor.MiddleCenter;
             }
-            CreateTimelineImage("Track", new Vector2(timelineWidth, 2f), Dim);
+            timelineTrack = CreateTimelineImage("Track", new Vector2(timelineWidth, 2f), Dim);
             timelineFrame = CreateTimelineImage("CenterFrame", new Vector2(32f, 44f), beatPointColor);
             timelineCenter = CreateTimelineImage("Center", new Vector2(26f, 38f), Background);
             approachingPoints = new Image[Mathf.Clamp(previewBeats, 1, 8) * 4];
+            timelinePointTicks = new long[approachingPoints.Length];
+            for (int i = 0; i < timelinePointTicks.Length; i++) timelinePointTicks[i] = long.MinValue;
             for (int i = 0; i < approachingPoints.Length; i++)
             {
                 approachingPoints[i] = CreateTimelineImage($"BeatPoint_{i}", Vector2.one * beatPointSize, beatPointColor);
@@ -511,11 +591,12 @@ namespace RhythmHunter.FightDemo
                 approachingPoints[i].enabled = false;
             }
             // Enemy countdown remains independent of the player's equal-beat rhythm.
+            BuildTimelineArtwork();
             if (warningText != null)
             {
-                warningText.transform.SetParent(timelineRoot, false);
-                warningText.rectTransform.anchorMin = warningText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-                warningText.rectTransform.anchoredPosition = new Vector2(0f, 48f);
+                warningText.transform.SetParent(developerUiRoot != null ? developerUiRoot : timelineRoot, false);
+                warningText.rectTransform.anchorMin = warningText.rectTransform.anchorMax = new Vector2(0.5f, developerUiRoot != null ? 0 : .5f);
+                warningText.rectTransform.anchoredPosition = new Vector2(0f, developerUiRoot != null ? timelineBottomOffset + 48 : 48);
                 warningText.rectTransform.sizeDelta = new Vector2(timelineWidth, 30f);
                 warningText.alignment = TextAnchor.MiddleCenter;
                 warningText.text = "WAITING FOR MUSIC";
@@ -546,7 +627,7 @@ namespace RhythmHunter.FightDemo
                 point.enabled = ready;
             if (!ready)
             {
-                timelineCenter.color = Background;
+                timelineCenter.color = HasTimelineArt ? Color.white : Background;
                 timelineCenter.rectTransform.localScale = Vector3.one;
                 if (warningText != null)
                     warningText.text = "WAITING FOR MUSIC";
@@ -562,25 +643,34 @@ namespace RhythmHunter.FightDemo
         private void RenderEqualBeatTimeline(double evaluatedMs, double anchorMs, double intervalMs)
         {
             bool burst = fight != null && fight.TeamSkillBurstActive;
-            Color color = burst ? Gold : beatPointColor;
+            Color color = burst ? Gold : HasTimelineArt ? Color.white : beatPointColor;
             double spacingMs = intervalMs * (burst ? .5 : 1);
             double beatPosition = (evaluatedMs - anchorMs) / spacingMs;
             float phase = (float)(beatPosition - System.Math.Floor(beatPosition));
             int count = approachingPoints.Length / (burst ? 2 : 4);
             if (timelineFrame != null) timelineFrame.color = color;
+            if (HasTimelineArt && timelineTrack != null) timelineTrack.color = color;
             for (int i = 0; i < approachingPoints.Length; i++)
                 approachingPoints[i].enabled = i < count * 2;
             for (int i = 0; i < count; i++)
             {
-                float distance = (i + 1f - phase) / count * timelineWidth * 0.5f;
+                long tick = (beatClock != null ? beatClock.LatestBeat.GlobalBeat : 0) * 2 +
+                    ((long)System.Math.Floor(beatPosition) + i + 1) * (burst ? 1 : 2);
+                timelinePointTicks[i * 2] = timelinePointTicks[i * 2 + 1] = tick;
+                bool visible = !removeAcceptedBeatPoints || !consumedTimelineTicks.Contains(tick);
+                approachingPoints[i * 2].enabled = approachingPoints[i * 2 + 1].enabled = visible;
+                float distance = TimelinePointDistance(i, phase, count, burst);
                 approachingPoints[i * 2].rectTransform.anchoredPosition = new Vector2(-distance, 0f);
                 approachingPoints[i * 2 + 1].rectTransform.anchoredPosition = new Vector2(distance, 0f);
                 approachingPoints[i * 2].color = approachingPoints[i * 2 + 1].color = color;
             }
             // Timeline-driven pulse freezes with paused audio and resets with a new anchor.
             float pulse = Mathf.Clamp01(1f - (float)(phase * spacingMs / 110.0));
-            timelineCenter.color = Color.Lerp(Background, color, pulse * centerFlashStrength);
-            timelineCenter.rectTransform.localScale = Vector3.one * (1f + pulse * 0.12f);
+            if (!HasTimelineArt)
+            {
+                timelineCenter.color = Color.Lerp(Background, color, pulse * centerFlashStrength);
+                timelineCenter.rectTransform.localScale = Vector3.one * (1f + pulse * 0.12f);
+            }
         }
 
         private void UpdateFades()

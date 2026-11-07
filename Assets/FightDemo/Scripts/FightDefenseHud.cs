@@ -16,12 +16,24 @@ namespace RhythmHunter.FightDemo
         private Image[] enemyFills;
         private GameObject[] enemyRows;
         private GameObject developerPanel;
+        private GameObject enemyPanel;
+        private bool hudVisible = true;
+        public void SetHudVisible(bool visible)
+        {
+            hudVisible = visible;
+            if (root != null) root.gameObject.SetActive(visible && fight != null && fight.HealthSystemEnabled);
+        }
+        public bool ShowEnemyStatusText { get; set; } = true;
+        public void SetEnemyHealthVisible(bool visible)
+        {
+            if (enemyPanel != null && enemyPanel.activeSelf != visible) enemyPanel.SetActive(visible);
+        }
         private Text developerToggleText;
         private static readonly string[] Positions = { "FRONT X", "MIDDLE Y", "BACK B" };
         private readonly Color red = new(1f, 0.22f, 0.3f);
         private readonly Color blue = new(0.35f, 0.8f, 1f);
 
-        public void Configure(FightCombatController controller, Canvas canvas, Font uiFont)
+        public void Configure(FightCombatController controller, Canvas canvas, Font uiFont, bool showPartyPanel = true)
         {
             if (root != null)
                 return;
@@ -45,8 +57,10 @@ namespace RhythmHunter.FightDemo
             armorText = Label(party, "", new Vector2(16, -118), new Vector2(528, 22));
             armorHearts = new HeartRow(this, party, new Vector2(16, -144), blue);
             recoveryText = Label(party, "", new Vector2(16, -178), new Vector2(528, 20), 15);
+            party.gameObject.SetActive(showPartyPanel);
 
             RectTransform enemies = Panel("EnemyHealth", root, new Vector2(24, -24), new Vector2(540, 204));
+            enemyPanel = enemies.gameObject;
             Label(enemies, "ENEMIES", new Vector2(16, -10), new Vector2(508, 28), 20);
             enemyLabels = new Text[3];
             enemyFills = new Image[3];
@@ -86,7 +100,7 @@ namespace RhythmHunter.FightDemo
         {
             if (root == null || fight == null)
                 return;
-            root.gameObject.SetActive(fight.HealthSystemEnabled);
+            root.gameObject.SetActive(hudVisible && fight.HealthSystemEnabled);
             hpText.text = $"HP  {fight.PartyHp:0.#} / {fight.MaxPartyHp:0.#}";
             armorText.text = $"ARMOR  {fight.PartyArmor:0.#} / {fight.MaxPartyArmor:0.#}";
             hpHearts.Set(fight.PartyHp, fight.MaxPartyHp);
@@ -106,12 +120,12 @@ namespace RhythmHunter.FightDemo
                 enemyRows[i].SetActive(enemy != null && enemy.HasCharacter);
                 if (enemy != null)
                 {
-                    enemyLabels[i].text = $"{enemy.DisplayName}   HP {enemy.CurrentHp:0.#} / {enemy.MaxHp:0.#}" +
+                    enemyLabels[i].text = $"{enemy.DisplayName}   HP {enemy.CurrentHp:0.#} / {enemy.MaxHp:0.#}" + (ShowEnemyStatusText ?
                         (enemy.IsFragile ? " <color=#FFCF55>◆ x2</color>" : "") +
                         (enemy.HasSlimeFragment ? $" <color=#77EE99>SLIME {enemy.SlimeBeatsRemaining}</color>" : "") +
                         (enemy.SlimeDetonationPending ? " <color=#77EE99>DETONATING</color>" : "") +
                         (enemy.BleedBeatsRemaining > 0 ? $" <color=#FF7777>BLEED {enemy.BleedBeatsRemaining}</color>" : "") +
-                        (enemy.IsStunned ? $" <color=#FFEE77>STUN {enemy.StunBeatsRemaining}</color>" : "");
+                        (enemy.IsStunned ? $" <color=#FFEE77>STUN {enemy.StunBeatsRemaining}</color>" : "") : "");
                     enemyFills[i].rectTransform.sizeDelta = new Vector2(508 * Mathf.Clamp01(enemy.CurrentHp / enemy.MaxHp), 9);
                 }
                 if (developerPanel.activeSelf)

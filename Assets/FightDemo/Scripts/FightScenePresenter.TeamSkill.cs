@@ -13,8 +13,9 @@ namespace RhythmHunter.FightDemo
         private Text burstLabel;
         private void UpdateTeamSkillHud()
         {
+            EnsureUiGroups();
             UpdateBurstHud();
-            if (!EqualBeats)
+            if (!EqualBeats || !showTeamSkillGauge)
             {
                 if (teamSkillPanel != null) teamSkillPanel.gameObject.SetActive(false);
                 if (ultimateFlash != null) ultimateFlash.color = Color.clear;
@@ -22,8 +23,10 @@ namespace RhythmHunter.FightDemo
             }
             if (teamSkillPanel == null)
             {
-                if (healthText == null || healthText.canvas == null) return;
-                teamSkillPanel = FightMenuUi.Rect("TeamSkillGauge", healthText.canvas.transform, new Vector2(-24, -286), new Vector2(540, 144));
+                if (healthText == null || playerUiCanvas == null) return;
+                teamSkillPanel = FightMenuUi.Rect("TeamSkillGauge", playerUiCanvas.transform, new Vector2(-24, -286), new Vector2(540, 144));
+                EnsureUiGroups();
+                if (developerUiRoot != null) teamSkillPanel.SetParent(developerUiRoot, false);
                 teamSkillPanel.anchorMin = teamSkillPanel.anchorMax = teamSkillPanel.pivot = Vector2.one;
                 teamSkillPanel.gameObject.AddComponent<Image>().color = new Color(.01f, .04f, .06f, .88f);
                 teamSkillLabel = FightMenuUi.Label(teamSkillPanel, "", new Vector2(12, -4), new Vector2(516, 56), healthText.font, 16);
@@ -48,9 +51,11 @@ namespace RhythmHunter.FightDemo
             bool visible = EqualBeats && fight != null && fight.TeamSkillBurstActive;
             if (burstPanel == null && visible)
             {
-                if (healthText == null || healthText.canvas == null) return;
-                burstPanel = FightMenuUi.Rect("TeamSkillRemaining", healthText.canvas.transform,
+                if (healthText == null || playerUiCanvas == null) return;
+                burstPanel = FightMenuUi.Rect("TeamSkillRemaining", playerUiCanvas.transform,
                     new Vector2(0, -48), new Vector2(460, 64));
+                EnsureUiGroups();
+                if (playerUiRoot != null) burstPanel.SetParent(playerUiRoot, false);
                 burstPanel.anchorMin = burstPanel.anchorMax = burstPanel.pivot = new Vector2(.5f, 1);
                 burstLabel = FightMenuUi.Label(burstPanel, "", new Vector2(0, -4), new Vector2(460, 30), healthText.font, 20);
                 burstLabel.alignment = TextAnchor.MiddleCenter;

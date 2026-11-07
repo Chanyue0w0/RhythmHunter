@@ -9,6 +9,12 @@ namespace RhythmHunter.FightDemo
         private FightCombatController fight;
         private RectTransform panel;
         private Text summary, lockedLabel;
+        private bool lockStatusVisible = true;
+        public void SetLockStatusVisible(bool visible)
+        {
+            lockStatusVisible = visible;
+            if (lockedLabel != null) lockedLabel.gameObject.SetActive(visible && fight != null && !fight.AwaitingBattleStart);
+        }
         private readonly Text[] positions = new Text[3];
         private readonly Button[] buttons = new Button[4];
         private static readonly string[] Bindings = { "FRONT  X / Q", "MIDDLE  Y / W", "BACK  B / E" };
@@ -57,7 +63,7 @@ namespace RhythmHunter.FightDemo
             bool preparing = fight.AwaitingBattleStart;
             // Keep pause/calibration menus accessible above the formation screen.
             panel.gameObject.SetActive(preparing && !fight.BattleEntranceRunning && !fight.IsPaused && !fight.TimingCalibrationActive);
-            lockedLabel.gameObject.SetActive(!preparing);
+            lockedLabel.gameObject.SetActive(lockStatusVisible && !preparing);
             lockedLabel.text = "FORMATION LOCKED  |  Changes available before the next battle";
             if (!preparing) return;
             bool complete = true;

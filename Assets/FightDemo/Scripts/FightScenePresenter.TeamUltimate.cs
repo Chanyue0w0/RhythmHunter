@@ -17,7 +17,7 @@ namespace RhythmHunter.FightDemo
             if (ultimateLabel == null)
             {
                 ultimateLabel = FightMenuUi.Label(teamSkillPanel, "", new Vector2(92, -86), new Vector2(432, 48), healthText.font, 14);
-                var overlay = FightMenuUi.Rect("TeamUltimateFlash", healthText.canvas.transform, Vector2.zero, Vector2.zero);
+                var overlay = FightMenuUi.Rect("TeamUltimateFlash", playerUiCanvas.transform, Vector2.zero, Vector2.zero);
                 overlay.anchorMin = Vector2.zero; overlay.anchorMax = Vector2.one;
                 overlay.offsetMin = overlay.offsetMax = Vector2.zero; overlay.SetAsFirstSibling();
                 ultimateFlash = overlay.gameObject.AddComponent<Image>(); ultimateFlash.raycastTarget = false;
