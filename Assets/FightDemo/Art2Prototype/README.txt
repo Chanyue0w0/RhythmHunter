@@ -308,3 +308,21 @@ preview camera, restores the previous renderer after rendering, and never saves 
 PNG exports are gamma-encoded for image viewing; measured values remain linear.
 The gray maps show clear face changes while the original painted/dark colors diminish
 the perceived difference. Passing these tests does not certify artistic normal accuracy.
+
+Scene beat movement (Art2_FightScene)
+- SceneBeatMotionManager is a scene root with an explicit reference to the existing
+  FmodBeatClock (same instance as the combat controller). It samples song beat phase;
+  there is no fallback BPM, independent timer, coroutine or event subscription.
+- Targets: WoodenBarricade_Left / Right and Rock_Left / Right from CaveEnvironment_2_5D.
+- Inspector: Motion Enabled toggles all movement; each Targets entry has Enabled,
+  Target, Direction Space (World/Self), Direction, Amplitude (world units),
+  Duration In Beats (0.05..1), Oscillations (1..8).
+- Initial settings: world Y, amplitude 0.08, first 0.5 beat, one damped oscillation.
+  Direction is normalized. Set X for sideways, Y for vertical, Z for depth motion.
+- Add scene Transform references to Targets to animate other scenery. Each target
+  should have only one motion owner; duplicate references within this manager are ignored.
+- Pausing the song freezes phase; no song/timing anchor means no movement. Team Skill
+  follows the same music grid. Disabling/removing targets or disabling the component
+  removes its offsets. Authored transforms and original sprites remain unchanged.
+- Movement runs before contact-shadow LateUpdate so shadows track the moved sprites.
+  Pixel shimmer during fractional movement is expected; lower amplitude if distracting.
