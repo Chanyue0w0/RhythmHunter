@@ -197,3 +197,42 @@ are used; no textures, particle spawning or per-frame material creation.
 Runtime/preview quads are not saved into the scene and are cleaned up on disable.
 The halo is a visual glow, not volumetric scattering; transparent sprite occlusion
 follows Unity transparent sorting and does not provide volumetric shadowing.
+
+Scenery surface-lighting prototype (rocks / wooden barricades)
+------------------------------------------------------------
+CaveEnvironment_2_5D now assigns CaveRocksSurfaceLit and CaveWoodSurfaceLit to
+Rocks_GroundAnchor / WoodenBarricades_GroundAnchor > Tilt_45deg > Sprite_FullCanvas.
+These use dedicated 1280x720 normal textures aligned to the unmodified source canvases.
+Normals describe authored broad rock faces, post sides and beam tops; painted brightness
+is not interpreted as height. Texture import: Normal Map, linear, Point, no compression
+or mipmaps. The original sprite textures, pivots and PPU are unchanged.
+
+Material Inspector:
+- Use Surface Normal Map: toggle directional surface relief for comparison.
+- Surface Normal Strength: default 0.85; set 0 for a flat normal.
+- Ambient Strength: default 0.62 (previous middle material: 0.8).
+- Light Influence: default 0.85 (previous: 0.65).
+For an exact pre-prototype material comparison, assign CaveMiddleLit temporarily.
+Actors/distant scenery retain their previous materials and normal mapping is off by default.
+Normal maps must match the source sprite UV canvas; these cards are not atlas-packed.
+
+On each Sprite_FullCanvas, Art2SceneryContactShadows provides:
+- Show Contact Shadows and Opacity (default 0.28).
+- Ground Height: default 0.025, the world Y of the floor.
+- Contacts: top-left source Foot Pixel, Width Pixels, world Depth and World Offset (X/Z).
+Two contacts per card follow its transform/flip/scale, with persistent world-XZ quads.
+Disable the component to compare grounding without changing projected light shadows.
+
+Rebuild authored normal textures on Windows using:
+  powershell -File Tools/Art2/Build-CaveSurfaceNormals.ps1
+The script uses editable polygon directions on a four-source-pixel grid and never writes
+original art. Keep PNG .meta files to preserve material references. Regeneration overwrites
+only the two generated normal PNGs, so retain a copy before hand-painting them further.
+
+Unity menu: Rhythm Hunter > Art2 > Validate Scenery Surface Lighting.
+Visual acceptance: compare Use Surface Normal Map on/off while moving a test light;
+rock upper/side faces and wood sides should differ, while the sprite outline remains fixed.
+Inspect contact placement at the current camera and after moving a card. This first pass
+is broad faceted shading, not 3D thickness, displacement, or physically accurate cavity AO.
+C# and static references/import settings were checked; Unity GPU/Play Mode visual review
+is still required before accepting the exact normal strength and shadow appearance.

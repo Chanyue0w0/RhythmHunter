@@ -4,6 +4,9 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _ShadowCutoff ("Shadow Alpha Cutoff", Range(0.001,1)) = 0.1
+        [Toggle] _UseNormalMap ("Use Surface Normal Map", Float) = 0
+        [Normal] _NormalMap ("Surface Normal Map (same canvas as sprite)", 2D) = "bump" {}
+        _NormalStrength ("Surface Normal Strength", Range(0,2)) = 1
         _AmbientTint ("Ambient Tint", Color) = (0.82,0.9,1,1)
         _AmbientStrength ("Ambient Strength", Range(0,2)) = 0.8
         _LightInfluence ("Light Influence", Range(0,2)) = 0.65
@@ -18,10 +21,12 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         HLSLINCLUDE
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/Core2D.hlsl"
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
+            TEXTURE2D(_NormalMap); SAMPLER(sampler_NormalMap);
             float4 _MainTex_TexelSize;
             CBUFFER_START(UnityPerMaterial)
                 half4 _AmbientTint, _AtmosphereTint;
                 half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix, _ShadowCutoff;
+                half _UseNormalMap, _NormalStrength;
             CBUFFER_END
         ENDHLSL
         Pass
@@ -50,6 +55,8 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 float3 positionWS : TEXCOORD1;
                 half3 normalWS : TEXCOORD2;
                 half3 vertexLight : TEXCOORD3;
+                half3 tangentWS : TEXCOORD4;
+                half3 bitangentWS : TEXCOORD5;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
             Varyings Vert(Attributes input)
@@ -62,6 +69,8 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 output.positionWS = TransformObjectToWorld(input.positionOS);
                 output.positionCS = TransformWorldToHClip(output.positionWS);
                 output.normalWS = TransformObjectToWorldNormal(float3(0,0,-1));
+                output.tangentWS = TransformObjectToWorldDir(float3(unity_SpriteProps.x,0,0));
+                output.bitangentWS = TransformObjectToWorldDir(float3(0,unity_SpriteProps.y,0));
                 output.vertexLight = VertexLighting(output.positionWS, output.normalWS);
                 output.uv = input.uv;
                 output.color = input.color * unity_SpriteColor;
@@ -91,7 +100,14 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                     color = half4(sum.rgb / max(sum.a, 0.0001h), sum.a / 16);
                 }
                 color *= input.color;
-                half3 rgb = color.rgb * (Art2Light(normalize(input.normalWS), input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)) + _EmissionStrength);
+                half3 normalWS = normalize(input.normalWS);
+                if (_UseNormalMap > 0.5h && _NormalStrength > 0.001h)
+                {
+                    half3 normalTS = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv), _NormalStrength);
+                    normalWS = normalize(normalTS.x * normalize(input.tangentWS)
+                        + normalTS.y * normalize(input.bitangentWS) + normalTS.z * normalWS);
+                }
+                half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)) + _EmissionStrength);
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 return half4(rgb, color.a);
             }

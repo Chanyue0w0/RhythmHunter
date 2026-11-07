@@ -63,7 +63,7 @@ namespace RhythmHunter.FightDemo.Editor
             if (rig.GetComponentsInChildren<Art2.Art2TorchFlicker>().Length != 4)
                 throw new InvalidOperationException("Expected four independent torch flickers.");
             const string folder = "Assets/FightDemo/Art2Prototype/";
-            foreach (var name in new[] { "Art2ActorLit", "CaveMiddleLit", "CaveDistantLit", "CaveTorchLit", "Art2ContactShadow", "CaveGround" })
+            foreach (var name in new[] { "Art2ActorLit", "CaveMiddleLit", "CaveDistantLit", "CaveTorchLit", "Art2ContactShadow", "CaveGround", "CaveRocksSurfaceLit", "CaveWoodSurfaceLit" })
             {
                 var material = AssetDatabase.LoadAssetAtPath<Material>(folder + name + ".mat");
                 if (!material || !material.shader) throw new InvalidOperationException("Missing material/shader: " + name);
@@ -76,6 +76,30 @@ namespace RhythmHunter.FightDemo.Editor
             if (actor.GetFloat("_BlurRadius") != 0 || distant.GetFloat("_BlurRadius") <= 0)
                 throw new InvalidOperationException("Only distant scenery should use the blur material.");
             Debug.Log("Art2 atmosphere configuration and currently imported shader messages validated. Play Mode visual/performance review is still required.");
+        }
+
+        [MenuItem("Rhythm Hunter/Art2/Validate Scenery Surface Lighting")]
+        public static void ValidateSurfaceLighting()
+        {
+            ValidateAtmosphere();
+            const string folder = "Assets/FightDemo/Art2Prototype/";
+            foreach (var kind in new[] { "Rocks", "Wood" })
+            {
+                var path = folder + "Cave" + kind + "Normal.png";
+                var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                var material = AssetDatabase.LoadAssetAtPath<Material>(folder + "Cave" + kind + "SurfaceLit.mat");
+                var texture = material.GetTexture("_NormalMap");
+                if (importer == null || importer.textureType != TextureImporterType.NormalMap ||
+                    importer.sRGBTexture || importer.mipmapEnabled || importer.filterMode != FilterMode.Point ||
+                    importer.textureCompression != TextureImporterCompression.Uncompressed ||
+                    texture == null || texture.width != 1280 || texture.height != 720 ||
+                    material.GetFloat("_UseNormalMap") != 1)
+                    throw new InvalidOperationException("Invalid full-canvas normal map setup: " + kind);
+            }
+            var scenery = GameObject.Find("CaveEnvironment_2_5D");
+            if (scenery.GetComponentsInChildren<Art2.Art2SceneryContactShadows>().Length != 2)
+                throw new InvalidOperationException("Expected rock and wood contact-shadow components.");
+            Debug.Log("Scenery normal textures/materials and contact-shadow components validated; visual comparison still required.");
         }
 
         [MenuItem("Rhythm Hunter/Art2/Validate Sprite Shadows")]

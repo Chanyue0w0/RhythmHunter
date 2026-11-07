@@ -977,6 +977,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 2523}
   - component: {fileID: 2521}
   - component: {fileID: 2522}
   m_Layer: 0
@@ -1027,7 +1028,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 53864954b3494a46b50d56e33bb09bce, type: 2}
+  - {fileID: 2100000, guid: 2d5e075d658242c39c42ff2d5d9dcf61, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1132,6 +1133,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 2623}
   - component: {fileID: 2621}
   - component: {fileID: 2622}
   m_Layer: 0
@@ -1182,7 +1184,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 53864954b3494a46b50d56e33bb09bce, type: 2}
+  - {fileID: 2100000, guid: 719901ef2d254d6cb7332ab826f5022f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1525,3 +1527,53 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &2523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3044d125049d48f4867f49a4feda51a0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
+  showContactShadows: 1
+  opacity: 0.28
+  groundHeight: 0.025
+  contacts:
+  - footPixel: {x: 437, y: 348}
+    widthPixels: 138
+    depth: 0.42
+    worldOffset: {x: 0, y: 0}
+  - footPixel: {x: 932, y: 352}
+    widthPixels: 162
+    depth: 0.48
+    worldOffset: {x: 0, y: 0}
+--- !u!114 &2623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3044d125049d48f4867f49a4feda51a0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
+  showContactShadows: 1
+  opacity: 0.28
+  groundHeight: 0.025
+  contacts:
+  - footPixel: {x: 209, y: 432}
+    widthPixels: 250
+    depth: 0.75
+    worldOffset: {x: 0, y: 0}
+  - footPixel: {x: 1156, y: 420}
+    widthPixels: 150
+    depth: 0.55
+    worldOffset: {x: 0, y: 0}
