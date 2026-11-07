@@ -9834,6 +9834,50 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2147100001}
     m_Modifications:
+    - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.76665
+      objectReference: {fileID: 0}
+    - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.76665
+      objectReference: {fileID: 0}
+    - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.76665
+      objectReference: {fileID: 0}
+    - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.24
+      objectReference: {fileID: 0}
+    - target: {fileID: 2101, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.63
+      objectReference: {fileID: 0}
+    - target: {fileID: 2133, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: beatClock
+      value: 
+      objectReference: {fileID: 2021200329}
+    - target: {fileID: 2133, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: frames.Array.data[1].sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b8213ebd928452840adc2ef3f31d9fbe, type: 3}
+    - target: {fileID: 2133, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: frames.Array.data[2].sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 70170cc412eb4084ab98f770463e1e42, type: 3}
+    - target: {fileID: 2143, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: beatClock
+      value: 
+      objectReference: {fileID: 2021200329}
+    - target: {fileID: 2143, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: frames.Array.data[1].sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 25c35bb49856bff438a7c38bd4ddab49, type: 3}
+    - target: {fileID: 2143, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: frames.Array.data[2].sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8962ef6c6c78e39469aa74254728e4a3, type: 3}
     - target: {fileID: 2421, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalPosition.y
       value: -1.32
@@ -10527,7 +10571,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 10.152022, y: 0, z: 0, w: 3.67404e-40}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: -420, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -10691,7 +10735,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 9.853354, y: 0, z: 0, w: 3.67404e-40}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11155,7 +11199,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.326459e-39, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 10.9031725, y: 7.316175e+34, z: 7.1429363e+31, w: 7.987447e+17}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11319,7 +11363,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1, z: 0, w: -2.5}
+  m_BoundingSphereOverride: {x: 1e-45, y: 1e-45, z: 1e-45, w: 1e-45}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11453,8 +11497,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: efcbbccded97484cb6df7d41a6ab15c9, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   beatClock: {fileID: 2021200329}
   motionEnabled: 1
   targets:
@@ -11462,28 +11506,28 @@ MonoBehaviour:
     target: {fileID: 2147500011}
     directionSpace: 0
     direction: {x: 0, y: 1, z: 0}
-    amplitude: 0.08
+    amplitude: 0.1
     durationInBeats: 0.5
     oscillations: 1
   - enabled: 1
     target: {fileID: 2147500021}
     directionSpace: 0
     direction: {x: 0, y: 1, z: 0}
-    amplitude: 0.08
+    amplitude: 0.1
     durationInBeats: 0.5
     oscillations: 1
   - enabled: 1
     target: {fileID: 2147500031}
     directionSpace: 0
     direction: {x: 0, y: 1, z: 0}
-    amplitude: 0.08
+    amplitude: 0.1
     durationInBeats: 0.5
     oscillations: 1
   - enabled: 1
     target: {fileID: 2147500041}
     directionSpace: 0
     direction: {x: 0, y: 1, z: 0}
-    amplitude: 0.08
+    amplitude: 0.1
     durationInBeats: 0.5
     oscillations: 1
 --- !u!1660057539 &9223372036854775807

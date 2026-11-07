@@ -326,3 +326,16 @@ Scene beat movement (Art2_FightScene)
   removes its offsets. Authored transforms and original sprites remain unchanged.
 - Movement runs before contact-shadow LateUpdate so shadows track the moved sprites.
   Pixel shimmer during fractional movement is expected; lower amplitude if distracting.
+
+Beat-synced cave crowd sprites
+- OverheadMoss_GroundAnchor retains its existing transform and scene overrides.
+  Under Tilt_45deg / OverheadMoss_SplitObjects, CaveCrowd_Left and CaveCrowd_Right
+  replace the old full-canvas sprite at its original image coordinates.
+- Each has SceneBeatSpriteAnimator: Frames contains sprite and Duration In Beats
+  together. 00 = 0.33, 01 = 0.33, 02 = 0.34; the loop is exactly one song beat.
+- Art2_FightScene explicitly binds both components to the existing FmodBeatClock.
+  No fallback tempo or frame-delta timer. Music pause freezes playback; before music
+  or when disabled, the first sprite is shown. Other scenes using this prefab need
+  to assign their own existing clock in the scene instance.
+- Original image files and PPU remain unchanged; import is Single / Full Rect / Point
+  without texture compression. Half-size transforms compensate for 2x source pixels.
