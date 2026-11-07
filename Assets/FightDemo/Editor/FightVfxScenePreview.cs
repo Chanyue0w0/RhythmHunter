@@ -43,12 +43,14 @@ namespace RhythmHunter.FightDemoEditor
 
         private static void BeginCamera(ScriptableRenderContext context, Camera camera)
         {
-            if (camera.cameraType != CameraType.SceneView || !NeedsUniversalScenePreview() || DefaultRenderer == null) return;
+            // URP 17 ignores AdditionalCameraData on Preview cameras, just as on SceneView.
+            bool diagnostic = camera.cameraType == CameraType.Preview && camera.name == "Art2_SurfaceDiagnosticCamera";
+            if ((!diagnostic && (camera.cameraType != CameraType.SceneView || !NeedsUniversalScenePreview())) || DefaultRenderer == null) return;
             var asset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
             if (asset == null) return;
             int index = -1;
             var stage = PrefabStageUtility.GetCurrentPrefabStage();
-            bool art2 = SceneManager.GetActiveScene().path == "Assets/FightDemo/Scenes/Art2_FightScene.unity" ||
+            bool art2 = diagnostic || SceneManager.GetActiveScene().path == "Assets/FightDemo/Scenes/Art2_FightScene.unity" ||
                 (stage != null && stage.assetPath.StartsWith("Assets/FightDemo/Prefabs/ArtBattle/Cave"));
             string rendererName = art2 ? "Art2ForwardPlusRenderer" : "UniversalVFXRenderer";
             var renderers = asset.rendererDataList;

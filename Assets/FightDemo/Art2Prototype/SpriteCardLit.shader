@@ -7,6 +7,8 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         [Toggle] _UseNormalMap ("Use Surface Normal Map", Float) = 0
         [Normal] _NormalMap ("Surface Normal Map (same canvas as sprite)", 2D) = "bump" {}
         _NormalStrength ("Surface Normal Strength", Range(0,2)) = 1
+        _DiffuseFloor ("Direct Light Wrap (lower = stronger face contrast)", Range(0,1)) = 0.3
+        [HideInInspector] _SurfaceDebugMode ("Preview Only: 0 Final, 1 Artwork, 2 Gray, 3 World Normals", Float) = 0
         _AmbientTint ("Ambient Tint", Color) = (0.82,0.9,1,1)
         _AmbientStrength ("Ambient Strength", Range(0,2)) = 0.8
         _LightInfluence ("Light Influence", Range(0,2)) = 0.65
@@ -26,7 +28,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
             CBUFFER_START(UnityPerMaterial)
                 half4 _AmbientTint, _AtmosphereTint;
                 half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix, _ShadowCutoff;
-                half _UseNormalMap, _NormalStrength;
+                half _UseNormalMap, _NormalStrength, _DiffuseFloor, _SurfaceDebugMode;
             CBUFFER_END
         ENDHLSL
         Pass
@@ -100,6 +102,8 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                     color = half4(sum.rgb / max(sum.a, 0.0001h), sum.a / 16);
                 }
                 color *= input.color;
+                if (_SurfaceDebugMode > 0.5h && _SurfaceDebugMode < 1.5h)
+                    return color;
                 half3 normalWS = normalize(input.normalWS);
                 if (_UseNormalMap > 0.5h && _NormalStrength > 0.001h)
                 {
@@ -107,7 +111,11 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                     normalWS = normalize(normalTS.x * normalize(input.tangentWS)
                         + normalTS.y * normalize(input.bitangentWS) + normalTS.z * normalWS);
                 }
-                half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)) + _EmissionStrength);
+                if (_SurfaceDebugMode > 2.5h)
+                    return half4(normalWS * 0.5h + 0.5h, color.a);
+                if (_SurfaceDebugMode > 1.5h)
+                    color.rgb = half3(0.5h, 0.5h, 0.5h);
+                half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS), _DiffuseFloor) + _EmissionStrength);
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 return half4(rgb, color.a);
             }

@@ -25,15 +25,15 @@ namespace RhythmHunter.FightDemo.Editor
             var environment = GameObject.Find("CaveEnvironment_2_5D");
             if (!environment) throw new InvalidOperationException("2.5D environment must be active.");
             var renderers = environment.GetComponentsInChildren<SpriteRenderer>();
-            if (renderers.Length != 9 || renderers.Any(r => !r.sprite || !r.sharedMaterial))
-                throw new InvalidOperationException("Expected nine valid cave cards.");
+            if (renderers.Length != 11 || renderers.Any(r => !r.sprite || !r.sharedMaterial))
+                throw new InvalidOperationException("Expected eleven cave cards, including four independent wood/rock sprites.");
             if (UnityEngine.Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None).Length != 6)
                 throw new InvalidOperationException("Expected six active battle slots.");
             if (GameObject.Find("CaveEnvironment") || GameObject.Find("ForestEnvironment"))
                 throw new InvalidOperationException("Original flat backgrounds must remain inactive.");
             if (UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None).Length != 1)
                 throw new InvalidOperationException("Expected one active audio listener.");
-            Debug.Log("Art2 validation passed: one camera/listener, nine cave cards, six battle slots and active combat.");
+            Debug.Log("Art2 validation passed: one camera/listener, eleven cave cards, six battle slots and active combat.");
         }
 
         [MenuItem("Rhythm Hunter/Art2/Validate Atmosphere")]
@@ -63,7 +63,7 @@ namespace RhythmHunter.FightDemo.Editor
             if (rig.GetComponentsInChildren<Art2.Art2TorchFlicker>().Length != 4)
                 throw new InvalidOperationException("Expected four independent torch flickers.");
             const string folder = "Assets/FightDemo/Art2Prototype/";
-            foreach (var name in new[] { "Art2ActorLit", "CaveMiddleLit", "CaveDistantLit", "CaveTorchLit", "Art2ContactShadow", "CaveGround", "CaveRocksSurfaceLit", "CaveWoodSurfaceLit" })
+            foreach (var name in new[] { "Art2ActorLit", "CaveMiddleLit", "CaveDistantLit", "CaveTorchLit", "Art2ContactShadow", "CaveGround", "CaveRockLeftLit", "CaveRockRightLit", "CaveWoodLeftLit", "CaveWoodRightLit" })
             {
                 var material = AssetDatabase.LoadAssetAtPath<Material>(folder + name + ".mat");
                 if (!material || !material.shader) throw new InvalidOperationException("Missing material/shader: " + name);
@@ -83,22 +83,29 @@ namespace RhythmHunter.FightDemo.Editor
         {
             ValidateAtmosphere();
             const string folder = "Assets/FightDemo/Art2Prototype/";
-            foreach (var kind in new[] { "Rocks", "Wood" })
+            foreach (var (kind, width, height) in new[] { ("RockLeft", 464, 192), ("RockRight", 296, 144),
+                ("WoodLeft", 288, 136), ("WoodRight", 320, 288) })
             {
                 var path = folder + "Cave" + kind + "Normal.png";
                 var importer = AssetImporter.GetAtPath(path) as TextureImporter;
-                var material = AssetDatabase.LoadAssetAtPath<Material>(folder + "Cave" + kind + "SurfaceLit.mat");
+                var material = AssetDatabase.LoadAssetAtPath<Material>(folder + "Cave" + kind + "Lit.mat");
                 var texture = material.GetTexture("_NormalMap");
                 if (importer == null || importer.textureType != TextureImporterType.NormalMap ||
                     importer.sRGBTexture || importer.mipmapEnabled || importer.filterMode != FilterMode.Point ||
                     importer.textureCompression != TextureImporterCompression.Uncompressed ||
-                    texture == null || texture.width != 1280 || texture.height != 720 ||
+                    texture == null || texture.width != width || texture.height != height ||
                     material.GetFloat("_UseNormalMap") != 1)
-                    throw new InvalidOperationException("Invalid full-canvas normal map setup: " + kind);
+                    throw new InvalidOperationException("Invalid cropped sprite normal map setup: " + kind);
             }
             var scenery = GameObject.Find("CaveEnvironment_2_5D");
-            if (scenery.GetComponentsInChildren<Art2.Art2SceneryContactShadows>().Length != 2)
-                throw new InvalidOperationException("Expected rock and wood contact-shadow components.");
+            if (scenery.GetComponentsInChildren<Art2.Art2SceneryContactShadows>().Length != 4)
+                throw new InvalidOperationException("Expected four independent rock/wood contact-shadow components.");
+            foreach (var r in scenery.GetComponentsInChildren<SpriteRenderer>().Where(r =>
+                r.name.StartsWith("Rock_") || r.name.StartsWith("WoodenBarricade_")))
+                if (r.sprite.texture.width != r.sharedMaterial.GetTexture("_NormalMap").width ||
+                    r.sprite.texture.height != r.sharedMaterial.GetTexture("_NormalMap").height ||
+                    r.shadowCastingMode != ShadowCastingMode.TwoSided || !r.receiveShadows)
+                    throw new InvalidOperationException("Split sprite lighting mismatch: " + r.name);
             Debug.Log("Scenery normal textures/materials and contact-shadow components validated; visual comparison still required.");
         }
 

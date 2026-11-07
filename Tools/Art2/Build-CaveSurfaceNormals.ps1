@@ -69,7 +69,25 @@ foreach ($kind in @('Rocks','Wood')) {
             $upscale.PixelOffsetMode = [Drawing.Drawing2D.PixelOffsetMode]::Half
             $upscale.DrawImage($bitmap,[Drawing.Rectangle]::new(0,0,1280,720),0,0,320,180,[Drawing.GraphicsUnit]::Pixel)
             $fullCanvas.Save((Join-Path $outputPath ("Cave"+$kind+"Normal.png")),[Drawing.Imaging.ImageFormat]::Png)
+            # Exact pixel registration of the user's 2x enlarged, independently cropped art.
+            $splits = if ($kind -eq 'Rocks') {
+                @(@('RockLeft',100,344,232,96), @('RockRight',1080,352,148,72))
+            } else {
+                @(@('WoodLeft',368,276,144,68), @('WoodRight',852,208,160,144))
+            }
+            foreach ($split in $splits) {
+                $width=[int]$split[3]*2; $height=[int]$split[4]*2
+                $part=[Drawing.Bitmap]::new($width,$height,[Drawing.Imaging.PixelFormat]::Format32bppArgb)
+                $partGraphics=[Drawing.Graphics]::FromImage($part)
+                try {
+                    $partGraphics.InterpolationMode=[Drawing.Drawing2D.InterpolationMode]::NearestNeighbor
+                    $partGraphics.PixelOffsetMode=[Drawing.Drawing2D.PixelOffsetMode]::Half
+                    $partGraphics.DrawImage($fullCanvas,[Drawing.Rectangle]::new(0,0,$width,$height),
+                        [int]$split[1],[int]$split[2],[int]$split[3],[int]$split[4],[Drawing.GraphicsUnit]::Pixel)
+                    $part.Save((Join-Path $outputPath ('Cave'+$split[0]+'Normal.png')),[Drawing.Imaging.ImageFormat]::Png)
+                } finally { $partGraphics.Dispose(); $part.Dispose() }
+            }
         } finally { $upscale.Dispose(); $fullCanvas.Dispose() }
     } finally { $graphics.Dispose(); $bitmap.Dispose() }
 }
-Write-Output 'Generated two 1280x720 authored surface-normal maps; source artwork untouched.'
+Write-Output 'Generated two full-canvas and four registered split normal maps; source artwork untouched.'

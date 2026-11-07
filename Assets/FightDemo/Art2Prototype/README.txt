@@ -236,3 +236,75 @@ Inspect contact placement at the current camera and after moving a card. This fi
 is broad faceted shading, not 3D thickness, displacement, or physically accurate cavity AO.
 C# and static references/import settings were checked; Unity GPU/Play Mode visual review
 is still required before accepting the exact normal strength and shadow appearance.
+
+Independent cropped cave objects (supersedes the two-card surface setup above)
+-----------------------------------------------------------------------------
+Art2 CaveEnvironment_2_5D now has eleven rendered cards. The previous full-canvas
+wood/rock renderer objects are transform-only containers, retaining scene overrides.
+The four active objects/materials are:
+- WoodenBarricades_GroundAnchor/Tilt_45deg/Wood_SplitObjects/WoodenBarricade_Left
+  cave_02_00 / CaveWoodLeftLit / CaveWoodLeftNormal
+- .../WoodenBarricade_Right: cave_02_01 / CaveWoodRightLit / CaveWoodRightNormal
+- Rocks_GroundAnchor/Tilt_45deg/Rocks_SplitObjects/Rock_Left
+  cave_01_00 / CaveRockLeftLit / CaveRockLeftNormal
+- .../Rock_Right: cave_01_01 / CaveRockRightLit / CaveRockRightNormal
+
+The new art is exactly twice the original pixel scale. PPU remains 100; child scale
+0.5 compensates. Old-canvas crop rectangles (top-left x,y,width,height) are:
+rock left (100,344,232,96), right (1080,352,148,72),
+wood left (368,276,144,68), right (852,208,160,144).
+Their corresponding child offsets preserve the original world-space artwork positions.
+Every opaque source pixel was matched at 2x scale; geometric centre/corner equivalence
+and untouched scene/ancestor transforms were checked. New PNGs were not rewritten.
+New sprite imports use Point, uncompressed, Single, Full Rect; pivots/PPU unchanged.
+
+Each object has its own cropped normal material, Two Sided casting, receiving and
+one independently adjustable contact shadow. Move the named child object to reposition
+one prop. Default surface settings: normal strength 1, ambient 0.48, light influence 1,
+Direct Light Wrap 0.1. Lower wrap preserves a more distinct shaded side. Existing actor,
+floor and other background material lighting retains its prior defaults.
+Use Surface Normal Map toggles only surface normals; the contact component has its own
+Show Contact Shadows switch. The old full-canvas materials remain as comparison assets.
+Build-CaveSurfaceNormals.ps1 now regenerates the two full maps plus four aligned split
+maps; avoid running it over hand-edited normal PNGs without preserving those edits.
+The main light, torch lights/VFX, camera and battle settings were not changed by the split.
+
+Isolated surface lighting diagnostic
+-----------------------------------
+Menu: Rhythm Hunter > Art2 > Surface Lighting Diagnostic.
+This Editor window creates a disposable PreviewScene with cloned materials, one white
+main test light, and copies of cave_01_00 / cave_02_00. It does not open, save or change
+Art2_FightScene, source materials, main light, torch lights, camera or object placement.
+Five columns (rock above, wood below): original artwork; gray flat-normal control;
+gray surface-normal result; world-space normal directions; artwork with surface lighting.
+The gray comparison uses independent ambient controls. The final column retains the
+source material's ambient/wrap settings so painted-color suppression can be diagnosed.
+Use left/right light buttons, azimuth/elevation sliders or automatic sweep. Setting
+normal strength to zero should remove face-dependent lighting in the gray-normal column.
+Original artwork and flat-normal controls should not develop directional face patterns.
+
+GPU check menu: Rhythm Hunter > Art2 > Verify Surface Light Response (GPU).
+Renders the actual SpriteCardLit shader with white light at azimuth -65/+65, elevation15,
+normal strength1 and gray ambient0.05. Reads 3x3 pixel patches on two authored faces of
+both objects; requires each face to win under its corresponding light by >0.08 and the
+flat-control inter-face difference to stay <0.025. A failure is explicitly reported.
+Results and PNG captures: Temp/Art2SurfaceDiagnostic/{result.txt,left.png,right.png}.
+This validates directional response and the normal transform, not final scene composition,
+contact shadows, artistic normal accuracy or the final game's performance.
+A one-shot Temp/Art2SurfaceDiagnostic.request can request the same check after editor
+reload; it never runs automatically in ordinary project loads or during Play Mode.
+
+Verified GPU diagnostic result (2026-11-07, Unity 6000.3.21f1 / DX11)
+- Rock gray surface: left light left/right samples 0.439 / 0.024;
+  right light 0.024 / 0.447. Flat-normal inter-face difference 0.000.
+- Wood gray surface: left light 0.290 / 0.024;
+  right light 0.184 / 0.451. Flat-normal inter-face difference 0.000.
+- Active scene/root-count/dirty-state/main-light identity, transform and serialized
+  settings preservation: PASS. Scene and cave prefab file hashes also unchanged.
+- C# build: zero warnings/errors. Both GPU direction checks PASS.
+URP Preview cameras require a render-scoped default-renderer override in this project;
+the existing FightVfxScenePreview helper now recognizes only the named diagnostic
+preview camera, restores the previous renderer after rendering, and never saves assets.
+PNG exports are gamma-encoded for image viewing; measured values remain linear.
+The gray maps show clear face changes while the original painted/dark colors diminish
+the perceived difference. Passing these tests does not certify artistic normal accuracy.
