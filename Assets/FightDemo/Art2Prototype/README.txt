@@ -101,3 +101,99 @@ Performance/quality:
 - C# compilation and serialized references verified. Unity batch startup still exits
   before project import, so GPU shader compilation, appearance, runtime restoration and
   actual frame-time measurements require Unity Editor verification.
+
+Structure and shadow sample (2026-11-07):
+- CaveStructureSample.prefab contains seven solid blocks and two faceted rocks.
+- Door_Thickness: left/right jambs, lintel, threshold and front step; the original
+  painted door remains visible in the recessed opening.
+- Left_Wall_Volume / Right_Wall_Volume: angled solid side walls.
+- Two_Faceted_Rocks: individually movable Rock_Left and Rock_Right.
+- Shapes use matte URP/Lit materials with colors chosen for the cave palette.
+  These are initial structural sample materials, not newly painted pixel textures.
+- Art2StructureMesh builds flat-normal geometry in Edit and Play modes. Size controls
+  dimensions; Top Depth Offset Per Height shears upper vertices along Z while keeping
+  the base flat on the floor. Rock Sides and Rock Seed adjust the two rocks.
+- Meshes rebuild only when configuration changes; generated meshes are hidden transient
+  resources and are released on disable. No colliders or gameplay components are added.
+- Default geometry budget: 168 triangles total across nine meshes.
+
+Shadow light controls:
+- Select ShadowTestLight_MoveMe under Art2_2_5D_Prototype and move its Transform.
+- Art2ShadowTestLight automatically aims it at ShadowTest_AimTarget in Edit/Play modes.
+- This is a directional light: moving it changes direction through automatic aiming;
+  position alone does not create distance falloff. Disable Aim At Target to rotate manually.
+- Light > Intensity / Color / Shadows / Strength control the light and its shadow.
+- Bias and Normal Bias use this light's local settings rather than the global pipeline values.
+- Main-light shadows already exist in the pipeline; additional-light and soft shadows
+  remain disabled globally. This sample uses hard shadows without changing global URP.
+- RenderSettings.sun in Art2 references this light. The other four atmosphere lights remain.
+- New solid geometry casts shadows onto the cave floor. Characters retain their existing
+  blob contact shadows; they do not acquire sprite silhouette shadow casting in this step.
+- Ground ambient strength is reduced to 0.6 so cast shadows can be distinguished.
+- Ground and lit cards sample the main-light shadow map; original transparent/VFX rules remain.
+
+Review:
+- Disable CaveStructureSample to compare the added geometry; the original cave remains.
+- Volume Weight=0 and CaveDistantLit Blur Radius=0 permit a structure-only comparison.
+- Menu Rhythm Hunter > Art2 > Validate Structure Sample checks generated meshes,
+  normals, shadow configuration and existing atmosphere setup in the Editor.
+- Your hidden HUD, rock/barricade overrides and camera settings are preserved.
+- C# build and serialized reference/override checks pass. Actual GPU shadows, material
+  rendering and geometry appearance still require an Editor visual check.
+
+Sprite silhouette shadows (Art2 only)
+------------------------------------
+WoodenBarricades and Rocks use Two Sided shadow casting and CaveMiddleLit.
+SpriteCardLit has an alpha-clipped ShadowCaster pass; transparent canvas pixels
+never cast a rectangular shadow. No source sprite crop/PPU changes are required.
+Art2ActorPresentation applies Art2ActorLit and Two Sided casting to spawned actors,
+including replacement actors on later waves, and restores original settings when disabled.
+Animation frames and SpriteRenderer flip/color are used by the shadow pass.
+
+Inspector controls:
+- Art2_2_5D_Prototype > Art2ActorPresentation > Cast Sprite Shadows: actor projection.
+- Show Contact Shadows: independent soft oval grounding (optional, not light projection).
+- Art2ActorLit / CaveMiddleLit > Shadow Alpha Cutoff (default 0.1): transparency threshold.
+- ShadowTestLight_MoveMe: move it while Aim At Target is enabled to change shadow direction.
+  This is a directional main light; distance alone does not change brightness.
+- Light > Shadows > Strength / Bias / Normal Bias: darkness and contact offset.
+  Excessive bias detaches shadows from feet. Existing point lights do not cast shadows.
+
+Rhythm Hunter > Art2 > Validate Sprite Shadows checks imported materials and scene setup.
+Visual checks: transparent margins cast no shadow; animated actors update silhouettes;
+move the main light to inspect wood/rock/actor shadows on CaveGround; restart/change waves.
+These are flat sprite-card silhouettes, not volumetric surfaces or per-pixel normal maps.
+Original unlit foreground framing and luminous torch cards remain non-casters.
+
+Red torch ambience:
+Art2_Atmosphere contains Torch_Left/Right_RedFlicker and
+Torch_InnerLeft/InnerRight_RedFlicker, aligned to the four painted flames.
+Light Color and Range are editable on each Light (red, range 5 by default).
+Art2TorchFlicker: Base Intensity 10, Flicker Amount 0.15, Speed 2.5;
+unique Noise Seeds keep the four lights independent. Smooth variation runs
+in Play Mode using unscaled time, without altering battle timing. Disable
+the component to restore steady light. No extra shadow maps are generated.
+The existing main shadow light and door fill remain unchanged.
+
+Torch visibility correction:
+Art2_TestCamera now selects Art2ForwardPlusRenderer (registered at renderer index 2).
+The default renderer and existing UniversalVFXRenderer remain unchanged. Scene View
+uses the Art2 renderer only for this scene / its Cave prefab previews. Sprite/floor
+shaders support the URP 17 clustered light loop so large cards are not restricted
+to four per-object additional lights. Main light settings are untouched.
+Art2TorchFlicker > Preview In Editor enables Scene View flicker outside Play Mode;
+preview intensity is restored after rendering, rather than saved into the Light.
+Enable Scene Lighting via Rhythm Hunter > Art2 > Frame Scene Preview if needed.
+The earlier Play Mode-only preview limitation no longer applies.
+
+Visible circular torch glow:
+All four red torch lights now include Art2TorchHalo. Radius (default 0.95)
+and Brightness (1.4) control the visible additive radial halo independently
+of the Light's illumination range. Light color and intensity drive the halo,
+including flicker in Scene View and Play Mode. Disable Art2TorchHalo to remove
+only the visible glow, retaining real lighting. Local Offset moves its centre.
+A shared TorchHalo material and four persistent camera-facing procedural quads
+are used; no textures, particle spawning or per-frame material creation.
+Runtime/preview quads are not saved into the scene and are cleaned up on disable.
+The halo is a visual glow, not volumetric scattering; transparent sprite occlusion
+follows Unity transparent sorting and does not provide volumetric shadowing.

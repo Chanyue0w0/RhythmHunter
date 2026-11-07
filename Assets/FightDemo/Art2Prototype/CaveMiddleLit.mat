@@ -23,6 +23,7 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _ShadowCutoff: 0.1
     - _AmbientStrength: 0.8
     - _LightInfluence: 0.65
     - _EmissionStrength: 0

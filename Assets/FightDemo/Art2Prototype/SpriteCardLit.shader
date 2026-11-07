@@ -3,6 +3,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
     Properties
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
+        _ShadowCutoff ("Shadow Alpha Cutoff", Range(0.001,1)) = 0.1
         _AmbientTint ("Ambient Tint", Color) = (0.82,0.9,1,1)
         _AmbientStrength ("Ambient Strength", Range(0,2)) = 0.8
         _LightInfluence ("Light Influence", Range(0,2)) = 0.65
@@ -14,6 +15,15 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
     SubShader
     {
         Tags { "Queue"="Transparent" "RenderType"="Transparent" "RenderPipeline"="UniversalPipeline" "CanUseSpriteAtlas"="True" }
+        HLSLINCLUDE
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/Core2D.hlsl"
+            TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
+            float4 _MainTex_TexelSize;
+            CBUFFER_START(UnityPerMaterial)
+                half4 _AmbientTint, _AtmosphereTint;
+                half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix, _ShadowCutoff;
+            CBUFFER_END
+        ENDHLSL
         Pass
         {
             Tags { "LightMode"="UniversalForward" }
@@ -27,13 +37,9 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
             #pragma fragment Frag
             #pragma multi_compile_instancing
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/Core2D.hlsl"
-            TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
-            float4 _MainTex_TexelSize;
-            CBUFFER_START(UnityPerMaterial)
-                half4 _AmbientTint, _AtmosphereTint;
-                half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix;
-            CBUFFER_END
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #include "Art2Lighting.hlsl"
             struct Attributes { float3 positionOS : POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings
@@ -85,9 +91,70 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                     color = half4(sum.rgb / max(sum.a, 0.0001h), sum.a / 16);
                 }
                 color *= input.color;
-                half3 rgb = color.rgb * (Art2Light(normalize(input.normalWS), input.positionWS, input.vertexLight) + _EmissionStrength);
+                half3 rgb = color.rgb * (Art2Light(normalize(input.normalWS), input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)) + _EmissionStrength);
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 return half4(rgb, color.a);
+            }
+            ENDHLSL
+        }
+
+        // Only the opaque sprite silhouette casts; transparent canvas pixels are discarded.
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode"="ShadowCaster" }
+            Cull Off
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0
+            HLSLPROGRAM
+            #pragma target 3.5
+            #pragma vertex ShadowVert
+            #pragma fragment ShadowFrag
+            #pragma multi_compile_instancing
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            float3 _LightDirection;
+            float3 _LightPosition;
+            struct ShadowAttributes
+            {
+                float3 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+                half4 color : COLOR;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+            struct ShadowVaryings
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                half alpha : TEXCOORD1;
+            };
+            ShadowVaryings ShadowVert(ShadowAttributes input)
+            {
+                UNITY_SETUP_INSTANCE_ID(input);
+                SetUpSpriteInstanceProperties();
+                input.positionOS = UnityFlipSprite(input.positionOS, unity_SpriteProps.xy);
+                float3 positionWS = TransformObjectToWorld(input.positionOS);
+                float3 normalWS = TransformObjectToWorldNormal(float3(0,0,-1));
+                #if defined(_CASTING_PUNCTUAL_LIGHT_SHADOW)
+                    float3 lightDirectionWS = normalize(_LightPosition - positionWS);
+                #else
+                    float3 lightDirectionWS = _LightDirection;
+                #endif
+                // A card has two faces: bias toward the light on either side.
+                normalWS *= dot(normalWS, lightDirectionWS) < 0 ? -1 : 1;
+                ShadowVaryings output;
+                output.positionCS = ApplyShadowClamping(TransformWorldToHClip(
+                    ApplyShadowBias(positionWS, normalWS, lightDirectionWS)));
+                output.uv = input.uv;
+                output.alpha = input.color.a * unity_SpriteColor.a;
+                return output;
+            }
+            half4 ShadowFrag(ShadowVaryings input) : SV_Target
+            {
+                half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a * input.alpha;
+                clip(alpha - max(_ShadowCutoff, 0.001h));
+                return 0;
             }
             ENDHLSL
         }

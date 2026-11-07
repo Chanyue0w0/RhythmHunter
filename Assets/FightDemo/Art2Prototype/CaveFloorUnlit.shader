@@ -22,6 +22,9 @@ Shader "RhythmHunter/Art2/CaveFloorLit"
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             TEXTURE2D(_BaseMap);
             SAMPLER(sampler_BaseMap);
@@ -48,7 +51,7 @@ Shader "RhythmHunter/Art2/CaveFloorLit"
             half4 Frag(Varyings input) : SV_Target
             {
                 half3 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-                return half4(baseColor * Art2Light(half3(0,1,0), input.positionWS, input.vertexLight), 1);
+                return half4(baseColor * Art2Light(half3(0,1,0), input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)), 1);
             }
             ENDHLSL
         }

@@ -34,7 +34,8 @@ namespace RhythmHunter.FightDemoEditor
         {
             var stage = PrefabStageUtility.GetCurrentPrefabStage();
             if (stage != null)
-                return stage.assetPath == "Assets/FightDemo/Prefabs/ArtBattle/CaveEnvironment_2_5D.prefab";
+                return stage.assetPath == "Assets/FightDemo/Prefabs/ArtBattle/CaveEnvironment_2_5D.prefab" ||
+                    stage.assetPath == "Assets/FightDemo/Prefabs/ArtBattle/CaveStructureSample.prefab";
             string path = SceneManager.GetActiveScene().path;
             return path == "Assets/FightDemo/Scenes/Art2_FightScene.unity" ||
                 (path.StartsWith("Assets/Vefects/Pixel Craft VFX URP/") && path.EndsWith(".unity"));
@@ -46,9 +47,13 @@ namespace RhythmHunter.FightDemoEditor
             var asset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
             if (asset == null) return;
             int index = -1;
+            var stage = PrefabStageUtility.GetCurrentPrefabStage();
+            bool art2 = SceneManager.GetActiveScene().path == "Assets/FightDemo/Scenes/Art2_FightScene.unity" ||
+                (stage != null && stage.assetPath.StartsWith("Assets/FightDemo/Prefabs/ArtBattle/Cave"));
+            string rendererName = art2 ? "Art2ForwardPlusRenderer" : "UniversalVFXRenderer";
             var renderers = asset.rendererDataList;
             for (int i = 0; i < renderers.Length; i++)
-                if (renderers[i] != null && renderers[i].name == "UniversalVFXRenderer") { index = i; break; }
+                if (renderers[i] != null && renderers[i].name == rendererName) { index = i; break; }
             if (index < 0) return;
             Restore();
             savedIndex = (int)DefaultRenderer.GetValue(asset);

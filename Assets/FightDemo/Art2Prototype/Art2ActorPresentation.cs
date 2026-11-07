@@ -8,6 +8,8 @@ namespace RhythmHunter.FightDemo.Art2
     {
         [SerializeField] private FightUnitSlot[] slots;
         [SerializeField] private Material actorMaterial;
+        [Tooltip("Cast the current animation sprite silhouette into the Art2 main-light shadow map.")]
+        [SerializeField] private bool castSpriteShadows = true;
         [SerializeField] private bool showContactShadows = true;
         [SerializeField] private Material contactShadowMaterial;
         [SerializeField] private Vector2 shadowSize = new Vector2(1.25f, 0.65f);
@@ -16,7 +18,8 @@ namespace RhythmHunter.FightDemo.Art2
         private GameObject[] actors;
         private GameObject[] shadows;
         private Mesh shadowMesh;
-        private readonly List<(SpriteRenderer renderer, int layer, int order, Material material)> originalSorting = new();
+        private readonly List<(SpriteRenderer renderer, int layer, int order, Material material,
+            UnityEngine.Rendering.ShadowCastingMode casting, bool receiving)> originalSorting = new();
 
         private void OnEnable()
         {
@@ -38,12 +41,23 @@ namespace RhythmHunter.FightDemo.Art2
                 originalSorting.RemoveAll(entry => entry.renderer == null);
                 foreach (var renderer in actor.GetComponentsInChildren<SpriteRenderer>(true))
                 {
-                    originalSorting.Add((renderer, renderer.sortingLayerID, renderer.sortingOrder, renderer.sharedMaterial));
+                    if (!originalSorting.Exists(entry => entry.renderer == renderer))
+                        originalSorting.Add((renderer, renderer.sortingLayerID, renderer.sortingOrder,
+                            renderer.sharedMaterial, renderer.shadowCastingMode, renderer.receiveShadows));
                     renderer.sortingLayerID = 0;
                     renderer.sortingOrder = 0;
                     if (actorMaterial != null) renderer.sharedMaterial = actorMaterial;
                 }
             }
+            // Also apply Inspector changes to actors that have already spawned.
+            foreach (var entry in originalSorting)
+                if (entry.renderer != null)
+                {
+                    entry.renderer.shadowCastingMode = castSpriteShadows
+                        ? UnityEngine.Rendering.ShadowCastingMode.TwoSided
+                        : UnityEngine.Rendering.ShadowCastingMode.Off;
+                    entry.renderer.receiveShadows = true;
+                }
         }
 
         private void UpdateShadow(int index, GameObject actor)
@@ -85,6 +99,8 @@ namespace RhythmHunter.FightDemo.Art2
                     entry.renderer.sortingLayerID = entry.layer;
                     entry.renderer.sortingOrder = entry.order;
                     entry.renderer.sharedMaterial = entry.material;
+                    entry.renderer.shadowCastingMode = entry.casting;
+                    entry.renderer.receiveShadows = entry.receiving;
                 }
             originalSorting.Clear();
             if (shadows != null)

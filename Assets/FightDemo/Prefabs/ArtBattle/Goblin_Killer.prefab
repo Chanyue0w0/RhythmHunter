@@ -113,6 +113,7 @@ MonoBehaviour:
   skillBreakPower: 0
   bossPattern:
     enabled: 0
+    superArmor: 1
     neutralBeats: 4
     armorBeats: 4
     chargeBeats: 4
@@ -127,6 +128,17 @@ MonoBehaviour:
     chargeDamage: 2
     rageFinisherDamage: 3
     successfulGuardBreakPower: 1
+  teamQteMode: 0
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 0}
+  qteProjectileFlightBeats: 0.35
+  qteProjectileArcHeight: 1.2
+  qteImpactEffectPrefab: {fileID: 0}
+  qteImpactEffectLifetime: 1.5
+  slimeFloorPrefab: {fileID: 0}
+  slimeFloorOffset: {x: 0, y: 0, z: -0.1}
   characterId: Goblin_Killer
   displayName: KILLER GOBLIN
   team: 0
@@ -153,6 +165,17 @@ MonoBehaviour:
   basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
+  basicAppliesBleeding: 0
+  bleedDamage: 0.5
+  bleedBeats: 4
+  fragmentDamage: 1
+  fragmentBeats: 4
+  fragmentDetonationDelayBeats: 0.5
+  fragmentExplosionEffectPrefab: {fileID: 0}
+  fragmentExplosionLifetime: 0
+  stunBeats: 4
+  statusSkillTargetLimit: 3
+  crowdControlImmune: 0
   enemyAttackUsesEffectFrames: 1
   attackWindupBeats: 0
   attackInterruptible: 1
@@ -217,6 +240,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5915600679224835315, guid: ee7eba399eed0e240b5b792773da1465, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 3107d2b0f11b3d1458103154d2257ee3, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
