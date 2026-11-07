@@ -339,3 +339,32 @@ Beat-synced cave crowd sprites
   to assign their own existing clock in the scene instance.
 - Original image files and PPU remain unchanged; import is Single / Full Rect / Point
   without texture compression. Half-size transforms compensate for 2x source pixels.
+
+3D status icons
+- Art2 FightCombatController > Pooled Status Icons > Status Icon Camera references
+  Art2_TestCamera. Leave it empty in 2D scenes to retain world-axis placement.
+- Status Icon Offset is an additional camera-space offset (currently Y=0.15).
+  X is screen right, Y screen up, negative Z toward camera. Individual StatusIcons
+  prefabs retain Head Offset and Position Anchor controls; their offsets use the
+  camera axes when a Status Icon Camera is supplied.
+- SpriteTop uses the sprite-local top transformed into world space in 3D, including
+  its existing transparent padding. Icons face the camera; lanes and block popup
+  jumps follow screen axes. Pooled reuse restores rotation, scale and alpha.
+- Validate Status Icon Pool now covers both perspective/orthographic tilted views,
+  head placement, jump direction, and the existing lifecycle/1000 reuse tests.
+
+ArtBattle character head anchors and 3D information
+- All eight current ArtBattle character prefabs now expose HeadAnchor on their
+  FightCharacterDefinition. It is an authored child of the actor root and inherits
+  the existing card tilt. Adjust it in Prefab Mode for each character's anatomy.
+- Initial placement uses the visible top silhouette of the default sprite, ignoring
+  transparent canvas padding. It is stable across animation frames. Original sprite
+  images, PPU, VFX_CastAnchor and VFX_ImpactAnchor are not changed.
+- Art2 status icons and damage numbers use HeadAnchor. Damage Number Camera and
+  Status Icon Camera reference Art2_TestCamera; their offsets are camera-relative.
+  Empty camera references preserve the original 2D presentation.
+- Art2ActorPresentation > Character Information: Information Camera controls text
+  and health-bar facing; Health Bar Head Gap adjusts bar distance above HeadAnchor.
+  Align Slot Information can be disabled; authored positions/rotations are restored.
+- Tools > Rhythm Hunter > Art2 > Add Missing Character Head Anchors is idempotent:
+  already assigned anchors retain their manually tuned positions.

@@ -144,6 +144,7 @@ namespace RhythmHunter.FightDemo
             : skillEffectPrefab;
         public Transform ActorRoot => actorRoot;
         public Transform NormalAttackEffectSpawnPoint => normalAttackEffectSpawnPoint;
+        public Transform HeadAnchor => characterDefinition != null ? characterDefinition.HeadAnchor : null;
         public Transform CastEffectAnchor => runtimeCastEffectAnchor != null
             ? runtimeCastEffectAnchor
             : (characterDefinition != null ? characterDefinition.CastEffectAnchor : actorRoot);

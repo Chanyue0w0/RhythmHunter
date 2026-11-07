@@ -3,12 +3,13 @@ using UnityEngine;
 namespace RhythmHunter.FightDemo
 {
     // Presentation only. The controller's pool owns lifetime and recycling.
+    [DefaultExecutionOrder(100)]
     public sealed class FightStatusIcon : MonoBehaviour
     {
         public enum PositionAnchor { SpriteTop, ActorOrigin, ImpactAnchor }
         [Tooltip("SpriteTop includes transparent sprite padding. ActorOrigin gives a stable authored position.")]
         [SerializeField] private PositionAnchor positionAnchor;
-        [Tooltip("World-space offset. Lower Y (including negative values) moves the icon down.")]
+        [Tooltip("Offset in world axes for 2D; camera axes when Status Icon Camera is assigned. Y=up; negative Z=toward camera.")]
         [SerializeField] private Vector3 headOffset = new(0, 0, -.5f);
         [Header("Status Trigger Pulse")]
         [SerializeField, Min(.01f)] private float triggerPulseBeats = .35f;
@@ -24,6 +25,9 @@ namespace RhythmHunter.FightDemo
         private Vector3 baseScale;
         private float pulseElapsed;
         private bool pulsing;
+        private Camera viewCamera;
+        private Vector3 sceneOffset;
+        private Quaternion baseRotation;
         internal bool Finishing { get; private set; }
         internal FightUnitSlot Target { get; private set; }
         internal int Kind { get; private set; }
@@ -33,13 +37,16 @@ namespace RhythmHunter.FightDemo
         {
             Kind = kind;
             baseScale = transform.localScale;
+            baseRotation = transform.localRotation;
             sprites = GetComponentsInChildren<SpriteRenderer>(true);
             colors = new Color[sprites.Length];
             for (int i = 0; i < sprites.Length; i++) colors[i] = sprites[i].color;
         }
 
-        internal void Begin(FightUnitSlot target, float lane)
+        internal void Begin(FightUnitSlot target, float lane, Camera camera = null, Vector3 offset = default)
         {
+            viewCamera = camera;
+            sceneOffset = offset;
             Target = target; Lane = lane; elapsed = 0;
             pulsing = Finishing = false;
             transform.localScale = baseScale;
@@ -47,19 +54,32 @@ namespace RhythmHunter.FightDemo
             if (targetSprite == null && target.ActorInstance != null)
                 targetSprite = target.ActorInstance.GetComponentInChildren<SpriteRenderer>();
             RestoreAlpha();
-            origin = HeadPosition() + headOffset;
-            transform.position = origin + Vector3.right * lane;
+            origin = HeadPosition();
+            UpdatePose();
             gameObject.SetActive(true);
         }
 
         private Vector3 HeadPosition()
         {
+            if (viewCamera != null && positionAnchor == PositionAnchor.SpriteTop && Target != null && Target.HeadAnchor != null)
+                return Target.HeadAnchor.position;
             if (Target != null && positionAnchor == PositionAnchor.ActorOrigin)
                 return Target.ActorInstance != null ? Target.ActorInstance.transform.position : Target.transform.position;
             if (Target != null && positionAnchor == PositionAnchor.ImpactAnchor)
                 return Target.ImpactEffectAnchor.position;
             if (targetSprite != null && targetSprite.sprite != null)
+            {
+                if (viewCamera != null)
+                {
+                    // A rotated world AABB's top/centre is not the sprite's actual head.
+                    Bounds bounds = targetSprite.sprite.bounds;
+                    Vector3 top = bounds.center + Vector3.up * bounds.extents.y;
+                    if (targetSprite.flipX) top.x = -top.x;
+                    if (targetSprite.flipY) top.y = -top.y;
+                    return targetSprite.transform.TransformPoint(top);
+                }
                 return new Vector3(targetSprite.bounds.center.x, targetSprite.bounds.max.y, targetSprite.bounds.center.z);
+            }
             return Target != null ? Target.ImpactEffectAnchor.position : origin;
         }
 
@@ -75,7 +95,7 @@ namespace RhythmHunter.FightDemo
             if (Kind != 0)
             {
                 if (Target == null || !Target.HasCharacter || Target.CurrentHp <= 0) return false;
-                transform.position = HeadPosition() + headOffset + Vector3.right * Lane;
+                UpdatePose();
                 if (pulsing)
                 {
                     pulseElapsed += beats;
@@ -98,7 +118,7 @@ namespace RhythmHunter.FightDemo
             }
             elapsed += seconds;
             float t = Mathf.Clamp01(elapsed / Mathf.Max(.01f, popupLifetime));
-            transform.position = origin + new Vector3(popupRightDistance * t, popupJumpHeight * 4 * t * (1 - t), 0);
+            UpdatePose();
             SetAlpha(1 - t);
             return t < 1;
         }
@@ -109,7 +129,31 @@ namespace RhythmHunter.FightDemo
             Target = null; targetSprite = null; elapsed = 0;
             pulsing = Finishing = false;
             transform.localScale = baseScale;
+            transform.localRotation = baseRotation;
+            viewCamera = null;
+            sceneOffset = Vector3.zero;
             RestoreAlpha();
+        }
+
+        // Runs after the Art2 camera's LateUpdate, including while the game is paused.
+        private void LateUpdate() => UpdatePose();
+
+        private void UpdatePose()
+        {
+            if (Target == null) return;
+            Vector3 offset = headOffset + sceneOffset + Vector3.right * Lane;
+            if (Kind == 0)
+            {
+                float t = Mathf.Clamp01(elapsed / Mathf.Max(.01f, popupLifetime));
+                offset += new Vector3(popupRightDistance * t, popupJumpHeight * 4 * t * (1 - t), 0);
+            }
+            Vector3 anchor = Kind == 0 ? origin : HeadPosition();
+            if (viewCamera != null)
+            {
+                transform.rotation = viewCamera.transform.rotation * baseRotation;
+                offset = viewCamera.transform.TransformDirection(offset);
+            }
+            transform.position = anchor + offset;
         }
 
         private void RestoreAlpha()

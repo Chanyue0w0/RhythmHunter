@@ -4,10 +4,16 @@ using UnityEngine;
 namespace RhythmHunter.FightDemo.Art2
 {
     // Scene-only rendering adaptation. Slot order, damage, timing and prefab data are untouched.
+    [DefaultExecutionOrder(90)]
     public sealed class Art2ActorPresentation : MonoBehaviour
     {
         [SerializeField] private FightUnitSlot[] slots;
         [SerializeField] private Material actorMaterial;
+        [Header("Character Information")]
+        [SerializeField] private Camera informationCamera;
+        [SerializeField] private bool alignSlotInformation = true;
+        [SerializeField] private float healthBarHeadGap = .25f;
+        private readonly List<(Transform target, FightUnitSlot slot, Vector3 position, Quaternion rotation, bool health)> overlays = new();
         [Tooltip("Cast the current animation sprite silhouette into the Art2 main-light shadow map.")]
         [SerializeField] private bool castSpriteShadows = true;
         [SerializeField] private bool showContactShadows = true;
@@ -25,6 +31,13 @@ namespace RhythmHunter.FightDemo.Art2
         {
             actors = new GameObject[slots != null ? slots.Length : 0];
             shadows = new GameObject[actors.Length];
+            overlays.Clear();
+            if (slots != null)
+                foreach (var slot in slots)
+                    if (slot != null)
+                        foreach (Transform child in slot.transform)
+                            if (child.name == "HealthFill" || child.name == "HealthBackground" || child.GetComponent<TextMesh>() != null)
+                                overlays.Add((child, slot, child.localPosition, child.localRotation, child.name.StartsWith("Health")));
         }
 
         private void LateUpdate()
@@ -58,6 +71,25 @@ namespace RhythmHunter.FightDemo.Art2
                         : UnityEngine.Rendering.ShadowCastingMode.Off;
                     entry.renderer.receiveShadows = true;
                 }
+            foreach (var overlay in overlays)
+            {
+                if (overlay.target == null) continue;
+                if (!alignSlotInformation || informationCamera == null)
+                {
+                    overlay.target.localPosition = overlay.position;
+                    overlay.target.localRotation = overlay.rotation;
+                    continue;
+                }
+                Transform view = informationCamera.transform;
+                Vector3 offset = Vector3.Scale(overlay.position, overlay.target.parent.lossyScale);
+                Vector3 origin = overlay.slot.transform.position;
+                if (overlay.health && overlay.slot.HeadAnchor != null)
+                {
+                    origin = overlay.slot.HeadAnchor.position;
+                    offset.y = healthBarHeadGap;
+                }
+                overlay.target.SetPositionAndRotation(origin + view.TransformDirection(offset), view.rotation * overlay.rotation);
+            }
         }
 
         private void UpdateShadow(int index, GameObject actor)
@@ -93,6 +125,13 @@ namespace RhythmHunter.FightDemo.Art2
 
         private void OnDisable()
         {
+            foreach (var overlay in overlays)
+                if (overlay.target != null)
+                {
+                    overlay.target.localPosition = overlay.position;
+                    overlay.target.localRotation = overlay.rotation;
+                }
+            overlays.Clear();
             foreach (var entry in originalSorting)
                 if (entry.renderer != null)
                 {

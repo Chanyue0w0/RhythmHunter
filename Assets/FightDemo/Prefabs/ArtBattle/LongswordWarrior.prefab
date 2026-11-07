@@ -33,6 +33,7 @@ Transform:
   - {fileID: 3706692169455734281}
   - {fileID: 1005054088885619773}
   - {fileID: 8708303165673788821}
+  - {fileID: 2402899425187873768}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4232183820247662683
@@ -51,6 +52,7 @@ MonoBehaviour:
   skillBreakPower: 0
   bossPattern:
     enabled: 0
+    superArmor: 1
     neutralBeats: 4
     armorBeats: 4
     chargeBeats: 4
@@ -65,6 +67,17 @@ MonoBehaviour:
     chargeDamage: 2
     rageFinisherDamage: 3
     successfulGuardBreakPower: 1
+  teamQteMode: 1
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 0.5
+  qteProjectilePrefab: {fileID: 0}
+  qteProjectileFlightBeats: 0.35
+  qteProjectileArcHeight: 1.2
+  qteImpactEffectPrefab: {fileID: 0}
+  qteImpactEffectLifetime: 1.5
+  slimeFloorPrefab: {fileID: 0}
+  slimeFloorOffset: {x: 0, y: 0, z: -0.1}
   characterId: LongswordWarrior
   displayName: LONGSWORD WARRIOR
   team: 1
@@ -80,10 +93,6 @@ MonoBehaviour:
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1
-  teamQteMode: 1
-  qteFailureDamageMultiplier: 0.5
-  qteFailureAppliesStatus: 1
-  rapidQteIntervalBeats: 0.5
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1
@@ -95,6 +104,17 @@ MonoBehaviour:
   basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
+  basicAppliesBleeding: 0
+  bleedDamage: 0.5
+  bleedBeats: 4
+  fragmentDamage: 1
+  fragmentBeats: 4
+  fragmentDetonationDelayBeats: 0.5
+  fragmentExplosionEffectPrefab: {fileID: 0}
+  fragmentExplosionLifetime: 0
+  stunBeats: 4
+  statusSkillTargetLimit: 3
+  crowdControlImmune: 0
   enemyAttackUsesEffectFrames: 0
   attackWindupBeats: 0
   attackInterruptible: 1
@@ -104,9 +124,41 @@ MonoBehaviour:
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 1005054088885619773}
   impactEffectAnchor: {fileID: 8708303165673788821}
+  headAnchor: {fileID: 2402899425187873768}
   attackIntervalBeats: 1
   maxMana: 4
   accentColor: {r: 0.12, g: 0.65, b: 0.9, a: 1}
+--- !u!1 &2438537692782408998
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2402899425187873768}
+  m_Layer: 0
+  m_Name: HeadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2402899425187873768
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2438537692782408998}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.4799166, y: 1.8205832, z: -0.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4424178650152436019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4268722423222428815
 GameObject:
   m_ObjectHideFlags: 0

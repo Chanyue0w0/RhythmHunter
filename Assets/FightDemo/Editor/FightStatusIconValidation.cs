@@ -76,6 +76,7 @@ namespace RhythmHunter.FightDemoEditor
                 Check(sprite.color.a > 0 && sprite.color.a < 1, "Blocked popup fades during its lifetime.");
                 Call(fight, "AdvanceStatusIconVisuals", .25f);
                 Check(fight.ActiveStatusIconCount == 0 && !popup.gameObject.activeSelf, "Blocked popup returns to pool after 0.5 seconds.");
+                ValidateCameraSpaceIcons(fight, active);
                 int created = fight.CreatedStatusIconCount;
                 for (int i = 0; i < 1000; i++)
                 {
@@ -98,6 +99,64 @@ namespace RhythmHunter.FightDemoEditor
                 Debug.Log("STATUS_ICON_POOL_VALIDATION_PASS: status lifecycle, jump/fade, 1000 reuse cycles, capacity and teardown.");
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
+
+        private static void ValidateCameraSpaceIcons(FightCombatController fight, IList active)
+        {
+            var cameraObject = new GameObject("StatusIconTestCamera");
+            cameraObject.transform.SetParent(fight.transform, false);
+            var camera = cameraObject.AddComponent<Camera>();
+            camera.enabled = false;
+            camera.transform.rotation = Quaternion.Euler(45, 12, 0);
+            SpriteRenderer actorSprite = null;
+            Quaternion originalRotation = Quaternion.identity;
+            try
+            {
+                Set(fight, "statusIconCamera", camera);
+                foreach (bool orthographic in new[] { false, true })
+                {
+                    camera.orthographic = orthographic;
+                    Call(fight, "ShowBlockedEffectIcon");
+                    var icon = (FightStatusIcon)active[0];
+                    actorSprite = (SpriteRenderer)typeof(FightStatusIcon).GetField("targetSprite", Flags).GetValue(icon);
+                    Check(actorSprite != null && actorSprite.sprite != null, "Missing actor sprite for 3D test.");
+                    originalRotation = actorSprite.transform.rotation;
+                    actorSprite.transform.rotation = Quaternion.Euler(45, 0, 0);
+                    Bounds bounds = actorSprite.sprite.bounds;
+                    Vector3 top = bounds.center + Vector3.up * bounds.extents.y;
+                    if (actorSprite.flipX) top.x = -top.x;
+                    if (actorSprite.flipY) top.y = -top.y;
+                    Vector3 expectedHead = actorSprite.transform.TransformPoint(top);
+                    var slot = (FightUnitSlot)typeof(FightStatusIcon).GetProperty("Target", Flags).GetValue(icon);
+                    if (slot.HeadAnchor != null) expectedHead = slot.HeadAnchor.position;
+                    Check(Vector3.Distance((Vector3)Call(icon, "HeadPosition"), expectedHead) < .0001f,
+                        "3D head anchor must use transformed sprite top, not its world AABB.");
+                    // Rent again after rotating the actor so the popup captures the new head.
+                    Call(fight, "ClearStatusIcons");
+                    Call(fight, "ShowBlockedEffectIcon");
+                    icon = (FightStatusIcon)active[0];
+                    Vector3 offset = (Vector3)typeof(FightStatusIcon).GetField("headOffset", Flags).GetValue(icon);
+                    Check(Vector3.Distance(icon.transform.position, expectedHead + camera.transform.TransformDirection(offset)) < .0001f,
+                        "Camera-relative offset must not drift away from the head.");
+                    Check(Vector3.Dot(icon.transform.forward, camera.transform.forward) > .9999f,
+                        "Icon must face the tilted camera.");
+                    Vector3 start = icon.transform.position;
+                    Call(fight, "AdvanceStatusIconVisuals", .25f);
+                    Vector3 motion = icon.transform.position - start;
+                    Check(Vector3.Dot(motion, camera.transform.right) > 0 && Vector3.Dot(motion, camera.transform.up) > 0,
+                        "3D block popup must jump toward screen right/up.");
+                    Call(fight, "ClearStatusIcons");
+                    actorSprite.transform.rotation = originalRotation;
+                    actorSprite = null;
+                }
+            }
+            finally
+            {
+                Call(fight, "ClearStatusIcons");
+                if (actorSprite != null) actorSprite.transform.rotation = originalRotation;
+                Set(fight, "statusIconCamera", null);
+                UnityEngine.Object.DestroyImmediate(cameraObject);
+            }
         }
     }
 }

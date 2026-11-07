@@ -124,6 +124,9 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Transform castEffectAnchor;
         [Tooltip("Incoming damage VFX anchor. Add or move VFX_ImpactAnchor inside this character prefab.")]
         [SerializeField] private Transform impactEffectAnchor;
+        [Tooltip("3D 頭頂資訊掛點；在 Prefab 中移動 HeadAnchor 可調整狀態圖示與傷害數字的位置。")]
+        [SerializeField] private Transform headAnchor;
+        public Transform HeadAnchor => headAnchor;
         [Tooltip("AI attack interval. Player-controlled party members ignore this value.")]
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;

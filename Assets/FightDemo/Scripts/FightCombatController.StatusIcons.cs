@@ -13,6 +13,10 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private int statusIconPrewarmPerType = 4;
         [SerializeField, Min(1)] private int maxBlockedEffectIcons = 32;
         [SerializeField, Min(0)] private float statusIconSpacing = .55f;
+        [Tooltip("3D 場景指定顯示相機：圖示朝向相機，偏移與彈跳使用畫面方向。留空維持原 2D 模式。")]
+        [SerializeField] private Camera statusIconCamera;
+        [Tooltip("額外圖示偏移；指定相機時 X=畫面右、Y=畫面上、Z=遠離相機。")]
+        [SerializeField] private Vector3 statusIconOffset;
         private Transform statusIconRoot, statusIconStorage;
         private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new() };
         private readonly List<FightStatusIcon> activeStatusIcons = new();
@@ -50,7 +54,7 @@ namespace RhythmHunter.FightDemo
             EnsureStatusIconPool();
             var icon = idleStatusIcons[kind].Count > 0 ? idleStatusIcons[kind].Pop() : CreateStatusIcon(kind);
             icon.transform.SetParent(statusIconRoot, false);
-            icon.Begin(target, lane);
+            icon.Begin(target, lane, statusIconCamera, statusIconOffset);
             activeStatusIcons.Add(icon);
         }
 

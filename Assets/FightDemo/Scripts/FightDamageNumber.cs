@@ -4,6 +4,7 @@ using UnityEngine;
 namespace RhythmHunter.FightDemo
 {
     /// <summary>A reusable damage popup. Glyph references and particle components are cached.</summary>
+    [DefaultExecutionOrder(100)]
     public sealed class FightDamageNumber : MonoBehaviour
     {
         internal sealed class Glyph
@@ -21,11 +22,14 @@ namespace RhythmHunter.FightDemo
         private Vector3 origin;
         private float elapsed, lifetime, rise;
         private bool paused;
+        private Camera viewCamera;
         internal bool Leased { get; private set; }
 
-        internal void Begin(FightCombatController fight, Vector3 position, float size, float seconds, float riseDistance)
+        internal void Begin(FightCombatController fight, Vector3 position, float size, float seconds, float riseDistance, Camera camera = null)
         {
             controller = fight;
+            viewCamera = camera;
+            transform.rotation = camera != null ? camera.transform.rotation : Quaternion.identity;
             transform.position = origin = position;
             transform.localScale = Vector3.one * size;
             elapsed = 0;
@@ -71,9 +75,24 @@ namespace RhythmHunter.FightDemo
             paused = false;
             elapsed = 0;
             gameObject.SetActive(false);
+            viewCamera = null;
+            transform.localRotation = Quaternion.identity;
         }
 
         private void Update() => Advance(Time.deltaTime);
+        private void LateUpdate()
+        {
+            if (!Leased || viewCamera == null) return;
+            transform.rotation = viewCamera.transform.rotation;
+            UpdatePosition();
+        }
+
+        private void UpdatePosition()
+        {
+            float t = Mathf.Clamp01(elapsed / lifetime);
+            Vector3 up = viewCamera != null ? viewCamera.transform.up : Vector3.up;
+            transform.position = origin + up * (rise * t + Mathf.Sin(t * Mathf.PI) * .15f);
+        }
 
         // Also permits deterministic editor validation without waiting for real frames.
         internal void Advance(float deltaTime)
@@ -91,7 +110,7 @@ namespace RhythmHunter.FightDemo
             elapsed += deltaTime;
             if (elapsed >= lifetime) { controller.ReturnDamageNumber(this); return; }
             float t = Mathf.Clamp01(elapsed / lifetime);
-            transform.position = origin + Vector3.up * (rise * t + Mathf.Sin(t * Mathf.PI) * .15f);
+            UpdatePosition();
             foreach (var glyph in glyphs)
                 if (glyph.point != null)
                     glyph.point.color = new Color(1, 1, 1, 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.55f, 1, t)));

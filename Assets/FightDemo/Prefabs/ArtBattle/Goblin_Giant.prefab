@@ -95,6 +95,7 @@ Transform:
   - {fileID: 4896774704012948112}
   - {fileID: 6601874366244489931}
   - {fileID: 7004274928639243472}
+  - {fileID: 6708979518259821821}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1049329208925010419
@@ -113,6 +114,7 @@ MonoBehaviour:
   skillBreakPower: 0
   bossPattern:
     enabled: 0
+    superArmor: 1
     neutralBeats: 4
     armorBeats: 4
     chargeBeats: 4
@@ -127,6 +129,17 @@ MonoBehaviour:
     chargeDamage: 2
     rageFinisherDamage: 3
     successfulGuardBreakPower: 1
+  teamQteMode: 0
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 0}
+  qteProjectileFlightBeats: 0.35
+  qteProjectileArcHeight: 1.2
+  qteImpactEffectPrefab: {fileID: 0}
+  qteImpactEffectLifetime: 1.5
+  slimeFloorPrefab: {fileID: 0}
+  slimeFloorOffset: {x: 0, y: 0, z: -0.1}
   characterId: Goblin_Giant
   displayName: GIANT GOBLIN
   team: 0
@@ -153,6 +166,17 @@ MonoBehaviour:
   basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
+  basicAppliesBleeding: 0
+  bleedDamage: 0.5
+  bleedBeats: 4
+  fragmentDamage: 1
+  fragmentBeats: 4
+  fragmentDetonationDelayBeats: 0.5
+  fragmentExplosionEffectPrefab: {fileID: 0}
+  fragmentExplosionLifetime: 0
+  stunBeats: 4
+  statusSkillTargetLimit: 3
+  crowdControlImmune: 0
   enemyAttackUsesEffectFrames: 1
   attackWindupBeats: 0
   attackInterruptible: 1
@@ -162,9 +186,41 @@ MonoBehaviour:
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 6601874366244489931}
   impactEffectAnchor: {fileID: 7004274928639243472}
+  headAnchor: {fileID: 6708979518259821821}
   attackIntervalBeats: 16
   maxMana: 4
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
+--- !u!1 &8252524555248054281
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6708979518259821821}
+  m_Layer: 0
+  m_Name: HeadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6708979518259821821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8252524555248054281}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.17734058, y: 1.7177917, z: -0.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7806950159752532399}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &4601833531708514031
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -64,6 +64,7 @@ Transform:
   - {fileID: 8729651937709061233}
   - {fileID: 1354775231306750794}
   - {fileID: 2231149388811729171}
+  - {fileID: 6326864205689780140}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5101759564044618693
@@ -82,6 +83,7 @@ MonoBehaviour:
   skillBreakPower: 0
   bossPattern:
     enabled: 0
+    superArmor: 1
     neutralBeats: 4
     armorBeats: 4
     chargeBeats: 4
@@ -96,6 +98,17 @@ MonoBehaviour:
     chargeDamage: 2
     rageFinisherDamage: 3
     successfulGuardBreakPower: 1
+  teamQteMode: 0
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 0}
+  qteProjectileFlightBeats: 0.35
+  qteProjectileArcHeight: 1.2
+  qteImpactEffectPrefab: {fileID: 0}
+  qteImpactEffectLifetime: 1.5
+  slimeFloorPrefab: {fileID: 0}
+  slimeFloorOffset: {x: 0, y: 0, z: -0.1}
   characterId: Minotaur
   displayName: MINOTAUR
   team: 1
@@ -105,7 +118,7 @@ MonoBehaviour:
   frontlineDefenseBonus: 0
   basicAbilityName: Not Configured
   normalAbilityBehavior: 5
-  normalAbilityPower: 0
+  normalAbilityPower: 0.5
   consecutiveInputBeats: 3
   basicGuardBeats: 1
   basicInterruptsEnemy: 0
@@ -116,10 +129,25 @@ MonoBehaviour:
   teamSkillEffectBeatOffset: 1
   skillName: Not Configured
   skillBehavior: 5
-  skillPower: 0
+  skillPower: 0.5
   conditionalSkillPower: 0
+  basicArmorRecovery: 0
+  basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
+  basicAppliesBleeding: 0
+  bleedDamage: 0.5
+  bleedBeats: 4
+  fragmentDamage: 1
+  fragmentBeats: 4
+  fragmentDetonationDelayBeats: 0.5
+  fragmentExplosionEffectPrefab: {fileID: 0}
+  fragmentExplosionLifetime: 0
+  stunBeats: 4
+  statusSkillTargetLimit: 3
+  crowdControlImmune: 0
+  enemyAttackUsesEffectFrames: 0
+  attackWindupBeats: 0
   attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
   useFallbackAbilityEffects: 0
@@ -127,9 +155,41 @@ MonoBehaviour:
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 1354775231306750794}
   impactEffectAnchor: {fileID: 2231149388811729171}
+  headAnchor: {fileID: 6326864205689780140}
   attackIntervalBeats: 4
   maxMana: 3
   accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}
+--- !u!1 &4381889871483072926
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6326864205689780140}
+  m_Layer: 0
+  m_Name: HeadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6326864205689780140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4381889871483072926}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.15049998, y: 2.3076665, z: -0.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4204335622044879702}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8371202048280760596
 GameObject:
   m_ObjectHideFlags: 0

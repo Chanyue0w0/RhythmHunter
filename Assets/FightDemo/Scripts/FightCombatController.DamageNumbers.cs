@@ -8,6 +8,8 @@ namespace RhythmHunter.FightDemo
     {
         [Header("Enemy Damage Numbers")]
         [SerializeField] private bool showEnemyDamageNumbers = true;
+        [Tooltip("3D 場景指定相機，使傷害數字朝向畫面，偏移與上飄沿畫面座標。留空保留 2D 行為。")]
+        [SerializeField] private Camera damageNumberCamera;
         [Tooltip("Digit prefabs in order: 0 through 9.")]
         [SerializeField] private GameObject[] damageDigitPrefabs = new GameObject[10];
         [SerializeField] private Vector3 damageNumberOffset = new Vector3(0, .25f, -.5f);
@@ -162,9 +164,21 @@ namespace RhythmHunter.FightDemo
             var renderer = target.ActorInstance != null ? target.ActorInstance.GetComponentInChildren<SpriteRenderer>() : null;
             if (renderer != null && renderer.sprite != null)
                 head = new Vector3(renderer.bounds.center.x, renderer.bounds.max.y, renderer.bounds.center.z);
+            if (damageNumberCamera != null)
+            {
+                if (target.HeadAnchor != null) head = target.HeadAnchor.position;
+                else if (renderer != null && renderer.sprite != null)
+                {
+                    Vector3 top = renderer.sprite.bounds.center + Vector3.up * renderer.sprite.bounds.extents.y;
+                    if (renderer.flipX) top.x = -top.x;
+                    if (renderer.flipY) top.y = -top.y;
+                    head = renderer.transform.TransformPoint(top);
+                }
+            }
             var popup = idleDamageNumbers.Count > 0 ? idleDamageNumbers.Pop() : CreateDamageNumber();
             popup.transform.SetParent(damagePoolRoot, false);
-            popup.Begin(this, head + damageNumberOffset, Mathf.Max(.01f, damageNumberScale), Mathf.Max(.1f, damageNumberLifetime), damageNumberRise);
+            Vector3 offset = damageNumberCamera != null ? damageNumberCamera.transform.TransformDirection(damageNumberOffset) : damageNumberOffset;
+            popup.Begin(this, head + offset, Mathf.Max(.01f, damageNumberScale), Mathf.Max(.1f, damageNumberLifetime), damageNumberRise, damageNumberCamera);
             activeDamageNumbers.Add(popup);
             uint seed = (uint)Random.Range(1, int.MaxValue);
             for (int i = 0; i < text.Length; i++)

@@ -64,6 +64,7 @@ Transform:
   - {fileID: 8729651937709061233}
   - {fileID: 1354775231306750794}
   - {fileID: 2231149388811729171}
+  - {fileID: 8956242490143995031}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5101759564044618693
@@ -154,9 +155,41 @@ MonoBehaviour:
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 1354775231306750794}
   impactEffectAnchor: {fileID: 2231149388811729171}
+  headAnchor: {fileID: 8956242490143995031}
   attackIntervalBeats: 4
   maxMana: 3
   accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}
+--- !u!1 &5461058197688731929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8956242490143995031}
+  m_Layer: 0
+  m_Name: HeadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8956242490143995031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5461058197688731929}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.050166663, y: 1.9314166, z: -0.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4204335622044879702}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8371202048280760596
 GameObject:
   m_ObjectHideFlags: 0

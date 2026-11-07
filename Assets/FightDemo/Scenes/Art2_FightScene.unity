@@ -9188,6 +9188,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
   showEnemyDamageNumbers: 1
+  damageNumberCamera: {fileID: 2147100302}
   damageDigitPrefabs:
   - {fileID: 8059646611630442008, guid: 65e346b2be0cd6f4e98a21f618c84252, type: 3}
   - {fileID: 821659882305050408, guid: 33830a29953a8a94db86312d69a514e5, type: 3}
@@ -9217,6 +9218,8 @@ MonoBehaviour:
   statusIconPrewarmPerType: 4
   maxBlockedEffectIcons: 32
   statusIconSpacing: 0.55
+  statusIconCamera: {fileID: 2147100302}
+  statusIconOffset: {x: 0, y: 0.15, z: 0}
   startWithFullTeamSkill: 1
   teamSkillGaugeGain: 1
   teamSkillBurstBeats: 16
@@ -9826,6 +9829,9 @@ MonoBehaviour:
   shadowSize: {x: 1.25, y: 0.65}
   shadowGroundOffset: {x: 0, y: 0}
   groundHeight: 0.025
+  informationCamera: {fileID: 2147100302}
+  alignSlotInformation: 1
+  healthBarHeadGap: 0.25
 --- !u!1001 &2147100100
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9925,6 +9931,10 @@ PrefabInstance:
     - target: {fileID: 2621, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalPosition.z
       value: 1.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 2641, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.92
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10571,7 +10581,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: -420, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 1.836772e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -10735,7 +10745,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: -2.3859665e-35, z: 4.5907e-41, w: -2.3859298e-35}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11199,7 +11209,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 10.9031725, y: 7.316175e+34, z: 7.1429363e+31, w: 7.987447e+17}
+  m_BoundingSphereOverride: {x: 2.3968e-41, y: 3.214242e-39, z: 1.0217e-41, w: 3.93419e+12}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11363,7 +11373,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1e-45, y: 1e-45, z: 1e-45, w: 1e-45}
+  m_BoundingSphereOverride: {x: -1.49e-43, y: 1e-45, z: 7e-45, w: -1.490754e-38}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

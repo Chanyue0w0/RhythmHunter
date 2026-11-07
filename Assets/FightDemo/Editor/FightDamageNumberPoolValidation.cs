@@ -57,6 +57,36 @@ namespace RhythmHunter.FightDemoEditor
                 Show(1);
                 Expire();
                 Check(fight.CreatedDamageNumberCount == roots, "Reset discarded reusable popup instances.");
+                var cameraObject = new GameObject("DamageNumberTestCamera");
+                cameraObject.transform.SetParent(fight.transform, false);
+                var camera = cameraObject.AddComponent<Camera>();
+                camera.enabled = false;
+                try
+                {
+                    Set(fight, "damageNumberCamera", camera);
+                    foreach (bool orthographic in new[] { false, true })
+                    {
+                        camera.orthographic = orthographic;
+                        camera.transform.rotation = Quaternion.Euler(45, 15, 0);
+                        Check(target.HeadAnchor != null, "3D character must have an authored head anchor.");
+                        Show(12.5f);
+                        var popup = (FightDamageNumber)active[0];
+                        Vector3 offset = (Vector3)fight.GetType().GetField("damageNumberOffset", Flags).GetValue(fight);
+                        Vector3 expected = target.HeadAnchor.position + camera.transform.TransformDirection(offset);
+                        Check(Vector3.Distance(popup.transform.position, expected) < .0001f, "Damage popup must use the head anchor and camera-relative offset.");
+                        Check(Vector3.Dot(popup.transform.forward, camera.transform.forward) > .9999f, "Damage digits must face the view.");
+                        Call(popup, "Advance", .1f);
+                        Vector3 movement = popup.transform.position - expected;
+                        Check(Vector3.Dot(movement.normalized, camera.transform.up) > .9999f, "Damage number must rise along screen up.");
+                        Expire();
+                    }
+                    Set(fight, "damageNumberCamera", null);
+                    Show(1);
+                    Check(Quaternion.Angle(((FightDamageNumber)active[0]).transform.rotation, Quaternion.identity) < .001f,
+                        "Pool reuse must restore 2D orientation.");
+                    Expire();
+                }
+                finally { UnityEngine.Object.DestroyImmediate(cameraObject); }
                 Debug.Log("DAMAGE_NUMBER_POOL_VALIDATION_PASS: 1000 reuse cycles, decimal digits, capacity, cleanup and disable.");
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
