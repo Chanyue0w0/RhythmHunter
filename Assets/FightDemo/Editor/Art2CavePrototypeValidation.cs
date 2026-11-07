@@ -25,15 +25,20 @@ namespace RhythmHunter.FightDemo.Editor
             var environment = GameObject.Find("CaveEnvironment_2_5D");
             if (!environment) throw new InvalidOperationException("2.5D environment must be active.");
             var renderers = environment.GetComponentsInChildren<SpriteRenderer>();
-            if (renderers.Length != 11 || renderers.Any(r => !r.sprite || !r.sharedMaterial))
-                throw new InvalidOperationException("Expected eleven cave cards, including four independent wood/rock sprites.");
+            if (renderers.Length != 14 || renderers.Any(r => !r.sprite || !r.sharedMaterial))
+                throw new InvalidOperationException("Expected fourteen cave cards, including four independent wood/rock sprites and four torch bodies.");
+            var torches = renderers.Where(r => r.name.StartsWith("WallTorch_")).ToArray();
+            if (torches.Length != 4 || torches.Count(r => AssetDatabase.GetAssetPath(r.sprite).EndsWith("/cave_00_left(no fire).png")) != 2 ||
+                torches.Count(r => AssetDatabase.GetAssetPath(r.sprite).EndsWith("/cave_00_right(no fire).png")) != 2 ||
+                torches.Any(r => r.sharedMaterial.GetFloat("_EmissionStrength") != 0))
+                throw new InvalidOperationException("Expected two left and two right non-emissive torch bodies.");
             if (UnityEngine.Object.FindObjectsByType<FightUnitSlot>(FindObjectsSortMode.None).Length != 6)
                 throw new InvalidOperationException("Expected six active battle slots.");
             if (GameObject.Find("CaveEnvironment") || GameObject.Find("ForestEnvironment"))
                 throw new InvalidOperationException("Original flat backgrounds must remain inactive.");
             if (UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None).Length != 1)
                 throw new InvalidOperationException("Expected one active audio listener.");
-            Debug.Log("Art2 validation passed: one camera/listener, eleven cave cards, six battle slots and active combat.");
+            Debug.Log("Art2 validation passed: one camera/listener, fourteen cave cards, six battle slots and active combat.");
         }
 
         [MenuItem("Rhythm Hunter/Art2/Validate Atmosphere")]
