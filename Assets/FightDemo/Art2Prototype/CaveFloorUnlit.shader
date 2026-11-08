@@ -34,6 +34,8 @@ Shader "RhythmHunter/Art2/CaveFloorLit"
                 half _AmbientStrength, _LightInfluence;
             CBUFFER_END
             #include "Art2Lighting.hlsl"
+            #include "Art2FocusWall.hlsl"
+            float4 _BaseMap_TexelSize;
             struct Attributes { float3 positionOS : POSITION; };
             struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float3 positionWS : TEXCOORD1; half3 vertexLight : TEXCOORD2; };
             Varyings Vert(Attributes input)
@@ -51,7 +53,22 @@ Shader "RhythmHunter/Art2/CaveFloorLit"
             half4 Frag(Varyings input) : SV_Target
             {
                 half3 baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-                return half4(baseColor * Art2Light(half3(0,1,0), input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)), 1);
+                half weight = FocusWallWeight(input.positionWS);
+                float2 stepUV = _BaseMap_TexelSize.xy * weight * _FocusWallSettings.z;
+                if (weight * _FocusWallSettings.z > .001)
+                {
+                    half3 sum = baseColor * 4;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv + float2(stepUV.x,0)).rgb * 2;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv - float2(stepUV.x,0)).rgb * 2;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv + float2(0,stepUV.y)).rgb * 2;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv - float2(0,stepUV.y)).rgb * 2;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv + stepUV).rgb;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv - stepUV).rgb;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv + float2(stepUV.x,-stepUV.y)).rgb;
+                    sum += SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv + float2(-stepUV.x,stepUV.y)).rgb;
+                    baseColor = sum / 16;
+                }
+                return half4(FocusWallFog(baseColor * Art2Light(half3(0,1,0), input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS)), weight), 1);
             }
             ENDHLSL
         }

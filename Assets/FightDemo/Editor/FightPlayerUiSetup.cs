@@ -17,9 +17,47 @@ namespace RhythmHunter.FightDemoEditor
         {
             const string path = "Temp/PlayerUiSetup.request";
             if (!File.Exists(path) || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
-            File.Delete(path);
-            try { Configure(); File.WriteAllText("Temp/PlayerUiSetup.result", "PASS: live Art2 scene references assigned and saved."); }
+            bool hideWorldInfo;
+            try { hideWorldInfo = File.ReadAllText(path).Trim() == "hide-world-info"; File.Delete(path); } catch (IOException) { return; }
+            try
+            {
+                if (hideWorldInfo) HideWorldInformation(); else Configure();
+                File.WriteAllText("Temp/PlayerUiSetup.result", hideWorldInfo ? "PASS: Art2 world labels and health visuals hidden; enemy health UI disabled; scene saved." : "PASS: live Art2 scene references assigned and saved.");
+            }
             catch (Exception ex) { File.WriteAllText("Temp/PlayerUiSetup.result", "FAIL: " + ex); Debug.LogException(ex); }
+        }
+        [MenuItem("Rhythm Hunter/Art2/Hide World Unit Information")]
+        public static void HideWorldInformation()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Run outside Play Mode.");
+            var scene = SceneManager.GetActiveScene();
+            if (scene.path != "Assets/FightDemo/Scenes/Art2_FightScene.unity") throw new InvalidOperationException("Open Art2_FightScene first.");
+            var slots = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightUnitSlot>(true)).ToArray();
+            foreach (var slot in slots)
+                foreach (Transform child in slot.transform)
+                    if (child.GetComponent<TextMesh>() || child.name == "HealthFill" || child.name == "HealthBackground")
+                    {
+                        Undo.RecordObject(child.gameObject, "Hide world unit information");
+                        child.gameObject.SetActive(false);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(child.gameObject);
+                    }
+            var presenter = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightScenePresenter>(true)).Single();
+            Undo.RecordObject(presenter, "Hide enemy health UI");
+            var data = new SerializedObject(presenter);
+            data.FindProperty("showEnemyHealthUi").boolValue = false;
+            data.ApplyModifiedProperties();
+            PrefabUtility.RecordPrefabInstancePropertyModifications(presenter);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Scene save failed.");
+            var report = new System.Text.StringBuilder();
+            foreach (var slot in slots)
+                foreach (Transform child in slot.transform)
+                    if (child.GetComponent<TextMesh>() || child.name == "HealthFill" || child.name == "HealthBackground")
+                    {
+                        if (child.gameObject.activeSelf) throw new InvalidOperationException("Label is still visible: " + child.name);
+                        report.AppendLine(slot.name + "/" + child.name);
+                    }
+            File.WriteAllText("Temp/WorldInfoHidden.txt", report.ToString());
         }
         [MenuItem("Rhythm Hunter/Art2/Configure Player UI Artwork")]
         public static void Configure()

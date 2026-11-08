@@ -51,6 +51,7 @@ namespace RhythmHunter.FightDemo.Art2
             Color color = source.color.linear * (Mathf.Max(0, brightness) *
                 Mathf.Max(0, source.intensity) / Mathf.Max(0.01f, referenceLightIntensity));
             color.a = 1;
+            visualRenderer.GetPropertyBlock(properties);
             properties.SetColor(HaloColor, color);
             visualRenderer.SetPropertyBlock(properties);
         }

@@ -16,6 +16,10 @@ namespace RhythmHunter.FightDemo.Art2
         private readonly List<(Transform target, FightUnitSlot slot, Vector3 position, Quaternion rotation, bool health)> overlays = new();
         [Tooltip("Cast the current animation sprite silhouette into the Art2 main-light shadow map.")]
         [SerializeField] private bool castSpriteShadows = true;
+        [Tooltip("Align the authored FootAnchor once on spawn; animation jumps remain free to move.")]
+        [SerializeField] private bool alignFeetToGround = true;
+        [SerializeField] private float actorGroundHeight = 0;
+        private readonly Dictionary<Transform, Vector3> originalActorPositions = new();
         [SerializeField] private bool showContactShadows = true;
         [SerializeField] private Material contactShadowMaterial;
         [SerializeField] private Vector2 shadowSize = new Vector2(1.25f, 0.65f);
@@ -51,6 +55,15 @@ namespace RhythmHunter.FightDemo.Art2
                 if (actors[i] == actor) continue;
                 actors[i] = actor;
                 if (actor == null) continue;
+                if (alignFeetToGround)
+                {
+                    Transform foot = actor.transform.Find("FootAnchor");
+                    if (foot != null)
+                    {
+                        originalActorPositions[actor.transform] = actor.transform.localPosition;
+                        actor.transform.position += Vector3.up * (actorGroundHeight - foot.position.y);
+                    }
+                }
                 originalSorting.RemoveAll(entry => entry.renderer == null);
                 foreach (var renderer in actor.GetComponentsInChildren<SpriteRenderer>(true))
                 {
@@ -125,6 +138,9 @@ namespace RhythmHunter.FightDemo.Art2
 
         private void OnDisable()
         {
+            foreach (var entry in originalActorPositions)
+                if (entry.Key != null) entry.Key.localPosition = entry.Value;
+            originalActorPositions.Clear();
             foreach (var overlay in overlays)
                 if (overlay.target != null)
                 {

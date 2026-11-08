@@ -39,6 +39,7 @@ Transform:
   - {fileID: 2601}
   - {fileID: 2701}
   - {fileID: 2801}
+  - {fileID: 2901}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1100
@@ -252,7 +253,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 42e3c8be635440419c68b7d7f688aa24, type: 2}
+  - {fileID: 2100000, guid: e51bbf2fef6e41b6ab8b14e20b4fcf85, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -504,7 +505,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 42e3c8be635440419c68b7d7f688aa24, type: 2}
+  - {fileID: 2100000, guid: e51bbf2fef6e41b6ab8b14e20b4fcf85, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -659,7 +660,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 42e3c8be635440419c68b7d7f688aa24, type: 2}
+  - {fileID: 2100000, guid: 9103025f9679408f8bd7fcbf227fd8f7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1107,7 +1108,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a24b1c53d5de4eb89b6294484a3386d1, type: 2}
+  - {fileID: 2100000, guid: 03df9c534ace43d59ceeed9cab45286c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1262,7 +1263,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a24b1c53d5de4eb89b6294484a3386d1, type: 2}
+  - {fileID: 2100000, guid: d0e1e5626f6a469bba3784f61c357259, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1401,7 +1402,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   showContactShadows: 1
-  opacity: 0.28
+  opacity: 0.48
   groundHeight: 0.025
   contacts:
   - footPixel: {x: 138, y: 132}
@@ -1514,7 +1515,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   showContactShadows: 1
-  opacity: 0.28
+  opacity: 0.48
   groundHeight: 0.025
   contacts:
   - footPixel: {x: 160, y: 284}
@@ -1627,7 +1628,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   showContactShadows: 1
-  opacity: 0.28
+  opacity: 0.55
   groundHeight: 0.025
   contacts:
   - footPixel: {x: 218, y: 176}
@@ -1740,7 +1741,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   showContactShadows: 1
-  opacity: 0.28
+  opacity: 0.55
   groundHeight: 0.025
   contacts:
   - footPixel: {x: 152, y: 136}
@@ -2170,7 +2171,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 42e3c8be635440419c68b7d7f688aa24, type: 2}
+  - {fileID: 2100000, guid: 09218ce5670f4774af5540e899f6bf40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2282,7 +2283,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 42e3c8be635440419c68b7d7f688aa24, type: 2}
+  - {fileID: 2100000, guid: 09218ce5670f4774af5540e899f6bf40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2335,3 +2336,60 @@ MonoBehaviour:
     durationInBeats: 0.33
   - sprite: {fileID: 21300000, guid: 25c35bb49856bff438a7c38bd4ddab49, type: 3}
     durationInBeats: 0.34
+
+--- !u!1 &2900
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2901}
+  - component: {fileID: 2902}
+  m_Layer: 0
+  m_Name: DistantFocusWall_MoveMe
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &2901
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2900}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e78cbc2a40145c8ad601a44caeac6b0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  targets:
+  - {fileID: 1103}
+  - {fileID: 2022}
+  - {fileID: 2222}
+  - {fileID: 2322}
+  - {fileID: 2132}
+  - {fileID: 2142}
+  - {fileID: 2432}
+  - {fileID: 2442}
+  - {fileID: 2452}
+  - {fileID: 2462}
+  transitionDepth: 3
+  blurPixels: 1.2
+  fogDensity: 0.16
+  fogColor: {r: 0.12, g: 0.18, b: 0.22, a: 1}
+  guideSize: {x: 24, y: 10}

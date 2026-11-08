@@ -14,6 +14,8 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         _LightInfluence ("Light Influence", Range(0,2)) = 0.65
         _EmissionStrength ("Emission Strength", Range(0,4)) = 0
         _BlurRadius ("Distant Blur (Source Pixels)", Range(0,2)) = 0
+        _FocusSaturation ("Focus Saturation", Range(0,1)) = 1
+        _FocusContrast ("Focus Contrast", Range(0,1)) = 1
         _AtmosphereTint ("Distant Atmosphere", Color) = (0.09,0.16,0.2,1)
         _AtmosphereMix ("Atmosphere Mix", Range(0,0.4)) = 0
     }
@@ -22,6 +24,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         Tags { "Queue"="Transparent" "RenderType"="Transparent" "RenderPipeline"="UniversalPipeline" "CanUseSpriteAtlas"="True" }
         HLSLINCLUDE
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/Core2D.hlsl"
+            #include "Art2FocusWall.hlsl"
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
             TEXTURE2D(_NormalMap); SAMPLER(sampler_NormalMap);
             float4 _MainTex_TexelSize;
@@ -29,6 +32,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 half4 _AmbientTint, _AtmosphereTint;
                 half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix, _ShadowCutoff;
                 half _UseNormalMap, _NormalStrength, _DiffuseFloor, _SurfaceDebugMode;
+                half _FocusSaturation, _FocusContrast;
             CBUFFER_END
         ENDHLSL
         Pass
@@ -87,9 +91,11 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
             {
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 // Material-uniform branch: sharp actors/foreground pay for one texture sample.
-                if (_BlurRadius > 0.001h)
+                half focusWeight = FocusWallWeight(input.positionWS);
+                half blurRadius = max(_BlurRadius, FocusWallBlurAmount(input.positionWS));
+                if (blurRadius > 0.001h)
                 {
-                    float2 stepUV = _MainTex_TexelSize.xy * _BlurRadius;
+                    float2 stepUV = _MainTex_TexelSize.xy * blurRadius;
                     half4 sum = half4(color.rgb * color.a, color.a) * 4;
                     sum += PremultipliedSample(input.uv + float2(stepUV.x,0)) * 2;
                     sum += PremultipliedSample(input.uv - float2(stepUV.x,0)) * 2;
@@ -102,6 +108,9 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                     color = half4(sum.rgb / max(sum.a, 0.0001h), sum.a / 16);
                 }
                 color *= input.color;
+                half luminance = dot(color.rgb, half3(0.2126h, 0.7152h, 0.0722h));
+                color.rgb = lerp(luminance.xxx, color.rgb, _FocusSaturation);
+                color.rgb = lerp(half3(0.18h, 0.18h, 0.18h), color.rgb, _FocusContrast);
                 if (_SurfaceDebugMode > 0.5h && _SurfaceDebugMode < 1.5h)
                     return color;
                 half3 normalWS = normalize(input.normalWS);
@@ -117,6 +126,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                     color.rgb = half3(0.5h, 0.5h, 0.5h);
                 half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS), _DiffuseFloor) + _EmissionStrength);
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
+                rgb = FocusWallFog(rgb, focusWeight);
                 return half4(rgb, color.a);
             }
             ENDHLSL

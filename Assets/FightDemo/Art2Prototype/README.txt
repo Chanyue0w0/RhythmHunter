@@ -470,3 +470,46 @@ Timeline tuning (Art2): FightScenePresenter Timeline Scale = 1.9, Timeline Botto
 Updated timeline: Art2 bottom offset = 150, scale stays 1.9. Preview Beats = 5. Artwork anchors (inner to outer) = 92/366, 148/366, 204/366, 260/366, 316/366 of half width. Timeline Step Travel Fraction = 0.25: hold for 75% of each interval, then SmoothStep into next anchor on the next beat. Burst uses half-beat intervals with midpoint positions. Stone bounce uses elapsed FMOD timeline milliseconds and captures beat duration on successful input, independent of callback beat anchor changes; starts visibly expanded even on repeated input.
 
 Timeline movement revision: restored original linear constant-speed convergence. Removed anchor stepping and its travel-fraction settings. Art2 retains preview 5, scale 1.9, bottom offset 150, successful stone bounce and Team Skill half-beat points.
+
+Art2 selective focus (2026-11-09):
+OverheadMoss_GroundAnchor is a legacy name for the animated GOBLIN CROWD, not moss.
+CaveEnvironment_2_5D uses three independent focus materials (Art2Prototype folder):
+- CaveFocusDistant: rear wall / side walls / closed door; Blur 1.35, Saturation 0.90, Contrast 0.96, Atmosphere Mix 0.08.
+- CaveFocusCrowd: CaveCrowd_Left / Right; Blur 0.8, Saturation 0.88, Contrast 0.94, Atmosphere Mix 0.06. Existing beat animation unchanged.
+- CaveFocusForeground: FrontRockEdges / ForegroundSilhouette; Blur 0.65. Neutral ambient and zero light influence preserve unlit artwork; ShadowCaster disabled.
+Select the material asset in Project and adjust Distant Blur (Source Pixels). Zero disables blur. Focus Saturation / Focus Contrast = 1 preserve original color/contrast; lower values soften background detail. Atmosphere Mix = 0 removes the distant tint.
+For a clear comparison, temporarily set Blur=0, Saturation=1, Contrast=1, Atmosphere Mix=0 on these three materials; restore the above values afterward.
+Actors, rocks, barricades, floor, torch lights and UI settings are unchanged. No texture import changes, no full-screen blur, no additional cameras.
+Shadow diagnosis: Art2_TestCamera uses perspective. ShadowTestLight_MoveMe is directional with shadows; cave fill and torch point lights have shadows disabled. Parallel world-space cast shadows may converge toward a screen-space vanishing point. Test Perspective off (Art2CameraController, or P if camera input enabled) to compare, without rotating the main light. Art2ActorPresentation also adds non-directional contact ellipses; Show Contact Shadows isolates those from Cast Sprite Shadows. Visual confirmation in Unity is still required.
+
+Distant focus wall revision (supersedes individual far/crowd/door focus settings above):
+CaveEnvironment_2_5D > DistantFocusWall_MoveMe > Art2FocusWall.
+This is an invisible world-space plane, not a rendered wall or a screen capture. Its local +Z is the affected side. Default local position (0,0,0.5) is a provisional road-start boundary; adjust visually in Art2.
+- Move world Z to move the beginning of distant effects; rotate Y 180 degrees to reverse the affected side.
+- Transition Depth: distance in world units until full effect (default 3).
+- Blur Pixels: source texture sampling radius (default 1.2, zero disables blur).
+- Fog Density: fog color mix (default 0.16, zero disables fog). Source sprite opacity remains unchanged.
+- Fog Color: tint of the distant veil.
+- Disable Art2FocusWall to restore renderer property blocks / compare before and after.
+- Guide Size changes only the Scene view gizmo, not the infinite plane coverage. Enable Gizmos and select the wall to see start/full-effect planes.
+Ten explicit environment targets: floor, rear wall, side walls, door, both animated goblin crowds, four torch bodies. Actors, HUD, rocks and barricades are excluded. Fire/halo particles use separate shaders and are not blurred/fogged by this implementation.
+CaveFocusDistant/Crowd/Door now have Blur=0, Atmosphere=0, Saturation=1, Contrast=1: all distant softening comes from the wall. Foreground edge softening remains separate.
+Uses renderer property blocks, preserving shared materials; original blocks restored on disable. No global shader values, additional camera, lighting changes, or gameplay changes.
+Unity Shader import and final road-start placement require visual verification; C# compilation alone does not validate GPU shader output.
+
+Torch rig / focus integration:
+Art2 scene: each WallTorch_* sprite owns FlameAnchor at its visible artwork top. The corresponding Torch_*_RedFlicker light is at the anchor origin; the existing flame particle root is at the same origin under the light. Particle simulation is Local. Adjust FlameAnchor local position for artistic placement, or move the torch sprite to move the complete rig. Keep the light and flame root local positions zero to avoid camera-angle-dependent separation.
+DistantFocusWall_MoveMe > Additional Roots contains the four light/particle hierarchies. Runtime halo renderers are discovered without allocating new material instances. Existing target renderers remain unchanged.
+Art2-only TorchFocus_M_VFX_2D_Fireball_Projectile_01_Color uses TorchParticleFocus.shader, preserving the source forward pass tint/emission/vertex-color modulation and alpha blending. Nine alpha-aware taps blur inside the current flipbook cell; samples are clamped to avoid neighbouring frames. Fog uses the same plane and density as scenery. Particle billboard animation remains enabled. Original Vefects assets are untouched.
+Round halos already have smooth radial edges; fog now attenuates their additive light instead of drawing a fog-colored rectangle. Physical Light intensity/flicker is unchanged.
+Controls remain on Art2FocusWall: Blur Pixels=0 disables fire/scenery blur; Fog Density=0 disables fog. Disable the wall to restore original property blocks. Fire materials retain their original appearance with these values at zero.
+Editor utility: Rhythm Hunter > Art2 > Bind Torch Rigs And Focus. It preserves existing FlameAnchor placements on repeat runs and validates four linked rigs before saving the active Art2 scene.
+
+Crowd/torch blur emphasis:
+Art2FocusWall > Background Detail Blur now has Emphasized Roots (goblin crowd plus four complete torch hierarchies), Detail Blur Multiplier=1.5 and Detail Blur Transition Scale=0.2. Only blur reaches full strength sooner; fog and the general Transition Depth are unchanged. Multiplier=1 and Transition Scale=1 restore the original depth-based blur. Blur Pixels=0 still disables all wall-driven blur. Objects in front of the wall remain unaffected. Latest live Unity validation confirmed all ten scenery/fire renderers receive parameters and all three shaders import without errors.
+
+Character directional shadows and door contact (2026-11-09):
+Art2ActorPresentation: Show Contact Shadows=false; Cast Sprite Shadows=true; Align Feet To Ground=true; Actor Ground Height=0. Eight ArtBattle character prefabs now have a root FootAnchor fitted from the lower visible sprite silhouette. On spawn only, the actor visual root is translated vertically so FootAnchor reaches the ground; slot positions and gameplay are unchanged. Animated jump offsets remain free. Existing anchors are preserved by repeated setup. Moving FootAnchor upwards lowers the grounded actor, and vice versa. Reset/disable restores actor original local positions.
+ShadowTestLight_MoveMe: Normal Bias reduced from 0.15 to 0.03 to reduce detached directional shadow edges. Light direction/color/intensity unchanged. Check real gameplay for acne or animation frames with feet above the reference pose; do not increase global offsets to compensate for individual artwork.
+ClosedDoor_GroundAnchor > Tilt_45deg > Sprite_FullCanvas has Art2SceneryContactShadows as an Art2 scene-added component. Opacity=0.5, Depth=0.7, width=115% of visible bottom band; same material/shader as rocks. This door contact remains enabled even while character contact ellipses are disabled.
+Editor menu: Rhythm Hunter/Art2/Configure Character Grounding And Door Shadow. Unity validation confirmed eight authored foot anchors can reach y=0 at left/center/right under 45-degree tilt. Actual game camera shadow appearance still needs visual verification.
