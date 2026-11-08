@@ -4858,6 +4858,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4673056556550880970}
+  - component: {fileID: 2393192358773788853}
   m_Layer: 0
   m_Name: WarningEffectPixel
   m_TagString: Untagged
@@ -4881,6 +4882,24 @@ Transform:
   - {fileID: 5187063752051876123}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2393192358773788853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6593023544061229464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6571ba71ad6ee74f885479f75d11ef0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2EffectPresentation
+  faceSpritesToCamera: 1
+  faceBillboardParticlesToCamera: 1
+  facePlanarMeshParticlesToCamera: 1
+  keepAboveGround: 0
+  groundHeight: 0
+  groundClearance: 0.03
 --- !u!1 &6897229630561392450
 GameObject:
   m_ObjectHideFlags: 0

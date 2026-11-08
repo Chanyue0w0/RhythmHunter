@@ -4903,6 +4903,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3383202049513885123}
+  - component: {fileID: 4573147820918552183}
   m_Layer: 0
   m_Name: ShieldVFXPixel
   m_TagString: Untagged
@@ -4919,13 +4920,31 @@ Transform:
   m_GameObject: {fileID: 2243853975527601220}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.0230334, y: -2.0050123, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4736106596345496122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4573147820918552183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2243853975527601220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6571ba71ad6ee74f885479f75d11ef0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2EffectPresentation
+  faceSpritesToCamera: 1
+  faceBillboardParticlesToCamera: 1
+  facePlanarMeshParticlesToCamera: 1
+  keepAboveGround: 1
+  groundHeight: 0
+  groundClearance: 0.03
 --- !u!1 &5597605690972157138
 GameObject:
   m_ObjectHideFlags: 0
@@ -4953,8 +4972,8 @@ Transform:
   m_GameObject: {fileID: 5597605690972157138}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.55, z: 0}
-  m_LocalScale: {x: 1.3200846, y: 1.3200846, z: 1.3200846}
+  m_LocalPosition: {x: -0.4, y: -2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3519218550353729412}
