@@ -303,13 +303,32 @@ namespace RhythmHunter.FightDemo
         private void Awake()
         {
             secondsPerBeat = 60d / Mathf.Max(1f, fallbackBpm);
-            ShowFrame(0);
+            UpdateIdle();
+            BindSpriteTexture();
         }
 
         private void OnEnable()
         {
             shownFrame = -1;
             Subscribe();
+            UpdateIdle();
+            BindSpriteTexture();
+        }
+
+        private MaterialPropertyBlock spriteTextureProperties;
+        private static readonly int SpriteTextureId = Shader.PropertyToID("_MainTex");
+
+        // Explicit per-renderer texture binding also covers the first frame after
+        // domain reload, before Unity refreshes shared-material sprite bindings.
+        private void LateUpdate() => BindSpriteTexture();
+
+        private void BindSpriteTexture()
+        {
+            if (targetRenderer == null || targetRenderer.sprite == null) return;
+            spriteTextureProperties ??= new MaterialPropertyBlock();
+            targetRenderer.GetPropertyBlock(spriteTextureProperties);
+            spriteTextureProperties.SetTexture(SpriteTextureId, targetRenderer.sprite.texture);
+            targetRenderer.SetPropertyBlock(spriteTextureProperties);
         }
 
         private void UpdateIdle()

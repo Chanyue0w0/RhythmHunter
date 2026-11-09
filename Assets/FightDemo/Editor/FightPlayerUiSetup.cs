@@ -21,6 +21,21 @@ namespace RhythmHunter.FightDemoEditor
             try { mode = File.ReadAllText(path).Trim(); File.Delete(path); } catch (IOException) { return; }
             try
             {
+                if (mode == "hide-damage-numbers")
+                {
+                    var scene = SceneManager.GetActiveScene();
+                    if (!scene.path.EndsWith("Art2_FightScene.unity")) throw new InvalidOperationException("Open Art2 first.");
+                    var fight = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightCombatController>(true)).Single();
+                    Undo.RecordObject(fight, "Hide damage numbers");
+                    var data = new SerializedObject(fight);
+                    data.FindProperty("showEnemyDamageNumbers").boolValue = false;
+                    data.ApplyModifiedProperties();
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(fight);
+                    EditorSceneManager.MarkSceneDirty(scene);
+                    if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Scene save failed.");
+                    File.WriteAllText("Temp/PlayerUiSetup.result", "PASS: damage numbers disabled; Art2 saved; controller=" + fight.name);
+                    return;
+                }
                 if (mode == "hide-timeline-bar")
                 {
                     var scene = SceneManager.GetActiveScene();
