@@ -18,8 +18,71 @@ namespace RhythmHunter.FightDemoEditor
         {
             const string request = "Temp/Art2Grounding.request";
             if (!File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode) return;
-            try { File.Delete(request); } catch (IOException) { return; }
-            try { Run(); } catch (Exception e) { File.WriteAllText("Temp/Art2Grounding.result", "FAIL: " + e); Debug.LogException(e); }
+            string mode;
+            try { mode = File.ReadAllText(request).Trim(); File.Delete(request); } catch (IOException) { return; }
+            try { if (mode == "individual-shadows") ConfigureIndividualShadows(); else if (mode == "contact-light") EnableContactLightShadows(); else Run(); } catch (Exception e) { File.WriteAllText("Temp/Art2Grounding.result", "FAIL: " + e); Debug.LogException(e); }
+        }
+        [MenuItem("Rhythm Hunter/Art2/Configure Individual Character Shadows")]
+        public static void ConfigureIndividualShadows()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.path.EndsWith("Art2_FightScene.unity")) throw new Exception("Open Art2 outside Play Mode.");
+            var presentation = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Art2ActorPresentation>(true)).Single();
+            var source = new SerializedObject(presentation);
+            int added = 0;
+            foreach (var name in new[] { "LongswordWarrior", "Mage", "Skeleton", "Dwarf", "Minotaur", "Goblin_Normal", "Goblin_Killer", "Goblin_Giant" })
+            {
+                string path = "Assets/FightDemo/Prefabs/ArtBattle/" + name + ".prefab";
+                var root = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    if (root.GetComponent<Art2CharacterShadowSettings>() == null)
+                    {
+                        var settings = root.AddComponent<Art2CharacterShadowSettings>();
+                        settings.size = source.FindProperty("shadowSize").vector2Value;
+                        settings.groundOffset = source.FindProperty("shadowGroundOffset").vector2Value;
+                        settings.followsLight = source.FindProperty("contactShadowFollowsLight").boolValue;
+                        settings.projectionHeight = source.FindProperty("contactShadowProjectionHeight").floatValue;
+                        settings.maxLightOffset = source.FindProperty("contactShadowMaxOffset").floatValue;
+                        PrefabUtility.SaveAsPrefabAsset(root, path);
+                        added++;
+                    }
+                    if (root.GetComponents<Art2CharacterShadowSettings>().Length != 1 || root.transform.Find("FootAnchor") == null)
+                        throw new Exception("Invalid individual shadow configuration: " + name);
+                }
+                finally { PrefabUtility.UnloadPrefabContents(root); }
+            }
+            AssetDatabase.SaveAssets();
+            File.WriteAllText("Temp/Art2Grounding.result", "PASS: eight character prefabs have independent shadow settings and FootAnchor; added=" + added + "; existing per-character tuning preserved; initial values copied from scene.");
+        }
+        [MenuItem("Rhythm Hunter/Art2/Enable Light Following Foot Shadows")]
+        public static void EnableContactLightShadows()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.path.EndsWith("Art2_FightScene.unity")) throw new Exception("Open Art2 outside Play Mode.");
+            var all = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Transform>(true)).ToArray();
+            var presentation = all.Select(t => t.GetComponent<Art2ActorPresentation>()).Single(p => p);
+            var light = all.Single(t => t.name == "ShadowTestLight_MoveMe").GetComponent<Light>();
+            if (!light) throw new Exception("Main light missing");
+            var method = typeof(Art2ActorPresentation).GetMethod("ProjectContactOffset", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            Vector3 Project(Vector3 ray) => (Vector3)method.Invoke(null, new object[] { ray, .25f, .45f });
+            if (Vector3.Distance(Project(new Vector3(1,-1,0)), new Vector3(.25f,0,0)) > .0001f ||
+                Vector3.Distance(Project(new Vector3(-1,-1,0)), new Vector3(-.25f,0,0)) > .0001f ||
+                Project(Vector3.down).sqrMagnitude > .0001f || Project(Vector3.up).sqrMagnitude > .0001f ||
+                Project(new Vector3(1,-.01f,0)).magnitude > .4501f)
+                throw new Exception("Contact projection validation failed");
+            Undo.RecordObject(presentation, "Enable light following foot shadows");
+            var data = new SerializedObject(presentation);
+            data.FindProperty("showContactShadows").boolValue = true;
+            data.FindProperty("contactShadowFollowsLight").boolValue = true;
+            data.FindProperty("contactShadowLight").objectReferenceValue = light;
+            data.FindProperty("contactShadowProjectionHeight").floatValue = .25f;
+            data.FindProperty("contactShadowMaxOffset").floatValue = .45f;
+            data.ApplyModifiedProperties();
+            PrefabUtility.RecordPrefabInstancePropertyModifications(presentation);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene)) throw new Exception("Scene save failed");
+            File.WriteAllText("Temp/Art2Grounding.result", "PASS: contact shadows enabled on " + presentation.name + "; main light=" + light.name + "; opposite directions, overhead light and offset clamp verified; Art2 saved.");
         }
         [MenuItem("Rhythm Hunter/Art2/Configure Character Grounding And Door Shadow")]
         public static void Run()

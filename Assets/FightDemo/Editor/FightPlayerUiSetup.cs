@@ -21,6 +21,27 @@ namespace RhythmHunter.FightDemoEditor
             try { mode = File.ReadAllText(path).Trim(); File.Delete(path); } catch (IOException) { return; }
             try
             {
+                if (mode == "stone-blue-explosion")
+                {
+                    var scene = SceneManager.GetActiveScene();
+                    if (!scene.path.EndsWith("Art2_FightScene.unity")) throw new InvalidOperationException("Open Art2 first.");
+                    foreach (var root in scene.GetRootGameObjects())
+                        if (root.name == "Stone UI Particle Stage" || root.name == "UI Particle Validation") UnityEngine.Object.DestroyImmediate(root);
+                    var presenter = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightScenePresenter>(true)).Single();
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/FightDemo/Prefabs/VFX/UI/BlueExplosion_UI.prefab");
+                    if (!prefab || prefab.GetComponentsInChildren<ParticleSystem>(true).Length == 0) throw new InvalidOperationException("Missing BlueExplosion particles.");
+                    Undo.RecordObject(presenter, "Set successful stone effect");
+                    var data = new SerializedObject(presenter);
+                    data.FindProperty("stoneSuccessEffectPrefab").objectReferenceValue = prefab;
+                    data.FindProperty("stoneSuccessEffectLifetime").floatValue = 1.2f;
+                    data.FindProperty("stoneSuccessEffectSize").vector2Value = new Vector2(240, 240);
+                    data.FindProperty("stoneSuccessEffectViewSize").floatValue = 1.4f;
+                    data.ApplyModifiedProperties();
+                    EditorSceneManager.MarkSceneDirty(scene);
+                    if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Scene save failed.");
+                    File.WriteAllText("Temp/PlayerUiSetup.result", "PASS: BlueExplosion_UI assigned to success-only stone effect, UI size 240, view size 1.4, lifetime 1.2; Art2 saved.");
+                    return;
+                }
                 if (mode == "hide-damage-numbers")
                 {
                     var scene = SceneManager.GetActiveScene();

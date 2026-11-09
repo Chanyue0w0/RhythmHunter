@@ -28,10 +28,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(0, .5f)] private float stoneBounceAmount = .15f;
         [UnityEngine.Serialization.FormerlySerializedAs("stoneShakeBeats")]
         [SerializeField, Range(.05f, 1)] private float stoneBounceBeats = .3f;
-        [Tooltip("Optional UI effect prefab (RectTransform) spawned at StoneSuccessEffectAnchor. Leave empty until art is ready.")]
+        [Tooltip("Success-only effect behind the stone. Particle prefabs use a reusable UI rendering stage; RectTransform prefabs use the UI anchor.")]
         [SerializeField] private GameObject stoneSuccessEffectPrefab;
         [Tooltip("Seconds until the UI effect is removed. Zero lets the prefab manage its own lifetime.")]
         [SerializeField, Min(0)] private float stoneSuccessEffectLifetime = .5f;
+        [SerializeField] private Vector2 stoneSuccessEffectSize = new(240, 240);
+        [SerializeField, Min(.1f)] private float stoneSuccessEffectViewSize = 1.4f;
+        private FightUiParticleBurst stoneParticleBurst;
         [Header("Accepted Beat Point Feedback")]
         [SerializeField] private bool removeAcceptedBeatPoints = true;
         [Tooltip("拍點消除特效：UI RectTransform Prefab。早按時在左右拍點位置生成；拍點已抵達時在中央生成。")]
@@ -71,8 +74,17 @@ namespace RhythmHunter.FightDemo
             stoneFillImage.fillMethod = Image.FillMethod.Vertical;
             stoneFillImage.fillOrigin = (int)Image.OriginVertical.Bottom;
             stoneEffectAnchor = new GameObject("StoneSuccessEffectAnchor", typeof(RectTransform)).GetComponent<RectTransform>();
-            stoneEffectAnchor.SetParent(timelineCenter.transform, false);
+            stoneEffectAnchor.SetParent(timelineCenter.transform.parent, false);
+            stoneEffectAnchor.anchorMin = timelineCenter.rectTransform.anchorMin;
+            stoneEffectAnchor.anchorMax = timelineCenter.rectTransform.anchorMax;
+            stoneEffectAnchor.anchoredPosition = timelineCenter.rectTransform.anchoredPosition;
+            stoneEffectAnchor.SetSiblingIndex(timelineCenter.transform.GetSiblingIndex());
             stoneEffectAnchor.sizeDelta = stoneArtSize;
+            if (stoneSuccessEffectPrefab != null && stoneSuccessEffectPrefab.GetComponentInChildren<ParticleSystem>(true) != null)
+            {
+                stoneParticleBurst = stoneEffectAnchor.gameObject.AddComponent<FightUiParticleBurst>();
+                stoneParticleBurst.Initialize(stoneSuccessEffectPrefab, stoneSuccessEffectSize, stoneSuccessEffectViewSize, stoneSuccessEffectLifetime);
+            }
             foreach (var point in approachingPoints)
             {
                 point.sprite = timelinePointSprite;
@@ -101,7 +113,7 @@ namespace RhythmHunter.FightDemo
             timelineTrack.rectTransform.sizeDelta = new Vector2(timelineWidth, timelineBarHeight > 0 ? timelineBarHeight :
                 timelineWidth * timelineBarSprite.rect.height / timelineBarSprite.rect.width);
             timelineCenter.rectTransform.sizeDelta = stoneArtSize;
-            stoneEffectAnchor.sizeDelta = stoneArtSize;
+            stoneEffectAnchor.sizeDelta = stoneParticleBurst != null ? stoneSuccessEffectSize : stoneArtSize;
             foreach (var point in approachingPoints) point.rectTransform.sizeDelta = timelinePointArtSize;
             float fill = Mathf.Clamp01((float)fight.TeamSkillGauge / Mathf.Max(1, fight.TeamSkillGaugeMax));
             bool timing = TryGetStoneBeat(out double beat);
@@ -154,6 +166,7 @@ namespace RhythmHunter.FightDemo
             // Give immediate visible feedback even when several successful calls share a frame.
             RenderStoneBounce(.15);
             if (stoneSuccessEffectPrefab == null || stoneEffectAnchor == null) return;
+            if (stoneParticleBurst != null) { stoneParticleBurst.Play(); return; }
             var effect = Instantiate(stoneSuccessEffectPrefab, stoneEffectAnchor, false);
             effect.SetActive(true);
             if (stoneSuccessEffectLifetime > 0) Destroy(effect, stoneSuccessEffectLifetime);

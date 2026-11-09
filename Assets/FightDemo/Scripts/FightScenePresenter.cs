@@ -316,7 +316,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnHeroCalled(FightCombatController.HeroCallResult call)
         {
-            if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
+            if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect && !call.RhythmResult.DuplicateBeat)
             {
                 OnSuccessfulStoneBeat();
                 ConsumeTimelinePoint(call.RhythmResult.NearestBeat.GlobalBeat * 2);

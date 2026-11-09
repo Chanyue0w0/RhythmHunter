@@ -9541,8 +9541,10 @@ MonoBehaviour:
   stoneBounceEnabled: 1
   stoneBounceAmount: 0.15
   stoneBounceBeats: 0.3
-  stoneSuccessEffectPrefab: {fileID: 0}
-  stoneSuccessEffectLifetime: 0.5
+  stoneSuccessEffectPrefab: {fileID: 1491377527257926432, guid: 130cad8f8fed8534e8e46c49713e0406, type: 3}
+  stoneSuccessEffectLifetime: 1.2
+  stoneSuccessEffectSize: {x: 240, y: 240}
+  stoneSuccessEffectViewSize: 1.4
   removeAcceptedBeatPoints: 1
   beatPointHitEffectPrefab: {fileID: 0}
   beatPointHitEffectLifetime: 0.5
@@ -9624,7 +9626,7 @@ MonoBehaviour:
   statusIconSpacing: 0.55
   statusIconCamera: {fileID: 2147100302}
   statusIconOffset: {x: 0, y: 0.15, z: 0}
-  startWithFullTeamSkill: 1
+  startWithFullTeamSkill: 0
   teamSkillGaugeGain: 1
   teamSkillBurstBeats: 16
   teamQteOffset: {x: 0, y: 0.25, z: -1}
@@ -10233,10 +10235,14 @@ MonoBehaviour:
   castSpriteShadows: 1
   alignFeetToGround: 1
   actorGroundHeight: 0
-  showContactShadows: 0
+  showContactShadows: 1
   contactShadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   shadowSize: {x: 1.25, y: 0.65}
   shadowGroundOffset: {x: 0, y: 0}
+  contactShadowFollowsLight: 1
+  contactShadowLight: {fileID: 2147300102}
+  contactShadowProjectionHeight: 0.25
+  contactShadowMaxOffset: 0.45
   groundHeight: 0.025
 --- !u!1001 &2147100100
 PrefabInstance:
@@ -11146,7 +11152,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
+  m_BoundingSphereOverride: {x: 3.0145e-41, y: 0, z: 0, w: NaN}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11310,7 +11316,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: -1.49e-43, y: NaN, z: 2.1e-44, w: 4.5918e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11774,7 +11780,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0.00092466775, y: 3.097271e+27, z: 6.8398014e+25, w: 250253.58}
+  m_BoundingSphereOverride: {x: 8.272431e+20, y: 0.000000003335243, z: 1.3555899e-19, w: 7.036846e+28}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11938,7 +11944,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 3.62e-43, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

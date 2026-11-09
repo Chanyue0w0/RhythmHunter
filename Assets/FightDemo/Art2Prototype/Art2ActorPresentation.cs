@@ -24,9 +24,16 @@ namespace RhythmHunter.FightDemo.Art2
         [SerializeField] private Material contactShadowMaterial;
         [SerializeField] private Vector2 shadowSize = new Vector2(1.25f, 0.65f);
         [SerializeField] private Vector2 shadowGroundOffset;
+        [Header("Contact Shadow Lighting")]
+        [SerializeField] private bool contactShadowFollowsLight = true;
+        [Tooltip("Main light driving the soft foot shadow. Directional lights use their direction, not their position.")]
+        [SerializeField] private Light contactShadowLight;
+        [SerializeField, Min(0)] private float contactShadowProjectionHeight = .25f;
+        [SerializeField, Min(0)] private float contactShadowMaxOffset = .45f;
         [SerializeField] private float groundHeight = 0.025f;
         private GameObject[] actors;
         private GameObject[] shadows;
+        private Transform[] feet;
         private Mesh shadowMesh;
         private readonly List<(SpriteRenderer renderer, int layer, int order, Material material,
             UnityEngine.Rendering.ShadowCastingMode casting, bool receiving)> originalSorting = new();
@@ -35,6 +42,7 @@ namespace RhythmHunter.FightDemo.Art2
         {
             actors = new GameObject[slots != null ? slots.Length : 0];
             shadows = new GameObject[actors.Length];
+            feet = new Transform[actors.Length];
             overlays.Clear();
             if (slots != null)
                 foreach (var slot in slots)
@@ -51,13 +59,13 @@ namespace RhythmHunter.FightDemo.Art2
             for (int i = 0; i < actors.Length; i++)
             {
                 var actor = slots[i] != null ? slots[i].ActorInstance : null;
-                UpdateShadow(i, actor);
                 if (actors[i] == actor) continue;
                 actors[i] = actor;
+                feet[i] = actor != null ? actor.transform.Find("FootAnchor") : null;
                 if (actor == null) continue;
                 if (alignFeetToGround)
                 {
-                    Transform foot = actor.transform.Find("FootAnchor");
+                    Transform foot = feet[i];
                     if (foot != null)
                     {
                         originalActorPositions[actor.transform] = actor.transform.localPosition;
@@ -75,6 +83,8 @@ namespace RhythmHunter.FightDemo.Art2
                     if (actorMaterial != null) renderer.sharedMaterial = actorMaterial;
                 }
             }
+            // Run after initial grounding so even the first shadow frame uses the final feet.
+            for (int i = 0; i < actors.Length; i++) UpdateShadow(i, actors[i]);
             // Also apply Inspector changes to actors that have already spawned.
             foreach (var entry in originalSorting)
                 if (entry.renderer != null)
@@ -107,7 +117,14 @@ namespace RhythmHunter.FightDemo.Art2
 
         private void UpdateShadow(int index, GameObject actor)
         {
-            bool visible = showContactShadows && contactShadowMaterial != null && actor != null && actor.activeInHierarchy;
+            var settings = actor != null ? actor.GetComponent<Art2CharacterShadowSettings>() : null;
+            bool custom = settings != null && settings.enabled;
+            Vector2 size = custom ? settings.size : shadowSize;
+            Vector2 offset = custom ? settings.groundOffset : shadowGroundOffset;
+            bool followsLight = custom ? settings.followsLight : contactShadowFollowsLight;
+            float projectionHeight = custom ? settings.projectionHeight : contactShadowProjectionHeight;
+            float maxOffset = custom ? settings.maxLightOffset : contactShadowMaxOffset;
+            bool visible = showContactShadows && (!custom || settings.showShadow) && contactShadowMaterial != null && actor != null && actor.activeInHierarchy;
             if (visible && shadows[index] == null)
             {
                 if (shadowMesh == null)
@@ -130,10 +147,28 @@ namespace RhythmHunter.FightDemo.Art2
             if (shadows[index] == null) return;
             shadows[index].SetActive(visible);
             if (!visible) return;
-            Vector3 position = slots[index].transform.position;
+            Vector3 position = feet[index] != null ? feet[index].position : actor.transform.position;
+            Vector3 lightOffset = Vector3.zero;
+            if (followsLight && contactShadowLight != null && contactShadowLight.isActiveAndEnabled && contactShadowLight.intensity > 0)
+            {
+                float height = Mathf.Max(0, projectionHeight) + Mathf.Max(0, position.y - actorGroundHeight);
+                Vector3 ray = contactShadowLight.type == LightType.Directional
+                    ? contactShadowLight.transform.forward
+                    : position + Vector3.up * Mathf.Max(0, projectionHeight) - contactShadowLight.transform.position;
+                lightOffset = ProjectContactOffset(ray, height, maxOffset);
+            }
+            position += lightOffset;
             shadows[index].transform.SetPositionAndRotation(
-                new Vector3(position.x + shadowGroundOffset.x, groundHeight, position.z + shadowGroundOffset.y), Quaternion.Euler(90, 0, 0));
-            shadows[index].transform.localScale = new Vector3(Mathf.Max(.01f, shadowSize.x), Mathf.Max(.01f, shadowSize.y), 1);
+                new Vector3(position.x + offset.x, groundHeight, position.z + offset.y), Quaternion.Euler(90, 0, 0));
+            shadows[index].transform.localScale = new Vector3(Mathf.Max(.01f, size.x), Mathf.Max(.01f, size.y), 1);
+        }
+
+        private static Vector3 ProjectContactOffset(Vector3 lightRay, float height, float maxOffset)
+        {
+            lightRay.Normalize();
+            if (lightRay.y >= -.001f) return Vector3.zero;
+            var offset = new Vector3(lightRay.x, 0, lightRay.z) * (Mathf.Max(0, height) / -lightRay.y);
+            return Vector3.ClampMagnitude(offset, Mathf.Max(0, maxOffset));
         }
 
         private void OnDisable()

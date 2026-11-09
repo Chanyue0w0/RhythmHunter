@@ -103,6 +103,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6939590469137170915}
   - component: {fileID: 4415416321156734532}
+  - component: {fileID: 5353716588271458883}
   m_Layer: 0
   m_Name: Skeleton
   m_TagString: Untagged
@@ -222,6 +223,24 @@ MonoBehaviour:
   attackIntervalBeats: 2
   maxMana: 4
   accentColor: {r: 0.2, g: 0.78, b: 0.48, a: 1}
+--- !u!114 &5353716588271458883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8843689267317842871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15665b9a24cd6be479e9427c71bd56f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CharacterShadowSettings
+  showShadow: 1
+  size: {x: 1.25, y: 1}
+  groundOffset: {x: 0, y: 0}
+  followsLight: 1
+  projectionHeight: 0.25
+  maxLightOffset: 0.45
 --- !u!1 &9080165771705310887
 GameObject:
   m_ObjectHideFlags: 0

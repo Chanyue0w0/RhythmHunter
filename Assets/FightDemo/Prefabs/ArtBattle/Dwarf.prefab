@@ -72,6 +72,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4204335622044879702}
   - component: {fileID: 5101759564044618693}
+  - component: {fileID: 5469783258685100309}
   m_Layer: 0
   m_Name: Dwarf
   m_TagString: Untagged
@@ -191,6 +192,24 @@ MonoBehaviour:
   attackIntervalBeats: 4
   maxMana: 3
   accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}
+--- !u!114 &5469783258685100309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574828989901532124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15665b9a24cd6be479e9427c71bd56f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CharacterShadowSettings
+  showShadow: 1
+  size: {x: 1.25, y: 1}
+  groundOffset: {x: 0, y: 0}
+  followsLight: 1
+  projectionHeight: 0.25
+  maxLightOffset: 0.45
 --- !u!1 &2693978973999741462
 GameObject:
   m_ObjectHideFlags: 0
