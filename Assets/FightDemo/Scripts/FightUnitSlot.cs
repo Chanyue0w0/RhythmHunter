@@ -341,7 +341,10 @@ namespace RhythmHunter.FightDemo
             RefreshHealthVisuals();
             // Only the lethal transition emits zero HP; overkill must not repeat kill/reward callbacks.
             if (wasAlive && currentHp <= 0 && team == UnitTeam.Enemy)
+            {
+                if (CombatController != null) CombatController.ShowDeathEffectIcon(this);
                 EnemyDefeated?.Invoke(this, ImpactEffectAnchor != null ? ImpactEffectAnchor.position : transform.position);
+            }
             if (wasAlive) HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;
         }

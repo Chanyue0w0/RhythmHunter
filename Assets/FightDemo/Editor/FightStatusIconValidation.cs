@@ -19,14 +19,43 @@ namespace RhythmHunter.FightDemoEditor
         {
             const string request = "Temp/FightStatusIconValidation.request";
             if (!File.Exists(request) || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
+            string mode = File.ReadAllText(request).Trim();
             File.Delete(request);
-            try { Run(); File.WriteAllText("Temp/FightStatusIconValidation.result", "PASS"); }
+            try { if (mode == "setup-death") ConfigureDeathIcon(); Run(); File.WriteAllText("Temp/FightStatusIconValidation.result", "PASS"); }
             catch (Exception ex) { File.WriteAllText("Temp/FightStatusIconValidation.result", "FAIL: " + ex); Debug.LogException(ex); }
         }
         const BindingFlags Flags = BindingFlags.NonPublic | BindingFlags.Instance;
         static void Set(object obj, string field, object value) => obj.GetType().GetField(field, Flags).SetValue(obj, value);
         static object Call(object obj, string method, params object[] args) => obj.GetType().GetMethod(method, Flags).Invoke(obj, args);
         static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
+
+        private static void ConfigureDeathIcon()
+        {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (!scene.path.EndsWith("Art2_FightScene.unity")) throw new Exception("Open Art2 outside Play Mode.");
+            const string path = "Assets/FightDemo/Prefabs/StatusIcons/DeathEffect.prefab";
+            var root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var icon = root.GetComponent<FightStatusIcon>() ?? root.AddComponent<FightStatusIcon>();
+                root.transform.localPosition = Vector3.zero;
+                root.transform.localRotation = Quaternion.identity;
+                var data = new SerializedObject(icon);
+                data.FindProperty("popupRightDistance").floatValue = -.6f;
+                data.FindProperty("popupLifetime").floatValue = .5f;
+                data.FindProperty("popupJumpHeight").floatValue = .25f;
+                data.ApplyModifiedPropertiesWithoutUndo();
+                foreach (var sprite in root.GetComponentsInChildren<SpriteRenderer>(true)) sprite.sortingOrder = 120;
+                PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            var fight = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightCombatController>(true)).Single();
+            var serialized = new SerializedObject(fight);
+            serialized.FindProperty("deathEffectIcon").objectReferenceValue = AssetDatabase.LoadAssetAtPath<FightStatusIcon>(path);
+            serialized.ApplyModifiedProperties();
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
 
         [MenuItem("Rhythm Hunter/Validate Status Icon Pool")]
         public static void Run()
@@ -36,6 +65,7 @@ namespace RhythmHunter.FightDemoEditor
             try
             {
                 var fight = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightCombatController>(true)).Single();
+                Set(fight, "deathEffectIcon", AssetDatabase.LoadAssetAtPath<FightStatusIcon>("Assets/FightDemo/Prefabs/StatusIcons/DeathEffect.prefab"));
                 Set(fight.BeatClock, "hasAnchor", true);
                 Set(fight.BeatClock, "latestBeat", new FmodBeatClock.BeatSnapshot(0, 1, 1, 0, 120, 4, 4));
                 Set(fight.RosterManager, "requireBattlePreparation", false);
@@ -89,7 +119,25 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.ActiveStatusIconCount == 2, "Block burst respects pool capacity.");
                 Call(fight, "ClearStatusIcons");
                 enemy.ApplyFragile(); enemy.ApplyBleeding(.5f, 4); enemy.TakeDamage(200);
-                Check(fight.ActiveStatusIconCount == 0, "Death removes all persistent icons.");
+                Check(fight.ActiveStatusIconCount == 1, "Death replaces persistent icons with one popup.");
+                var death = (FightStatusIcon)active[0];
+                start = death.transform.position;
+                Call(enemy, "RemoveDefeatedEnemyPresentation");
+                enemy.TakeDamage(1);
+                Call(fight, "ClearCombatEffectsKeepingDamageNumbers");
+                Check(fight.ActiveStatusIconCount == 1, "Wave clear must retain death popup; overkill must not duplicate it.");
+                Call(fight, "AdvanceStatusIconVisuals", .25f);
+                Check(death.transform.position.x < start.x && death.transform.position.y > start.y, "Death popup must jump left/up after actor removal.");
+                Check(death.GetComponentInChildren<SpriteRenderer>().color.a < 1, "Death popup must fade.");
+                Call(fight, "AdvanceStatusIconVisuals", .25f);
+                Check(fight.ActiveStatusIconCount == 0, "Death popup must return to pool after .5 seconds.");
+                created = fight.CreatedStatusIconCount;
+                for (int i = 0; i < 100; i++)
+                {
+                    Call(fight, "ShowDeathEffectIcon", enemy);
+                    Call(fight, "AdvanceStatusIconVisuals", .5f);
+                }
+                Check(created == fight.CreatedStatusIconCount, "Death popups must reuse pooled objects.");
                 Call(fight, "ShowBlockedEffectIcon"); Call(fight, "OnDisable");
                 Check(fight.ActiveStatusIconCount == 0, "Battle teardown recycles block popups.");
                 UnityEngine.Object.DestroyImmediate(fight);

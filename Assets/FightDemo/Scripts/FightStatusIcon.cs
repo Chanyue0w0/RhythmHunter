@@ -15,7 +15,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(.01f)] private float triggerPulseBeats = .35f;
         [SerializeField, Min(1)] private float triggerPulseScale = 1.6f;
         [SerializeField, Min(.01f)] private float popupLifetime = .5f;
-        [SerializeField, Min(0)] private float popupRightDistance = .6f;
+        [Tooltip("Screen-space horizontal travel: positive = right, negative = left.")]
+        [SerializeField] private float popupRightDistance = .6f;
         [SerializeField, Min(0)] private float popupJumpHeight = .25f;
         private SpriteRenderer[] sprites;
         private Color[] colors;
@@ -31,6 +32,7 @@ namespace RhythmHunter.FightDemo
         internal bool Finishing { get; private set; }
         internal FightUnitSlot Target { get; private set; }
         internal int Kind { get; private set; }
+        internal bool IsPopup => Kind == 0 || Kind == 3;
         internal float Lane { get; set; }
 
         internal void Initialize(int kind)
@@ -92,7 +94,7 @@ namespace RhythmHunter.FightDemo
 
         internal bool Advance(float seconds, float beats)
         {
-            if (Kind != 0)
+            if (!IsPopup)
             {
                 if (Target == null || !Target.HasCharacter || Target.CurrentHp <= 0) return false;
                 UpdatePose();
@@ -140,14 +142,14 @@ namespace RhythmHunter.FightDemo
 
         private void UpdatePose()
         {
-            if (Target == null) return;
+            if (Target == null && !IsPopup) return;
             Vector3 offset = headOffset + sceneOffset + Vector3.right * Lane;
-            if (Kind == 0)
+            if (IsPopup)
             {
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.01f, popupLifetime));
                 offset += new Vector3(popupRightDistance * t, popupJumpHeight * 4 * t * (1 - t), 0);
             }
-            Vector3 anchor = Kind == 0 ? origin : HeadPosition();
+            Vector3 anchor = IsPopup ? origin : HeadPosition();
             if (viewCamera != null)
             {
                 transform.rotation = viewCamera.transform.rotation * baseRotation;

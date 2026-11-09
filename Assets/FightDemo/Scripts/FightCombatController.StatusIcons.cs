@@ -10,6 +10,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightStatusIcon blockedEffectIcon;
         [SerializeField] private FightStatusIcon weakEffectIcon;
         [SerializeField] private FightStatusIcon bleedEffectIcon;
+        [SerializeField] private FightStatusIcon deathEffectIcon;
         [SerializeField, Min(0)] private int statusIconPrewarmPerType = 4;
         [SerializeField, Min(1)] private int maxBlockedEffectIcons = 32;
         [SerializeField, Min(0)] private float statusIconSpacing = .55f;
@@ -18,12 +19,12 @@ namespace RhythmHunter.FightDemo
         [Tooltip("額外圖示偏移；指定相機時 X=畫面右、Y=畫面上、Z=遠離相機。")]
         [SerializeField] private Vector3 statusIconOffset;
         private Transform statusIconRoot, statusIconStorage;
-        private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new() };
+        private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new(), new() };
         private readonly List<FightStatusIcon> activeStatusIcons = new();
         public int ActiveStatusIconCount => activeStatusIcons.Count;
         public int CreatedStatusIconCount { get; private set; }
 
-        private FightStatusIcon IconPrefab(int kind) => kind == 0 ? blockedEffectIcon : kind == 1 ? weakEffectIcon : bleedEffectIcon;
+        private FightStatusIcon IconPrefab(int kind) => kind == 0 ? blockedEffectIcon : kind == 1 ? weakEffectIcon : kind == 2 ? bleedEffectIcon : deathEffectIcon;
 
         private void EnsureStatusIconPool()
         {
@@ -33,7 +34,7 @@ namespace RhythmHunter.FightDemo
             statusIconStorage = new GameObject("Inactive").transform;
             statusIconStorage.SetParent(statusIconRoot, false);
             statusIconStorage.gameObject.SetActive(false);
-            for (int kind = 0; kind < 3; kind++)
+            for (int kind = 0; kind < idleStatusIcons.Length; kind++)
                 if (IconPrefab(kind) != null)
                     for (int i = 0; i < Mathf.Clamp(statusIconPrewarmPerType, 0, 32); i++)
                         idleStatusIcons[kind].Push(CreateStatusIcon(kind));
@@ -113,8 +114,9 @@ namespace RhythmHunter.FightDemo
 
         private void LateUpdate()
         {
-            if (!showStatusIcons || battleEnded || AwaitingNextWave) { ClearStatusIcons(); return; }
-            foreach (var enemy in fightScene2Enemies) RefreshStatusIcons(enemy);
+            if (!showStatusIcons) { ClearStatusIcons(); return; }
+            if (battleEnded || AwaitingNextWave) ClearStatusIconsExceptDeath(true);
+            else foreach (var enemy in fightScene2Enemies) RefreshStatusIcons(enemy);
             float delta = IsPaused || TimingCalibrationActive ? 0 : Time.deltaTime;
             AdvanceStatusIconVisuals(delta);
         }
@@ -128,9 +130,19 @@ namespace RhythmHunter.FightDemo
                 if (activeStatusIcons[i] == null || !activeStatusIcons[i].Advance(delta, beats)) ReturnStatusIcon(activeStatusIcons[i]);
         }
 
-        private void ClearStatusIcons()
+        internal void ShowDeathEffectIcon(FightUnitSlot target)
         {
-            while (activeStatusIcons.Count > 0) ReturnStatusIcon(activeStatusIcons[activeStatusIcons.Count - 1]);
+            if (!showStatusIcons || !isActiveAndEnabled || target == null || target.Team != FightUnitSlot.UnitTeam.Enemy) return;
+            RentStatusIcon(3, target);
+        }
+
+        private void ClearStatusIcons() => ClearStatusIconsExceptDeath(false);
+
+        private void ClearStatusIconsExceptDeath(bool keepDeathPopups)
+        {
+            for (int i = activeStatusIcons.Count - 1; i >= 0; i--)
+                if (!keepDeathPopups || activeStatusIcons[i] == null || activeStatusIcons[i].Kind != 3)
+                    ReturnStatusIcon(activeStatusIcons[i]);
         }
     }
 }

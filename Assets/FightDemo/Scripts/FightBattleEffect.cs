@@ -77,7 +77,7 @@ namespace RhythmHunter.FightDemo
         {
             StopBattleAudio();
             ClearSkillVisuals();
-            ClearStatusIcons();
+            ClearStatusIconsExceptDeath(true);
             // Let lethal-hit feedback finish its short lifetime at the old target's
             // position. Full combat reset still clears every effect immediately.
             foreach (var effect in new List<FightBattleEffect>(battleEffects))
