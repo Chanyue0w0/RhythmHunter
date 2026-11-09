@@ -847,8 +847,7 @@ namespace RhythmHunter.FightDemo
                 // determines player targets, not which enemies are allowed to attack.
                 StartAuthoredEnemyTurns(beat.GlobalBeat);
                 if (!pendingEnemyAttack && lastEnemyQueuedBeat != beat.GlobalBeat && activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
-                    (activeEnemySlot.CharacterDefinition == null || !activeEnemySlot.CharacterDefinition.EnemyAttackUsesEffectFrames ||
-                     (BossActive && activeEnemySlot == bossActor)) &&
+                    (activeEnemySlot.CharacterDefinition == null || (BossActive && activeEnemySlot == bossActor)) &&
                     !enemyHits.Exists(hit => hit.source == activeEnemySlot && !hit.launched) &&
                     (!BossActive || lastBossAttackBeat != beat.GlobalBeat))
                 {
@@ -977,6 +976,8 @@ namespace RhythmHunter.FightDemo
                     ApplyPartyDamage(damage, pendingAttackGlobalBeat);
                 else
                     partyHp = Mathf.Max(0f, partyHp - damage);
+                if (damage > 0 && attacker != null && tankSlot != null)
+                    attacker.PlayOnHitEffect(false, tankSlot.ImpactEffectAnchor);
                 if (!blocked && tankSlot != null)
                 {
                     tankSlot.PlayCombatAnimation(
@@ -1137,10 +1138,14 @@ namespace RhythmHunter.FightDemo
             partyArmor -= armorDamage;
             float hpDamage = Mathf.Min(partyHp, damage - armorDamage);
             partyHp -= hpDamage;
+            if (armorDamage > 0 || hpDamage > 0) PartyDamageTaken?.Invoke(armorDamage, hpDamage);
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             if (UsesBattlePreparation && endBattleOnZeroHp && partyHp <= 0) FinishBattle(false);
             return armorDamage + hpDamage;
         }
+
+        // Actual resource loss, emitted only by damage resolution (never healing/formation changes).
+        public event Action<float, float> PartyDamageTaken;
 
         // Compatibility entry point for existing validation tools. Time never restores armor.
         public void AdvanceArmorRecovery(long globalBeat) { }
@@ -1300,7 +1305,8 @@ namespace RhythmHunter.FightDemo
                 return;
 
             // A transition shot stays harmless even if its animation/projectile lands after entry finishes.
-            if (WaveTransitionActive) damage = 0;
+            bool transitionBlocked = WaveTransitionActive && damage > 0;
+            if (transitionBlocked) damage = 0;
 
             FightCharacterCombatAnimator.CombatAnimation animation = action switch
             {
@@ -1329,6 +1335,7 @@ namespace RhythmHunter.FightDemo
                         () =>
                         {
                             float hp = target.CurrentHp;
+                            if (transitionBlocked) target.ShowTransitionImmuneHit();
                             ApplyHeroDamage(actionRosterVersion, attacker, target, damage, false);
                             if (IsCurrentHeroAction(actionRosterVersion, attacker, target) && target.CurrentHp < hp &&
                                 attacker.CharacterDefinition != null && attacker.CharacterDefinition.BasicAppliesBleeding)
@@ -1340,6 +1347,7 @@ namespace RhythmHunter.FightDemo
                     effect => { if (IsCurrentHeroAction(actionRosterVersion, attacker, target)) attacker.PlayFrameEffect(effect, target.ImpactEffectAnchor); })) launch();
                 return;
             }
+            if (transitionBlocked && IsCurrentHeroAction(actionRosterVersion, attacker, target)) target.ShowTransitionImmuneHit();
             if (resolvingTeamSkillFrame && action == ActionType.Skill)
             {
                 PlayHeroActionVisual(actionRosterVersion, attacker, target, action);
@@ -1457,8 +1465,14 @@ namespace RhythmHunter.FightDemo
 
         private void ApplyAreaDamage(int expectedRosterVersion, FightUnitSlot attacker, float damage)
         {
-            if (!IsCurrentHero(expectedRosterVersion, attacker) || !HealthSystemEnabled || WaveTransitionActive || damage <= 0)
+            if (!IsCurrentHero(expectedRosterVersion, attacker) || !HealthSystemEnabled || damage <= 0)
                 return;
+            if (WaveTransitionActive)
+            {
+                foreach (var enemy in fightScene2Enemies)
+                    if (enemy != null && enemy.CurrentHp > 0) enemy.ShowTransitionImmuneHit();
+                return;
+            }
 
             foreach (FightUnitSlot target in fightScene2Enemies.ToArray())
             {
@@ -1486,8 +1500,9 @@ namespace RhythmHunter.FightDemo
             float damage,
             bool skill = true)
         {
-            if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target) || WaveTransitionActive || damage <= 0)
+            if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target) || damage <= 0)
                 return;
+            if (WaveTransitionActive) { target.ShowTransitionImmuneHit(); return; }
 
             if (HealthSystemEnabled && CanHitBurstTarget(target))
             {

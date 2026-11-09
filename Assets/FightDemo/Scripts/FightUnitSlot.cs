@@ -311,10 +311,20 @@ namespace RhythmHunter.FightDemo
 
         public float TakeDamage(float amount) => TakeDamage(amount, DamageKind.Direct);
 
+        internal void ShowTransitionImmuneHit()
+        {
+            if (IsTransitionInvulnerable && actorInstance != null)
+                actorInstance.GetComponent<FightTransitionInvulnerabilityVisual>()?.ShowHit();
+        }
+
         public float TakeDamage(float amount, DamageKind kind)
         {
             // Reject before consuming statuses, triggering fragments or emitting damage numbers.
-            if (IsTransitionInvulnerable) return 0;
+            if (IsTransitionInvulnerable)
+            {
+                if (amount > 0 && !float.IsInfinity(amount)) ShowTransitionImmuneHit();
+                return 0;
+            }
             float damage = QuantizeNonNegative(amount);
             bool retained = RetainedForBurst;
             bool wasAlive = currentHp > 0;
@@ -394,6 +404,10 @@ namespace RhythmHunter.FightDemo
 
         public void PlayAttackFrameWarning(bool enemy)
         {
+            // The animation already emits its configured warning VFX/audio.
+            // Keep the procedural warning only as a fallback for older sequences.
+            if (combatAnimator != null && combatAnimator.FindSequence(combatAnimator.ActiveAnimation)?.WarningEffect?.prefab != null)
+                return;
             Color warningColor = enemy
                 ? new Color(1f, 0.18f, 0.05f, 0.72f)
                 : new Color(0.15f, 0.9f, 1f, 0.65f);

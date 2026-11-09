@@ -27,13 +27,32 @@ namespace RhythmHunter.FightDemo
             foreach (var enemy in fightScene2Enemies)
             {
                 if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || enemy.IsStunned ||
-                    enemy.CharacterDefinition == null || !enemy.CharacterDefinition.EnemyAttackUsesEffectFrames ||
+                    enemy.CharacterDefinition == null ||
                     (BossActive && enemy == bossActor) ||
                     !IsScheduledAttackBeat(globalBeat - enemyPausedBeats, enemy.AttackIntervalBeats) ||
                     enemyHits.Exists(hit => hit.source == enemy && !hit.launched) ||
                     (enemy.CombatAnimator != null && enemy.CombatAnimator.IsPlaying)) continue;
-                TryStartAuthoredEnemyAttack(enemy);
+                if (enemy.CharacterDefinition.EnemyAttackUsesEffectFrames)
+                    TryStartAuthoredEnemyAttack(enemy);
+                else
+                    StartIndependentEnemyAttack(enemy);
             }
+        }
+
+        // Windup-based enemies use the same per-source queue as frame-authored enemies.
+        // Their timing choice must never restrict them to the front formation slot.
+        private void StartIndependentEnemyAttack(FightUnitSlot source)
+        {
+            var definition = source.CharacterDefinition;
+            enemyHits.Add(new ScheduledEnemyHit { source = source,
+                due = NormalBattleBeatCount + definition.AttackWindupBeats,
+                version = rosterVersion, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
+            int version = rosterVersion;
+            bool Valid() => version == rosterVersion && !battleEnded && source != null && source.CurrentHp > 0;
+            bool started = source.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.NormalAttack,
+                () => { if (Valid()) source.PlayAttackFrameWarning(true); },
+                () => { if (Valid()) source.PlayLightAttackAt(tankSlot != null ? tankSlot.ImpactEffectAnchor : null); }, null);
+            if (!started) source.PlayLightAttackAt(tankSlot != null ? tankSlot.ImpactEffectAnchor : null);
         }
 
         /// <summary>Future behavior entry point: offsets are ordinary combat beats from now.
@@ -135,6 +154,8 @@ namespace RhythmHunter.FightDemo
                 float damage = blocked || !HealthSystemEnabled ? 0 : QuantizeCombatValue(hit.damage);
                 if (blocked) { blockedAttackCount++; ShowBlockedEffectIcon(); } else receivedAttackCount++;
                 ApplyPartyDamage(damage, hit.hitBeat);
+                if (damage > 0 && hit.source != null && tankSlot != null)
+                    hit.source.PlayOnHitEffect(false, tankSlot.ImpactEffectAnchor);
                 if (!blocked && !battleEnded) tankSlot?.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Hit, null, null, null);
                 EnemyAttackResolved?.Invoke(new EnemyAttackResult(hit.hitBeat, hit.bar, blocked, damage, partyHp));
                 if (battleEnded) break;

@@ -284,6 +284,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: GoblinGiant_Visual
       objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.prefab
+      value: 
+      objectReference: {fileID: 6593023544061229464, guid: 2e1c2f459c628474c9a7928b57b34a9c, type: 3}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.followAnchor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.limitLifetime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.soundEventPath
+      value: event:/ZooGoblinFight/SoundEffects/Warning
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.lifetimeSeconds
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[3].playWarning
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[3].effects.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.41

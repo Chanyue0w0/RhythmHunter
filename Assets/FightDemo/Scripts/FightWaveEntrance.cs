@@ -24,6 +24,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Color invulnerabilityColor = new(.35f, .9f, 1f, 1f);
         [SerializeField, Min(.01f)] private float invulnerabilityTextSize = .12f;
         [SerializeField] private float invulnerabilityHeadOffset = .25f;
+        [SerializeField, Min(.01f)] private float invulnerabilityHitLabelSeconds = .5f;
         private sealed class Entry
         {
             public Transform root;
@@ -80,7 +81,7 @@ namespace RhythmHunter.FightDemo
                 if (showInvulnerabilityLabel && slot.Team == FightUnitSlot.UnitTeam.Enemy)
                 {
                     var label = slot.ActorInstance.GetComponent<FightTransitionInvulnerabilityVisual>() ?? slot.ActorInstance.AddComponent<FightTransitionInvulnerabilityVisual>();
-                    label.Initialize(slot, view, invulnerabilityLabel, invulnerabilityColor, invulnerabilityTextSize, invulnerabilityHeadOffset);
+                    label.Initialize(slot, view, invulnerabilityLabel, invulnerabilityColor, invulnerabilityTextSize, invulnerabilityHeadOffset, invulnerabilityHitLabelSeconds);
                 }
             }
         }

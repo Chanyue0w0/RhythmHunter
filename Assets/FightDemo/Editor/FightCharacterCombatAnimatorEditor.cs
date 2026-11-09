@@ -88,6 +88,16 @@ namespace RhythmHunter.FightDemoEditor
             }
             if (sequence != null)
             {
+                EditorGUILayout.PropertyField(sequence.FindPropertyRelative("warningEffect"), new GUIContent("Warning 特效與音效（每次勾選共用）"), true);
+                var warningData = sequence.FindPropertyRelative("warningEffect");
+                var warningRows = sequence.FindPropertyRelative("frameEffects");
+                bool hasWarning = sequence.FindPropertyRelative("warningFrame").intValue >= 0;
+                for (int row = 0; row < warningRows.arraySize; row++)
+                    hasWarning |= warningRows.GetArrayElementAtIndex(row).FindPropertyRelative("playWarning").boolValue;
+                if (hasWarning && warningData.FindPropertyRelative("prefab").objectReferenceValue == null)
+                    EditorGUILayout.HelpBox("已勾選 Warning，但尚未指定共用 Prefab；正式警告特效與音效不會播放。請展開上方 Warning 設定。", MessageType.Warning);
+                else if (hasWarning && string.IsNullOrWhiteSpace(warningData.FindPropertyRelative("soundEventPath").stringValue))
+                    EditorGUILayout.HelpBox("Warning 特效已指定，但 Sound Event Path 留空，因此不會播放警告音效。", MessageType.Info);
                 DrawFrames(sequence.FindPropertyRelative("frames"), sequence.FindPropertyRelative("useFrameBeatDurations"),
                     sequence.FindPropertyRelative("frameBeatDurations"), type == 7 || type == 8 ? null : sequence);
                 if (!sequence.FindPropertyRelative("useFrameBeatDurations").boolValue)
@@ -109,6 +119,7 @@ namespace RhythmHunter.FightDemoEditor
                     effectsByFrame.InsertArrayElementAtIndex(index);
                     effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("effects").ClearArray();
                     effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("playAttackEffect").boolValue = false;
+                    effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("playWarning").boolValue = false;
                 }
                 effectsByFrame.arraySize = frames.arraySize;
             }
@@ -137,7 +148,15 @@ namespace RhythmHunter.FightDemoEditor
                     else EditorGUILayout.LabelField("持續時間", "使用此動畫的 FPS／循環速度");
                     if (sequence != null)
                     {
-                        FrameEvent(sequence, "warningFrame", "進入圖片時生成 Warning", i);
+                        var legacyWarning = sequence.FindPropertyRelative("warningFrame");
+                        var frameWarning = effectsByFrame.GetArrayElementAtIndex(i).FindPropertyRelative("playWarning");
+                        bool warningEnabled = legacyWarning.intValue == i || frameWarning.boolValue;
+                        bool warningValue = EditorGUILayout.ToggleLeft("進入圖片時生成 Warning（特效＋音效，可多選）", warningEnabled);
+                        if (warningValue != warningEnabled)
+                        {
+                            if (legacyWarning.intValue == i) legacyWarning.intValue = -1;
+                            frameWarning.boolValue = warningValue;
+                        }
                         var legacyEffect = sequence.FindPropertyRelative("attackEffectFrame");
                         var frameEffect = effectsByFrame.GetArrayElementAtIndex(i).FindPropertyRelative("playAttackEffect");
                         bool wasEnabled = legacyEffect.intValue == i || frameEffect.boolValue;
@@ -188,6 +207,7 @@ namespace RhythmHunter.FightDemoEditor
                     effectsByFrame.InsertArrayElementAtIndex(index);
                     effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("effects").ClearArray();
                     effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("playAttackEffect").boolValue = false;
+                    effectsByFrame.GetArrayElementAtIndex(index).FindPropertyRelative("playWarning").boolValue = false;
                 }
             }
             if (useBeats.boolValue)
@@ -246,14 +266,6 @@ namespace RhythmHunter.FightDemoEditor
                 entry.FindPropertyRelative("limitLifetime").boolValue = false;
                 entry.FindPropertyRelative("lifetimeSeconds").floatValue = 1.5f;
             }
-        }
-
-        private static void FrameEvent(SerializedProperty sequence, string name, string label, int index)
-        {
-            SerializedProperty property = sequence.FindPropertyRelative(name);
-            bool enabled = property.intValue == index;
-            bool value = EditorGUILayout.ToggleLeft(label, enabled);
-            if (value != enabled) property.intValue = value ? index : -1;
         }
 
         private static void RemapEvents(SerializedProperty sequence, int from, int to)

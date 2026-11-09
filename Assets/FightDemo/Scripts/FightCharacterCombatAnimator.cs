@@ -51,6 +51,7 @@ namespace RhythmHunter.FightDemo
         {
             public List<FrameEffect> effects = new();
             public bool playAttackEffect;
+            public bool playWarning;
         }
 
         [Serializable]
@@ -59,6 +60,10 @@ namespace RhythmHunter.FightDemo
             [SerializeField] private CombatAnimation animation;
             [SerializeField] private List<Sprite> frames = new();
             [SerializeField] private List<FrameEffects> frameEffects = new();
+            [SerializeField] private FrameEffect warningEffect;
+            public FrameEffect WarningEffect => warningEffect;
+            public bool PlaysWarningAt(int index) => index == warningFrame ||
+                (index >= 0 && index < frameEffects.Count && frameEffects[index] != null && frameEffects[index].playWarning);
             public IReadOnlyList<FrameEffect> EffectsAt(int index) => index < frameEffects.Count ? frameEffects[index]?.effects : null;
             public bool HasFrameEffects
             {
@@ -166,7 +171,6 @@ namespace RhythmHunter.FightDemo
         private Action<FrameEffect> frameEffectCallback;
         private Action damageCallback;
         private Action completedCallback;
-        private bool warningRaised;
         private bool effectRaised;
         private bool damageRaised;
         private bool playbackPaused;
@@ -478,7 +482,6 @@ namespace RhythmHunter.FightDemo
             frameEffectCallback = onFrameEffect;
             damageCallback = onDamage;
             completedCallback = onCompleted;
-            warningRaised = false;
             effectRaised = false;
             damageRaised = false;
             EnterFrame(0);
@@ -548,10 +551,16 @@ namespace RhythmHunter.FightDemo
                     else GetComponentInParent<FightUnitSlot>()?.PlayFrameEffect(effect);
                     if (version != playbackVersion) return;
                 }
-            if (!warningRaised && frameIndex == activeSequence.WarningFrame)
+            if (activeSequence.PlaysWarningAt(frameIndex))
             {
-                warningRaised = true;
                 WarningEventCount++;
+                var warning = activeSequence.WarningEffect;
+                if (warning != null && warning.prefab != null)
+                {
+                    if (frameEffectCallback != null) frameEffectCallback(warning);
+                    else GetComponentInParent<FightUnitSlot>()?.PlayFrameEffect(warning);
+                    if (version != playbackVersion) return;
+                }
                 warningCallback?.Invoke();
                 if (version != playbackVersion) return;
             }

@@ -93,12 +93,12 @@ namespace RhythmHunter.FightDemoEditor
                 for (int n = 0; n < 15; n++) Beat(n);
                 Check(fight.ScheduledEnemyHitCount == 0, "Rear enemies attacked before interval");
                 Beat(15);
-                Check(fight.HasPendingEnemyAttack, "Front normal attack must coexist with rear attacks");
-                Check(fight.ScheduledEnemyHitCount == 3 && killer.CombatAnimator.IsPlaying && giant.CombatAnimator.IsPlaying,
+                Check(!fight.HasPendingEnemyAttack, "Normal enemies must use independent queues");
+                Check(fight.ScheduledEnemyHitCount == 4 && killer.CombatAnimator.IsPlaying && giant.CombatAnimator.IsPlaying,
                     "Rear Killer and Giant must both animate and schedule their hits");
                 Beat(15);
-                Check(fight.ScheduledEnemyHitCount == 3, "Duplicate beat scheduled duplicate attacks");
-                Check(fight.TryInterruptEnemyAttack(killer) && fight.ScheduledEnemyHitCount == 1, "Interrupt must only cancel Killer's two hits");
+                Check(fight.ScheduledEnemyHitCount == 4, "Duplicate beat scheduled duplicate attacks");
+                Check(fight.TryInterruptEnemyAttack(killer) && fight.ScheduledEnemyHitCount == 2, "Interrupt must only cancel Killer's two hits");
                 Check(giant.CombatAnimator.IsPlaying, "Interrupting Killer stopped Giant");
                 Call(fight, "CancelEnemyCombatWork");
                 Check(fight.ScheduledEnemyHitCount == 0 && !giant.CombatAnimator.IsPlaying, "Wave cleanup left rear attack active");
@@ -127,12 +127,13 @@ namespace RhythmHunter.FightDemoEditor
                 Check(Enumerable.Range(0, 3).All(i => sequence.GetFrameBeats(i) == 1), "One beat per attack frame.");
                 Check(Mathf.Abs(Get<System.Collections.Generic.List<float>>(animator, "idleFrameBeatDurations").Sum() - 1) < .0001f, "Idle loop is one beat.");
                 void Beat(int n) => Call(fight, "OnBeat", new FmodBeatClock.BeatSnapshot(n, 1+n/4, 1+n%4, n*500, 120, 4, 4));
-                void Resolve() => Call(fight, "ResolvePendingEnemyAttack", Get<int>(fight, "pendingAttackRosterVersion"), Get<long>(fight, "pendingEnemyActionId"), enemy);
+                Set(fight, "beatClock", null);
+                void Resolve() => Call(fight, "ResolveEnemyCombatWork", (int)(Get<long>(fight, "latestCombatBeat") * 500 + 499));
                 for (int n = 0; n < 15; n++) Beat(n);
                 Check(!fight.HasPendingEnemyAttack, "No attack before interval.");
                 float resources = fight.PartyHp + fight.PartyArmor;
                 Beat(15); Resolve();
-                Check(fight.HasPendingEnemyAttack && fight.PartyHp + fight.PartyArmor == resources, "Attack 1 cannot hit.");
+                Check(fight.ScheduledEnemyHitCount == 1 && fight.PartyHp + fight.PartyArmor == resources, "Attack 1 cannot hit.");
                 Beat(16); Resolve();
                 Check(fight.PartyHp + fight.PartyArmor == resources, "Warning beat cannot hit.");
                 Call(fight, "BeginEnemyPause");
@@ -141,9 +142,9 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.PartyHp + fight.PartyArmor == resources, "Team pause cannot consume windup.");
                 Call(fight, "EndEnemyPause", true);
                 Beat(23); Resolve();
-                Check(fight.PartyHp + fight.PartyArmor == resources - .5f && !fight.HasPendingEnemyAttack, "Third ordinary beat hits exactly half a heart.");
-                Call(fight, "QueueEnemyAttack", new FmodBeatClock.BeatSnapshot(24, 7, 1, 12000, 120, 4, 4));
-                Check(fight.TryInterruptEnemyAttack(enemy) && !fight.HasPendingEnemyAttack, "Windup can be interrupted.");
+                Check(fight.PartyHp + fight.PartyArmor == resources - .5f && fight.ScheduledEnemyHitCount == 0, "Third ordinary beat hits exactly half a heart.");
+                Call(fight, "StartIndependentEnemyAttack", enemy);
+                Check(fight.TryInterruptEnemyAttack(enemy) && fight.ScheduledEnemyHitCount == 0, "Windup can be interrupted.");
                 Debug.Log("NORMAL_GOBLIN_VALIDATION_PASS");
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }

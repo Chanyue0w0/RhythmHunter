@@ -244,7 +244,7 @@ MonoBehaviour:
   enemyAttackUsesEffectFrames: 0
   attackWindupBeats: 2
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 6979637366035971696, guid: 08166c26e8781d8449ee84139f5d70aa, type: 3}
+  normalAbilityEffectPrefab: {fileID: 102462788088139591, guid: a9314ecfd5492ce4a8ab2d5d43542838, type: 3}
   useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5
@@ -325,8 +325,36 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.prefab
+      value: 
+      objectReference: {fileID: 6593023544061229464, guid: 2e1c2f459c628474c9a7928b57b34a9c, type: 3}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.followAnchor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.limitLifetime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.soundEventPath
+      value: event:/ZooGoblinFight/SoundEffects/Warning
+      objectReference: {fileID: 0}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].warningEffect.lifetimeSeconds
+      value: 2.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[1].playWarning
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6248837688280884345, guid: 80c514241aed43898480363815605cb2, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[1].effects.Array.size
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

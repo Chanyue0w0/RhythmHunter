@@ -38,6 +38,17 @@ namespace RhythmHunter.FightDemoEditor
                 Set(roster, "<BattleStarted>k__BackingField", true);
                 Set(fight, "<AwaitingNextWave>k__BackingField", true);
                 var enemy = roster.ActiveEnemies.First();
+                var immune = enemy.ActorInstance.AddComponent<FightTransitionInvulnerabilityVisual>();
+                immune.Initialize(enemy, null, "IMMUNE", Color.cyan, .12f, .25f);
+                var label = enemy.ActorInstance.GetComponentsInChildren<TextMesh>(true).Single(t => t.name == "TransitionInvulnerabilityLabel");
+                Check(!label.gameObject.activeSelf, "Immune label appeared merely from entry");
+                enemy.TakeDamage(1);
+                Check(label.gameObject.activeSelf, "Blocked damage did not show immune label");
+                Set(immune, "remaining", 0f); Call(immune, "Refresh");
+                Check(!label.gameObject.activeSelf, "Immune label did not expire");
+                var warrior = fight.RosterManager.ActiveHeroes.First();
+                Call(fight, "PlayAnimatedHeroAction", warrior, enemy, FightCombatController.ActionType.LightAttack, 1f);
+                Check(label.gameObject.activeSelf, "Transition attack zero-damage path missed immune feedback");
                 float hp = enemy.CurrentHp;
                 Set(enemy, "fragile", true);
                 foreach (FightUnitSlot.DamageKind kind in Enum.GetValues(typeof(FightUnitSlot.DamageKind)))
