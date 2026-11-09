@@ -1272,12 +1272,12 @@ namespace RhythmHunter.FightDemo
             if (resolvingTeamSkillFrame && action == ActionType.Skill)
             {
                 PlayHeroActionVisual(actionRosterVersion, attacker, target, action);
-                ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
+                ApplyHeroDamage(actionRosterVersion, attacker, target, damage, action == ActionType.Skill);
                 return;
             }
             // The rhythm judgement owns damage timing. Resolve before starting any
             // animation so projectile speed, effect lifetime, and frame events are visual-only.
-            ApplyHeroDamage(actionRosterVersion, attacker, target, damage);
+            ApplyHeroDamage(actionRosterVersion, attacker, target, damage, action == ActionType.Skill);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
@@ -1395,7 +1395,9 @@ namespace RhythmHunter.FightDemo
                 if (!CanHitBurstTarget(target))
                     continue;
                 bool wasAlive = target.CurrentHp > 0;
-                target.TakeDamage(ModifyBossDamage(target, damage));
+                float dealt = target.TakeDamage(ModifyBossDamage(target, damage));
+                if (dealt > 0 || IsBurstRetainedTarget(target) && ModifyBossDamage(target, damage) > 0)
+                    attacker.PlayOnHitEffect(true, target.ImpactEffectAnchor);
                 if (wasAlive) CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,
@@ -1410,7 +1412,8 @@ namespace RhythmHunter.FightDemo
             int expectedRosterVersion,
             FightUnitSlot attacker,
             FightUnitSlot target,
-            float damage)
+            float damage,
+            bool skill = true)
         {
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
                 return;
@@ -1418,7 +1421,9 @@ namespace RhythmHunter.FightDemo
             if (HealthSystemEnabled && CanHitBurstTarget(target))
             {
                 bool wasAlive = target.CurrentHp > 0;
-                target.TakeDamage(ModifyBossDamage(target, damage));
+                float dealt = target.TakeDamage(ModifyBossDamage(target, damage));
+                if (dealt > 0 || IsBurstRetainedTarget(target) && ModifyBossDamage(target, damage) > 0)
+                    attacker.PlayOnHitEffect(skill, target.ImpactEffectAnchor);
                 if (wasAlive) CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,

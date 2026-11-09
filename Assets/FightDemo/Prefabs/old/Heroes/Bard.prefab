@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 12
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -91,7 +91,7 @@ SpriteRenderer:
   m_Size: {x: 4.82, y: 5.11}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!114 &2185465317251320045
 MonoBehaviour:
@@ -105,24 +105,83 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  basicBreakPower: 0
+  skillBreakPower: 0
+  bossPattern:
+    enabled: 0
+    superArmor: 1
+    neutralBeats: 4
+    armorBeats: 4
+    chargeBeats: 4
+    vulnerableBeats: 4
+    rageWindupBeats: 2
+    rageAttackBeats: 6
+    rageAttackInterval: 2
+    breakBeats: 4
+    breakThreshold: 3
+    armorReduction: 0.5
+    vulnerableBonus: 0.5
+    chargeDamage: 2
+    rageFinisherDamage: 3
+    successfulGuardBreakPower: 1
+  teamQteMode: 0
+  qteFailureDamageMultiplier: 0.5
+  qteFailureAppliesStatus: 1
+  rapidQteIntervalBeats: 1
+  qteProjectilePrefab: {fileID: 0}
+  qteProjectileFlightBeats: 0.35
+  qteProjectileArcHeight: 1.2
+  qteImpactEffectPrefab: {fileID: 0}
+  qteImpactEffectLifetime: 1.5
+  slimeFloorPrefab: {fileID: 0}
+  slimeFloorOffset: {x: 0, y: 0, z: -0.1}
   characterId: Bard
   displayName: BARD
   team: 1
   role: 2
   maxHp: 1
   defense: 1
+  frontlineDefenseBonus: 0
   basicAbilityName: Heal
   normalAbilityBehavior: 2
   normalAbilityPower: 0.5
+  consecutiveInputBeats: 3
+  basicGuardBeats: 1
+  basicInterruptsEnemy: 0
+  successfulInterruptDamageBonus: 0
   attackPower: 1
+  teamSkillManaCost: 10
+  teamSkillPerformanceBeats: 4
+  teamSkillEffectBeatOffset: 0
   skillName: Healing Chorus
   skillBehavior: 2
   skillPower: 1
+  conditionalSkillPower: 4
+  basicArmorRecovery: 0
+  basicArmorRecoveryAmount: 1
+  teamSkillArmorRecovery: 0
+  teamSkillArmorRecoveryAmount: 1
+  basicAppliesBleeding: 0
+  bleedDamage: 0.5
+  bleedBeats: 4
+  fragmentDamage: 1
+  fragmentBeats: 4
+  fragmentDetonationDelayBeats: 0.5
+  fragmentExplosionEffectPrefab: {fileID: 0}
+  fragmentExplosionLifetime: 0
+  stunBeats: 4
+  statusSkillTargetLimit: 3
+  crowdControlImmune: 0
+  enemyAttackUsesEffectFrames: 0
+  attackWindupBeats: 0
+  attackInterruptible: 1
   normalAbilityEffectPrefab: {fileID: 0}
+  useFallbackAbilityEffects: 1
   skillEffectPrefab: {fileID: 8051251566155585380, guid: 5dbd5598d6ff1ab4c8915e39f9f6fa53, type: 3}
   abilityEffectLifetime: 1.5
   castEffectAnchor: {fileID: 0}
   impactEffectAnchor: {fileID: 0}
+  headAnchor: {fileID: 0}
   attackIntervalBeats: 2
   maxMana: 4
   accentColor: {r: 0.2, g: 0.78, b: 0.48, a: 1}
@@ -141,10 +200,16 @@ MonoBehaviour:
   targetRenderer: {fileID: 8196285849424408783}
   beatSource: {fileID: 0}
   fallbackBpm: 120
+  useDrunkIdle: 0
   frames:
   - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
   - {fileID: -8157529274441160004, guid: d9e5ba9e884714847869b90ccac2db14, type: 3}
   - {fileID: 8050079004319037636, guid: 30365fd678e77b648b9da40fcc59cc36, type: 3}
+  useIdleFrameBeatDurations: 0
+  idleFrameBeatDurations:
+  - 0.5
+  - 0.5
+  - 0.5
   cyclesPerBeat: 1
   pingPong: 0
   phaseOffset: 0
@@ -154,7 +219,19 @@ MonoBehaviour:
     - {fileID: -1351328435862124284, guid: 1c30bbd113ed59746a6ac8dfd52e3a84, type: 3}
     - {fileID: 2103946461064055381, guid: 937694a14aa60424aaec3da7dcdc6b8b, type: 3}
     - {fileID: 3121326049159161688, guid: ff735b34821d7b54597408a7147b87f0, type: 3}
+    frameEffects:
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
+    - effects: []
+      playAttackEffect: 0
     framesPerSecond: 18
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    - 0.5
     warningFrame: 0
     attackEffectFrame: 1
     damageFrame: 2
@@ -163,7 +240,13 @@ MonoBehaviour:
     - {fileID: -1351328435862124284, guid: 1c30bbd113ed59746a6ac8dfd52e3a84, type: 3}
     - {fileID: 2103946461064055381, guid: 937694a14aa60424aaec3da7dcdc6b8b, type: 3}
     - {fileID: 3121326049159161688, guid: ff735b34821d7b54597408a7147b87f0, type: 3}
+    frameEffects: []
     framesPerSecond: 18
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    - 0.5
     warningFrame: 0
     attackEffectFrame: 1
     damageFrame: 2
@@ -172,7 +255,13 @@ MonoBehaviour:
     - {fileID: -1351328435862124284, guid: 1c30bbd113ed59746a6ac8dfd52e3a84, type: 3}
     - {fileID: 2103946461064055381, guid: 937694a14aa60424aaec3da7dcdc6b8b, type: 3}
     - {fileID: 3121326049159161688, guid: ff735b34821d7b54597408a7147b87f0, type: 3}
+    frameEffects: []
     framesPerSecond: 14.400001
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    - 0.5
     warningFrame: 0
     attackEffectFrame: 1
     damageFrame: 2
@@ -181,7 +270,13 @@ MonoBehaviour:
     - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
     - {fileID: -8157529274441160004, guid: d9e5ba9e884714847869b90ccac2db14, type: 3}
     - {fileID: 8050079004319037636, guid: 30365fd678e77b648b9da40fcc59cc36, type: 3}
+    frameEffects: []
     framesPerSecond: 14
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    - 0.5
     warningFrame: 0
     attackEffectFrame: 0
     damageFrame: 0
@@ -193,21 +288,38 @@ MonoBehaviour:
     - {fileID: -528471281070363416, guid: dce49542b9d57714ab24013312a1c6cf, type: 3}
     - {fileID: 352373741322793507, guid: 2e457b27096185247870632d551d2e78, type: 3}
     - {fileID: 1851172496842706988, guid: 324853e5009eead4c858954294c9e717, type: 3}
+    frameEffects: []
     framesPerSecond: 18
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
     warningFrame: 0
     attackEffectFrame: 2
     damageFrame: 3
   - animation: 5
     frames:
     - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
+    frameEffects: []
     framesPerSecond: 12
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
     warningFrame: -1
     attackEffectFrame: -1
     damageFrame: 0
   - animation: 6
     frames:
     - {fileID: -3781910019033479378, guid: 76e3ff41fd303bb4b92f81937f4f35b5, type: 3}
+    frameEffects: []
     framesPerSecond: 8
+    useFrameBeatDurations: 0
+    frameBeatDurations:
+    - 0.5
     warningFrame: -1
     attackEffectFrame: -1
     damageFrame: 0

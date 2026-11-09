@@ -14,10 +14,17 @@ namespace RhythmHunter.FightDemo
         private Animator[] animators;
         private float[] speeds;
         private bool paused;
+        private ParticleSystem[] completionParticles;
         public bool Frozen => fight != null && (fight.IsPaused || fight.TimingCalibrationActive || (enemy && fight.EnemyActionsPaused));
         public void Configure(FightCombatController controller, bool isEnemy, float lifetime)
         {
             fight = controller; enemy = isEnemy; remaining = lifetime;
+            var settings = GetComponent<FightEffectSettings>();
+            if (settings != null && settings.destroyAfterParticles)
+            {
+                completionParticles = GetComponentsInChildren<ParticleSystem>(true);
+                if (completionParticles.Length > 0) remaining = 0;
+            }
             animators = GetComponentsInChildren<Animator>(true);
             speeds = new float[animators.Length];
             fight?.RegisterBattleEffect(this);
@@ -41,7 +48,15 @@ namespace RhythmHunter.FightDemo
                     for (int i = 0; i < animators.Length; i++) if (animators[i] != null) animators[i].speed = speeds[i];
                 }
             }
-            if (freeze || remaining <= 0) return;
+            if (freeze) return;
+            if (completionParticles != null && completionParticles.Length > 0)
+            {
+                foreach (var particles in completionParticles)
+                    if (particles != null && particles.gameObject.activeInHierarchy && particles.IsAlive(false)) return;
+                Cancel();
+                return;
+            }
+            if (remaining <= 0) return;
             remaining -= Time.deltaTime;
             if (remaining <= 0) Destroy(gameObject);
         }

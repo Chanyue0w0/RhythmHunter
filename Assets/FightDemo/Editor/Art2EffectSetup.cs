@@ -35,7 +35,8 @@ namespace RhythmHunter.FightDemoEditor
                     var adapter = root.GetComponent<Art2EffectPresentation>();
                     if (!adapter) adapter = root.AddComponent<Art2EffectPresentation>();
                     var data = new SerializedObject(adapter);
-                    data.FindProperty("keepAboveGround").boolValue = path.EndsWith("/ShieldVFXPixel.prefab");
+                    if (path.EndsWith("/ShieldVFXPixel.prefab") || path.EndsWith("/SwordSlash_Pixel.prefab"))
+                        data.FindProperty("keepAboveGround").boolValue = true;
                     data.ApplyModifiedPropertiesWithoutUndo();
                     var particleRenderers = root.GetComponentsInChildren<ParticleSystemRenderer>(true);
                     report.AppendLine(Path.GetFileName(path) + ": sprites=" + root.GetComponentsInChildren<SpriteRenderer>(true).Length + ", particles=" + string.Join(",", particleRenderers.Select(p => p.renderMode + "/" + p.alignment + (p.mesh ? " mesh=" + p.mesh.name + " size=" + p.mesh.bounds.size : ""))));

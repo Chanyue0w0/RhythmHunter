@@ -588,6 +588,9 @@ namespace RhythmHunter.FightDemo
                 verticalOffset);
         }
 
+        public void PlayOnHitEffect(bool skill, Transform target) =>
+            EffectPlayer.SpawnOnHit(skill ? SkillEffectPrefab : NormalAttackEffectPrefab, target);
+
         private bool SpawnConfiguredAbilityEffects(
             bool skill,
             FightAttackEffect.VisualStyle style,

@@ -17,8 +17,43 @@ namespace RhythmHunter.FightDemoEditor
         {
             const string request = "Temp/TorchRigSetup.request";
             if (!File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode) return;
-            try { File.Delete(request); } catch (IOException) { return; }
-            try { Run(); } catch (Exception e) { File.WriteAllText("Temp/TorchRigSetup.result", "FAIL: " + e); Debug.LogException(e); }
+            bool beatMotion;
+            try { beatMotion = File.ReadAllText(request).Trim() == "beat-motion"; File.Delete(request); } catch (IOException) { return; }
+            try { if (beatMotion) ConfigureBeatMotion(); else Run(); } catch (Exception e) { File.WriteAllText("Temp/TorchRigSetup.result", "FAIL: " + e); Debug.LogException(e); }
+        }
+        [MenuItem("Rhythm Hunter/Art2/Add Gentle Torch Beat Motion")]
+        public static void ConfigureBeatMotion()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (EditorApplication.isPlayingOrWillChangePlaymode || scene.path != "Assets/FightDemo/Scenes/Art2_FightScene.unity") throw new Exception("Open Art2 outside Play Mode.");
+            var all = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Transform>(true)).ToArray();
+            var manager = all.Select(t => t.GetComponent<RhythmHunter.FightDemo.SceneBeatMotionManager>()).Single(c => c);
+            Undo.RecordObject(manager, "Add gentle torch beat motion");
+            var data = new SerializedObject(manager);
+            if (!data.FindProperty("beatClock").objectReferenceValue) throw new Exception("Scene beat clock is missing.");
+            var targets = data.FindProperty("targets");
+            foreach (var name in new[] { "WallTorch_Left_Outer", "WallTorch_Left_Inner", "WallTorch_Right_Inner", "WallTorch_Right_Outer" })
+            {
+                var target = all.Single(t => t.name == name);
+                if (!target.Find("FlameAnchor")) throw new Exception("Missing linked flame anchor: " + name);
+                int index = -1;
+                for (int i = 0; i < targets.arraySize; i++)
+                    if (targets.GetArrayElementAtIndex(i).FindPropertyRelative("target").objectReferenceValue == target) { index = i; break; }
+                if (index < 0) { index = targets.arraySize; targets.arraySize++; }
+                var entry = targets.GetArrayElementAtIndex(index);
+                entry.FindPropertyRelative("enabled").boolValue = true;
+                entry.FindPropertyRelative("target").objectReferenceValue = target;
+                entry.FindPropertyRelative("directionSpace").enumValueIndex = (int)Space.World;
+                entry.FindPropertyRelative("direction").vector3Value = Vector3.up;
+                entry.FindPropertyRelative("amplitude").floatValue = .025f;
+                entry.FindPropertyRelative("durationInBeats").floatValue = .4f;
+                entry.FindPropertyRelative("oscillations").intValue = 1;
+            }
+            data.ApplyModifiedProperties();
+            PrefabUtility.RecordPrefabInstancePropertyModifications(manager);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene)) throw new Exception("Scene save failed.");
+            File.WriteAllText("Temp/TorchRigSetup.result", "PASS: four linked torch roots added to existing SceneBeatMotionManager; amplitude 0.025, duration 0.4 beat, world up, one oscillation; existing song clock preserved; Art2 saved.");
         }
         [MenuItem("Rhythm Hunter/Art2/Bind Torch Rigs And Focus")]
         public static void Run()

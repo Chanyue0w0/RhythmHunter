@@ -17,10 +17,25 @@ namespace RhythmHunter.FightDemoEditor
         {
             const string path = "Temp/PlayerUiSetup.request";
             if (!File.Exists(path) || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
-            bool hideWorldInfo;
-            try { hideWorldInfo = File.ReadAllText(path).Trim() == "hide-world-info"; File.Delete(path); } catch (IOException) { return; }
+            string mode;
+            try { mode = File.ReadAllText(path).Trim(); File.Delete(path); } catch (IOException) { return; }
             try
             {
+                if (mode == "hide-timeline-bar")
+                {
+                    var scene = SceneManager.GetActiveScene();
+                    if (!scene.path.EndsWith("Art2_FightScene.unity")) throw new InvalidOperationException("Open Art2 first.");
+                    var presenter = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightScenePresenter>(true)).Single();
+                    Undo.RecordObject(presenter, "Hide timeline bar artwork");
+                    var data = new SerializedObject(presenter);
+                    data.FindProperty("showTimelineBar").boolValue = false;
+                    data.ApplyModifiedProperties();
+                    EditorSceneManager.MarkSceneDirty(scene);
+                    if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Scene save failed.");
+                    File.WriteAllText("Temp/PlayerUiSetup.result", "PASS: timeline bar hidden; Art2 saved.");
+                    return;
+                }
+                bool hideWorldInfo = mode == "hide-world-info";
                 if (hideWorldInfo) HideWorldInformation(); else Configure();
                 File.WriteAllText("Temp/PlayerUiSetup.result", hideWorldInfo ? "PASS: Art2 world labels and health visuals hidden; enemy health UI disabled; scene saved." : "PASS: live Art2 scene references assigned and saved.");
             }

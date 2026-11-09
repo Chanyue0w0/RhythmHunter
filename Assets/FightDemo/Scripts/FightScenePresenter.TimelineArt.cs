@@ -10,6 +10,8 @@ namespace RhythmHunter.FightDemo
         [Tooltip("整組節拍器縮放，包含底條、拍點與中央石頭。")]
         [SerializeField, Min(.1f)] private float timelineScale = 1;
         [SerializeField] private Sprite timelineBarSprite;
+        [Tooltip("只控制節拍器底圖；拍點、中央石頭與判定保持運作。")]
+        [SerializeField] private bool showTimelineBar = true;
         [SerializeField] private Sprite timelinePointSprite;
         [SerializeField] private Sprite stoneEmptySprite;
         [SerializeField] private Sprite stoneFillSprite;
@@ -49,6 +51,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!HasTimelineArt) return;
             timelineTrack.sprite = timelineBarSprite;
+            timelineTrack.enabled = showTimelineBar;
             timelineTrack.color = Color.white;
             timelineTrack.rectTransform.sizeDelta = new Vector2(timelineWidth,
                 timelineWidth * timelineBarSprite.rect.height / timelineBarSprite.rect.width);
@@ -92,6 +95,7 @@ namespace RhythmHunter.FightDemo
         {
             if (stoneFillImage == null || fight == null) return;
             timelineRoot.anchoredPosition = new Vector2(0, timelineBottomOffset);
+            timelineTrack.enabled = showTimelineBar;
             timelineRoot.localScale = Vector3.one * Mathf.Max(.1f, timelineScale);
             timelineRoot.sizeDelta = new Vector2(timelineWidth, 64);
             timelineTrack.rectTransform.sizeDelta = new Vector2(timelineWidth, timelineBarHeight > 0 ? timelineBarHeight :

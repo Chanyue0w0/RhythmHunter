@@ -6,6 +6,15 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent]
     public sealed class FightUnitEffects : MonoBehaviour
     {
+        public void SpawnOnHit(GameObject sourcePrefab, Transform target)
+        {
+            if (sourcePrefab == null || target == null) return;
+            var settings = sourcePrefab.GetComponent<FightEffectSettings>();
+            if (settings == null || settings.onHitPrefab == null) return;
+            SpawnConfiguredAbility(settings.onHitPrefab, target, settings.onHitLifetime,
+                FightAttackEffect.VisualStyle.Normal, Color.white);
+        }
+
         private void PlayFrameSound(FightCharacterCombatAnimator.FrameEffect entry, Vector3 position)
         {
             var slot = GetComponent<FightUnitSlot>();
