@@ -43,13 +43,37 @@ namespace RhythmHunter.FightDemo
         }
         [Tooltip("Optional waves after the initial Enemy Prefabs. Hero formation stays locked.")]
         [SerializeField] private EnemyWave[] additionalWaves = Array.Empty<EnemyWave>();
-        public int WaveCount => 1 + (additionalWaves?.Length ?? 0);
+        private FightCharacterDefinition[][] stageWaves;
+        public int WaveCount => stageWaves != null ? stageWaves.Length : 1 + (additionalWaves?.Length ?? 0);
+
+        public bool TryConfigureStage(FightStageDefinition stage, out string error)
+        {
+            if (BattleStarted) { error = "Cannot change Stage during battle."; return false; }
+            if (!requireBattlePreparation) { error = "Stage waves require the existing battle preparation lifecycle."; return false; }
+            if (stage == null) { error = "Stage is missing."; return false; }
+            if (!stage.Validate(out error)) return false;
+            if (enemySpawnSlots == null || enemySpawnSlots.Length != 3 || Array.Exists(enemySpawnSlots, slot => slot == null))
+            { error = "Stage requires three enemy spawn positions."; return false; }
+            // Existing battle targets sort enemy SlotIndex descending. Authoring uses
+            // explicit front/middle/back rather than exposing that legacy ordering.
+            int[] order = { 0, 1, 2 };
+            Array.Sort(order, (a, b) => enemySpawnSlots[b].SlotIndex.CompareTo(enemySpawnSlots[a].SlotIndex));
+            var snapshot = new FightCharacterDefinition[stage.Waves.Count][];
+            for (int w = 0; w < snapshot.Length; w++)
+            {
+                snapshot[w] = new FightCharacterDefinition[3];
+                for (int p = 0; p < 3; p++) snapshot[w][order[p]] = stage.Waves[w].At(p);
+            }
+            stageWaves = snapshot; // Do not mutate shared assets or re-read edits mid-battle.
+            enemyPrefabs = (FightCharacterDefinition[])snapshot[0].Clone();
+            error = null; return true;
+        }
 
         internal bool SpawnNextEnemyWave(int waveIndex)
         {
             if (!FormationLocked || waveIndex < 1 || waveIndex >= WaveCount) return false;
             activeEnemies.Clear();
-            SpawnSide(enemySpawnSlots, additionalWaves[waveIndex - 1]?.enemies,
+            SpawnSide(enemySpawnSlots, stageWaves != null ? stageWaves[waveIndex] : additionalWaves[waveIndex - 1]?.enemies,
                 FightUnitSlot.UnitTeam.Enemy, activeEnemies);
             return true;
         }
