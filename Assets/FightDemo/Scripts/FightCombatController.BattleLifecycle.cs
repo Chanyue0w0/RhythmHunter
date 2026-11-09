@@ -1,10 +1,22 @@
 using System;
 using RhythmHunter.RhythmDemo;
+using UnityEngine;
 
 namespace RhythmHunter.FightDemo
 {
     public sealed partial class FightCombatController
     {
+        [Header("Wave Transition")]
+        [Tooltip("Number of subsequent music beats to wait before the next wave enters.")]
+        [SerializeField, Min(0)] private int waveTransitionWaitBeats = 2;
+        [Tooltip("Optional shared-armor recovery VFX, spawned at the front hero when a wave restores armor.")]
+        [SerializeField] private GameObject waveArmorRecoveryEffect;
+        [Tooltip("Zero lets the prefab control its own lifetime, like other battle VFX.")]
+        [SerializeField, Min(0)] private float waveArmorRecoveryEffectLifetime;
+        private int waveWaitBeatsRemaining;
+        private long lastWaveWaitBeat = long.MinValue;
+        public int WaveWaitBeatsRemaining => AwaitingNextWave ? waveWaitBeatsRemaining : 0;
+        public event Action<int> WaveCleared;
         public int CurrentWave { get; private set; } = 1;
         public int WaveCount => rosterManager != null ? rosterManager.WaveCount : 1;
         public bool BattleWon { get; private set; }
@@ -24,9 +36,15 @@ namespace RhythmHunter.FightDemo
             if (TeamSkillRunning) return;
             if (FindFrontLivingEnemy() != null) return;
             AwaitingNextWave = true;
+            waveWaitBeatsRemaining = Mathf.Max(0, waveTransitionWaitBeats);
+            lastWaveWaitBeat = latestCombatBeat;
             ResetBasicAbilityProgress();
             CancelEnemyCombatWork();
-            RestorePartyArmor();
+            float restored = RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.Full);
+            if (restored > 0 && waveArmorRecoveryEffect != null && tankSlot != null)
+                tankSlot.EffectPlayer.SpawnConfiguredAbility(waveArmorRecoveryEffect, tankSlot.ImpactEffectAnchor,
+                    waveArmorRecoveryEffectLifetime, FightAttackEffect.VisualStyle.Normal, Color.white);
+            WaveCleared?.Invoke(CurrentWave);
         }
 
         private bool AdvanceWaveBoundary()
@@ -35,6 +53,14 @@ namespace RhythmHunter.FightDemo
             if (battleEnded) return true;
             if (!AwaitingNextWave || TeamSkillRunning || TeamUltimateRunning) return false;
             if (CurrentWave >= WaveCount) { FinishBattle(true); return true; }
+            // Count unique musical beats, not elapsed seconds or normal-combat status beats.
+            // Pausing/calibration never consumes the gap; duplicate callbacks cannot shorten it.
+            if (latestCombatBeat > lastWaveWaitBeat)
+            {
+                lastWaveWaitBeat = latestCombatBeat;
+                waveWaitBeatsRemaining = Mathf.Max(0, waveWaitBeatsRemaining - 1);
+            }
+            if (waveWaitBeatsRemaining > 0) return false;
             CancelEnemyCombatWork();
             rosterVersion++; // Invalidates all old hero animation callbacks before slots are reused.
             if (!rosterManager.SpawnNextEnemyWave(CurrentWave)) { FinishBattle(true); return true; }
@@ -44,6 +70,7 @@ namespace RhythmHunter.FightDemo
             fightScene2Enemies.Sort((left, right) => right.SlotIndex.CompareTo(left.SlotIndex));
             activeEnemySlot = FindFrontLivingEnemy();
             AwaitingNextWave = false;
+            waveWaitBeatsRemaining = 0;
             // Start the new wave's attack countdown from this boundary.
             enemyPausedBeats = latestCombatBeat + 1;
             RosterRebuilt?.Invoke();
@@ -87,6 +114,7 @@ namespace RhythmHunter.FightDemo
             battleEnded = true;
             BattleWon = won;
             AwaitingNextWave = false;
+            waveWaitBeatsRemaining = 0;
             rosterVersion++;
             int mana = teamSkillGauge;
             ResetTeamSkill();

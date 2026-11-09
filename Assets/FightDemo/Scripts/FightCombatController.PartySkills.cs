@@ -18,11 +18,6 @@ namespace RhythmHunter.FightDemo
                 if (version != rosterVersion || battleEnded) return;
             }
         }
-        private void RestorePartyArmor()
-        {
-            RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.Full);
-        }
-
         public float RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode mode, float amount = 0)
         {
             if (!HealthSystemEnabled || battleEnded || AwaitingBattleStart || mode == FightCharacterDefinition.ArmorRestoreMode.None) return 0;

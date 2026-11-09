@@ -70,9 +70,45 @@ namespace RhythmHunter.FightDemoEditor
                 Check(enemy.CurrentHp == hp && enemy.IsFragile && enemy.BleedBeatsRemaining == 0, "Delayed transition projectile damaged after immunity ended");
                 Check(enemy.TakeDamage(.5f) > 0 && !enemy.IsFragile, "Damage did not resume after transition");
                 ValidateDeath(fight, roster);
-                File.WriteAllText("Temp/WaveTransitionValidation.result", "PASS: transition immunity/input/healing/guard/projectile regression; direct/DoT deaths remove actors once, keep slots fixed; burst retains defeated targets then removes them; hero unaffected; roster respawn works.");
+                ValidateWaveWait(fight, roster);
+                File.WriteAllText("Temp/WaveTransitionValidation.result", "PASS: transition input/immunity and death regression; two unique subsequent beats before next wave; one armor refill/event per wave; MP/HP preserved; heroes retained; final wave victory without extra spawn.");
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
+
+        private static void ValidateWaveWait(FightCombatController fight, FightRosterManager roster)
+        {
+            Set(roster, "<BattleStarted>k__BackingField", false);
+            roster.SpawnConfiguredRoster();
+            Call(fight, "RebuildRosterAndResetCombat");
+            Set(roster, "stageWaves", new[] { roster.EnemyPrefabs.ToArray(), roster.EnemyPrefabs.ToArray() });
+            Set(roster, "<BattleStarted>k__BackingField", true);
+            Set(fight, "latestCombatBeat", 100L);
+            Set(fight, "partyArmor", 0f);
+            Set(fight, "teamSkillGauge", 17);
+            Set(fight, "waveTransitionWaitBeats", 2);
+            var heroes = roster.ActiveHeroes.Select(h => h.ActorInstance).ToArray();
+            float hp = fight.PartyHp;
+            int clears = 0, starts = 0;
+            fight.WaveCleared += _ => clears++;
+            fight.WaveStarted += _ => starts++;
+            foreach (var enemy in roster.ActiveEnemies) enemy.TakeDamage(1000);
+            Call(fight, "CheckWaveCompletion");
+            Check(fight.AwaitingNextWave && fight.WaveWaitBeatsRemaining == 2 && clears == 1, "Wave clear did not start two-beat wait once");
+            Check(fight.PartyArmor == fight.MaxPartyArmor && fight.TeamSkillGauge == 17 && fight.PartyHp == hp, "Wave recovery changed HP/MP or missed full armor");
+            Call(fight, "AdvanceWaveBoundary");
+            Check(fight.CurrentWave == 1 && fight.WaveWaitBeatsRemaining == 2, "Clear beat consumed wait");
+            Set(fight, "latestCombatBeat", 101L);
+            Call(fight, "AdvanceWaveBoundary");
+            Call(fight, "AdvanceWaveBoundary");
+            Check(fight.CurrentWave == 1 && fight.WaveWaitBeatsRemaining == 1 && clears == 1, "Duplicate beat consumed gap or repeated refill");
+            Set(fight, "latestCombatBeat", 102L);
+            Call(fight, "AdvanceWaveBoundary");
+            Check(fight.CurrentWave == 2 && !fight.AwaitingNextWave && starts == 1 && fight.TeamSkillGauge == 17, "Second beat did not spawn next wave or MP changed");
+            Check(roster.ActiveHeroes.Select(h => h.ActorInstance).SequenceEqual(heroes), "Wave transition respawned heroes");
+            foreach (var enemy in roster.ActiveEnemies) enemy.TakeDamage(1000);
+            Call(fight, "AdvanceWaveBoundary");
+            Check(fight.BattleWon && fight.BattleEnded && starts == 1 && clears == 2, "Final wave failed victory or spawned extra wave");
         }
 
         private static void ValidateDeath(FightCombatController fight, FightRosterManager roster)

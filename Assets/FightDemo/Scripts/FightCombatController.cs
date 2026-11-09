@@ -1096,6 +1096,8 @@ namespace RhythmHunter.FightDemo
             BattleWon = AwaitingNextWave = false;
             CurrentWave = 1;
             NormalBattleBeatCount = 0;
+            waveWaitBeatsRemaining = 0;
+            lastWaveWaitBeat = long.MinValue;
             lastNormalBattleBeat = long.MinValue;
             ClearEnemyScheduledActions();
             ClearBattleEffects();

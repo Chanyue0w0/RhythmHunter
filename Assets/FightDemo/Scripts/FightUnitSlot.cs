@@ -163,7 +163,7 @@ namespace RhythmHunter.FightDemo
         public int MissFeedbackPlayCount => missFeedbackPlayCount;
         public int ArrivalHopPlayCount { get; private set; }
 
-        private FightUnitEffects EffectPlayer
+        internal FightUnitEffects EffectPlayer
         {
             get
             {
