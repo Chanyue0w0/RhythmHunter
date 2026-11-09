@@ -1269,6 +1269,36 @@ namespace RhythmHunter.FightDemo
                     : FightCharacterCombatAnimator.CombatAnimation.LightAttack
             };
             int actionRosterVersion = rosterVersion;
+            var projectile = action != ActionType.Skill && attacker.NormalAttackEffectPrefab != null
+                ? attacker.NormalAttackEffectPrefab.GetComponent<FightEffectSettings>() : null;
+            if (projectile != null && projectile.flyToTarget && beatClock != null)
+            {
+                bool launched = false;
+                Action launch = () =>
+                {
+                    if (launched || !IsCurrentHeroAction(actionRosterVersion, attacker, target) || !CanHitBurstTarget(target)) return;
+                    launched = true;
+                    var origin = attacker.CastEffectAnchor;
+                    var position = origin.position + (target.ImpactEffectAnchor.position - origin.position).normalized * projectile.forwardSpawnDistance;
+                    var instance = Instantiate(attacker.NormalAttackEffectPrefab, position,
+                        origin.rotation * Quaternion.Euler(0, 0, attacker.NormalAttackEffectPrefab.transform.eulerAngles.z));
+                    UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(instance, gameObject.scene);
+                    instance.AddComponent<FightBeatProjectile>().Initialize(this, target.ImpactEffectAnchor, projectile.flightBeats,
+                        () => !battleEnded && IsCurrentHeroAction(actionRosterVersion, attacker, target) && CanHitBurstTarget(target),
+                        () =>
+                        {
+                            float hp = target.CurrentHp;
+                            ApplyHeroDamage(actionRosterVersion, attacker, target, damage, false);
+                            if (IsCurrentHeroAction(actionRosterVersion, attacker, target) && target.CurrentHp < hp &&
+                                attacker.CharacterDefinition != null && attacker.CharacterDefinition.BasicAppliesBleeding)
+                                target.ApplyBleeding(attacker.CharacterDefinition.BleedDamage, attacker.CharacterDefinition.BleedBeats);
+                        });
+                };
+                if (!attacker.PlayCombatAnimation(animation,
+                    () => PlayHeroAttackWarning(actionRosterVersion, attacker), launch, null,
+                    effect => { if (IsCurrentHeroAction(actionRosterVersion, attacker, target)) attacker.PlayFrameEffect(effect, target.ImpactEffectAnchor); })) launch();
+                return;
+            }
             if (resolvingTeamSkillFrame && action == ActionType.Skill)
             {
                 PlayHeroActionVisual(actionRosterVersion, attacker, target, action);

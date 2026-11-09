@@ -212,7 +212,7 @@ MonoBehaviour:
   enemyAttackUsesEffectFrames: 0
   attackWindupBeats: 0
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 0}
+  normalAbilityEffectPrefab: {fileID: 4474199922380967310, guid: 77690aa7d14a054419e5d76eedfe305d, type: 3}
   useFallbackAbilityEffects: 0
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5
