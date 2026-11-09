@@ -115,6 +115,8 @@ namespace RhythmHunter.FightDemo
         private Transform runtimeImpactEffectAnchor;
 
         public event Action<FightUnitSlot, float, float> HealthChanged;
+        // One notification per lethal transition. Future death VFX can use this world position.
+        public event Action<FightUnitSlot, Vector3> EnemyDefeated;
 
         public string SlotId => slotId;
         public string DisplayName => displayName;
@@ -280,6 +282,24 @@ namespace RhythmHunter.FightDemo
             ResetInputFeedback();
         }
 
+        private void LateUpdate()
+        {
+            RemoveDefeatedEnemyPresentation();
+        }
+
+        private void RemoveDefeatedEnemyPresentation()
+        {
+            // Finish damage/on-hit callbacks first. Keep logical slots fixed for targeting and waves.
+            // Burst attacks retain their original targets until all final animations/projectiles finish.
+            if (team != UnitTeam.Enemy || currentHp > 0 || RetainedForBurst || actorInstance == null) return;
+            ClearTimedStatuses();
+            ClearFragile();
+            combatAnimator?.InterruptPlayback();
+            SetHealthDisplayVisible(false);
+            actorInstance.SetActive(false);
+            RemoveSpawnedActor();
+        }
+
         public void RestoreFullHealth()
         {
             ClearTimedStatuses();
@@ -320,6 +340,8 @@ namespace RhythmHunter.FightDemo
             if (currentHp <= 0 && !retained) ClearTimedStatuses();
             RefreshHealthVisuals();
             // Only the lethal transition emits zero HP; overkill must not repeat kill/reward callbacks.
+            if (wasAlive && currentHp <= 0 && team == UnitTeam.Enemy)
+                EnemyDefeated?.Invoke(this, ImpactEffectAnchor != null ? ImpactEffectAnchor.position : transform.position);
             if (wasAlive) HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;
         }
@@ -569,6 +591,8 @@ namespace RhythmHunter.FightDemo
 
         public void SetHealthDisplayMode(bool showBar, bool showNumber)
         {
+            if (team == UnitTeam.Enemy && currentHp <= 0 && !RetainedForBurst)
+                showBar = showNumber = false;
             if (hpBackground != null)
                 hpBackground.gameObject.SetActive(showBar);
             if (hpFill != null)

@@ -69,9 +69,53 @@ namespace RhythmHunter.FightDemoEditor
                 impact.Invoke();
                 Check(enemy.CurrentHp == hp && enemy.IsFragile && enemy.BleedBeatsRemaining == 0, "Delayed transition projectile damaged after immunity ended");
                 Check(enemy.TakeDamage(.5f) > 0 && !enemy.IsFragile, "Damage did not resume after transition");
-                File.WriteAllText("Temp/WaveTransitionValidation.result", "PASS: direct/DoT/secondary immunity preserves fragile; heal/armor/guard and ordinary MP work; A gives feedback without MP/skill; delayed shot remains harmless; normal damage resumes.");
+                ValidateDeath(fight, roster);
+                File.WriteAllText("Temp/WaveTransitionValidation.result", "PASS: transition immunity/input/healing/guard/projectile regression; direct/DoT deaths remove actors once, keep slots fixed; burst retains defeated targets then removes them; hero unaffected; roster respawn works.");
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
+
+        private static void ValidateDeath(FightCombatController fight, FightRosterManager roster)
+        {
+            var enemies = roster.ActiveEnemies.Where(e => e.HasCharacter).ToArray();
+            Check(enemies.Length >= 2, "Death validation needs two enemies");
+            var first = enemies[0]; var second = enemies[1];
+            var positions = enemies.Select(e => e.transform.position).ToArray();
+            int deaths = 0;
+            first.EnemyDefeated += (_, _) => deaths++;
+            first.TakeDamage(1000);
+            Check(first.ActorInstance != null, "Actor removed before on-hit callbacks could finish");
+            Call(first, "RemoveDefeatedEnemyPresentation");
+            first.TakeDamage(1);
+            Call(first, "RemoveDefeatedEnemyPresentation");
+            Check(deaths == 1 && first.ActorInstance == null && first.CurrentHp == 0 && first.HasCharacter, "Direct death cleanup/event failed");
+            Set(fight, "nextTeamSkillBeat", 100L);
+            Call(fight, "BeginBurstTargets");
+            int burstDeaths = 0;
+            second.EnemyDefeated += (_, _) => burstDeaths++;
+            second.TakeDamage(1000, FightUnitSlot.DamageKind.DamageOverTime);
+            Call(second, "RemoveDefeatedEnemyPresentation");
+            Check(second.ActorInstance != null && fight.IsBurstRetainedTarget(second), "Burst corpse disappeared early");
+            second.TakeDamage(1);
+            Check(burstDeaths == 1, "Overkill repeated defeat event");
+            Set(fight, "nextTeamSkillBeat", long.MaxValue);
+            Call(fight, "ClearBurstTargets");
+            Call(second, "RemoveDefeatedEnemyPresentation");
+            Check(second.ActorInstance == null, "Burst corpse survived skill completion");
+            for (int i = 0; i < enemies.Length; i++)
+                Check(enemies[i].transform.position == positions[i], "Death moved logical formation slots");
+            var hero = roster.ActiveHeroes.First();
+            var actor = hero.ActorInstance;
+            Set(hero, "currentHp", 0f);
+            Call(hero, "RemoveDefeatedEnemyPresentation");
+            Check(hero.ActorInstance == actor, "Enemy cleanup removed hero");
+            Set(roster, "<BattleStarted>k__BackingField", false);
+            roster.SpawnConfiguredRoster();
+            Check(roster.ActiveEnemies.Where(e => e.HasCharacter).All(e => e.ActorInstance != null && e.CurrentHp > 0), "Respawn failed after death removal");
+            first = roster.ActiveEnemies.First(e => e.HasCharacter);
+            first.TakeDamage(1000, FightUnitSlot.DamageKind.DamageOverTime);
+            Call(first, "RemoveDefeatedEnemyPresentation");
+            Check(first.ActorInstance == null, "Ordinary bleed death failed to remove actor");
         }
     }
 }
