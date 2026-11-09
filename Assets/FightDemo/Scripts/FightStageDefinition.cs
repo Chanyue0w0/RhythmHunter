@@ -20,7 +20,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private string displayName = "Stage 1";
         [Tooltip("Existing FMOD song event. A Stage plays one song across all waves.")]
         [SerializeField] private string musicEventPath;
-        [Tooltip("Planning reference only. 0 = use song length when Stage timing is implemented; no overtime penalty yet.")]
+        [Tooltip("Song duration for results/overtime statistics. 0 = read FMOD event length. Set explicitly for looping/adaptive events. No overtime penalty.")]
         [SerializeField, Min(0)] private float plannedSongSeconds;
         [SerializeField] private List<Wave> waves = new();
         public string StageId => stageId;

@@ -154,6 +154,14 @@ namespace RhythmHunter.RhythmDemo
         public bool IsReady => initialized && musicInstance.isValid();
         public bool IsPlaying => playbackStarted && musicInstance.isValid();
         public bool IsPaused => paused;
+        public bool TryGetSongLengthSeconds(out float seconds)
+        {
+            seconds = 0;
+            if (!musicInstance.isValid() || musicInstance.getDescription(out var description) != RESULT.OK ||
+                description.getLength(out int milliseconds) != RESULT.OK || milliseconds <= 0) return false;
+            seconds = milliseconds / 1000f;
+            return true;
+        }
         public bool HasTimingAnchor => hasAnchor;
         public BeatSnapshot LatestBeat => latestBeat;
         public long ReceivedBeatCount => receivedBeatCount;
