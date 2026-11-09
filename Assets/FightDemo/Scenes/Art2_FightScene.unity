@@ -9481,6 +9481,7 @@ GameObject:
   - component: {fileID: 2021200331}
   - component: {fileID: 2021200333}
   - component: {fileID: 2021200334}
+  - component: {fileID: 2021200335}
   m_Layer: 0
   m_Name: FightDemoController
   m_TagString: Untagged
@@ -9795,6 +9796,25 @@ MonoBehaviour:
   stageIndex: 0
   roster: {fileID: 2021200331}
   beatClock: {fileID: 2021200329}
+--- !u!114 &2021200335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021200323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1d6695abd0c7b04dae944adce98eb6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightWaveEntrance
+  fight: {fileID: 2021200326}
+  roster: {fileID: 2021200331}
+  beatClock: {fileID: 2021200329}
+  view: {fileID: 2147100302}
+  slideEnabled: 1
+  durationBeats: 1
+  edgeMargin: 0.08
 --- !u!1 &2037638509
 GameObject:
   m_ObjectHideFlags: 0
@@ -11169,7 +11189,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 6.8398014e+25, y: 250253.58, z: 14681.103, w: 1.8331856e+31}
+  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11333,7 +11353,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 3.64436e-20, y: 9.194e-41, z: 2.4289e-41, w: 0}
+  m_BoundingSphereOverride: {x: 8.528333e-33, y: 1.3563156e-19, z: 1.8526304e+28, w: 8.319531e+35}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11797,7 +11817,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 3.815214e-20, y: 7.34789e-40, z: 2.529e-41, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 1.67e-42, z: 0, w: 2.000011}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11961,7 +11981,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.0842021e-19, y: 9.1846e-40, z: 2.503e-42, w: 0}
+  m_BoundingSphereOverride: {x: 1, y: 3.304e-42, z: 0, w: 1.12e-43}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

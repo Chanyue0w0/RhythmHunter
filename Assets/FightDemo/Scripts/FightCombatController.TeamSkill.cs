@@ -47,7 +47,7 @@ namespace RhythmHunter.FightDemo
         // FMOD beat. This never consumes the rhythm judge's Basic input slot.
         public bool TryStartTeamSkill()
         {
-            if (!TeamSkillReady || IsPaused || TimingCalibrationActive || battleEnded || latestCombatBeat < 0) return false;
+            if (!TeamSkillReady || WaveEntranceRunning || IsPaused || TimingCalibrationActive || battleEnded || latestCombatBeat < 0) return false;
             if (frontHero.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable ||
                 secondHero.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable ||
                 thirdHero.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable)

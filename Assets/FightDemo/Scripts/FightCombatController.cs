@@ -149,7 +149,9 @@ namespace RhythmHunter.FightDemo
         private bool entrancePending;
         private bool entranceMusicStarted, entranceDrinking;
         private double entranceIdleDuration;
-        public bool BattleEntranceRunning => entrancePending;
+        private FightWaveEntrance waveEntrance;
+        public bool WaveEntranceRunning => waveEntrance != null && waveEntrance.IsRunning;
+        public bool BattleEntranceRunning => entrancePending || WaveEntranceRunning;
 
         private void BeginBattleEntrance()
         {
@@ -197,7 +199,7 @@ namespace RhythmHunter.FightDemo
 
         private void CompleteBattleEntrance()
         {
-            if (IsPaused || TimingCalibrationActive) return;
+            if (IsPaused || TimingCalibrationActive || WaveEntranceRunning) return;
             entrancePending = false;
             if (TryBeginBattle())
             {
@@ -295,7 +297,7 @@ namespace RhythmHunter.FightDemo
 
         public bool TryBeginBattle()
         {
-            if (entrancePending || !AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
+            if (BattleEntranceRunning || !AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
             ResetBattleStateForRoster();
             rhythmJudge?.ResetDuplicateTracking();
             if (startWithFullTeamSkill)
@@ -305,6 +307,7 @@ namespace RhythmHunter.FightDemo
             }
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             if (beatClock != null && !beatClock.IsPlaying) beatClock.RestartMusic();
+            waveEntrance?.BeginFirstWave();
             return true;
         }
         public bool HasPendingEnemyAttack => pendingEnemyAttack;
@@ -405,6 +408,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            waveEntrance = GetComponent<FightWaveEntrance>();
             EnsureStatusIconPool();
             EnsureDamageNumberPool();
             if (autoPlayBattleEntrance) beatClock?.SetAutomaticPlayback(false);
@@ -435,7 +439,7 @@ namespace RhythmHunter.FightDemo
         {
             UpdateBattleEntrance();
             UpdateSkillVisualPause();
-            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
+            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded || WaveEntranceRunning) return;
 
             UpdateTeamSkillBurst();
             AdvanceSkillVisualLifetimes(Time.deltaTime);
@@ -487,7 +491,7 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (battleEnded || AwaitingNextWave || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
+            if (battleEnded || AwaitingNextWave || AwaitingBattleStart || WaveEntranceRunning || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
@@ -782,6 +786,13 @@ namespace RhythmHunter.FightDemo
 
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive || battleEnded) return;
+            waveEntrance?.RefreshProgress();
+            if (WaveEntranceRunning)
+            {
+                if (!AwaitingBattleStart) enemyPausedBeats++;
+                FightBeat?.Invoke(beat);
+                return;
+            }
             if (AwaitingBattleStart)
             {
                 FightBeat?.Invoke(beat);

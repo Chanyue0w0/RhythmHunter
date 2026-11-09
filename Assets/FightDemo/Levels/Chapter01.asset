@@ -16,3 +16,4 @@ MonoBehaviour:
   displayName: Chapter 1
   stages:
   - {fileID: 11400000, guid: 9e5c540b824a317478e88587ee10ff4b, type: 2}
+  - {fileID: 11400000, guid: 8b464ab871efe5b498ae5e4f8aa9e816, type: 2}

@@ -208,7 +208,7 @@ MonoBehaviour:
   displayName: NORMAL GOBLIN
   team: 0
   role: 0
-  maxHp: 10
+  maxHp: 20
   defense: 0
   frontlineDefenseBonus: 0
   basicAbilityName: Basic Ability
