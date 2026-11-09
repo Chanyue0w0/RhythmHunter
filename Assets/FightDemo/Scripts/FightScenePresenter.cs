@@ -326,7 +326,8 @@ namespace RhythmHunter.FightDemo
                 if (call.RhythmResult.Judgement == FmodRhythmJudge.Grade.Perfect)
                 {
                     perfectCalls++;
-                    string title = call.SkillActivated ? "SKILL" : EqualBeats ? "BASIC ABILITY" : "NORMAL ABILITY";
+                    string title = call.Command == FightInputRouter.HeroCommand.TeamSkill && fight.WaveTransitionActive ? "BEAT" :
+                        call.SkillActivated ? "SKILL" : EqualBeats ? "BASIC ABILITY" : "NORMAL ABILITY";
                     SetResult(title, call.SkillActivated ? Gold : Green,
                         call.Message + "  |  " + FormatDelta(call.RhythmResult.DeltaMs), 1.2f);
                 }

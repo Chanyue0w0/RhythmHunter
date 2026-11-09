@@ -14,15 +14,26 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Camera view;
         [SerializeField] private bool slideEnabled = true;
         [SerializeField, Min(.05f)] private float durationBeats = 1;
+        [Tooltip("Hop immediately on arrival, using each slot's existing On Beat Jump Height/Duration.")]
+        [SerializeField] private bool hopOnArrival = true;
         [Tooltip("Extra space beyond the viewport, as a fraction of screen width.")]
         [SerializeField, Min(0)] private float edgeMargin = .08f;
+        [Header("Enemy Entry Invulnerability")]
+        [SerializeField] private bool showInvulnerabilityLabel = true;
+        [SerializeField] private string invulnerabilityLabel = "IMMUNE";
+        [SerializeField] private Color invulnerabilityColor = new(.35f, .9f, 1f, 1f);
+        [SerializeField, Min(.01f)] private float invulnerabilityTextSize = .12f;
+        [SerializeField] private float invulnerabilityHeadOffset = .25f;
         private sealed class Entry
         {
             public Transform root;
+            public FightUnitSlot slot;
+            public GameObject actor;
             public Vector3 offset, appliedLocal;
         }
         private readonly List<Entry> entries = new();
         private bool running, hasTime;
+        private bool alignToFirstBeat;
         private int previousMs;
         private double elapsedBeats;
         private bool initialStarted;
@@ -46,6 +57,7 @@ namespace RhythmHunter.FightDemo
             AddSide(roster.ActiveEnemies);
             running = entries.Count > 0;
             elapsedBeats = 0;
+            alignToFirstBeat = true;
             hasTime = beatClock.IsPlaying && beatClock.TryGetTimelinePositionMs(out previousMs);
             Apply(1);
         }
@@ -63,7 +75,13 @@ namespace RhythmHunter.FightDemo
                 Bounds bounds = new Bounds(slot.ActorInstance.transform.position, Vector3.zero);
                 foreach (var renderer in slot.ActorInstance.GetComponentsInChildren<SpriteRenderer>())
                     if (renderer.enabled && renderer.sprite != null) bounds.Encapsulate(renderer.bounds);
-                entries.Add(new Entry { root = root, offset = CalculateStartOffset(view, bounds, root.position, fromRight, edgeMargin) });
+                entries.Add(new Entry { root = root, slot = slot, actor = slot.ActorInstance,
+                    offset = CalculateStartOffset(view, bounds, root.position, fromRight, edgeMargin) });
+                if (showInvulnerabilityLabel && slot.Team == FightUnitSlot.UnitTeam.Enemy)
+                {
+                    var label = slot.ActorInstance.GetComponent<FightTransitionInvulnerabilityVisual>() ?? slot.ActorInstance.AddComponent<FightTransitionInvulnerabilityVisual>();
+                    label.Initialize(slot, view, invulnerabilityLabel, invulnerabilityColor, invulnerabilityTextSize, invulnerabilityHeadOffset);
+                }
             }
         }
 
@@ -110,10 +128,18 @@ namespace RhythmHunter.FightDemo
             if (fight.IsPaused || fight.TimingCalibrationActive) return;
             double msPerBeat = beatClock.HasTimingAnchor ? beatClock.MillisecondsPerBeat : beatClock.OpeningSecondsPerBeat * 1000;
             if (msPerBeat <= 0) return;
-            elapsedBeats += delta / msPerBeat;
+            if (alignToFirstBeat)
+            {
+                // Anchor the slide to the actual FMOD beat, rather than the frame
+                // that first observed playback. Integer durations arrive on that beat grid.
+                if (!beatClock.HasTimingAnchor) return;
+                elapsedBeats = System.Math.Max(0, now - beatClock.LatestBeat.TimelinePositionMs) / msPerBeat;
+                alignToFirstBeat = false;
+            }
+            else elapsedBeats += delta / msPerBeat;
             float t = Mathf.Clamp01((float)(elapsedBeats / Mathf.Max(.05f, durationBeats)));
             Apply(1 - Mathf.SmoothStep(0, 1, t));
-            if (t >= 1) Clear();
+            if (t >= 1) CompleteArrival();
         }
 
         private void Apply(float amount)
@@ -128,6 +154,16 @@ namespace RhythmHunter.FightDemo
             }
         }
         private void Clear() { Apply(0); entries.Clear(); running = hasTime = false; }
+        private void CompleteArrival()
+        {
+            if (!running) return;
+            Apply(0); // Restore the destination before starting any hop, in this same frame.
+            running = hasTime = false;
+            foreach (var entry in entries)
+                if (hopOnArrival && entry.slot != null && entry.slot.ActorInstance == entry.actor)
+                    entry.slot.PlayArrivalHop();
+            entries.Clear();
+        }
         private void OnDisable()
         {
             if (fight != null) fight.WaveStarted -= OnWaveStarted;

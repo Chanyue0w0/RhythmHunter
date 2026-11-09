@@ -38,7 +38,7 @@ namespace RhythmHunter.FightDemo
 
         private string PerformAimedShot(FightUnitSlot actor, float power, long beat)
         {
-            if (FindFrontLivingEnemy() == null)
+            if (FindFrontLivingEnemy() == null && !WaveTransitionActive)
             {
                 ResetBasicAbilityProgress();
                 return "Aimed Shot found no target";
@@ -62,11 +62,15 @@ namespace RhythmHunter.FightDemo
             ResetBasicAbilityProgress();
             // Reacquire on the final input; never retain a target from preparation.
             var target = FindFrontLivingEnemy();
-            if (target == null) return "Aimed Shot found no target";
-            bool interrupted = actor.CharacterDefinition != null && !actor.CharacterDefinition.BasicAppliesBleeding && actor.CharacterDefinition.BasicInterruptsEnemy &&
+            if (target == null)
+            {
+                PlayTransitionAttackWithoutTarget(actor, FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
+                return "Aimed Shot — no target during transition";
+            }
+            bool interrupted = !WaveTransitionActive && actor.CharacterDefinition != null && !actor.CharacterDefinition.BasicAppliesBleeding && actor.CharacterDefinition.BasicInterruptsEnemy &&
                 TryInterruptEnemyAttack(target);
             if (interrupted && enableCharacterPassives) power += actor.CharacterDefinition.SuccessfulInterruptDamageBonus;
-            if (actor.CharacterDefinition != null)
+            if (actor.CharacterDefinition != null && !WaveTransitionActive)
                 ApplyBossBreak(actor.CharacterDefinition.BasicBreakPower, beat);
             float previousHp = target.CurrentHp;
             int version = rosterVersion;
@@ -80,7 +84,7 @@ namespace RhythmHunter.FightDemo
         private void UpdateBasicAbilityProgress()
         {
             if (aimedShotProgress == 0) return;
-            if (battleEnded || aimedShotActor == null || !aimedShotActor.HasCharacter || FindFrontLivingEnemy() == null)
+            if (battleEnded || aimedShotActor == null || !aimedShotActor.HasCharacter || (FindFrontLivingEnemy() == null && !WaveTransitionActive))
             {
                 ResetBasicAbilityProgress();
                 return;

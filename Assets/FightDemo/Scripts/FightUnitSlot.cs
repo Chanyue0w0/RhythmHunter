@@ -85,6 +85,7 @@ namespace RhythmHunter.FightDemo
         private float currentHp;
         private bool fragile;
         private bool RetainedForBurst => CombatController != null && CombatController.IsBurstRetainedTarget(this);
+        public bool IsTransitionInvulnerable => team == UnitTeam.Enemy && CombatController != null && CombatController.WaveTransitionActive;
         public bool IsFragile => fragile && team == UnitTeam.Enemy && hasCharacter && (currentHp > 0 || RetainedForBurst);
 
         public bool ApplyFragile()
@@ -158,6 +159,7 @@ namespace RhythmHunter.FightDemo
         public int GuardPlayCount => guardPlayCount;
         public int OnBeatFeedbackPlayCount => onBeatFeedbackPlayCount;
         public int MissFeedbackPlayCount => missFeedbackPlayCount;
+        public int ArrivalHopPlayCount { get; private set; }
 
         private FightUnitEffects EffectPlayer
         {
@@ -291,6 +293,8 @@ namespace RhythmHunter.FightDemo
 
         public float TakeDamage(float amount, DamageKind kind)
         {
+            // Reject before consuming statuses, triggering fragments or emitting damage numbers.
+            if (IsTransitionInvulnerable) return 0;
             float damage = QuantizeNonNegative(amount);
             bool retained = RetainedForBurst;
             bool wasAlive = currentHp > 0;
@@ -485,6 +489,19 @@ namespace RhythmHunter.FightDemo
                 onBeatFeedbackPlayCount++;
             else
                 missFeedbackPlayCount++;
+            BeginInputFeedback(onBeat);
+        }
+
+        // Entrance presentation reuses the attack hop without recording a successful input.
+        public void PlayArrivalHop()
+        {
+            if (!isActiveAndEnabled || actorInstance == null) return;
+            ArrivalHopPlayCount++;
+            BeginInputFeedback(true);
+        }
+
+        private void BeginInputFeedback(bool onBeat)
+        {
             ResetInputFeedback();
             inputFeedbackTarget = actorInstance != null ? actorInstance.transform : actorRoot;
             if (inputFeedbackTarget == null)

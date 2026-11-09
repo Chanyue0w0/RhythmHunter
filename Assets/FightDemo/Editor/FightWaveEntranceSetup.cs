@@ -45,10 +45,11 @@ namespace RhythmHunter.FightDemoEditor
             data.FindProperty("view").objectReferenceValue = camera;
             data.FindProperty("slideEnabled").boolValue = true;
             data.FindProperty("durationBeats").floatValue = 1;
+            data.FindProperty("hopOnArrival").boolValue = true;
             data.ApplyModifiedProperties();
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene)) throw new Exception("Scene save failed");
-            File.WriteAllText("Temp/WaveEntranceSetup.result", "PASS: Art2 one-beat entrance configured; first wave six actors, later only three enemies; logical slots unchanged and cancellation restores roots; orthographic/perspective off-screen bounds and ground height validated.");
+            File.WriteAllText("Temp/WaveEntranceSetup.result", "PASS: Art2 one-beat entrance with arrival hop configured; six initial actors / later enemies only; arrival hops once, cancellation never hops, input counters unchanged; roots restored; orthographic/perspective bounds validated.");
         }
         private static void ValidateSidesAndRestore()
         {
@@ -96,6 +97,19 @@ namespace RhythmHunter.FightDemoEditor
                     if (i < 3 ? actorRoots[i].localPosition.sqrMagnitude > .000001f : actorRoots[i].localPosition.sqrMagnitude < .01f)
                         throw new Exception("Later wave moved wrong side");
                 clear.Invoke(entrance, null);
+                var slots = slotRoots.Select(t => t.GetComponent<FightUnitSlot>()).ToArray();
+                if (slots.Any(s => s.ArrivalHopPlayCount != 0)) throw new Exception("Cancelled entrance triggered a hop");
+                var complete = typeof(FightWaveEntrance).GetMethod("CompleteArrival", flags);
+                begin.Invoke(entrance, new object[] { true });
+                complete.Invoke(entrance, null);
+                complete.Invoke(entrance, null);
+                if (slots.Any(s => s.ArrivalHopPlayCount != 1) || entrance.IsRunning || actorRoots.Any(t => t.localPosition.sqrMagnitude > .000001f))
+                    throw new Exception("Initial arrival did not restore roots and hop exactly once");
+                begin.Invoke(entrance, new object[] { false });
+                complete.Invoke(entrance, null);
+                for (int i = 0; i < slots.Length; i++)
+                    if (slots[i].ArrivalHopPlayCount != (i < 3 ? 1 : 2) || slots[i].OnBeatFeedbackPlayCount != 0 || slots[i].MissFeedbackPlayCount != 0)
+                        throw new Exception("Arrival affected wrong side or counted as player input");
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
         }

@@ -9814,7 +9814,13 @@ MonoBehaviour:
   view: {fileID: 2147100302}
   slideEnabled: 1
   durationBeats: 1
+  hopOnArrival: 1
   edgeMargin: 0.08
+  showInvulnerabilityLabel: 1
+  invulnerabilityLabel: IMMUNE
+  invulnerabilityColor: {r: 0.35, g: 0.9, b: 1, a: 1}
+  invulnerabilityTextSize: 0.12
+  invulnerabilityHeadOffset: 0.25
 --- !u!1 &2037638509
 GameObject:
   m_ObjectHideFlags: 0
@@ -11353,7 +11359,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 8.528333e-33, y: 1.3563156e-19, z: 1.8526304e+28, w: 8.319531e+35}
+  m_BoundingSphereOverride: {x: 8.272431e+20, y: 0.000000003335243, z: 1.3555899e-19, w: 7.036846e+28}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11817,7 +11823,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 1.67e-42, z: 0, w: 2.000011}
+  m_BoundingSphereOverride: {x: 3.493188e-29, y: 0, z: 0, w: 2.204114e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11981,7 +11987,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1, y: 3.304e-42, z: 0, w: 1.12e-43}
+  m_BoundingSphereOverride: {x: 9.1837e-41, y: 5.050952e-39, z: 2.6528e-41, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

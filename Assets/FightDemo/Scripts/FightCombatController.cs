@@ -151,6 +151,7 @@ namespace RhythmHunter.FightDemo
         private double entranceIdleDuration;
         private FightWaveEntrance waveEntrance;
         public bool WaveEntranceRunning => waveEntrance != null && waveEntrance.IsRunning;
+        public bool WaveTransitionActive => AwaitingNextWave || WaveEntranceRunning;
         public bool BattleEntranceRunning => entrancePending || WaveEntranceRunning;
 
         private void BeginBattleEntrance()
@@ -439,13 +440,14 @@ namespace RhythmHunter.FightDemo
         {
             UpdateBattleEntrance();
             UpdateSkillVisualPause();
-            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded || WaveEntranceRunning) return;
+            if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
             UpdateTeamSkillBurst();
             AdvanceSkillVisualLifetimes(Time.deltaTime);
             AdvanceSlimeDetonations(Time.deltaTime);
             CheckWaveCompletion();
             UpdateBasicAbilityProgress();
+            if (WaveEntranceRunning) return;
             TryResolvePendingAttack();
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int impactTime)) ResolveEnemyCombatWork(impactTime);
         }
@@ -491,13 +493,20 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (battleEnded || AwaitingNextWave || AwaitingBattleStart || WaveEntranceRunning || TimingCalibrationActive || IsPaused ||
+            if (battleEnded || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
 
             if (command == FightInputRouter.HeroCommand.TeamSkill)
             {
                 if (UsesEqualBeats && rhythmJudge != null && inputRouter != null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
+                if (WaveTransitionActive)
+                {
+                    if (rhythmJudge == null) return;
+                    var result = rhythmJudge.JudgeInput(inputRouter != null ? inputRouter.CurrentInputAgeMs : 0);
+                    ApplyTransitionRhythmJudgement(result);
+                    return;
+                }
                 if (UsesEqualBeats) { if (TeamSkillRunning) SubmitTeamSkillBurst(); else TryStartTeamSkill(); return; }
                 command = FightInputRouter.HeroCommand.Ultimate;
             }
@@ -517,6 +526,13 @@ namespace RhythmHunter.FightDemo
             }
 
             SubmitLegacyHeroCommand(command);
+        }
+
+        private void ApplyTransitionRhythmJudgement(FmodRhythmJudge.Result result)
+        {
+            PlaySuccessfulInputSound(result);
+            HeroCalled?.Invoke(new HeroCallResult(FightInputRouter.HeroCommand.TeamSkill, result, false, false,
+                "Wave transition — rhythm only; TeamSkill not activated"));
         }
 
         private void SubmitFrontHeroCommand(FightInputRouter.HeroCommand command)
@@ -641,7 +657,7 @@ namespace RhythmHunter.FightDemo
             // Preparation inputs are not attacks and must not build Boss Break.
             if (!skill && behavior == FightCharacterDefinition.AbilityBehavior.AimedShot)
                 return PerformAimedShot(actor, power, globalBeat);
-            if (actor.CharacterDefinition != null)
+            if (actor.CharacterDefinition != null && !WaveTransitionActive)
                 ApplyBossBreak(skill ? actor.CharacterDefinition.SkillBreakPower : actor.CharacterDefinition.BasicBreakPower, globalBeat);
 
             switch (behavior)
@@ -695,7 +711,10 @@ namespace RhythmHunter.FightDemo
                 default:
                     FightUnitSlot target = FindFrontLivingEnemy();
                     if (target == null)
+                    {
+                        if (WaveTransitionActive) PlayTransitionAttackWithoutTarget(actor, animation);
                         return $"{abilityName} found no target";
+                    }
                     float effectivePower = ModifyBossDamage(target, power);
                     PlayAnimatedHeroAction(actor, target, action, power);
                     return $"{abilityName} deals {effectivePower:0.#} damage to the front enemy";
@@ -715,6 +734,12 @@ namespace RhythmHunter.FightDemo
             guardedGlobalBeat = pendingEnemyAttack
                 ? pendingAttackGlobalBeat
                 : inputGlobalBeat + GetEnemyBeatsUntilAttack(inputGlobalBeat);
+        }
+
+        private void PlayTransitionAttackWithoutTarget(FightUnitSlot actor, FightCharacterCombatAnimator.CombatAnimation animation)
+        {
+            actor.PlayCombatAnimation(animation, null, null, null,
+                effect => { if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self) actor.PlayFrameEffect(effect); });
         }
 
         private void SubmitLegacyHeroCommand(FightInputRouter.HeroCommand command)
@@ -1272,6 +1297,9 @@ namespace RhythmHunter.FightDemo
             if (attacker == null)
                 return;
 
+            // A transition shot stays harmless even if its animation/projectile lands after entry finishes.
+            if (WaveTransitionActive) damage = 0;
+
             FightCharacterCombatAnimator.CombatAnimation animation = action switch
             {
                 ActionType.HeavyAttack => FightCharacterCombatAnimator.CombatAnimation.HeavyAttack,
@@ -1427,7 +1455,7 @@ namespace RhythmHunter.FightDemo
 
         private void ApplyAreaDamage(int expectedRosterVersion, FightUnitSlot attacker, float damage)
         {
-            if (!IsCurrentHero(expectedRosterVersion, attacker) || !HealthSystemEnabled)
+            if (!IsCurrentHero(expectedRosterVersion, attacker) || !HealthSystemEnabled || WaveTransitionActive || damage <= 0)
                 return;
 
             foreach (FightUnitSlot target in fightScene2Enemies.ToArray())
@@ -1456,7 +1484,7 @@ namespace RhythmHunter.FightDemo
             float damage,
             bool skill = true)
         {
-            if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target))
+            if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target) || WaveTransitionActive || damage <= 0)
                 return;
 
             if (HealthSystemEnabled && CanHitBurstTarget(target))
