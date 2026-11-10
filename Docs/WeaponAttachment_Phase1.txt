@@ -1,0 +1,63 @@
+武器掛載實驗：第一階段
+
+分支：codex/WeaponPixelSpinedSystem（基線已發布；開發變更尚未 push）
+本階段提供靜態武器掛載、實際影格通知及編輯工具。
+任意武器動畫狀態、Charge_1 / Charge_Full 播放為下一階段，尚未提供 SetWeaponAnimationState。
+
+測試資源：Assets/FightDemo/Prefabs/ArtBattle/WeaponPrototype/
+- Warrior_WeaponPrototype.prefab：LongswordWarrior 的獨立測試 Variant。
+- Weapon_GripPlaceholder.prefab：使用既有 Wood 素材的定位示意，不是正式手掌＋劍。
+- Warrior_Attachment.asset：所有動畫逐幀定位資料。初始位置僅供測試，尚未美術對位。
+未修改正式場景、隊伍、原角色 Prefab 或圖片匯入設定。
+原角色圖仍包含手掌／武器，測試時會重疊；正式使用需換成美術提供的去武器角色圖。
+
+編輯步驟
+1. Unity 選單 Rhythm Hunter > Weapons > Weapon Attachment Editor。
+2. 選擇 Warrior_WeaponPrototype Prefab；會讀取既有動畫分類與逐張拍數。
+3. 選擇定位資料及武器 Prefab（元件為 FightWeaponVisual）。
+4. 選動畫、上一幀／下一幀；左鍵點／拖動 Grip Point 設定角色握點。
+5. 切 Direction Point，左鍵點／拖動指定劍指向；距離不改變武器尺寸。
+6. 可輸入位置、朝向角度、顯示狀態；Pixel Snap 以角色圖 Pivot 與 PPU 計算。
+7. 未設定的下一幀沿用上一幀草稿；已設定幀優先載入既有位置。
+8. 修改會在換幀時存入定位資料的編輯中狀態；最後務必按「儲存掛載與角色」。
+   此按鈕同時儲存角色影格 ID、掛載設定及定位資料，避免 ID 尚未寫回角色。
+9. 可預覽播放與翻面。預覽為獨立純 Sprite 顯示，不播放 Warning、傷害或音效。
+   預覽 BPM 是編輯用數值，不影響音樂或戰鬥時鐘。
+
+武器 Prefab
+- 一個 FightWeaponVisual，指定唯一手掌＋武器 SpriteRenderer。
+- Grip Point：武器根物件本地座標的握點；不修改圖片 Pivot。
+- Forward Angle：素材原始朝向，右為 0 度、上為 90 度。
+- Depth Offset：角色圖平面的微量前後距離，預設 -0.005；Art2 用於避免同平面閃爍。
+- 保留原本武器 Scale；掛載不透過兩點距離縮放武器。
+- 建議不同充能圖片維持一致畫布／握點。
+
+執行方式
+FightWeaponAttachment 訂閱角色實際顯示影格，不自行推算角色動畫。
+執行時在角色 SpriteRenderer 下建立 WeaponAnchor；繼承角色縮放、2.5D 傾斜與移動。
+SpriteRenderer.flipX/flipY 透過掛點反射處理，父物件負縮放不重複套用。
+沒有對應定位資料的影格預設隱藏武器，避免沿用錯誤位置。
+ReplaceWeapon 可替換 Prefab，會清理舊武器並登記 Art2 材質／陰影。
+武器更換才搜尋場景呈現管理器；平時不反覆搜尋或生成物件。
+只有角色視覺跟隨，沒有任何能力、傷害、充能規則。
+
+影格 ID 與維護
+僅開啟工具並儲存的角色建立影格 ID。其他角色不需遷移。
+使用原動畫 Inspector 的移動／新增／刪除按鈕，ID 會跟隨圖片。
+直接使用 Debug Inspector 或外部工具改陣列時，必須同步處理 attachmentFrameIds。
+動畫類型重複時仍沿用既有播放器取第一組的規則。
+資料使用角色圖片的本地座標，角色根物件與視覺子物件不同縮放不需手動換算。
+
+驗證
+Rhythm Hunter > Weapons > Create and Validate Phase 1 Prototype
+已存在的示意資源不會重新覆寫；驗證使用暫存物件。
+測試：Idle／OpeningIdle／Attack 真實影格；同 Sprite 不同影格；中斷；
+非零握點、非等比例武器縮放、45 度角色傾斜與父層負縮放；
+翻面、隱藏／缺少定位、更換武器清理。
+
+限制／待確認
+- 預覽使用不受光材質；Art2 實際遮擋、陰影與貼合品質需 Play 視覺驗收。
+- 第一階段只有靜態武器，不代表充能狀態動畫已完成。
+- 未完成正式手掌＋劍的精準逐幀對位。
+- 目前前後層次由武器 Depth Offset 控制，尚無每幀前後穿插設定。
+- 避免在 Play 模式儲存 Prefab。建議先用測試 Variant，不直接修改共用視覺 Prefab。

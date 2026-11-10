@@ -59,6 +59,9 @@ namespace RhythmHunter.FightDemo
         {
             [SerializeField] private CombatAnimation animation;
             [SerializeField] private List<Sprite> frames = new();
+            [SerializeField, HideInInspector] private List<string> attachmentFrameIds = new();
+            public string AttachmentFrameId(int index) => index >= 0 && index < attachmentFrameIds.Count ? attachmentFrameIds[index] : null;
+            public void EnsureAttachmentFrameIds() => EnsureIds(attachmentFrameIds, frames.Count);
             [SerializeField] private List<FrameEffects> frameEffects = new();
             [SerializeField] private FrameEffect warningEffect;
             public FrameEffect WarningEffect => warningEffect;
@@ -143,6 +146,46 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Use the optional drunk idle after the entrance. Disabled: keep the ordinary Opening Idle sequence throughout battle. Prefabs without Opening Idle retain their existing idle.")]
         [SerializeField] private bool useDrunkIdle;
         [SerializeField] private List<Sprite> frames = new();
+        [SerializeField, HideInInspector] private List<string> attachmentFrameIds = new();
+
+        public readonly struct DisplayedSpriteFrame
+        {
+            public readonly int Source; // -1: legacy idle; otherwise CombatAnimation.
+            public readonly int Index;
+            public readonly string Id;
+            public readonly Sprite Sprite;
+            public DisplayedSpriteFrame(int source, int index, string id, Sprite sprite)
+            { Source = source; Index = index; Id = id; Sprite = sprite; }
+        }
+        public DisplayedSpriteFrame DisplayedFrame { get; private set; }
+        public event Action<DisplayedSpriteFrame> DisplayedFrameChanged;
+        public string AttachmentFrameId(int source, int index) => source < 0
+            ? (index >= 0 && index < attachmentFrameIds.Count ? attachmentFrameIds[index] : null)
+            : FindSequence((CombatAnimation)source)?.AttachmentFrameId(index);
+        // Opt-in authoring migration; never generate identifiers during playback.
+        public void EnsureAttachmentFrameIds()
+        {
+            EnsureIds(attachmentFrameIds, frames.Count);
+            foreach (var sequence in sequences) sequence?.EnsureAttachmentFrameIds();
+        }
+        private static void EnsureIds(List<string> ids, int count)
+        {
+            while (ids.Count < count) ids.Add(Guid.NewGuid().ToString("N"));
+            var used = new HashSet<string>();
+            for (int i = 0; i < count; i++)
+                if (string.IsNullOrEmpty(ids[i]) || !used.Add(ids[i]))
+                { ids[i] = Guid.NewGuid().ToString("N"); used.Add(ids[i]); }
+            if (ids.Count > count) ids.RemoveRange(count, ids.Count - count);
+        }
+        private void DisplaySprite(int source, int index, Sprite sprite)
+        {
+            targetRenderer.sprite = sprite;
+            string id = AttachmentFrameId(source, index);
+            if (DisplayedFrame.Source == source && DisplayedFrame.Index == index &&
+                DisplayedFrame.Sprite == sprite && DisplayedFrame.Id == id) return;
+            DisplayedFrame = new DisplayedSpriteFrame(source, index, id, sprite);
+            DisplayedFrameChanged?.Invoke(DisplayedFrame);
+        }
         [Tooltip("Use individual idle frame durations instead of Cycles Per Beat. Ping Pong still applies.")]
         [SerializeField] private bool useIdleFrameBeatDurations;
         [SerializeField] private List<float> idleFrameBeatDurations = new();
@@ -356,7 +399,7 @@ namespace RhythmHunter.FightDemo
                         : 1d / Math.Max(1f, entry.FramesPerSecond) / Math.Max(0.001d, secondsPerBeat);
                     if (position < 0)
                     {
-                        targetRenderer.sprite = entry.Frames[i];
+                        DisplaySprite((int)entry.Animation, i, entry.Frames[i]);
                         shownFrame = -1;
                         return;
                     }
@@ -432,7 +475,7 @@ namespace RhythmHunter.FightDemo
             if (targetRenderer == null || frames == null || index < 0 || index >= frames.Count || shownFrame == index)
                 return;
 
-            targetRenderer.sprite = frames[index];
+            DisplaySprite(-1, index, frames[index]);
             shownFrame = index;
         }
 
@@ -541,7 +584,8 @@ namespace RhythmHunter.FightDemo
         {
             int version = playbackVersion;
             activeFrame = frameIndex;
-            targetRenderer.sprite = activeSequence.Frames[frameIndex];
+            DisplaySprite((int)activeSequence.Animation, frameIndex, activeSequence.Frames[frameIndex]);
+            if (version != playbackVersion || activeSequence == null) return;
             var effects = activeSequence.EffectsAt(frameIndex);
             if (effects != null)
                 foreach (var effect in effects)

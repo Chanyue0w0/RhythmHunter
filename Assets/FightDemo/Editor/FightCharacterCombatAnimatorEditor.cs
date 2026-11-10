@@ -77,6 +77,7 @@ namespace RhythmHunter.FightDemoEditor
                     sequence = list.GetArrayElementAtIndex(index);
                     sequence.FindPropertyRelative("animation").intValue = type;
                     sequence.FindPropertyRelative("frames").ClearArray();
+                    sequence.FindPropertyRelative("attachmentFrameIds").ClearArray();
                     sequence.FindPropertyRelative("frameEffects").ClearArray();
                     sequence.FindPropertyRelative("frameBeatDurations").ClearArray();
                     sequence.FindPropertyRelative("useFrameBeatDurations").boolValue = true;
@@ -110,6 +111,14 @@ namespace RhythmHunter.FightDemoEditor
             SerializedProperty sequence = null)
         {
             EditorGUILayout.PropertyField(useBeats, new GUIContent("逐張設定拍數"));
+            var ids = frames.serializedObject.FindProperty(frames.propertyPath.Substring(0, frames.propertyPath.Length - "frames".Length) + "attachmentFrameIds");
+            bool hasIds = ids != null && ids.arraySize > 0;
+            if (hasIds)
+            {
+                int previous = ids.arraySize;
+                ids.arraySize = frames.arraySize;
+                for (int i = previous; i < ids.arraySize; i++) ids.GetArrayElementAtIndex(i).stringValue = System.Guid.NewGuid().ToString("N");
+            }
             SerializedProperty effectsByFrame = sequence?.FindPropertyRelative("frameEffects");
             if (effectsByFrame != null)
             {
@@ -181,6 +190,7 @@ namespace RhythmHunter.FightDemoEditor
                 {
                     frames.GetArrayElementAtIndex(i).objectReferenceValue = null;
                     frames.DeleteArrayElementAtIndex(i);
+                    if (hasIds) ids.DeleteArrayElementAtIndex(i);
                     durations.DeleteArrayElementAtIndex(i);
                     effectsByFrame?.DeleteArrayElementAtIndex(i);
                     RemapEvents(sequence, i, -1);
@@ -189,6 +199,7 @@ namespace RhythmHunter.FightDemoEditor
                 if (move != 0)
                 {
                     frames.MoveArrayElement(i, i + move);
+                    if (hasIds) ids.MoveArrayElement(i, i + move);
                     durations.MoveArrayElement(i, i + move);
                     effectsByFrame?.MoveArrayElement(i, i + move);
                     RemapEvents(sequence, i, i + move);
@@ -200,6 +211,11 @@ namespace RhythmHunter.FightDemoEditor
                 int index = frames.arraySize;
                 frames.InsertArrayElementAtIndex(index);
                 frames.GetArrayElementAtIndex(index).objectReferenceValue = null;
+                if (hasIds)
+                {
+                    ids.arraySize = frames.arraySize;
+                    ids.GetArrayElementAtIndex(index).stringValue = System.Guid.NewGuid().ToString("N");
+                }
                 if (durations.arraySize <= index) durations.InsertArrayElementAtIndex(index);
                 durations.GetArrayElementAtIndex(index).floatValue = 0.5f;
                 if (effectsByFrame != null)

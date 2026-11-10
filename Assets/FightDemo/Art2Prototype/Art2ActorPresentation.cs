@@ -52,6 +52,21 @@ namespace RhythmHunter.FightDemo.Art2
                                 overlays.Add((child, slot, child.localPosition, child.localRotation, child.name.StartsWith("Health")));
         }
 
+        // Weapon replacement does not replace the actor root, so register its renderer explicitly.
+        public void RegisterWeaponRenderer(SpriteRenderer renderer)
+        {
+            if (renderer == null || renderer.gameObject.scene != gameObject.scene) return;
+            originalSorting.RemoveAll(entry => entry.renderer == null);
+            if (!originalSorting.Exists(entry => entry.renderer == renderer))
+                originalSorting.Add((renderer, renderer.sortingLayerID, renderer.sortingOrder,
+                    renderer.sharedMaterial, renderer.shadowCastingMode, renderer.receiveShadows));
+            renderer.sortingLayerID = 0;
+            renderer.sortingOrder = 0;
+            if (actorMaterial != null) renderer.sharedMaterial = actorMaterial;
+            renderer.shadowCastingMode = castSpriteShadows ? UnityEngine.Rendering.ShadowCastingMode.TwoSided : UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = true;
+        }
+
         private void LateUpdate()
         {
             if (slots == null) return;
