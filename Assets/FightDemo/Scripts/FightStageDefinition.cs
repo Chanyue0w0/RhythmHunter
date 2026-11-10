@@ -14,6 +14,8 @@ namespace RhythmHunter.FightDemo
             public FightCharacterDefinition front;
             public FightCharacterDefinition middle;
             public FightCharacterDefinition back;
+            [Tooltip("Shared pressure window for this Wave. Disabled preserves the existing attack interval.")]
+            public FightEnemyPressureSettings pressure = new();
             public FightCharacterDefinition At(int position) => position == 0 ? front : position == 1 ? middle : back;
         }
         [SerializeField] private string stageId = "Stage01";
@@ -40,6 +42,8 @@ namespace RhythmHunter.FightDemo
                 var wave = waves[i];
                 if (wave == null || (!wave.front && !wave.middle && !wave.back))
                 { error = $"Wave {i + 1} has no enemies."; return false; }
+                if (wave.pressure != null && !wave.pressure.Validate(out error))
+                { error = $"Wave {i + 1}: {error}"; return false; }
                 for (int p = 0; p < 3; p++)
                     if (wave.At(p) != null && wave.At(p).Team != FightUnitSlot.UnitTeam.Enemy)
                     { error = $"Wave {i + 1}, position {p + 1} must reference an enemy prefab."; return false; }

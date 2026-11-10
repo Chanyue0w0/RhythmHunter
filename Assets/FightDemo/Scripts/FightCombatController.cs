@@ -1096,6 +1096,7 @@ namespace RhythmHunter.FightDemo
             battleEnded = false;
             BattleWon = AwaitingNextWave = false;
             CurrentWave = 1;
+            ResetWavePressure();
             NormalBattleBeatCount = 0;
             waveWaitBeatsRemaining = 0;
             lastWaveWaitBeat = long.MinValue;

@@ -111,6 +111,7 @@ namespace RhythmHunter.FightDemo
         public void InterruptEnemyAttack(FightUnitSlot enemy)
         {
             if (enemy == null || !fightScene2Enemies.Contains(enemy)) return;
+            EndEnemyCadenceEarly(enemy);
             enemy.CombatAnimator?.InterruptPlayback();
             InterruptScheduledEnemyAction(enemy);
             if (pendingEnemyAttacker != enemy) return;

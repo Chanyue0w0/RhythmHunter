@@ -1,0 +1,34 @@
+敵人攻勢 - Wave 設定、計時與密集攻擊
+
+攻勢期間已接管普通敵人攻擊間隔，Recovery Beats 現在會實際生效。
+普通哥布林、Killer、Giant 都使用完整 Normal 動畫拍數 + Recovery Beats，下一整拍可再出招。
+不加速圖片、不縮短警告、不改單次傷害；仍等待尚未結算的攻擊段落與動畫完成。
+進入攻勢時，待機敵人立刻出招；正出招者完成後加入。Boss 獨立模式不接管。
+退出攻勢不取消已預告的招式，重新安排普通間隔，避免瞬間補打一招。
+
+設定：Project > Assets/FightDemo/Levels/Stage01.asset > Waves > Pressure
+- Enable Pressure Phase：開關。既有未設定的 Wave 預設關閉。
+- Start Beat：20；第一個攻勢從本 Wave 有效戰鬥第 20 拍開始。
+- Duration Beats：20；第 40 拍退出，不包含第 40 拍。
+- Recovery Beats：2；完整攻擊動畫後的休息拍數；可改為 1 提高密度。
+- Repeat：開啟。
+- Repeat Every Beats：40；下一次在第 60、100 拍開始。
+- Repeat Every Beats 必須 >= Duration Beats，避免重疊窗口。
+
+本次 Stage01 的兩波皆啟用上述預設；不改隊伍、敵人、動畫、傷害與音樂。
+Stage02 與其他未設定的 Stage 預設不啟用。
+Stage 在開場讀取快照；Play 中修改資源不會改變當場規則，重新開始才生效。
+
+觀察：Play > FightDemoController > FightCombatController Inspector 頂部
+Wave Combat Beat / Phase / Remaining Beats / Next Start Beat / Clock Frozen。
+目前是 Inspector 測試讀數，沒有新增玩家畫面提示。
+
+有效拍數沿用正常戰鬥拍回呼，重複回呼不累積。
+開場、滑入、Wave 等待、TeamSkill、遊戲暫停與校正不計入。
+個別敵人暈眩不凍結全隊時段；新 Wave 從 0 重新開始。
+Wave 清空、戰敗或勝利時不再有啟用中的攻勢；Restart 清除計時。
+
+驗證選單：Rhythm Hunter > Levels > Validate Pressure Timing (Checkpoint 1)
+會開預覽場景及複製的 Stage 做測試，不儲存或覆寫正式場景。
+攻擊驗證：Rhythm Hunter > Levels > Validate Pressure Attacks
+測試三種哥布林、1/2 拍冷卻、攻勢退出及重複、停用還原普通間隔、暫停、中斷與暈眩。

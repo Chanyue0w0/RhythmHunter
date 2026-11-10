@@ -251,7 +251,7 @@ MonoBehaviour:
   castEffectAnchor: {fileID: 7844641504107683177}
   impactEffectAnchor: {fileID: 8765688678766679457}
   headAnchor: {fileID: 5571737518414513795}
-  attackIntervalBeats: 16
+  attackIntervalBeats: 20
   maxMana: 4
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
 --- !u!114 &4010285134757933532

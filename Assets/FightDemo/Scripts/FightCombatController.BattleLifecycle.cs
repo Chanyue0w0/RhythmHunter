@@ -65,6 +65,7 @@ namespace RhythmHunter.FightDemo
             rosterVersion++; // Invalidates all old hero animation callbacks before slots are reused.
             if (!rosterManager.SpawnNextEnemyWave(CurrentWave)) { FinishBattle(true); return true; }
             CurrentWave++;
+            ResetWavePressure();
             fightScene2Enemies.Clear();
             fightScene2Enemies.AddRange(rosterManager.ActiveEnemies);
             fightScene2Enemies.Sort((left, right) => right.SlotIndex.CompareTo(left.SlotIndex));
@@ -80,10 +81,12 @@ namespace RhythmHunter.FightDemo
 
         private void AdvanceNormalBattleBeat(FmodBeatClock.BeatSnapshot beat)
         {
-            if (battleEnded || AwaitingNextWave || EnemyActionsPaused || TeamSkillRunning || TeamUltimateRunning ||
+            if (battleEnded || AwaitingBattleStart || WaveEntranceRunning || IsPaused || TimingCalibrationActive ||
+                AwaitingNextWave || EnemyActionsPaused || TeamSkillRunning || TeamUltimateRunning ||
                 beat.GlobalBeat <= lastNormalBattleBeat) return;
             lastNormalBattleBeat = beat.GlobalBeat;
             NormalBattleBeatCount++;
+            AdvanceWavePressureBeat();
             foreach (var enemy in fightScene2Enemies.ToArray())
             {
                 if (enemy != null) enemy.AdvanceTimedStatuses(NormalBattleBeatCount);

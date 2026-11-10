@@ -22,16 +22,15 @@ namespace RhythmHunter.FightDemo
         private void StartAuthoredEnemyTurns(long globalBeat)
         {
             if (globalBeat == lastAuthoredEnemyBeat || battleEnded || AwaitingBattleStart ||
-                AwaitingNextWave || EnemyActionsPaused || IsPaused || TimingCalibrationActive) return;
+                AwaitingNextWave || WaveEntranceRunning || EnemyActionsPaused || TeamSkillRunning || IsPaused || TimingCalibrationActive) return;
             lastAuthoredEnemyBeat = globalBeat;
+            RefreshPressureCadence();
             foreach (var enemy in fightScene2Enemies)
             {
                 if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || enemy.IsStunned ||
                     enemy.CharacterDefinition == null ||
                     (BossActive && enemy == bossActor) ||
-                    !IsScheduledAttackBeat(globalBeat - enemyPausedBeats, enemy.AttackIntervalBeats) ||
-                    enemyHits.Exists(hit => hit.source == enemy && !hit.launched) ||
-                    (enemy.CombatAnimator != null && enemy.CombatAnimator.IsPlaying)) continue;
+                    !EnemyCadenceReady(enemy, globalBeat) || EnemyActionBusy(enemy)) continue;
                 if (enemy.CharacterDefinition.EnemyAttackUsesEffectFrames)
                     TryStartAuthoredEnemyAttack(enemy);
                 else
@@ -44,6 +43,7 @@ namespace RhythmHunter.FightDemo
         private void StartIndependentEnemyAttack(FightUnitSlot source)
         {
             var definition = source.CharacterDefinition;
+            RecordEnemyActionCadence(source);
             enemyHits.Add(new ScheduledEnemyHit { source = source,
                 due = NormalBattleBeatCount + definition.AttackWindupBeats,
                 version = rosterVersion, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
@@ -92,6 +92,7 @@ namespace RhythmHunter.FightDemo
                 offset += sequence.GetFrameBeats(i);
             }
             if (count == 0) return false;
+            RecordEnemyActionCadence(source);
             int version = rosterVersion;
             bool Valid() => version == rosterVersion && !battleEnded && source != null && source.CurrentHp > 0;
             source.PlayCombatAnimation(animation,
@@ -184,6 +185,7 @@ namespace RhythmHunter.FightDemo
         private void ClearEnemyScheduledActions()
         {
             enemyHits.Clear();
+            ClearPressureCadence();
             lastAuthoredEnemyBeat = long.MinValue;
         }
     }

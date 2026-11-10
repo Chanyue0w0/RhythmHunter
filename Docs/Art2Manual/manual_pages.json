@@ -1,0 +1,1761 @@
+[
+  {
+    "title": "快速索引｜我想改什麼？",
+    "lead": "先依目標找到真正的設定來源。Hierarchy 找場景物件；Project 找 Prefab 與資料資源。下列欄位可用 Inspector 的英文名稱辨認。",
+    "sections": [
+      {
+        "rows": [
+          [
+            "需求",
+            "操作入口"
+          ],
+          [
+            "換玩家隊伍",
+            "FightDemoController > FightRosterManager > Hero Prefabs；索引 0 / 1 / 2 是前 / 中 / 後。"
+          ],
+          [
+            "換敵人、增加 Wave",
+            "Levels/Stage01.asset 的 Waves；目前 Chapter01、Stage Index = 0。"
+          ],
+          [
+            "換關卡歌曲",
+            "Stage 的 Music Event Path。已使用 Planner 時，不只改 FmodBeatClock。"
+          ],
+          [
+            "調拍點判定",
+            "FightDemoController > FmodRhythmJudge > Perfect Window Ms。"
+          ],
+          [
+            "滿 MP 測試／死亡後繼續測試",
+            "FightCombatController > Start With Full Team Skill / End Battle On Zero Hp。"
+          ],
+          [
+            "調角色圖片與拍數",
+            "角色 Prefab 子物件 > FightCharacterCombatAnimator；每張圖片與事件一起設定。"
+          ],
+          [
+            "警告跳兩次",
+            "Normal 動畫兩張圖片勾 Play Warning，且指定共用 Warning Effect 與音效。"
+          ],
+          [
+            "調 Camera",
+            "Art2_TestCamera > Art2CameraController；不要只改停用的 Main Camera。"
+          ],
+          [
+            "把全隊往畫面下移",
+            "BattlefieldWorld 的世界 Z 往負方向調；保持 Y，先小幅測試。"
+          ],
+          [
+            "調霧與模糊",
+            "CaveEnvironment_2_5D 內 DistantFocusWall_MoveMe > Art2FocusWall。"
+          ],
+          [
+            "恢復節拍器底圖",
+            "FightScenePresenter > Show Timeline Bar。"
+          ],
+          [
+            "開關傷害數字",
+            "FightCombatController > Show Enemy Damage Numbers。"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "快速索引｜常用測試與保存",
+    "sections": [
+      {
+        "h": "按鍵與語意",
+        "rows": [
+          [
+            "輸入",
+            "目前用途"
+          ],
+          [
+            "Q / W / E",
+            "前衛 / 中衛 / 後衛普通能力。"
+          ],
+          [
+            "手把 X / Y / B",
+            "同上；採 Xbox 標示，其他手把依西 / 北 / 東位置。"
+          ],
+          [
+            "R / 手把 A",
+            "TeamSkill；16 拍期間整拍與半拍成功輸入會讓三人同時施放。"
+          ],
+          [
+            "F9",
+            "Restart Battle，重載目前場景。"
+          ],
+          [
+            "Esc / F8 / Start",
+            "目前 Art2 是戰鬥暫停入口，不是校正快捷鍵；校正請開獨立 FightCalibrationScene。"
+          ],
+          [
+            "方向鍵 / 滾輪",
+            "Art2 Camera 平移 / 縮放，需 Game 視窗有焦點且 Enable Keyboard And Wheel 開啟。"
+          ],
+          [
+            "P / Home",
+            "切換投影 / 恢復進場時 Camera 設定。"
+          ]
+        ]
+      },
+      {
+        "h": "每次工作結束",
+        "p": [
+          "1. 停止 Play，再把測試成功的數值寫回場景或 Prefab。Play 內臨時物件及數值不能當成已保存。",
+          "2. 儲存場景；Prefab Mode 檢查 Auto Save 或按 Save。修改共用材質、圖片匯入器及 ScriptableObject 可能直接持久化，不能一律假設停止 Play 就還原。",
+          "3. 查看 Git 變更清單，記錄本次測試。FMOD 快取不等於歌曲 Bank、Prefab 或校正資料。"
+        ]
+      }
+    ],
+    "sources": [
+      "Assets/InputActionMap/FightControl.inputactions",
+      "FightPauseController.cs",
+      "Art2CameraController.cs"
+    ]
+  },
+  {
+    "title": "01｜工作方式與資源所有權",
+    "lead": "最容易造成「改了卻沒用」的原因，是改到執行時複本、舊場景物件或被上層資料覆寫的欄位。",
+    "sections": [
+      {
+        "h": "先分辨四種東西",
+        "rows": [
+          [
+            "類型",
+            "修改影響"
+          ],
+          [
+            "Scene instance",
+            "只影響這份場景；Prefab 實例上的改動會成為 Override。"
+          ],
+          [
+            "角色 Prefab",
+            "所有引用此 Prefab 的關卡都可能受影響。先複製成新版本再做不同敵人變體。"
+          ],
+          [
+            "VisualPrefab 子 Prefab",
+            "通常提供共用圖像與動畫。外層 ArtBattle Prefab 可以覆寫它；不要只看基底值。"
+          ],
+          [
+            "Stage / Chapter 資料",
+            "控制關卡內容；Planner 在開始時讀取成快照。Play 中改資源不代表本場立即換波。"
+          ],
+          [
+            "執行時物件",
+            "ActorRoot 下角色、PlayerUI、特效與數字等。用來檢視結果，持久設定仍回原資源。"
+          ]
+        ]
+      },
+      {
+        "h": "建議工作流程",
+        "p": [
+          "先記錄要改哪個資源與一個預期結果，再只調一組參數。比如只改 Killer 警告位置，不同時改傷害、間隔與音量，才能知道哪個改動有效。",
+          "調整場景專用的火把、模糊或光線時，優先保留為 Art2 場景 Override；只有確定所有引用場景都應一致，才 Apply 回共用 Prefab。",
+          "不要用 Apply All 解決不明設定。先看 Overrides 清單，確認是否包含你調好的主光、VFX 或 Camera。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "01｜保存、版本與恢復",
+    "sections": [
+      {
+        "h": "保存前檢查",
+        "p": [
+          "停止 Play，確認 Art2_FightScene 是目前要保存的場景。按 Ctrl+S；查看場景名稱旁的未保存標記。Prefab Mode 有獨立保存流程。",
+          "保留 .meta。Unity 以 GUID 串接素材；移動資源請在 Project 視窗進行。若在檔案總管搬動，素材和 .meta 必須一起搬，否則可能出現 Missing 參照。"
+        ]
+      },
+      {
+        "h": "不用 Codex 也能做的版本記錄",
+        "rows": [
+          [
+            "紀錄項目",
+            "範例"
+          ],
+          [
+            "資源",
+            "ArtBattle/Goblin_Killer.prefab"
+          ],
+          [
+            "修改",
+            "第 1、3 張警告；保留共用 Warning 音效"
+          ],
+          [
+            "驗證",
+            "兩次警告均出現；三隻同場可各自攻擊"
+          ],
+          [
+            "回復方式",
+            "先以 Git 客戶端檢視該檔案差異，再選擇是否還原該檔案；不要直接全專案 Reset。"
+          ]
+        ]
+      },
+      {
+        "h": "哪些不是快取",
+        "p": [
+          "Assets、ProjectSettings、Packages 及 FMOD 專案作者資料是重要來源。Library / Temp 是 Unity 產物；本手冊的輸出也不是戰鬥設定。不要在不明來源時批次刪除。",
+          "個人校正另外存於 Application.persistentDataPath 的 rhythm-calibration.json。換電腦要另外備份；推送場景不會帶上本機校正。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "02｜Art2 場景地圖",
+    "lead": "物件名保留英文，方便直接在 Hierarchy 搜尋。Prefab 展開層級可能因場景 Override 改變；下表是功能分組，實際完整路徑請用搜尋定位後展開父層。",
+    "sections": [
+      {
+        "rows": [
+          [
+            "重要物件",
+            "責任與操作範圍"
+          ],
+          [
+            "FightDemoController",
+            "戰鬥流程、輸入、節拍、Roster、關卡、入場、結算與受傷 UI 的主要入口。"
+          ],
+          [
+            "BattlefieldWorld",
+            "六個站位與場上資訊。移動此群組可整體調整隊伍構圖。"
+          ],
+          [
+            "HeroSlot_Front / Middle / Rear",
+            "玩家生成位置；ActorRoot 內在遊玩時生成角色。"
+          ],
+          [
+            "EnemySlot_Front / Middle / Rear",
+            "敵人站位；死亡不讓其他人搬到前一格，選擇目標仍向後找存活者。"
+          ],
+          [
+            "Art2_2_5D_Prototype",
+            "Art2 角色視覺橋接、Camera 與氛圍相關物件。"
+          ],
+          [
+            "CaveEnvironment_2_5D",
+            "洞穴分層背景、地板、四火把、雙石頭、雙木柵欄、雙群眾與效果牆。"
+          ],
+          [
+            "Art2_TestCamera",
+            "目前 2.5D 視角。Main Camera 留有舊設定，不是調構圖的主要入口。"
+          ],
+          [
+            "Art2_Atmosphere",
+            "主／輔助光、火把光、PostProcessing。火把光可能跟著各火把的 FlameAnchor 階層。"
+          ],
+          [
+            "FightHudCanvas / EventSystem",
+            "UI 顯示與操作；不要為隱藏開發資訊把整個 Canvas 關掉。"
+          ],
+          [
+            "SceneBeatMotionManager",
+            "背景物件跟隨總節拍振動。"
+          ],
+          [
+            "TestingPrefabs",
+            "美術測試用實例，不能視為正式角色或技能設定來源。"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "02｜控制器與執行時物件",
+    "sections": [
+      {
+        "h": "FightDemoController 上怎麼分工",
+        "rows": [
+          [
+            "元件",
+            "負責事項"
+          ],
+          [
+            "FightLevelPlanner",
+            "選 Chapter / Stage；開始時設定敵人與歌曲。"
+          ],
+          [
+            "FightRosterManager",
+            "生成角色、維護隊伍與波次，戰前編隊。"
+          ],
+          [
+            "FightCombatController",
+            "成功輸入、共用資源、傷害、狀態、TeamSkill、結束條件。"
+          ],
+          [
+            "FmodBeatClock / FmodRhythmJudge",
+            "歌曲節拍來源 / 輸入判定；不要新增獨立音樂計時。"
+          ],
+          [
+            "FightAudioPlayer",
+            "共用戰鬥音效播放與清理；音樂由 BeatClock 管理。"
+          ],
+          [
+            "FightScenePresenter",
+            "玩家與開發 UI、節拍器、顯示開關。"
+          ],
+          [
+            "FightWaveEntrance",
+            "進場滑入、抵達跳躍、過場無敵標示。"
+          ],
+          [
+            "FightStageResults / FightVictoryPanel",
+            "戰鬥統計 / 勝利與戰敗面板。"
+          ],
+          [
+            "FightDamageEdgeFeedback",
+            "玩家受傷與低血量的全螢幕 UI 邊緣提示。"
+          ]
+        ]
+      },
+      {
+        "h": "為何 Edit 模式看不到某些 UI？",
+        "p": [
+          "PlayerUI、DeveloperUI、BattleMenus 群組及部分面板由 Play 流程建立。先 Play 查看結果，再停止並回到 Presenter 或 UI Prefab 調整，不能只改執行時 RectTransform。",
+          "PlayerDamageEdgeCanvas 和 PlayerResultCanvas 是獨立 Overlay Canvas。它們不是相機後製，也不是場景中的小平面。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "02｜設定來源關係圖",
+    "lead": "此圖為功能示意，不是 Unity 截圖；箭頭表示主要資料流，省略內部事件與相互參照。",
+    "diagram": true,
+    "sections": [
+      {
+        "h": "應該在哪一層改？",
+        "p": [
+          "改「出現哪些敵人」用 Stage；改「這種敵人的所有數值」用角色 Prefab；改「這場畫面站在哪裡」用場景 Slot。三者責任不同，不需要每次重新建角色。",
+          "音樂與節拍是一個共用來源。UI、背景振動、角色動畫、投射物飛行拍數都應沿用既有節拍；不要用獨立秒數計時器重新猜拍。"
+        ]
+      },
+      {
+        "h": "角色內部掛點",
+        "rows": [
+          [
+            "掛點",
+            "用途"
+          ],
+          [
+            "FootAnchor",
+            "腳底貼地與個別接觸影參考；不直接控制戰鬥站位。"
+          ],
+          [
+            "HeadAnchor",
+            "狀態圖示、傷害數字與頭頂資訊。"
+          ],
+          [
+            "VFX_CastAnchor",
+            "自身施放、子彈出生等效果參考。"
+          ],
+          [
+            "VFX_ImpactAnchor",
+            "被命中 VFX 位置；法師護罩另使用前衛的 Cast Anchor。"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "03｜Camera 構圖與移動",
+    "sections": [
+      {
+        "h": "操作位置",
+        "p": [
+          "搜尋 Art2_TestCamera，調整 Art2CameraController。Play 中腳本會持續設定 Camera，因此直接改 Camera Transform 可能下一幀又被改回。需要永久構圖請調控制元件的 Focus、Pitch、Framing Half Height。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "欄位",
+            "如何使用"
+          ],
+          [
+            "Perspective",
+            "開啟透視，近大遠小；關閉為正交。"
+          ],
+          [
+            "Pitch",
+            "30 至 60 度。45 度是目前基準；改角度要重新檢查腳底、火把與前景穿幫。"
+          ],
+          [
+            "Field Of View",
+            "透視 FOV；目前 40。正交時不以 FOV 控制畫面尺寸。"
+          ],
+          [
+            "Framing Half Height",
+            "構圖高度／縮放基準，目前 5.35。縮小會拉近。"
+          ],
+          [
+            "Focus",
+            "畫面中心的世界座標；比單改 Camera Position 更穩定。"
+          ],
+          [
+            "Pan Speed / Zoom Speed",
+            "測試平移與滾輪速度，不影響戰鬥節拍。"
+          ],
+          [
+            "Enable Keyboard And Wheel",
+            "關閉可防測試時誤移動相機。"
+          ]
+        ]
+      },
+      {
+        "h": "比較兩種投影",
+        "p": [
+          "Play 後點 Game 視窗，按 P 比較；切換會盡量維持焦點平面上的畫面高度，但不同深度的物件比例仍會改變。按 Home 回復這次 Play 開始時的設定，不是回復專案最早的數值。"
+        ]
+      }
+    ],
+    "sources": [
+      "Assets/FightDemo/Art2Prototype/Art2CameraController.cs"
+    ]
+  },
+  {
+    "title": "03｜擺放、腳底與 Scene 預覽",
+    "sections": [
+      {
+        "h": "座標與群組",
+        "rows": [
+          [
+            "操作",
+            "建議方式"
+          ],
+          [
+            "左右位移",
+            "世界 X；使用 Global Gizmo，避免傾斜父層把方向混入高度。"
+          ],
+          [
+            "前後位移",
+            "世界 Z；朝鏡頭移動通常會在畫面往下。"
+          ],
+          [
+            "高度",
+            "世界 Y；角色站地面時不要以 Y 當畫面上下偏移。"
+          ],
+          [
+            "全部戰鬥角色往下",
+            "選 BattlefieldWorld，小幅降低世界 Z；維持 Y。"
+          ],
+          [
+            "單一角色站位",
+            "修改對應 HeroSlot / EnemySlot，不要移動 Play 生成的角色作永久設定。"
+          ],
+          [
+            "單一背景物件",
+            "移動 GroundAnchor 或切開的子物件；Tilt 層控制圖片朝向。"
+          ]
+        ]
+      },
+      {
+        "h": "Scene 空白時",
+        "p": [
+          "先確認開的是 Art2；搜尋 CaveEnvironment_2_5D，選取可見子物件按 F 聚焦。關閉 Scene 2D 模式，檢查 Shaded、Scene Lighting、Effects 與物件眼睛隱藏狀態。",
+          "可使用 Rhythm Hunter > Art2 > Frame Scene Preview。這是預覽工具；不要為了解決 Scene 顯示而任意換全專案 Renderer。Game 構圖仍以 Art2_TestCamera 為準。"
+        ]
+      },
+      {
+        "h": "Pixel Art 顯示限制",
+        "p": [
+          "透視、45 度傾斜、非整數縮放與相機移動可能產生像素閃爍。先固定構圖測試，再小幅縮放；Point 保持像素邊界，但不保證斜角完全沒有 Shimmering。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "04｜洞穴背景物件清單",
+    "sections": [
+      {
+        "rows": [
+          [
+            "名稱",
+            "內容與常見操作"
+          ],
+          [
+            "Ground_XZ",
+            "原圖地板映射到 XZ 地面；是接收陰影與視覺站地的基準。"
+          ],
+          [
+            "RearWall_GroundAnchor",
+            "遠處洞穴牆；模糊與薄霧的主要背景。"
+          ],
+          [
+            "ClosedDoor_GroundAnchor",
+            "通道盡頭門；有額外接觸陰影，不能當近景石頭一起移動。"
+          ],
+          [
+            "SideWalls_GroundAnchor",
+            "兩側洞壁，維持畫面框景與深度。"
+          ],
+          [
+            "WoodenBarricades_GroundAnchor",
+            "WoodenBarricade_Left / Right；cave_02_00、cave_02_01。"
+          ],
+          [
+            "Rocks_GroundAnchor",
+            "Rock_Left / Right；cave_01_00、cave_01_01。"
+          ],
+          [
+            "WallTorches_GroundAnchor",
+            "四座已切開火把，左右使用各自 no fire 圖片。"
+          ],
+          [
+            "OverheadMoss_GroundAnchor",
+            "名稱是歷史遺留，內容其實是哥布林群眾；CaveCrowd_Left / Right。"
+          ],
+          [
+            "FrontRockEdges_GroundAnchor",
+            "前景岩石邊緣。"
+          ],
+          [
+            "ForegroundSilhouette_GroundAnchor",
+            "原圖周圍黑色前景框；有獨立柔化設定。"
+          ],
+          [
+            "DistantFocusWall_MoveMe",
+            "控制遠景效果開始的空間界線，本身不是可見實體牆。"
+          ]
+        ]
+      },
+      {
+        "h": "資源位置",
+        "p": [
+          "環境 Prefab：Assets/FightDemo/Prefabs/ArtBattle/CaveEnvironment_2_5D.prefab。原圖與切圖在 Arts 場景素材中，可用 Project 搜尋完整檔名定位，避免依中文資料夾名稱猜路徑。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "04｜換圖與新增場景裝飾",
+    "sections": [
+      {
+        "h": "替換一塊石頭",
+        "p": [
+          "1. 停止 Play，展開 CaveEnvironment_2_5D > Rocks_GroundAnchor，選 Rock_Left 或 Rock_Right。",
+          "2. 在 SpriteRenderer 更換 Sprite，保留既有材質、光影相關元件與 sorting 設定。切圖 PPU、畫布及 Pivot 不同時，先確認可見底部再調局部位移。",
+          "3. 先從 Game Camera 檢查大小，再看 Scene 的地面接觸。修改接觸陰影尺寸；確認 SceneBeatMotion 仍指向正確物件。",
+          "4. 若只供 Art2 使用，保存場景 Override 即可；確定所有引用都需要此圖才 Apply。"
+        ]
+      },
+      {
+        "h": "新增裝飾物",
+        "p": [
+          "複製同類型的背景子物件，再換 Sprite，可保留適合的材質與影子設定。換名後移到合適父層，避免連原物件的測試燈一起複製成重複光源。",
+          "新遠景不會只因名字含 Background 就自動被霧化。要加入 Art2FocusWall 的 Targets 或對應 Additional Roots，且材質須支援效果牆參數。新節拍裝飾也要加入 Motion Targets。"
+        ]
+      },
+      {
+        "h": "不要同時改三種尺寸",
+        "p": [
+          "Sprite PPU、Transform Scale 和父層 Scale 都會影響大小。沿用現有 PPU，優先調場景 Transform。不要為一個物件重設原始圖片 PPU，否則其他場景可能一起變大。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "05｜主光、火把與光暈",
+    "sections": [
+      {
+        "h": "主光的控制方式",
+        "p": [
+          "ShadowTestLight_MoveMe 是可調方向的主光。Art2ShadowTestLight 開啟 Aim At Target 時，移動光源會重新朝 ShadowTest_AimTarget 瞄準，因而改變投影方向。它是方向光，位置遠近本身不產生點光源距離衰減。",
+          "要直接轉動光源，先關閉 Aim At Target。調 Color / Intensity 改色與亮度；調 Shadows Strength 改投影濃度。此手冊不重設你已調好的主光。"
+        ]
+      },
+      {
+        "h": "四火把的三種效果",
+        "rows": [
+          [
+            "元件／物件",
+            "作用"
+          ],
+          [
+            "Light",
+            "真的照亮受光材質；Range 是影響範圍，Intensity 是亮度。"
+          ],
+          [
+            "Art2TorchFlicker",
+            "Base Intensity、Flicker Amount、Speed、Noise Seed 控制忽明忽暗。"
+          ],
+          [
+            "Art2TorchHalo",
+            "可見圓形光暈；Radius、Brightness 與 Offset，與真實照明不是同一件事。"
+          ],
+          [
+            "FlameAnchor / 火焰 VFX",
+            "火焰位置。光源與粒子跟隨同一火把錨點，避免靠 Camera 投影手動對齊。"
+          ]
+        ]
+      },
+      {
+        "h": "調整順序",
+        "p": [
+          "先固定主光，再調火把 Light，最後調 Halo 與粒子透明度。過亮時只降低粒子 Start Color Alpha，不一定能降低材質的 Emission；需一起檢查材質。移動火把應移動火把根物件或 FlameAnchor，不要讓光與火焰分離。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "05｜陰影、霧與後製的分工",
+    "sections": [
+      {
+        "rows": [
+          [
+            "效果",
+            "調整入口與差異"
+          ],
+          [
+            "角色光線投影",
+            "Art2ActorPresentation > Cast Sprite Shadows；受材質 ShadowCaster 與主光影響。"
+          ],
+          [
+            "角色腳底橢圓影",
+            "Art2ActorPresentation > Show Contact Shadows 是總開關；各角色 Art2CharacterShadowSettings 控制獨立 Size / Offset / 跟光偏移。"
+          ],
+          [
+            "石頭、柵欄、門接觸影",
+            "Art2SceneryContactShadows；調 Contacts 內 Width Pixels、Depth、World Offset，以及元件 Opacity，這不是角色的橢圓影。"
+          ],
+          [
+            "地面偏離",
+            "先查 FootAnchor、Align Feet To Ground 和 Actor Ground Height，再查主光 Bias / Normal Bias。"
+          ],
+          [
+            "背景模糊與霧",
+            "Art2FocusWall > Blur Pixels / Fog Density，兩者可分開設 0 比較。"
+          ],
+          [
+            "全畫面調色與 Bloom",
+            "Art2_PostProcessing > Volume / Profile；Weight = 0 可比較前後。"
+          ]
+        ]
+      },
+      {
+        "h": "效果牆怎麼用",
+        "p": [
+          "移動 DistantFocusWall_MoveMe 的世界 Z 改變效果開始處，局部 +Z 是受影響方向。Transition Depth 決定往後多遠達到完整效果；Guide Size 只改 Gizmo，不是牆的裁切範圍。",
+          "Targets 列出背景 Renderer；Additional Roots 包含火把階層。Emphasized Roots、Detail Blur Multiplier、Detail Blur Transition Scale 用來強化群眾與火焰細節模糊。這不是通用螢幕截圖模糊，未支援的 Shader 不會自動受影響。",
+          "陰影過小先查接觸影的尺寸估算與可見底部，別只提高不透明度；光影受平面 Sprite 限制，不會自動產生完整 3D 石頭體積。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "05｜材質受光與診斷比較",
+    "sections": [
+      {
+        "h": "平面圖如何有明暗變化",
+        "p": [
+          "SpriteCardLit 讓 Sprite 取樣主光、附加光與陰影；Normal Map 再提供圖內不同表面的朝向。只有一張平面且沒有適合的法線時，照明可能整張一起變亮，不能只靠 Camera 角度變成石頭體積。",
+          "材質位於 Assets/FightDemo/Art2Prototype。角色用 Art2ActorLit；左右石頭與木柵欄有 CaveRockLeftLit / RightLit、CaveWoodLeftLit / RightLit 等獨立資源。以當前 Renderer 的 Material 參照為準，不要改到未使用的舊 CaveMiddleLit 卻以為沒有作用。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "Shader Inspector 欄位",
+            "用途"
+          ],
+          [
+            "Use Surface Normal Map",
+            "啟用法線，Surface Normal Map 圖片需和 Sprite 使用相同畫布／對應區域。"
+          ],
+          [
+            "Surface Normal Strength",
+            "法線強度；太高可能像塑膠或凹凸倒置。"
+          ],
+          [
+            "Direct Light Wrap",
+            "較低增加面向差異；過高會讓各面都亮，削弱立體感。"
+          ],
+          [
+            "Ambient Strength / Tint",
+            "環境底亮與色調；過高會蓋過移動光源的明暗差。"
+          ],
+          [
+            "Light Influence",
+            "動態光的影響量。"
+          ],
+          [
+            "Emission Strength",
+            "自發光；石頭或角色過高會看似不受光。"
+          ],
+          [
+            "Shadow Alpha Cutoff",
+            "陰影透明度裁切，不是石頭表面法線強度。"
+          ]
+        ]
+      },
+      {
+        "h": "比較方法",
+        "p": [
+          "先在獨立樣本比較原圖、灰底受光與法線視圖，再移動測試光。專案有 Rhythm Hunter > Art2 > Surface Lighting Diagnostic 與 Verify Surface Light Response (GPU)。這些是診斷工具，執行前保存；不要把測試模式留在正式材質。",
+          "判斷時先固定相機與主光，再一次只改 Ambient 或 Normal Strength。若灰底可見受光差、原圖看不出，代表原圖既有陰影與亮部可能掩蓋動態光，不是再加更多點光就一定改善。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "06｜讓背景跟著節拍動",
+    "sections": [
+      {
+        "h": "新增一個節拍振動目標",
+        "p": [
+          "1. 搜尋 SceneBeatMotionManager；Beat Clock 應指向 FightDemoController 的 FmodBeatClock。",
+          "2. 展開 Targets，新增項目，拖入真正要動的 Transform。若是火把，選能帶動燈光與火焰的完整根物件。",
+          "3. 設 Enabled，從小幅度開始，例如 0.01 至 0.04 世界單位；播放歌曲觀察與拍點的同步。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "欄位",
+            "解釋"
+          ],
+          [
+            "Motion Enabled",
+            "整個管理器的開關。"
+          ],
+          [
+            "Direction / Direction Space",
+            "方向與 Local / World 空間；上跳用 World 的 (0,1,0) 較直觀。"
+          ],
+          [
+            "Amplitude",
+            "位移大小，不是角度。"
+          ],
+          [
+            "Duration In Beats",
+            "每拍中動作持續比例；例如 0.5 表示半拍內完成。"
+          ],
+          [
+            "Oscillations",
+            "一次動作內的振動次數，越大越抖。"
+          ],
+          [
+            "Target",
+            "指向哪個 Transform；原物件改名通常不會斷，但刪掉重建要重新指定。"
+          ]
+        ]
+      },
+      {
+        "h": "避免互相覆寫",
+        "p": [
+          "不要讓兩個 Motion Target 同時控制同一 Transform，也不要同時讓另一個 Animator 覆寫它的位置。需要兩種動作時用父子層分工。火把幅度應低於石頭和柵欄，避免光點晃動搶走戰鬥焦點。"
+        ]
+      }
+    ],
+    "sources": [
+      "Assets/FightDemo/Scripts/SceneBeatMotionManager.cs"
+    ]
+  },
+  {
+    "title": "06｜背景逐張動畫與拍數",
+    "sections": [
+      {
+        "h": "哥布林群眾",
+        "p": [
+          "OverheadMoss 是舊名稱，左右角色分別為 CaveCrowd_Left、CaveCrowd_Right，使用 SceneBeatSpriteAnimator 播放 cave_07_left_00 至 02、cave_07_right_00 至 02。",
+          "三張共一拍的配法為 0.33、0.33、0.34。若全用 0.33 就是 0.99 拍，長期循環會與一拍目標不同。新增或減少圖片時重新檢查總和。"
+        ]
+      },
+      {
+        "h": "背景動畫和角色動畫不同",
+        "rows": [
+          [
+            "系統",
+            "用途"
+          ],
+          [
+            "SceneBeatSpriteAnimator",
+            "場景裝飾圖片輪播，如群眾；不是敵人傷害事件來源。"
+          ],
+          [
+            "SceneBeatMotionManager",
+            "移動 Transform，如石頭小跳；不替換圖片。"
+          ],
+          [
+            "FightCharacterCombatAnimator",
+            "角色 Idle 與攻擊／TeamSkill／喝酒等事件動畫。"
+          ]
+        ]
+      },
+      {
+        "h": "完成後檢查",
+        "p": [
+          "把 BeatTapping 開啟聽四至八小節，確認輪播一整組恰為一拍。暫停與恢復後也要觀察一次。",
+          "更換背景圖片後，確認模糊材質與效果牆參照仍存在；動畫正常但遠景沒有霧，通常要查 Renderer / 材質，而不是改拍數。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "07｜建立 Chapter、Stage 與 Wave",
+    "sections": [
+      {
+        "h": "資料入口",
+        "p": [
+          "Project 的 Assets/FightDemo/Levels 目前有 Chapter01、Stage01、Stage02。FightDemoController > FightLevelPlanner 指定 Chapter 與 Stage Index，索引從 0 開始；0 是第一個 Stage。",
+          "建立新資料可使用 Project 右鍵 Create > Rhythm Hunter > Levels > Stage / Chapter。為資料取唯一 ID，Display Name 則是玩家顯示名稱。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "Stage 欄位",
+            "規則"
+          ],
+          [
+            "Music Event Path",
+            "FMOD event:/ 路徑；整個 Stage 共用一首歌，換 Wave 不重新開歌。"
+          ],
+          [
+            "Planned Song Seconds",
+            "0 嘗試讀 FMOD 長度；循環或動態歌曲可填明確秒數。目前僅用於統計，沒有超時懲罰。"
+          ],
+          [
+            "Waves",
+            "依序排列，每波 Name、Front、Middle、Back。"
+          ],
+          [
+            "Front / Middle / Back",
+            "拖入 Enemy 的 FightCharacterDefinition Prefab，至少一格有敵人。"
+          ],
+          [
+            "Chapter.Stages",
+            "排列 Stage 資源；新增資料後記得加入此清單。"
+          ]
+        ]
+      },
+      {
+        "h": "目前快照",
+        "p": [
+          "Chapter01 有兩個 Stage，Art2 選 Stage Index 0。Stage01 使用 event:/Ritual Slam _120_3，設兩波。詳細敵人參照請直接看資源；不要改 Roster 的舊 Enemy Prefabs 期待覆蓋已選 Stage。"
+        ]
+      }
+    ],
+    "sources": [
+      "FightStageDefinition.cs",
+      "FightLevelPlanner.cs",
+      "FightRosterManager.cs"
+    ]
+  },
+  {
+    "title": "07｜入場、換波與結算",
+    "sections": [
+      {
+        "h": "完整流程",
+        "p": [
+          "開場播放普通 Idle 與喝酒呈現；音樂開始時間由 FightCombatController 的 Music Start Delay Seconds 控制，目前 0。歌曲立即開始不等於刪除喝酒動畫。開場流程完成後進入隊伍與敵人的入場階段。",
+          "初始 Wave 兩方滑入；後續只滑入敵人。FightWaveEntrance 的 Duration Beats 目前 1；Hop On Arrival 讓角色抵達時一起小跳，使用角色既有的跳躍表現。",
+          "Wave 清空立即回滿護甲，等待 2 個普通節拍，再生成下一波並滑入。HP / MP 不因換波重置。最後一波清空直接結算，不多等一個空 Wave。"
+        ]
+      },
+      {
+        "h": "過場輸入",
+        "p": [
+          "普通能力仍能按節拍累積 MP 與執行非傷害功能，但傷害型能力不造成傷害。敵人滑入期間無敵；IMMUNE 只有受到傷害嘗試時才短暫顯示，不是每次進場自動跳字。",
+          "A 可以打節拍回饋，但過場不啟動 TeamSkill。TeamSkill 尚未結束時不讓剩餘效果跨到新 Wave；結束後再處理波次。"
+        ]
+      },
+      {
+        "h": "結算與待補效果",
+        "p": [
+          "FightVictoryPanel 同時提供 Show Victory Panel、Show Defeat Panel。FightStageResults 記錄勝敗、Wave 與時間；Restart 使用目前場景。",
+          "Wave Armor Recovery Effect 是回滿護甲時預留 VFX 欄位，目前未指定；只有實際恢復護甲才有該效果的觸發需求。不要為了補特效另做自然回甲計時。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "08｜隊伍與共用資源",
+    "sections": [
+      {
+        "h": "替換玩家隊伍",
+        "p": [
+          "停止 Play，在 FightDemoController > FightRosterManager > Hero Prefabs 修改 0、1、2 三格，分別是前、中、後衛。保留 Hero Spawn Slots 的場景站位參照。",
+          "拖入 ArtBattle 的完整角色 Prefab，不是單獨的 VisualPrefab。前者帶 FightCharacterDefinition 與角色掛點；後者通常只有畫面。角色交換後普通按鍵跟著位置，而不是固定職業。"
+        ]
+      },
+      {
+        "h": "數值來源",
+        "rows": [
+          [
+            "資源",
+            "目前規則"
+          ],
+          [
+            "HP",
+            "三名角色 Max Hp 加總，戰鬥只扣一份全隊 HP。"
+          ],
+          [
+            "DEF",
+            "前衛 Defense 為基礎，適用被動另受 Enable Character Passives 控制。沒有自然時間回甲。"
+          ],
+          [
+            "MP",
+            "三人 Team Skill Mana Cost 加總為門檻；角色 MP 欄位不是進場已有的量。"
+          ],
+          [
+            "累積",
+            "普通能力成功節拍輸入 +1；射手準備輸入也計入。傷害次數不額外累積。"
+          ],
+          [
+            "同拍限制",
+            "目前共用判定器會辨識重複成功拍點；不能靠同拍連按反覆取得 MP。"
+          ],
+          [
+            "換波",
+            "HP / MP 保留，護甲回滿。"
+          ]
+        ]
+      },
+      {
+        "h": "測試開關",
+        "p": [
+          "Start With Full Team Skill 可用於進場測特效；目前關閉。End Battle On Zero Hp 目前開啟；美術測試可暫關，但停止測試後記得還原。Enable Character Passives 目前關閉，因此不要拿最早企劃的戰士 +1 DEF 當現在必定生效的值。",
+          "目前預設三人基礎 HP 合計 4、MP 門檻 60；戰士站前衛且被動關閉時 DEF 上限為基礎 2，不是早期企劃含被動的 3。換成其他角色組合後以當場重算結果為準。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "08｜當前能力與 TeamSkill",
+    "sections": [
+      {
+        "rows": [
+          [
+            "角色",
+            "目前行為"
+          ],
+          [
+            "長劍戰士",
+            "普通斬擊；TeamSkill 破勢斬傷害後給脆弱。數值與特效以 Prefab 為準。"
+          ],
+          [
+            "能量法師",
+            "普通護罩格擋指定拍；TeamSkill 為史萊姆分裂體，直接傷害觸發後延遲 0.5 拍引爆。"
+          ],
+          [
+            "骷髏射手",
+            "普通連續兩拍瞄準再射擊、附流血，不再普攻中斷；TeamSkill 小型炸彈附中斷／暈眩，霸體免疫控制。"
+          ],
+          [
+            "其他美術角色",
+            "有 Prefab 不代表能力已正式完成；Dwarf / Minotaur 等須核對資料，不自行套上正式技能假設。"
+          ]
+        ]
+      },
+      {
+        "h": "TeamSkill 新版",
+        "p": [
+          "持續 16 拍，普通角色按鍵停用，只接受 A／鍵盤 R。整拍與半拍判定成功，每次三人同時施放；同一拍點不重複接受。失敗不觸發技能，也不套普通 Miss 懲罰。節拍 UI 變金色並顯示剩餘時間。",
+          "敵人攻擊與狀態持續拍數暫停；玩家技能傷害與分裂體引爆仍結算。單體目標死亡後改打下一個存活者；最後一個敵人及群體目標可在本次 Burst 中保留受擊表現，結束仍正常計入死亡與換波。",
+          "技能動畫再被下一次輸入重播時，已接受施放的事件另由共用節拍排程保存。TeamSkill 要在動畫中設定攻擊特效圖片，否則可能有動畫卻沒有技能結算。舊 QTE 失敗倍率、三連 QTE 間隔與 TeamUltimate 不是目前調整 Burst 的入口。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "08｜狀態與補甲參數速查",
+    "sections": [
+      {
+        "rows": [
+          [
+            "效果",
+            "生效／解除與可調入口"
+          ],
+          [
+            "脆弱 Fragile",
+            "下一次有效傷害 ×2 後解除；不疊層。各敵人獨立。流血也可消耗，完全格擋／無傷不應消耗。"
+          ],
+          [
+            "流血 Bleeding",
+            "角色 Basic Applies Bleeding、Bleed Damage、Bleed Beats。現行方向是每拍 0.5、4 拍；無視 DEF／格擋，不觸發分裂體。再施加刷新。"
+          ],
+          [
+            "史萊姆分裂體",
+            "Fragment Damage、Fragment Beats、Fragment Detonation Delay Beats。直接傷害觸發後延遲引爆；DoT 不觸發。附著自身不造成直接傷害。"
+          ],
+          [
+            "暈眩 Stun",
+            "Stun Beats；炸彈命中後控制敵人。Crowd Control Immune / Boss 霸體可免疫控制但仍受傷。"
+          ],
+          [
+            "護罩 Guard",
+            "Basic Guard Beats；依成功判定拍管理，可擋同有效拍內多次符合條件的命中。"
+          ],
+          [
+            "固定補甲",
+            "ArmorRestoreMode.FixedAmount 加 Basic / Team Skill Armor Recovery Amount。"
+          ],
+          [
+            "滿額補甲",
+            "ArmorRestoreMode.Full，恢復至當下全隊上限，不加上限、不治療 HP。"
+          ]
+        ]
+      },
+      {
+        "h": "被動關閉時的特別規則",
+        "p": [
+          "Enable Character Passives 關閉會抑制一般角色附帶的補甲被動。若要設計正式「補甲普通能力」，將能力行為選 RestoreArmor，並設定該能力的 Armor Recovery 模式／量；不要只填 Amount 卻讓模式停在 None。",
+          "所有持續拍數在 TeamSkill 期間暫停消耗，技能內引爆仍可結算。Wave 切換／戰鬥結束會清理狀態；不要用圖示是否留著作唯一的狀態數值依據。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "09｜圖片匯入與 Idle 設定",
+    "sections": [
+      {
+        "h": "圖片不要被自動裁掉",
+        "p": [
+          "Texture Importer 使用 Sprite (2D and UI)、Sprite Mode = Single、Mesh Type = Full Rect；Filter Mode = Point，避免不必要 Compression。保留原 PPU 與畫布尺寸。點 Apply 後確認。",
+          "專案有 FightSpriteImportDefaults；仍應檢查新素材是否在該工具適用範圍內。已有 Multiple 切圖不會因你希望新圖 Single 就應該全部改掉；洞穴拆圖等資源要保留其用途。"
+        ]
+      },
+      {
+        "h": "角色動畫位置",
+        "p": [
+          "雙擊 ArtBattle 角色 Prefab，找到子物件的 FightCharacterCombatAnimator。Idle 圖片與 Combat Sequences 分開；Target Renderer 應指向該角色 SpriteRenderer。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "欄位",
+            "用途"
+          ],
+          [
+            "Use Idle Frame Beat Durations",
+            "開啟後依每張拍數播放；缺漏項應補齊。"
+          ],
+          [
+            "Cycles Per Beat",
+            "未採逐張拍數時，一拍完成幾次完整循環。"
+          ],
+          [
+            "Ping Pong",
+            "正播後倒播，不重複端點圖片；適合擺動，不適合每種攻擊。"
+          ],
+          [
+            "Phase Offset",
+            "整組相對節拍的相位偏移；改它不是改歌曲 BPM。"
+          ],
+          [
+            "Use Drunk Idle",
+            "目前普通 Idle 為主要方向；關閉時優先使用 Opening Idle 作平常待機，有缺漏才回舊 Idle。"
+          ]
+        ]
+      },
+      {
+        "h": "檢查",
+        "p": [
+          "先看兩個完整循環，再測試攻擊結束是否回到正確 Idle。不要只看 Prefab 第一張 Sprite 判斷執行時 Idle。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "09｜逐張動畫、特效與傷害",
+    "sections": [
+      {
+        "h": "動畫類別",
+        "p": [
+          "Normal、TeamSkill、GetHurt、Die、Opening Idle、Drink、Aim 為主要分類。某些舊 Light / Heavy 類別仍存在，不代表目前普通輸入會依序使用它們。新增 Die 圖片也不保證現有死亡清除流程會等待整組播完。"
+        ]
+      },
+      {
+        "h": "每張圖片的設定",
+        "rows": [
+          [
+            "項目",
+            "如何設定"
+          ],
+          [
+            "Sprite / Duration Beats",
+            "同張圖的內容與持續拍數；0.5 半拍，3 張一拍可填 0.33 / 0.33 / 0.34。"
+          ],
+          [
+            "Play Attack Effect",
+            "生成角色原本設定的普通／技能特效；在目前 TeamSkill 也是效果結算時機。"
+          ],
+          [
+            "Play Warning",
+            "可多張勾選；共用 Warning Effect 必須有 Prefab 與可用音效路徑。"
+          ],
+          [
+            "Effects 清單",
+            "同一圖片可生成多個額外效果；與 Play Attack Effect 可以並存。"
+          ],
+          [
+            "Use Frame Beat Durations",
+            "開啟逐張拍數；關閉改用 FPS，節拍動畫製作不建議混用。"
+          ]
+        ]
+      },
+      {
+        "h": "不同傷害來源不能混淆",
+        "p": [
+          "普通近戰由成功判定流程決定傷害，不是任意新增一個粒子就會扣血；指定飛行普通攻擊會在投射物抵達時處理命中。TeamSkill 使用第一個有效攻擊特效圖片觸發技能；敵人勾 Enemy Attack Uses Effect Frames 時，每個攻擊特效圖片可排一段傷害。",
+          "舊 damageFrame 序列化資料仍保留作相容用途，不要拿它當本版編輯傷害時機的主要入口。只把攻擊 VFX 加進 Effects 清單，不等於勾了攻擊事件。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "10｜敵人攻擊與多段警告",
+    "sections": [
+      {
+        "h": "三種哥布林共同規則",
+        "p": [
+          "三隻各自按 Attack Interval Beats 排程，不再限制只有首位能攻擊。測試時至少放兩隻同類敵人確認。敵人攻擊仍鎖定玩家前衛表現，傷害扣全隊共用資源。",
+          "Attack Power 是每次命中傷害；Enemy Attack Uses Effect Frames 開啟時，Normal 動畫每個攻擊特效圖片都可成為一段。例如兩段各 1 HP，不是把 1 HP 平分成兩次。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "欄位",
+            "調整方式"
+          ],
+          [
+            "Attack Interval Beats",
+            "每次開始攻擊的節拍間隔。太短而動畫仍忙碌時，不應假設可以無限重疊攻擊。"
+          ],
+          [
+            "Enemy Attack Uses Effect Frames",
+            "多段攻擊優先用此模式，圖片事件對應攻擊時機。"
+          ],
+          [
+            "Attack Windup Beats",
+            "未用圖片事件時，開始動畫至命中的整拍等待。"
+          ],
+          [
+            "Attack Interruptible",
+            "目前前搖／行為可否中斷；待機不算成功中斷。"
+          ],
+          [
+            "Crowd Control Immune",
+            "免疫中斷與暈眩，不免疫一般傷害。"
+          ]
+        ]
+      },
+      {
+        "h": "Killer 警告設定實例",
+        "p": [
+          "最新已儲存 Killer Override 為第 1、3 張 Play Warning；第 4、6 張已關閉。這是後續美術調整後的現值，與先前修復驗證的第 4、6 張不同。正式調整以 Inspector 當下值為準，不依舊聊天紀錄。",
+          "共同 Warning Effect 指向 WarningEffectPixel；Sound Event Path 是 event:/ZooGoblinFight/SoundEffects/Warning。只勾選而共用效果留空，就沒有完整的正式警告特效／音效。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "10｜製作一隻新的敵人",
+    "sections": [
+      {
+        "h": "建議流程",
+        "p": [
+          "1. 複製最接近行為的 ArtBattle 哥布林 Prefab，改名稱、Character Id、Display Name、Team = Enemy。保留正確角色元件，不複製場景執行時角色。",
+          "2. 設 Max Hp、Attack Power、Attack Interval Beats；先用單一傷害段完成可玩測試。",
+          "3. 在 Normal 動畫換圖片並設定每張拍數；需要多段攻擊則開 Enemy Attack Uses Effect Frames。警告圖片要早於相應命中，給玩家聽覺與視覺準備時間。",
+          "4. 設 Normal Ability Effect Prefab 與其 OnHit；檢查 Cast / Impact / Head / Foot 掛點。",
+          "5. 在測試 Stage 放一隻，確認警告、聲音、傷害；再放兩至三隻，確認各自出招、格擋、暈眩與死亡後不殘留攻擊。"
+        ]
+      },
+      {
+        "h": "不要盲目重跑設定工具",
+        "p": [
+          "Rhythm Hunter 下有 Configure / Migrate 類作者工具，也有 Validate 類工具。Configure 可能覆寫 Prefab、場景或作者欄位；你已手調圖片時不要當成一般播放按鈕。",
+          "舊 Validate Killer And Giant 等工具可能使用開發當時的固定動畫拍數。若你已改企劃，先讀錯誤訊息與工具預期，不要為了讓舊測試通過而把新美術設定改回。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "11｜戰鬥 VFX 生成清單",
+    "sections": [
+      {
+        "h": "三個不同層級",
+        "rows": [
+          [
+            "入口",
+            "適合用途"
+          ],
+          [
+            "角色 Definition 的 Normal Ability Effect Prefab",
+            "這名角色每次普通攻擊的主要效果，例如 SwordSlash_Pixel 或 BleedBullet。"
+          ],
+          [
+            "角色 Definition 的 Skill Effect Prefab",
+            "主要技能效果或某些效果的備援。TeamSkill 要搭配攻擊事件。"
+          ],
+          [
+            "動畫圖片 Effects 清單",
+            "施放前蓄力、角色附近效果、額外裝飾；一張可多筆。"
+          ],
+          [
+            "FightEffectSettings > On Hit Prefab",
+            "已確認直接命中後，在受擊目標 Impact Anchor 生成一次效果。"
+          ],
+          [
+            "Wave Armor Recovery Effect",
+            "清波補甲效果，場景控制器設定，不屬於任何一名角色的普通攻擊。"
+          ]
+        ]
+      },
+      {
+        "h": "Effects 每筆怎麼填",
+        "p": [
+          "Prefab 必填。Location 選 Self 或 Attack Target；Self Anchor 空白時用角色 CastEffectAnchor。Position Offset、Rotation Offset 用於微調；Follow Anchor 決定生成後跟隨掛點。",
+          "Limit Lifetime 關閉時交給效果自身管理，但 Wave／戰鬥清理仍會處理；開啟後 Lifetime Seconds 以秒計，不是拍。若效果自己播完就消失，不必再硬設短秒數截掉尾巴。",
+          "Sound Event Path 留空不播聲；Sound Volume 0 也聽不到。幀特效是特效生成入口，不應只放聲音卻把 Prefab 留空。聲音最後走場景共用 FightAudioPlayer。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "11｜投射物、方向與生命週期",
+    "sections": [
+      {
+        "h": "BleedBullet 與 OnHit",
+        "p": [
+          "在骷髏射手 Normal Ability Effect Prefab 指向 BleedBullet，子彈的 FightEffectSettings 開 Fly To Target；Flight Beats 控制飛行拍數，Forward Spawn Distance 控制出生於施放者前方距離。",
+          "On Hit Prefab 指向 OnHitPixelVFX(Red) 等效果，命中後才播放；不要把 OnHit 當子彈固定子物件，否則可能出現在出生點或重複播。普通與 TeamSkill 投射物欄位不同，法師／炸彈仍使用角色 Qte Projectile 欄位的共用拋物線實作。"
+        ]
+      },
+      {
+        "h": "2.5D 朝向",
+        "p": [
+          "Art2EffectPresentation 讓支援的平面 Sprite / 粒子朝目前 Art2 Camera，保留圖面內旋轉。想分別旋轉 Claw 的粒子群組，調每個 Particle System 的 Main > Start Rotation；Renderer 面向 View 時只轉 Transform 不一定如預期。",
+          "左右鏡像應檢查 Particle System Renderer 的 Flip X 或貼圖／材質 UV 設定；旋轉 180 度會連上下方向一起轉，通常不是想要的水平翻轉。",
+          "Keep Above Ground 依可見 Renderer Bounds 提升特效。若感覺太高，先看透明邊界與 Spawn Anchor，再小幅降低 Ground Clearance，不要把整個人物往下壓。"
+        ]
+      },
+      {
+        "h": "消失與效能",
+        "p": [
+          "Destroy After Particles 等待所有子粒子完成後走戰鬥清理。一次性效果需關掉 Loop，並檢查子系統；否則一個永遠 Loop 的子粒子會讓效果留住。",
+          "StatusIcons 與 DamageNumber 已有池；不能因此假設所有一般 VFX 都是 ObjectPool。大量新增效果前，先看重複頻率、子粒子上限與生命周期。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "11｜三個可直接照做的 VFX 範例",
+    "sections": [
+      {
+        "h": "A. TeamSkill 第一張蓄力，最後一張攻擊",
+        "p": [
+          "在角色 TeamSkill 第一張圖片 Effects 新增 ChargeEffect，Location = Self，指定 Cast Anchor；依效果是否自己結束選 Limit Lifetime。最後出手圖片仍勾 Play Attack Effect，保留原技能攻擊特效與結算。",
+          "不要只把原本 Play Attack Effect 取消再改成普通 Effects 清單。額外蓄力與正式命中是兩個事件。"
+        ]
+      },
+      {
+        "h": "B. 哥布林雙段抓擊與雙警告",
+        "p": [
+          "先在 Normal 動畫排好圖片與拍數。兩個警告位置都勾 Play Warning，設定共同 WarningEffectPixel 和 Warning 音效。兩個命中位置勾 Play Attack Effect，並啟用 Enemy Attack Uses Effect Frames。",
+          "Normal Ability Effect Prefab 指向 ClawSlash_Pixel；其 On Hit Prefab 指向受傷火花。格擋時應有 BlockedEffect 而不是假命中火花。中斷成功後檢查第二段不再扣血。"
+        ]
+      },
+      {
+        "h": "C. 法師護罩保護玩家前衛",
+        "p": [
+          "法師普通能力為 Guard，主要護罩由普通技能效果欄位提供。現有格擋流程會把護罩放到前衛的 Cast Anchor，而非要求法師站前衛。想調全隊位置不要把盾放在法師身上補位。",
+          "如果用通用圖片 Effects 清單，Self 指施放者、Attack Target 是該動作提供的目標，沒有獨立「任何友軍位置」選單。不能假設每個動畫事件都會自行找到前衛；特殊友軍選擇擴充仍需程式。"
+        ]
+      },
+      {
+        "h": "完成後驗收",
+        "p": [
+          "用原速與 TeamSkill 連按各測一次。確認特效沒有重複出生、音效沒有因同張圖被重播而無限堆積、尾巴會結束、換波與 Restart 後沒有殘留。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "12｜玩家 UI 與開發資訊開關",
+    "sections": [
+      {
+        "h": "主要入口",
+        "p": [
+          "FightDemoController > FightScenePresenter 管顯示；右上愛心／護甲的美術由 Party Resource Hud Prefab 管。Play 後看 PlayerUI 群組即可找到玩家用節拍器與資源顯示。"
+        ]
+      },
+      {
+        "rows": [
+          [
+            "欄位",
+            "影響範圍"
+          ],
+          [
+            "Show Developer Ui",
+            "開發者群組；不應拿它關閉玩家節拍器。"
+          ],
+          [
+            "Show Enemy Health Ui",
+            "敵人舊血條。"
+          ],
+          [
+            "Show Enemy Status Ui",
+            "敵人舊狀態文字，不是頭上的 Weak / Bleed 圖示。"
+          ],
+          [
+            "Show Team Skill Gauge",
+            "舊累積條；不等於石頭填充。"
+          ],
+          [
+            "Show Defense Hud",
+            "舊防禦資訊。"
+          ],
+          [
+            "Show Formation Lock Status",
+            "編隊鎖定提示。"
+          ],
+          [
+            "Show Visibility Buttons",
+            "測試用顯示開關按鈕本身。"
+          ],
+          [
+            "Show Enemy Damage Numbers",
+            "CombatController 上，控制傷害數字生成。"
+          ],
+          [
+            "Show Status Icons",
+            "CombatController 上，控制正式狀態圖示。"
+          ]
+        ]
+      },
+      {
+        "h": "地面角色資訊",
+        "p": [
+          "名稱、職業、血量等舊標籤在各 Slot 的 UnitName、RoleAndInput、Stats 與 HealthBackground 等子物件。若要恢復，先確認 Presenter 或 Art2ActorPresentation 是否再次控制其顯示／面向，避免只啟用一個子物件卻被流程關回。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "12｜愛心、護甲與節拍器美術",
+    "sections": [
+      {
+        "h": "右上資源 HUD",
+        "p": [
+          "搜尋 FightPartyResourceHud Prefab（由 Presenter 的 Party Resource Hud Prefab 引用）。Hp Empty / Hp Full、Armor Empty / Armor Full 分別是底與填圖。Icon Size、Icon Gap、Row Gap 控制尺寸與間距；數值自動接全隊資源。",
+          "每顆 0 至 1，支援半顆；靠右對齊，由右側填充。Beat Bounce Enabled、Bounce Height、Bounce Duration Beats 控制跳動。HP 與 DEF 按右對齊索引同步，例如 HP 四顆、DEF 兩顆時，後兩步共同跳動。"
+        ]
+      },
+      {
+        "h": "節拍器",
+        "rows": [
+          [
+            "欄位",
+            "用途與目前方向"
+          ],
+          [
+            "Timeline Scale / Bottom Offset",
+            "整體尺寸 / 底部距離；目前 1.9 / 150。"
+          ],
+          [
+            "Timeline Width / Preview Beats",
+            "軌道寬度 / 預覽拍數；目前 840 / 5。"
+          ],
+          [
+            "Show Timeline Bar",
+            "bar(5 ver) 底圖，目前關閉；拍點與石頭可以繼續顯示。"
+          ],
+          [
+            "Stone Empty / Fill / Ready Frames",
+            "底圖、由下向上 MP 填充、滿量循環圖片。"
+          ],
+          [
+            "Stone Bounce Amount / Beats",
+            "成功時快速放大縮小；失敗不觸發。"
+          ],
+          [
+            "Stone Success Effect Prefab",
+            "目前 BlueExplosion_UI；在石頭後方顯示。"
+          ],
+          [
+            "Remove Accepted Beat Points",
+            "成功輸入移除該拍點。"
+          ],
+          [
+            "Beat Point Hit Effect Prefab",
+            "拍點消失位置的額外效果，與石頭效果不同，目前預留。"
+          ]
+        ]
+      },
+      {
+        "h": "不要直接縮放 Play 物件",
+        "p": [
+          "EqualBeatTimeline 是執行時結果，永久尺寸寫回 Presenter。移動目前維持等速，不使用曾測試過的逐錨點加速版本。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "12｜狀態圖示與受傷邊緣",
+    "sections": [
+      {
+        "h": "頭頂 StatusIcons",
+        "p": [
+          "Prefabs 的狀態圖示分類中有 BlockedEffect、WeakEffect、BleedEffect、DeathEffect。由池重用，生成位置依角色 HeadAnchor、全域 Status Icon Offset 與 Camera 方向計算。",
+          "Weak 持續存在直到下一次有效傷害消耗；Bleed 存在時每次傷害觸發放大縮小；Blocked 每次格擋成功右彈淡出；Death 在死亡時左彈淡出。單純設定粒子 Loop 不會代替狀態程式的解除。"
+        ]
+      },
+      {
+        "h": "調整步驟",
+        "p": [
+          "只一名角色偏高，改該角色 HeadAnchor；全體偏高，改 CombatController 的 Status Icon Offset。圖示大小、觸發縮放、彈跳距離與持續秒數在 FightStatusIcon Prefab 元件。死亡方向要保留負的水平彈出距離。"
+        ]
+      },
+      {
+        "h": "全螢幕傷害提示",
+        "rows": [
+          [
+            "欄位／顏色",
+            "行為"
+          ],
+          [
+            "Show Damage Flash",
+            "未格擋的實際傷害才閃；護甲承受淡藍，HP 承受鮮紅。"
+          ],
+          [
+            "Show Low Health Pulse",
+            "HP 大於 0 且不超過 Low Health Threshold 持續淡紅脈動。"
+          ],
+          [
+            "Hit Flash Seconds",
+            "一次受傷淡出秒數，目前 0.45。"
+          ],
+          [
+            "Edge Width",
+            "邊緣厚度比例；目前儲存值 0.051，太薄時容易感覺不明顯。"
+          ],
+          [
+            "Low Health Pulse Beats",
+            "低血量呼吸週期，以拍計，目前 2。"
+          ]
+        ]
+      },
+      {
+        "p": [
+          "提示由 PlayerDamageEdgeCanvas 的全螢幕 Graphic 繪製；中心透明且不擋輸入。若完全看不到，先確認真的扣到護甲或 HP，而不是成功格擋、過場無敵或已結算。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "13｜音樂與判定調整",
+    "sections": [
+      {
+        "h": "唯一節拍來源",
+        "p": [
+          "FmodBeatClock 提供歌曲節拍，FmodRhythmJudge 判定輸入，場景動畫與戰鬥沿用此時鐘。BPM 不是在每個角色自行填一個值就能改歌曲節拍；Fallback BPM 主要是無可用時鐘時的備援。",
+          "當 Planner 有有效 Stage 時，以 Stage.Music Event Path 為歌曲來源。若只改 BeatClock 的路徑，進場會再被 Stage 設定。Music Volume 與 Music Pitch 則在時鐘上調整，改 Pitch 也會改播放速度。"
+        ]
+      },
+      {
+        "h": "目前判定",
+        "p": [
+          "Art2 的 Perfect Window Ms = 120，Judgement Offset Ms = 0；Duplicate Perfect Becomes Miss = true。這是場景儲存值，個人延遲另由輸入裝置校正資料套用。",
+          "普通成功拍點為共享判定，重複輸入不提供額外 MP；射手下一拍改按其他角色會中斷連續瞄準。TeamSkill 另用半拍窗口處理，不靠放寬普通判定讓亂按全部成功。"
+        ]
+      },
+      {
+        "h": "兩種 BeatTapping 不同",
+        "rows": [
+          [
+            "入口",
+            "發聲時機"
+          ],
+          [
+            "FmodBeatClock > Enable Beat Tapping",
+            "音樂節拍到達時自動播放，方便聽歌曲與拍點是否一致。"
+          ],
+          [
+            "FightCombatController > Enable Successful Input Sound",
+            "玩家普通能力節拍輸入成功時播放；Miss 不播。"
+          ]
+        ]
+      },
+      {
+        "p": [
+          "Music Start Delay Seconds 同名欄位有不同流程來源：目前自動開場主要由 CombatController 控制，值為 0；BeatClock 上仍有自己的自動播放延遲欄位，不能只改那個期待開場改變。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "13｜校正 Save 與歌曲漂移",
+    "sections": [
+      {
+        "h": "校正操作",
+        "p": [
+          "保持同一副耳機、輸出裝置與輸入裝置，開啟獨立 FightCalibrationScene。Art2 目前建立的是暫停面板，沒有掛入校正面板；不要把 F8 當成 Art2 校正入口。依音樂自然按普通角色鍵，一拍一次。先暖身 4 次，再收集 32 次。",
+          "可靠條件包含至少 24 個一致樣本、Spread 不超過 30 ms、Drift 絕對值不超過 30 ms，且偏移在允許範圍。Save 灰色時讀畫面 SAVE blocked 原因；不可靠會持續更新最近 32 個樣本，不用強制改程式繞過。",
+          "Preview 先試補償，Save 才保存。關閉未保存的預覽會還原；鍵盤與手把分別保存。切出 Game 視窗、超過 5 秒未敲擊會重啟收樣準備。"
+        ]
+      },
+      {
+        "h": "怎樣分辨原音檔問題",
+        "rows": [
+          [
+            "現象",
+            "先做的檢查"
+          ],
+          [
+            "整首差不多固定早／晚",
+            "查看個人延遲、音訊裝置與 Judgement Offset；以穩定段落校正。"
+          ],
+          [
+            "越到後段越偏",
+            "用自動 BeatTapping 比對歌曲不同時間點；固定 offset 不能修累積 BPM 誤差。"
+          ],
+          [
+            "只有某一段忽快忽慢",
+            "標記歌曲秒數與拍點；檢查原音檔／FMOD 節拍編排，不要全局放寬窗口掩蓋。"
+          ],
+          [
+            "Save 一直不能按",
+            "先看 Spread / Drift，確認不是亂按、重複拍、失焦或裝置切換。"
+          ]
+        ]
+      },
+      {
+        "h": "備份",
+        "p": [
+          "rhythm-calibration.json 在 Application.persistentDataPath，舊 PlayerPrefs 仍保留相容資料。若檔案格式錯誤，系統保留檔案並顯示保存錯誤；先備份再排查，別直接刪掉唯一校正結果。獨立校正場景目前 Battle Scene Name = FightScene3，與 Art2 不同。要回 Art2，保存校正後停止 Play 並手動開 Art2；若要改轉場目標，另在校正場景指定 Art2_FightScene 並確認 Build 清單。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "14｜日常工作驗收清單",
+    "sections": [
+      {
+        "h": "美術與動畫更新後",
+        "p": [
+          "1. 新圖片 Single / Full Rect、Point、PPU 與 Pivot 正確；沒有把正式切圖資源誤改成單張。",
+          "2. 開場 Idle、喝酒、普通攻擊、TeamSkill 各播一輪；攻擊後回 Idle，未出現舊巨大角色第一幀。",
+          "3. 攻擊圖的特效事件正確，Warning 有特效與音效；所有一次性 VFX 自行結束。",
+          "4. 透視下左右兩端角色腳底、HeadAnchor、投射物與 OnHit 都沒有沉地或飄太高。"
+        ]
+      },
+      {
+        "h": "關卡與能力更新後",
+        "p": [
+          "1. 至少兩隻敵人同場，兩者都能獨立攻擊；多段行為可被預期的控制取消未發段。",
+          "2. 格擋不扣血、不跳受傷邊緣；護甲與 HP 受擊顏色不同。低血量顯示與結算關閉正常。",
+          "3. Wave 清空回滿甲、等待、下一波滑入；過場普通輸入可成功，但不傷害敵人，A 不啟動技能。",
+          "4. TeamSkill 16 拍、半拍輸入、最後敵人保留受擊、結束後正常換波。",
+          "5. Restart 一次後再打到結算，檢查 Console 沒有新增紅字、重複音效或事件。"
+        ]
+      },
+      {
+        "h": "記錄證據",
+        "p": [
+          "每次記錄測試 Stage、隊伍、歌曲、改動資源、操作順序與實際結果。畫面問題可留 Game 截圖；時機問題留短影片與音訊，單張圖片無法證明拍點正確。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "14｜常見問題排查",
+    "sections": [
+      {
+        "rows": [
+          [
+            "問題",
+            "由近到遠檢查"
+          ],
+          [
+            "Killer 沒警告／音效",
+            "圖片 Play Warning → 共用 Warning Effect Prefab → Sound Event Path / Volume → FightAudioPlayer Sound Enabled → 敵人是否暫停。"
+          ],
+          [
+            "技能有動畫沒傷害",
+            "角色能力類型 → TeamSkill 的 Play Attack Effect 圖片 → 有效目標 → 過場無敵 → Console。"
+          ],
+          [
+            "子彈沒 OnHit",
+            "主要特效 FightEffectSettings.OnHitPrefab → 是否真命中造成直接傷害 → 受擊者 Impact Anchor → 效果生命週期。"
+          ],
+          [
+            "VFX 太高／沉地",
+            "Spawn / Impact 掛點 → 原圖透明邊界 → Art2EffectPresentation Ground Clearance → 子粒子 Local Offset。"
+          ],
+          [
+            "旋轉 Transform 沒用",
+            "Renderer 是否 View Billboard → 個別粒子 Main.Start Rotation → 是否有腳本每幀重設朝向。"
+          ],
+          [
+            "UI 看不到",
+            "是否 Play 才生成 → Presenter 對應開關 → PlayerUI 父 Canvas → Scale / Anchors → 遮蓋排序。"
+          ],
+          [
+            "模糊不影響火焰",
+            "Additional Roots / Emphasized Roots → 使用支援的 TorchFocus 材質 → 位於牆後側 → Blur Pixels。"
+          ],
+          [
+            "第二隻敵人不打",
+            "Stage 是否生成正確 Prefab → Attack Interval → 是否仍入場／暈眩／TeamSkill → 動畫事件 → 個別敵人 Console。"
+          ],
+          [
+            "陰影與腳偏離",
+            "FootAnchor → Ground Height → 單角色情況還是全體 → Bias / Normal Bias → 接觸影 Offset。"
+          ],
+          [
+            "換波內容不對",
+            "Planner Chapter / Stage Index → Stage.Waves，避免只改 Roster 備援清單。"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "title": "維護附錄｜待補內容與舊功能",
+    "sections": [
+      {
+        "h": "已存在欄位，仍待美術或企劃決定",
+        "rows": [
+          [
+            "項目",
+            "目前可做／尚缺"
+          ],
+          [
+            "清波補甲 VFX",
+            "Wave Armor Recovery Effect 尚未指定；補上後需測試實際補甲與最後一波。"
+          ],
+          [
+            "拍點消失 VFX",
+            "Beat Point Hit Effect Prefab 尚空；石頭成功 BlueExplosion_UI 已是另一個入口。"
+          ],
+          [
+            "分裂體引爆效果",
+            "Fragment Explosion Effect Prefab 可獨立設定；空白會使用施放者既有技能效果備援。"
+          ],
+          [
+            "暈眩專屬 Icon",
+            "現有四類圖示不包含完整獨立 Stun 圖示流程；新增 Prefab 本身不足以自動接入。"
+          ],
+          [
+            "角色受傷／死亡動畫",
+            "動畫分類存在；要確認各角色有素材與呼叫流程。敵人死亡移除、DeathEffect 不等於完整 Die 動畫等待。"
+          ],
+          [
+            "關卡超時懲罰",
+            "只有歌曲長度與超時統計，尚未實作懲罰規則。"
+          ],
+          [
+            "正式勝敗美術／掉落",
+            "目前為功能性面板；經驗、道具吸取與持久進度不是已完成系統。"
+          ]
+        ]
+      },
+      {
+        "h": "保留但不作目前調整入口",
+        "p": [
+          "舊圓環 QTE 與三次 QTE 規則已被 16 拍 Burst 取代；但含 Qte 名稱的投射物欄位仍被新版使用，不能整批刪除。",
+          "TeamUltimate、舊第四拍模式、早期 EnergySurge / FormationBreaker 行為仍可見於程式。現有開關或列舉不等於企劃已啟用。角色被動目前關閉，補甲功能可設 FixedAmount / Full，但被動關閉時一般角色額外補甲會被抑制，RestoreArmor 能力仍可使用；不能混為每拍自然恢復。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "維護附錄｜工具、Build 與交接",
+    "sections": [
+      {
+        "h": "工具使用原則",
+        "p": [
+          "Frame Scene Preview 用於 Scene 預覽。Validate 類工具以錯誤訊息輔助診斷；Configure / Migrate / Bind 類工具可能直接保存資源，執行前先保存與備份。舊驗證工具有舊數值假設，尤其早期技能與 QTE。",
+          "Console 紅字先雙擊第一個相關錯誤，記錄完整堆疊。編輯中或 Play 熱重載造成的錯誤，要停止 Play、等待編譯完，再重新進入測試才能分辨是否持續。"
+        ]
+      },
+      {
+        "h": "Build 設定",
+        "p": [
+          "Build Profiles 的啟用 Scene 清單是正式啟動入口。只加入你要測試的場景，不把所有舊實驗場景都勾上。若使用獨立校正場景轉場，該腳本指定的戰鬥場景也必須可載入。",
+          "啟動順序、FMOD Bank 是否可用、音訊裝置與校正檔案要在 Build 另測一次；Editor 能播放不代表成品機器的本機設定相同。不要為了 Build 清理把正式素材或 .meta 當成 Cache。",
+          "本次檔案核對：ProjectSettings/EditorBuildSettings.asset 的共用清單啟用 Main_FightScene、FightCalibrationScene、Art_FightScene、Single_FightScene，未列 Art2_FightScene。若目前 Build Profile 沒有自己的覆寫清單，Art2 成品與 Restart 會需要先加入 Art2。這裡只記錄差異，未修改你的 Build 設定。"
+        ]
+      },
+      {
+        "h": "下一位開發者需要什麼",
+        "p": [
+          "提供本手冊、當前 Git 提交、使用的 Unity 版本與重現步驟。若問題依賴校正，另外附 rhythm-calibration.json 備份與裝置名稱。",
+          "本次文件不更動戰鬥系統，也不替你重設主光、場景、角色或判定。更新文件時先核對現值，再改章節；不要把每次對話的過渡方案全當現行規格。"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "維護附錄｜檔案路徑速查",
+    "lead": "以下路徑皆相對專案根 D:/Project2/RhythmHunter；Project 搜尋檔名後可直接定位。保留同名 .meta，不要只複製內容而丟失參照。",
+    "sections": [
+      {
+        "rows": [
+          [
+            "用途",
+            "資源位置"
+          ],
+          [
+            "Art2 場景",
+            "Assets/FightDemo/Scenes/Art2_FightScene.unity"
+          ],
+          [
+            "洞穴環境",
+            "Assets/FightDemo/Prefabs/ArtBattle/CaveEnvironment_2_5D.prefab"
+          ],
+          [
+            "三名勇者",
+            "Assets/FightDemo/Prefabs/ArtBattle/LongswordWarrior.prefab\nAssets/FightDemo/Prefabs/ArtBattle/Mage.prefab\nAssets/FightDemo/Prefabs/ArtBattle/Skeleton.prefab"
+          ],
+          [
+            "三種敵人",
+            "Assets/FightDemo/Prefabs/ArtBattle/Goblin_Normal.prefab\nGoblin_Killer.prefab / Goblin_Giant.prefab（同資料夾）"
+          ],
+          [
+            "共用角色視覺",
+            "Assets/FightDemo/Prefabs/ArtBattle/VisualPrefab/"
+          ],
+          [
+            "愛心與護甲",
+            "Assets/FightDemo/Prefabs/UI/PartyResourceHud.prefab"
+          ],
+          [
+            "狀態圖示",
+            "Assets/FightDemo/Prefabs/StatusIcons/"
+          ],
+          [
+            "史萊姆與炸彈",
+            "Assets/FightDemo/Prefabs/TeamSkill/SmallSlime.prefab\nFloorSlime.prefab / Bomb.prefab（同資料夾）"
+          ],
+          [
+            "戰鬥與 UI VFX",
+            "Assets/FightDemo/Prefabs/VFX/\nAssets/FightDemo/Prefabs/VFX/UI/"
+          ],
+          [
+            "關卡資料",
+            "Assets/FightDemo/Levels/Chapter01.asset\nStage01.asset / Stage02.asset（同資料夾）"
+          ],
+          [
+            "Camera / 光影 / 材質",
+            "Assets/FightDemo/Art2Prototype/"
+          ],
+          [
+            "按鍵綁定",
+            "Assets/InputActionMap/FightControl.inputactions"
+          ]
+        ]
+      },
+      {
+        "p": [
+          "腳本以元件名稱搜尋；附錄 C 列出場景直接元件的完整路徑。普通角色動畫與陰影設定在 Prefab 內，不會全部列在場景元件表。"
+        ]
+      }
+    ]
+  }
+]

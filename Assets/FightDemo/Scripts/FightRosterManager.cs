@@ -44,6 +44,11 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Optional waves after the initial Enemy Prefabs. Hero formation stays locked.")]
         [SerializeField] private EnemyWave[] additionalWaves = Array.Empty<EnemyWave>();
         private FightCharacterDefinition[][] stageWaves;
+        private FightEnemyPressureSettings[] stagePressure;
+        // Return a copy so Inspector/asset edits cannot mutate the active battle snapshot.
+        public FightEnemyPressureSettings GetWavePressureSettings(int zeroBasedWave) =>
+            stagePressure != null && zeroBasedWave >= 0 && zeroBasedWave < stagePressure.Length
+                ? stagePressure[zeroBasedWave].Copy() : new FightEnemyPressureSettings();
         public int WaveCount => stageWaves != null ? stageWaves.Length : 1 + (additionalWaves?.Length ?? 0);
 
         public bool TryConfigureStage(FightStageDefinition stage, out string error)
@@ -59,12 +64,15 @@ namespace RhythmHunter.FightDemo
             int[] order = { 0, 1, 2 };
             Array.Sort(order, (a, b) => enemySpawnSlots[b].SlotIndex.CompareTo(enemySpawnSlots[a].SlotIndex));
             var snapshot = new FightCharacterDefinition[stage.Waves.Count][];
+            var pressureSnapshot = new FightEnemyPressureSettings[stage.Waves.Count];
             for (int w = 0; w < snapshot.Length; w++)
             {
                 snapshot[w] = new FightCharacterDefinition[3];
+                pressureSnapshot[w] = stage.Waves[w].pressure?.Copy() ?? new FightEnemyPressureSettings();
                 for (int p = 0; p < 3; p++) snapshot[w][order[p]] = stage.Waves[w].At(p);
             }
             stageWaves = snapshot; // Do not mutate shared assets or re-read edits mid-battle.
+            stagePressure = pressureSnapshot;
             enemyPrefabs = (FightCharacterDefinition[])snapshot[0].Clone();
             error = null; return true;
         }

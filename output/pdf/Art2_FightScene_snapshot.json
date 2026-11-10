@@ -1,0 +1,208 @@
+{
+  "commit": "a7aad261",
+  "scene": "Assets/FightDemo/Scenes/Art2_FightScene.unity",
+  "components": {
+    "FightUnitSlot": [
+      {
+        "object": "EnemySlot_Front",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 928597}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot\n  slotId: EnemySlot_GoblinShield\n  displayName: GOBLIN SHIELD\n  team: 0\n  role: 0\n  slotIndex: 2\n  maxHp: 90\n  normalAbilityBehavior: 0\n  normalAbilityPower: 1\n  attackPower: 14\n  skillPower: 30\n  skillBehavior: 0\n  attackIntervalBeats: 4\n  maxMana: 4\n  currentMana: 0\n  actorPrefab: {fileID: 7851057040622904946, guid: f6f5612f6468ef340a4e2d9422b3fbb2, type: 3}\n  normalAttackEffectPrefab: {fileID: 0}\n  skillEffectPrefab: {fileID: 0}\n  actorRoot: {fileID: 986243845}\n  normalAttackEffectSpawnPoint: {fileID: 819669274}\n  actorLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLifetime: 0.45\n  placeholderVisual: {fileID: 0}\n  fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}\n  accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}\n  effectPlayer: {fileID: 0}\n  hpBackground: {fileID: 1681309267}\n  hpFill: {fileID: 403897600}\n  hpLabel: {fileID: 267799631}\n  roleLabel: {fileID: 42493753}\n  onBeatJumpHeight: 0.22\n  onBeatJumpDuration: 0.18\n  missShakeStrength: 0.12\n  missShakeDuration: 0.16\n  missShakeFrequency: 60\n",
+        "fileid": "928599"
+      },
+      {
+        "object": "HeroSlot_Middle",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 287245176}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot\n  slotId: HeroSlot_Bard\n  displayName: BARD\n  team: 1\n  role: 2\n  slotIndex: 1\n  maxHp: 85\n  normalAbilityBehavior: 0\n  normalAbilityPower: 1\n  attackPower: 8\n  skillPower: 30\n  skillBehavior: 0\n  attackIntervalBeats: 4\n  maxMana: 4\n  currentMana: 0\n  actorPrefab: {fileID: 8843689267317842871, guid: f532149af4baaa348ae1bad00f844542, type: 3}\n  normalAttackEffectPrefab: {fileID: 0}\n  skillEffectPrefab: {fileID: 0}\n  actorRoot: {fileID: 213200706}\n  normalAttackEffectSpawnPoint: {fileID: 184254596}\n  actorLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLifetime: 0.45\n  placeholderVisual: {fileID: 0}\n  fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}\n  accentColor: {r: 0.2, g: 0.78, b: 0.48, a: 1}\n  effectPlayer: {fileID: 0}\n  hpBackground: {fileID: 81267975}\n  hpFill: {fileID: 510067692}\n  hpLabel: {fileID: 1252487855}\n  roleLabel: {fileID: 1567002023}\n  onBeatJumpHeight: 0.22\n  onBeatJumpDuration: 0.18\n  missShakeStrength: 0.12\n  missShakeDuration: 0.16\n  missShakeFrequency: 60\n",
+        "fileid": "287245178"
+      },
+      {
+        "object": "EnemySlot_Rear",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 581508851}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot\n  slotId: EnemySlot_GoblinMage\n  displayName: GOBLIN MAGE\n  team: 0\n  role: 0\n  slotIndex: 0\n  maxHp: 80\n  normalAbilityBehavior: 0\n  normalAbilityPower: 1\n  attackPower: 12\n  skillPower: 30\n  skillBehavior: 0\n  attackIntervalBeats: 4\n  maxMana: 4\n  currentMana: 0\n  actorPrefab: {fileID: 0}\n  normalAttackEffectPrefab: {fileID: 0}\n  skillEffectPrefab: {fileID: 0}\n  actorRoot: {fileID: 221509334}\n  normalAttackEffectSpawnPoint: {fileID: 547510897}\n  actorLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLifetime: 0.45\n  placeholderVisual: {fileID: 0}\n  fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}\n  accentColor: {r: 0.55, g: 0.16, b: 0.2, a: 1}\n  effectPlayer: {fileID: 0}\n  hpBackground: {fileID: 1144997886}\n  hpFill: {fileID: 1668408736}\n  hpLabel: {fileID: 517797252}\n  roleLabel: {fileID: 899324079}\n  onBeatJumpHeight: 0.22\n  onBeatJumpDuration: 0.18\n  missShakeStrength: 0.12\n  missShakeDuration: 0.16\n  missShakeFrequency: 60\n",
+        "fileid": "581508853"
+      },
+      {
+        "object": "EnemySlot_Middle",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 616141043}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot\n  slotId: EnemySlot_GoblinMercenary\n  displayName: GOBLIN MERCENARY\n  team: 0\n  role: 0\n  slotIndex: 1\n  maxHp: 120\n  normalAbilityBehavior: 0\n  normalAbilityPower: 1\n  attackPower: 18\n  skillPower: 30\n  skillBehavior: 0\n  attackIntervalBeats: 4\n  maxMana: 4\n  currentMana: 0\n  actorPrefab: {fileID: 0}\n  normalAttackEffectPrefab: {fileID: 0}\n  skillEffectPrefab: {fileID: 0}\n  actorRoot: {fileID: 2124323439}\n  normalAttackEffectSpawnPoint: {fileID: 1913808006}\n  actorLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLifetime: 0.45\n  placeholderVisual: {fileID: 0}\n  fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}\n  accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}\n  effectPlayer: {fileID: 0}\n  hpBackground: {fileID: 538625507}\n  hpFill: {fileID: 13774378}\n  hpLabel: {fileID: 1486828711}\n  roleLabel: {fileID: 1119591243}\n  onBeatJumpHeight: 0.22\n  onBeatJumpDuration: 0.18\n  missShakeStrength: 0.12\n  missShakeDuration: 0.16\n  missShakeFrequency: 60\n",
+        "fileid": "616141045"
+      },
+      {
+        "object": "HeroSlot_Rear",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 828184396}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot\n  slotId: HeroSlot_Mage\n  displayName: MAGE\n  team: 1\n  role: 3\n  slotIndex: 2\n  maxHp: 75\n  normalAbilityBehavior: 0\n  normalAbilityPower: 1\n  attackPower: 24\n  skillPower: 30\n  skillBehavior: 0\n  attackIntervalBeats: 4\n  maxMana: 4\n  currentMana: 0\n  actorPrefab: {fileID: 1574828989901532124, guid: d614d303502021f47a7481c319f4e97f, type: 3}\n  normalAttackEffectPrefab: {fileID: 0}\n  skillEffectPrefab: {fileID: 0}\n  actorRoot: {fileID: 1756861568}\n  normalAttackEffectSpawnPoint: {fileID: 1678343433}\n  actorLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLifetime: 0.45\n  placeholderVisual: {fileID: 0}\n  fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}\n  accentColor: {r: 0.72, g: 0.3, b: 0.88, a: 1}\n  effectPlayer: {fileID: 0}\n  hpBackground: {fileID: 1942080884}\n  hpFill: {fileID: 1132866506}\n  hpLabel: {fileID: 46506982}\n  roleLabel: {fileID: 961970724}\n  onBeatJumpHeight: 0.22\n  onBeatJumpDuration: 0.18\n  missShakeStrength: 0.12\n  missShakeDuration: 0.16\n  missShakeFrequency: 60\n",
+        "fileid": "828184398"
+      },
+      {
+        "object": "HeroSlot_Front",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2037638509}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot\n  slotId: HeroSlot_Paladin\n  displayName: PALADIN\n  team: 1\n  role: 1\n  slotIndex: 0\n  maxHp: 120\n  normalAbilityBehavior: 0\n  normalAbilityPower: 1\n  attackPower: 12\n  skillPower: 30\n  skillBehavior: 0\n  attackIntervalBeats: 4\n  maxMana: 4\n  currentMana: 0\n  actorPrefab: {fileID: 2052762948902822046, guid: f28badd7dbd217245bb39aae3ca0c745, type: 3}\n  normalAttackEffectPrefab: {fileID: 0}\n  skillEffectPrefab: {fileID: 0}\n  actorRoot: {fileID: 178498080}\n  normalAttackEffectSpawnPoint: {fileID: 732383581}\n  actorLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLocalOffset: {x: 0, y: 0, z: 0}\n  attackEffectLifetime: 0.45\n  placeholderVisual: {fileID: 0}\n  fallbackEffectSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}\n  accentColor: {r: 0.12, g: 0.65, b: 0.9, a: 1}\n  effectPlayer: {fileID: 0}\n  hpBackground: {fileID: 934003315}\n  hpFill: {fileID: 1590038036}\n  hpLabel: {fileID: 707206172}\n  roleLabel: {fileID: 1462401102}\n  onBeatJumpHeight: 0.22\n  onBeatJumpDuration: 0.18\n  missShakeStrength: 0.12\n  missShakeDuration: 0.16\n  missShakeFrequency: 60\n",
+        "fileid": "2037638511"
+      }
+    ],
+    "Art2SceneryContactShadows": [
+      {
+        "object": "",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1513715650}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 3044d125049d48f4867f49a4feda51a0, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2SceneryContactShadows\n  shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}\n  showContactShadows: 1\n  opacity: 0.5\n  groundHeight: 0.025\n  contacts:\n  - footPixel: {x: 640, y: 264}\n    widthPixels: 335.9\n    depth: 2.01\n    worldOffset: {x: 0, y: 0}\n",
+        "fileid": "1513715653"
+      }
+    ],
+    "FightBattlefieldPresenter": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 5abd07980edf7cd428c34c985b89b4b8, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBattlefieldPresenter\n  fight: {fileID: 2021200326}\n  enemySlots:\n  - {fileID: 581508853}\n  - {fileID: 0}\n  - {fileID: 0}\n  heroSlots:\n  - {fileID: 2037638511}\n  - {fileID: 287245178}\n  - {fileID: 828184398}\n  tankShield: {fileID: 256767383}\n  enemyTelegraph: {fileID: 0}\n",
+        "fileid": "2021200324"
+      }
+    ],
+    "FightScenePresenter": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: d3686a9e83f96b84b904c1223cd7b674, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightScenePresenter\n  timelineScale: 1.9\n  timelineBarSprite: {fileID: 21300000, guid: 3364845ec05154c4b83eede94957e942, type: 3}\n  showTimelineBar: 0\n  timelinePointSprite: {fileID: 21300000, guid: 5d43eb9f5d875f849a405800c5f58f78, type: 3}\n  stoneEmptySprite: {fileID: 21300000, guid: c52009719b5f35f46bbbad10c8943544, type: 3}\n  stoneFillSprite: {fileID: 21300000, guid: 63315626d9124774585cd363f137ac7a, type: 3}\n  stoneReadyFrames:\n  - {fileID: 21300000, guid: 53907aa8d7412114aacbed4970ed5e3d, type: 3}\n  - {fileID: 21300000, guid: 450f5bb6e402fac4b9c8637a561c7ee5, type: 3}\n  - {fileID: 21300000, guid: be905d538f69dfc44879677d2f77830a, type: 3}\n  - {fileID: 21300000, guid: 76510089599750f4eaa8aa51a80ae1c4, type: 3}\n  - {fileID: 21300000, guid: ea32bd1915aee1245a289d4b6af1fa02, type: 3}\n  timelinePointArtSize: {x: 6, y: 34}\n  stoneArtSize: {x: 70, y: 90}\n  timelineBarHeight: 0\n  stoneReadyLoopBeats: 1\n  stoneBounceEnabled: 1\n  stoneBounceAmount: 0.15\n  stoneBounceBeats: 0.3\n  stoneSuccessEffectPrefab: {fileID: 1491377527257926432, guid: 130cad8f8fed8534e8e46c49713e0406, type: 3}\n  stoneSuccessEffectLifetime: 1.2\n  stoneSuccessEffectSize: {x: 240, y: 240}\n  stoneSuccessEffectViewSize: 1.4\n  removeAcceptedBeatPoints: 1\n  beatPointHitEffectPrefab: {fileID: 0}\n  beatPointHitEffectLifetime: 0.5\n  playerUiCanvas: {fileID: 1649508005}\n  showDeveloperUi: 1\n  beatClock: {fileID: 2021200329}\n  rhythmJudge: {fileID: 2021200328}\n  fight: {fileID: 2021200326}\n  partyResourceHudPrefab: {fileID: 1002, guid: 3d004614dfe14804a27006c0bbab3ae5, type: 3}\n  showDefenseHud: 0\n  showFormationLockStatus: 0\n  showVisibilityButtons: 0\n  showEnemyHealthUi: 0\n  showEnemyStatusUi: 0\n  showTeamSkillGauge: 0\n  playbackText: {fileID: 1151355355}\n  cycleText: {fileID: 1803524084}\n  warningText: {fileID: 180909938}\n  resultText: {fileID: 1656811036}\n  detailText: {fileID: 665657722}\n  healthText: {fileID: 369717914}\n  statisticsText: {fileID: 1113113256}\n  beatNodes:\n  - {fileID: 2083992555}\n  - {fileID: 498462610}\n  - {fileID: 2043876131}\n  - {fileID: 809463615}\n  beatProgress: {fileID: 1380923318}\n  healthBar: {fileID: 455403627}\n  timelineWidth: 840\n  timelineBottomOffset: 150\n  previewBeats: 5\n  beatPointSize: 14\n  beatPointColor: {r: 0.2, g: 0.92, b: 1, a: 1}\n  centerFlashStrength: 0.8\n  screenFlash: {fileID: 1465678668}\n",
+        "fileid": "2021200325"
+      }
+    ],
+    "FightCombatController": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController\n  waveTransitionWaitBeats: 2\n  waveArmorRecoveryEffect: {fileID: 0}\n  waveArmorRecoveryEffectLifetime: 0\n  showEnemyDamageNumbers: 0\n  damageNumberCamera: {fileID: 2147100302}\n  damageDigitPrefabs:\n  - {fileID: 8059646611630442008, guid: 65e346b2be0cd6f4e98a21f618c84252, type: 3}\n  - {fileID: 821659882305050408, guid: 33830a29953a8a94db86312d69a514e5, type: 3}\n  - {fileID: 3387627009911684426, guid: 433ee73351e8a6244803ba28bccc3bdf, type: 3}\n  - {fileID: 3346009242134115890, guid: 1701385fd0b8a6b438db3b0e8caf8923, type: 3}\n  - {fileID: 7816833423727273069, guid: bed62489476db6a45b171d2ae7dae00d, type: 3}\n  - {fileID: 8133363191223406634, guid: a15113e8d46c0c845bc7e18ffdc3b8cf, type: 3}\n  - {fileID: 2482282291809049268, guid: 8419c973d1928824f93b421394e9ea49, type: 3}\n  - {fileID: 173090391683368173, guid: e168d4ee2dc573643b98e2af87b750c5, type: 3}\n  - {fileID: 5612388837414510471, guid: d7cd6bc43cadc7c4daa7f5c349e2c045, type: 3}\n  - {fileID: 5543003937174842591, guid: f7c8ce6b5d3a91240b7ecdedbd76e6b8, type: 3}\n  damageNumberOffset: {x: 0.5, y: 0, z: 0}\n  damageNumberLifetime: 0.8\n  damageNumberScale: 1\n  damageDigitSpacing: 0.3\n  damageNumberRise: 0.6\n  damageNumberSortingOrder: 100\n  damageNumberPrewarm: 8\n  damageGlyphPrewarmPerDigit: 4\n  damageNumberMaxActive: 64\n  damageGlyphMaxCachedPerDigit: 64\n  enableCharacterPassives: 0\n  showStatusIcons: 1\n  blockedEffectIcon: {fileID: 11400000, guid: 2a00d1707c09407c9e7e402ded2978fc, type: 3}\n  weakEffectIcon: {fileID: 11400000, guid: 9ff13082aa054a0ca58cfafa99f96b14, type: 3}\n  bleedEffectIcon: {fileID: 11400000, guid: 442cd5d6d1e442719285852463c374f4, type: 3}\n  deathEffectIcon: {fileID: 4598197743899309283, guid: eb2080904599ba2429b6e8d3c3e8d54c, type: 3}\n  statusIconPrewarmPerType: 4\n  maxBlockedEffectIcons: 32\n  statusIconSpacing: 0.55\n  statusIconCamera: {fileID: 2147100302}\n  statusIconOffset: {x: 0, y: 0.15, z: 0}\n  startWithFullTeamSkill: 0\n  teamSkillGaugeGain: 1\n  teamSkillBurstBeats: 16\n  teamQteOffset: {x: 0, y: 0.25, z: -1}\n  teamQteInnerRadius: 0.45\n  teamUltimateRequiredCharges: 3\n  teamUltimatePerformanceBeats: 4\n  teamUltimateImpactBeat: 4\n  teamUltimateDamage: 3\n  beatClock: {fileID: 2021200329}\n  rhythmJudge: {fileID: 2021200328}\n  inputRouter: {fileID: 2021200327}\n  rosterManager: {fileID: 2021200331}\n  tankSlot: {fileID: 2037638511}\n  activeEnemySlot: {fileID: 0}\n  maxPartyHp: 4\n  enemyAttackDamage: 1\n  resolutionSafetyMs: 12\n  endBattleOnZeroHp: 1\n  autoPlayBattleEntrance: 1\n  musicStartDelaySeconds: 0\n  enableSuccessfulInputSound: 1\n  successfulInputSoundEventPath: event:/SoundEffects/BeatTapping\n  successfulInputSoundVolume: 0.5\n  combatMode: 2\n  enableHealthSystemInFrontHeroMode: 1\n  enemyAttackIntervalBeats: 4\n  frontHero:\n    heroLabel: PALADIN\n    unitSlot: {fileID: 2037638511}\n    skillActivationCount: 0\n  secondHero:\n    heroLabel: BARD\n    unitSlot: {fileID: 287245178}\n    skillActivationCount: 0\n  thirdHero:\n    heroLabel: MAGE\n    unitSlot: {fileID: 828184398}\n    skillActivationCount: 0\n",
+        "fileid": "2021200326"
+      }
+    ],
+    "FightInputRouter": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 4a5524212e24e1a4482ac2a543012f3c, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightInputRouter\n  fightControls: {fileID: -944628639613478452, guid: 3cd4a754d66185f4aa4de56e7822a561, type: 3}\n",
+        "fileid": "2021200327"
+      }
+    ],
+    "FmodRhythmJudge": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 797894045f468094db4eae73ea7e7993, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodRhythmJudge\n  beatClock: {fileID: 2021200329}\n  perfectWindowMs: 120\n  judgementOffsetMs: 0\n  duplicatePerfectBecomesMiss: 1\n",
+        "fileid": "2021200328"
+      }
+    ],
+    "FmodBeatClock": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 3814f07b225d8f34084d9aed7684d7c7, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock\n  musicEventPath: event:/Ritual Slam _120_3\n  musicStartDelaySeconds: 1\n  musicVolume: 0.673\n  musicPitch: 1\n  playOnStart: 1\n  enableBeatTapping: 0\n  beatTappingEventPath: event:/SoundEffects/BeatTapping\n  beatTappingVolume: 0.5\n  openingSongTempo: 0\n  openingTempoEventPath: \n",
+        "fileid": "2021200329"
+      }
+    ],
+    "FightRosterManager": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 5dd05245035e4803bc6e8ae3535f39c5, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightRosterManager\n  requireBattlePreparation: 1\n  fightController: {fileID: 2021200326}\n  beatClock: {fileID: 2021200329}\n  heroSpawnSlots:\n  - {fileID: 2037638511}\n  - {fileID: 287245178}\n  - {fileID: 828184398}\n  heroPrefabs:\n  - {fileID: 4232183820247662683, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}\n  - {fileID: 5101759564044618693, guid: 36f448331cb44310bc10b52d1c294d8b, type: 3}\n  - {fileID: 4415416321156734532, guid: 81c1367b5bbb4f45ab9a7039e857c330, type: 3}\n  enemySpawnSlots:\n  - {fileID: 581508853}\n  - {fileID: 616141045}\n  - {fileID: 928599}\n  enemyPrefabs:\n  - {fileID: 1049329208925010419, guid: d1687460d02df1b47bac316481cf4276, type: 3}\n  - {fileID: 2418354018728722847, guid: f6f5612f6468ef340a4e2d9422b3fbb2, type: 3}\n  - {fileID: 2418354018728722847, guid: 58027208f6f64c22a1c628b184a89f77, type: 3}\n  additionalWaves: []\n",
+        "fileid": "2021200331"
+      }
+    ],
+    "FightAudioPlayer": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 50ef773be6c94a44b108e27f935cc8f2, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightAudioPlayer\n  soundEnabled: 1\n  masterVolume: 1\n  maxActiveSounds: 64\n",
+        "fileid": "2021200333"
+      }
+    ],
+    "FightLevelPlanner": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: e2aaf96685c11ad4eafed2904c2ff534, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightLevelPlanner\n  chapter: {fileID: 11400000, guid: d42c845434c163849bc67a7a7698645c, type: 2}\n  stageIndex: 0\n  roster: {fileID: 2021200331}\n  beatClock: {fileID: 2021200329}\n",
+        "fileid": "2021200334"
+      }
+    ],
+    "FightWaveEntrance": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: a1d6695abd0c7b04dae944adce98eb6b, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightWaveEntrance\n  fight: {fileID: 2021200326}\n  roster: {fileID: 2021200331}\n  beatClock: {fileID: 2021200329}\n  view: {fileID: 2147100302}\n  slideEnabled: 1\n  durationBeats: 1\n  hopOnArrival: 1\n  edgeMargin: 0.08\n  showInvulnerabilityLabel: 1\n  invulnerabilityLabel: IMMUNE\n  invulnerabilityColor: {r: 0.35, g: 0.9, b: 1, a: 1}\n  invulnerabilityTextSize: 0.12\n  invulnerabilityHeadOffset: 0.25\n  invulnerabilityHitLabelSeconds: 0.5\n",
+        "fileid": "2021200335"
+      }
+    ],
+    "FightVictoryPanel": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 4bed071d29784a247851471714dbd238, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightVictoryPanel\n  results: {fileID: 2021200337}\n  showVictoryPanel: 1\n  showDefeatPanel: 1\n  font: {fileID: 0}\n  backdropColor: {r: 0.015, g: 0.025, b: 0.04, a: 0.88}\n  accentColor: {r: 1, g: 0.8, b: 0.28, a: 1}\n  defeatAccentColor: {r: 1, g: 0.35, b: 0.3, a: 1}\n",
+        "fileid": "2021200336"
+      }
+    ],
+    "FightStageResults": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: c07879ce08912cd4798aa5f16e590d8f, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageResults\n  fight: {fileID: 2021200326}\n  planner: {fileID: 2021200334}\n  beatClock: {fileID: 2021200329}\n",
+        "fileid": "2021200337"
+      }
+    ],
+    "FightDamageEdgeFeedback": [
+      {
+        "object": "FightDemoController",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2021200323}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 70edf3323b563ba46884f9e4eeaad503, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightDamageEdgeFeedback\n  fight: {fileID: 2021200326}\n  showDamageFlash: 1\n  showLowHealthPulse: 1\n  armorHitColor: {r: 0.45, g: 0.8, b: 1, a: 0.42}\n  hpHitColor: {r: 1, g: 0.06, b: 0.04, a: 0.65}\n  lowHealthColor: {r: 1, g: 0.38, b: 0.4, a: 0.18}\n  hitFlashSeconds: 0.45\n  edgeWidth: 0.051\n  lowHealthThreshold: 1\n  lowHealthPulseBeats: 2\n",
+        "fileid": "2021200338"
+      }
+    ],
+    "Art2ActorPresentation": [
+      {
+        "object": "Art2_2_5D_Prototype",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147100000}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 149033ff1c1f447cb2c7a21b81cdb2e4, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2ActorPresentation\n  slots:\n  - {fileID: 928599}\n  - {fileID: 287245178}\n  - {fileID: 581508853}\n  - {fileID: 616141045}\n  - {fileID: 828184398}\n  - {fileID: 2037638511}\n  actorMaterial: {fileID: 2100000, guid: ac283b04adc847bc80b3a500676dba2b, type: 2}\n  informationCamera: {fileID: 2147100302}\n  alignSlotInformation: 1\n  healthBarHeadGap: 0.25\n  castSpriteShadows: 1\n  alignFeetToGround: 1\n  actorGroundHeight: 0\n  showContactShadows: 1\n  contactShadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}\n  shadowSize: {x: 1.25, y: 0.65}\n  shadowGroundOffset: {x: 0, y: 0}\n  contactShadowFollowsLight: 1\n  contactShadowLight: {fileID: 2147300102}\n  contactShadowProjectionHeight: 0.25\n  contactShadowMaxOffset: 0.45\n  groundHeight: 0.025\n",
+        "fileid": "2147100002"
+      }
+    ],
+    "Art2CameraController": [
+      {
+        "object": "Art2_TestCamera",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147100300}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 571f0fdf1dd8431c8105e49094534548, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CameraController\n  perspective: 1\n  pitch: 45\n  fieldOfView: 40\n  framingHalfHeight: 5.35\n  focus: {x: 0, y: 0, z: 0}\n  panSpeed: 3\n  zoomSpeed: 0.15\n  zoomLimits: {x: 3.5, y: 8}\n  enableKeyboardAndWheel: 1\n",
+        "fileid": "2147100304"
+      }
+    ],
+    "Art2TorchFlicker": [
+      {
+        "object": "Torch_Left_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147200300}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  baseIntensity: 10\n  flickerAmount: 0.15\n  flickerSpeed: 2.5\n  noiseSeed: 17\n  previewInEditor: 1\n",
+        "fileid": "2147200303"
+      },
+      {
+        "object": "Torch_Right_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147200400}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  baseIntensity: 10\n  flickerAmount: 0.15\n  flickerSpeed: 2.5\n  noiseSeed: 63\n  previewInEditor: 1\n",
+        "fileid": "2147200403"
+      },
+      {
+        "object": "Torch_InnerLeft_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147400300}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  baseIntensity: 10\n  flickerAmount: 0.15\n  flickerSpeed: 2.5\n  noiseSeed: 111\n  previewInEditor: 1\n",
+        "fileid": "2147400303"
+      },
+      {
+        "object": "Torch_InnerRight_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147400400}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  baseIntensity: 10\n  flickerAmount: 0.15\n  flickerSpeed: 2.5\n  noiseSeed: 157\n  previewInEditor: 1\n",
+        "fileid": "2147400403"
+      }
+    ],
+    "Art2TorchHalo": [
+      {
+        "object": "Torch_Left_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147200300}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}\n  radius: 0.95\n  brightness: 0.61\n  referenceLightIntensity: 10\n  localOffset: {x: 0, y: 0, z: 0}\n",
+        "fileid": "2147200305"
+      },
+      {
+        "object": "Torch_Right_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147200400}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}\n  radius: 0.95\n  brightness: 0.61\n  referenceLightIntensity: 10\n  localOffset: {x: 0, y: 0, z: 0}\n",
+        "fileid": "2147200405"
+      },
+      {
+        "object": "Torch_InnerLeft_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147400300}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}\n  radius: 0.95\n  brightness: 0.61\n  referenceLightIntensity: 10\n  localOffset: {x: 0, y: 0, z: 0}\n",
+        "fileid": "2147400305"
+      },
+      {
+        "object": "Torch_InnerRight_RedFlicker",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147400400}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}\n  radius: 0.95\n  brightness: 0.61\n  referenceLightIntensity: 10\n  localOffset: {x: 0, y: 0, z: 0}\n",
+        "fileid": "2147400405"
+      }
+    ],
+    "Art2ShadowTestLight": [
+      {
+        "object": "ShadowTestLight_MoveMe",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147300100}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 440c88abc9ab4108b66436413755af58, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2ShadowTestLight\n  aimTarget: {fileID: 2147300201}\n  aimAtTarget: 1\n",
+        "fileid": "2147300103"
+      }
+    ],
+    "SceneBeatMotionManager": [
+      {
+        "object": "SceneBeatMotionManager",
+        "text": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 2147500100}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: efcbbccded97484cb6df7d41a6ab15c9, type: 3}\n  m_Name: \n  m_EditorClassIdentifier: \n  beatClock: {fileID: 2021200329}\n  motionEnabled: 1\n  targets:\n  - enabled: 1\n    target: {fileID: 2147500011}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.1\n    durationInBeats: 0.5\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 2147500021}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.1\n    durationInBeats: 0.5\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 2147500031}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.1\n    durationInBeats: 0.5\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 2147500041}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.1\n    durationInBeats: 0.5\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 1674957628}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.025\n    durationInBeats: 0.4\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 1879600866}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.025\n    durationInBeats: 0.4\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 640384060}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.025\n    durationInBeats: 0.4\n    oscillations: 1\n  - enabled: 1\n    target: {fileID: 254189892}\n    directionSpace: 0\n    direction: {x: 0, y: 1, z: 0}\n    amplitude: 0.025\n    durationInBeats: 0.4\n    oscillations: 1\n",
+        "fileid": "2147500102"
+      }
+    ]
+  }
+}
