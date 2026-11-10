@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 4232183820247662683}
   - component: {fileID: 1305831055623879113}
   m_Layer: 0
-  m_Name: LongswordWarrior
+  m_Name: LongswordWarrior_old
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

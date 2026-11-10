@@ -9931,6 +9931,7 @@ MonoBehaviour:
   resolutionSafetyMs: 12
   endBattleOnZeroHp: 1
   autoPlayBattleEntrance: 1
+  playOpeningCharacterAnimations: 0
   musicStartDelaySeconds: 0
   enableSuccessfulInputSound: 1
   successfulInputSoundEventPath: event:/SoundEffects/BeatTapping
@@ -10036,7 +10037,7 @@ MonoBehaviour:
   - {fileID: 287245178}
   - {fileID: 828184398}
   heroPrefabs:
-  - {fileID: 4232183820247662683, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
+  - {fileID: 1698642025307986667, guid: bd3b0004258f3ef40ac6017ec0694d53, type: 3}
   - {fileID: 5101759564044618693, guid: 36f448331cb44310bc10b52d1c294d8b, type: 3}
   - {fileID: 4415416321156734532, guid: 81c1367b5bbb4f45ab9a7039e857c330, type: 3}
   enemySpawnSlots:
@@ -11535,7 +11536,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 9.676e-42, y: 0, z: 0, w: 1e-45}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11699,7 +11700,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.118e-42, y: 4.050806e-39, z: 4.050871e-39, w: 4.050871e-39}
+  m_BoundingSphereOverride: {x: 1.687e-42, y: 4.050806e-39, z: 4.050871e-39, w: 4.050871e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12163,7 +12164,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 9.756e-42, y: NaN, z: NaN, w: NaN}
+  m_BoundingSphereOverride: {x: 0, y: 5.3e-44, z: 0, w: 1.6114932e-38}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12327,7 +12328,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 7.575e-42, y: 0, z: 0, w: 1.6531e-39}
+  m_BoundingSphereOverride: {x: 8.305307e-19, y: 0, z: 0.000043680135, w: 3.049315e-35}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

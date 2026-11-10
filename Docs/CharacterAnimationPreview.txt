@@ -1,0 +1,32 @@
+角色動畫預覽與編輯
+
+開啟方法
+- 角色的 FightCharacterCombatAnimator Inspector > 開啟角色動畫預覽／編輯視窗。
+- 或選單 Rhythm Hunter > Animation > Character Animation Preview，選擇角色 Prefab。
+- 與 Weapon Attachment Editor 共用同一個預覽視窗核心；切換模式前會詢問未儲存的動畫修改。
+
+操作
+左側：選動畫分類、上一幀／下一幀、影格滑桿、播放預覽、BPM、縮放與翻面。
+右側：原本角色動畫 Inspector，可修改圖片、每張拍數（例如 0.5、0.33）、FPS、
+圖片排序／增刪、Warning、攻擊特效與附加特效欄位。
+修改後按左下「儲存角色動畫至所選 Prefab」；儲存目標路徑會顯示在上方。
+使用「重新載入 Prefab」可放棄視窗草稿，重新讀取硬碟內容。
+有改動時切換角色或關閉視窗會提示儲存。
+
+行為與限制
+- 使用 Prefab 的隔離編輯副本；不直接修改當前場景角色。
+- 從角色 Variant 開啟，應顯示該角色的資源路徑，不直接改共用 Visual Prefab。
+- 預覽只播放 Sprite，不觸發傷害、Warning 音效或真正生成戰鬥 VFX。
+- 右側可設定特效欄位，但本版不預覽粒子、燈光或音效；仍需 Play 驗收。
+- 編輯器 BPM 僅控制預覽速度，不修改歌曲 BPM、節拍判定或戰鬥時鐘。
+- 動作預覽循環播放方便觀察；遊戲內是否重複播放仍由原本戰鬥流程決定。
+- 視窗原始圖片比例不等同於 Art2 透視相機效果；實際陰影、遮擋仍以場景為準。
+- Play 模式停用儲存與動畫資料編輯。
+- 若同一 Prefab 被其他 Inspector／Prefab Mode 儲存或尚有未儲存改動，
+  視窗拒絕覆蓋；請先完成其他編輯後重新載入。
+- Unity 編譯重新載入程式前，請先儲存視窗修改；重載後會重新讀取所選 Prefab。
+
+驗證選單
+Rhythm Hunter > Animation > Validate Character Preview Editing
+使用獨立暫存 Prefab 驗證 0.75 拍修改儲存／重新載入、影格範圍、
+不觸發戰鬥事件、不新增武器掛載，以及原始角色資源保持不變。

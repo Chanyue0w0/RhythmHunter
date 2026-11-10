@@ -7,12 +7,15 @@ namespace RhythmHunter.FightDemoEditor
     [CustomEditor(typeof(FightCharacterCombatAnimator))]
     public sealed class FightCharacterCombatAnimatorEditor : Editor
     {
+        public bool EmbeddedPreview { get; set; }
         private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false, false };
 
         public override void OnInspectorGUI()
         {
             foreach (var inspected in targets) if (inspected == null) return;
             serializedObject.Update();
+            if (!EmbeddedPreview && GUILayout.Button("開啟角色動畫預覽／編輯視窗"))
+                WeaponAttachmentEditorWindow.OpenCharacter((FightCharacterCombatAnimator)target);
             using (new EditorGUI.DisabledScope(true))
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Script"));
             Field("targetRenderer");

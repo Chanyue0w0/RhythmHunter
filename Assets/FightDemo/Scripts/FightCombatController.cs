@@ -141,6 +141,8 @@ namespace RhythmHunter.FightDemo
 
         [Header("Battle Entrance")]
         [SerializeField] private bool autoPlayBattleEntrance;
+        [Tooltip("開場先播放普通 Idle 與喝酒；關閉時跳過這段演出，保留音樂延遲與角色滑入。下次進場生效。")]
+        [SerializeField] private bool playOpeningCharacterAnimations = true;
         [Tooltip("Seconds before music starts, independent of Opening Idle and Drink. Battle controls unlock after the entrance animation and music start.")]
         [UnityEngine.Serialization.FormerlySerializedAs("minimumEntranceSeconds")]
         [SerializeField, Min(0f)] private float musicStartDelaySeconds = 0f;
@@ -164,6 +166,7 @@ namespace RhythmHunter.FightDemo
             beatClock?.PrepareOpeningTempo();
             if (musicStartDelaySeconds <= 0f) StartEntranceMusic();
             entranceIdleDuration = 0;
+            if (!playOpeningCharacterAnimations) return;
             foreach (var hero in rosterManager.ActiveHeroes)
             {
                 hero.CombatAnimator?.BeginOpeningIdle();
@@ -185,6 +188,11 @@ namespace RhythmHunter.FightDemo
             if (!entrancePending || IsPaused || TimingCalibrationActive) return;
             entranceElapsed += UnityEngine.Time.deltaTime;
             if (!entranceMusicStarted && entranceElapsed >= musicStartDelaySeconds) StartEntranceMusic();
+            if (!playOpeningCharacterAnimations)
+            {
+                if (entranceMusicStarted) CompleteBattleEntrance();
+                return;
+            }
             if (!entranceDrinking && entranceElapsed >= entranceIdleDuration)
             {
                 entranceDrinking = true;
