@@ -17,6 +17,7 @@ namespace RhythmHunter.FightDemoEditor
             .GetField("m_DefaultRendererIndex", BindingFlags.Instance | BindingFlags.NonPublic);
         private static UniversalRenderPipelineAsset overriddenAsset;
         private static int savedIndex;
+        private static bool savedDepth, savedOpaque;
         private static Camera previewCamera;
 
         static FightVfxScenePreview()
@@ -34,11 +35,21 @@ namespace RhythmHunter.FightDemoEditor
         {
             var stage = PrefabStageUtility.GetCurrentPrefabStage();
             if (stage != null)
-                return stage.assetPath == "Assets/FightDemo/Prefabs/ArtBattle/CaveEnvironment_2_5D.prefab" ||
+                return UsesParticlePreview(stage) ||
+                    stage.assetPath == "Assets/FightDemo/Prefabs/ArtBattle/CaveEnvironment_2_5D.prefab" ||
                     stage.assetPath == "Assets/FightDemo/Prefabs/ArtBattle/CaveStructureSample.prefab";
             string path = SceneManager.GetActiveScene().path;
             return path == "Assets/FightDemo/Scenes/Art2_FightScene.unity" ||
                 (path.StartsWith("Assets/Vefects/Pixel Craft VFX URP/") && path.EndsWith(".unity"));
+        }
+
+        private static bool UsesParticlePreview(PrefabStage stage)
+        {
+            // Keep the authored battle VFX preview policy unchanged. Other purchased
+            // particle prefabs automatically get the universal renderer, without asset edits.
+            return stage != null && !stage.assetPath.StartsWith("Assets/FightDemo/Prefabs/VFX/") &&
+                stage.prefabContentsRoot != null &&
+                stage.prefabContentsRoot.GetComponentInChildren<ParticleSystem>(true) != null;
         }
 
         private static void BeginCamera(ScriptableRenderContext context, Camera camera)
@@ -50,7 +61,7 @@ namespace RhythmHunter.FightDemoEditor
             if (asset == null) return;
             int index = -1;
             var stage = PrefabStageUtility.GetCurrentPrefabStage();
-            bool art2 = diagnostic || SceneManager.GetActiveScene().path == "Assets/FightDemo/Scenes/Art2_FightScene.unity" ||
+            bool art2 = diagnostic || (stage == null && SceneManager.GetActiveScene().path == "Assets/FightDemo/Scenes/Art2_FightScene.unity") ||
                 (stage != null && stage.assetPath.StartsWith("Assets/FightDemo/Prefabs/ArtBattle/Cave"));
             string rendererName = art2 ? "Art2ForwardPlusRenderer" : "UniversalVFXRenderer";
             var renderers = asset.rendererDataList;
@@ -59,9 +70,13 @@ namespace RhythmHunter.FightDemoEditor
             if (index < 0) return;
             Restore();
             savedIndex = (int)DefaultRenderer.GetValue(asset);
+            savedDepth = asset.supportsCameraDepthTexture;
+            savedOpaque = asset.supportsCameraOpaqueTexture;
             overriddenAsset = asset;
             previewCamera = camera;
             DefaultRenderer.SetValue(asset, index);
+            asset.supportsCameraDepthTexture = true;
+            asset.supportsCameraOpaqueTexture = true;
         }
 
         private static void EndCamera(ScriptableRenderContext context, Camera camera)
@@ -71,7 +86,12 @@ namespace RhythmHunter.FightDemoEditor
 
         private static void Restore()
         {
-            if (overriddenAsset != null) DefaultRenderer?.SetValue(overriddenAsset, savedIndex);
+            if (overriddenAsset != null)
+            {
+                DefaultRenderer?.SetValue(overriddenAsset, savedIndex);
+                overriddenAsset.supportsCameraDepthTexture = savedDepth;
+                overriddenAsset.supportsCameraOpaqueTexture = savedOpaque;
+            }
             overriddenAsset = null;
             previewCamera = null;
         }
