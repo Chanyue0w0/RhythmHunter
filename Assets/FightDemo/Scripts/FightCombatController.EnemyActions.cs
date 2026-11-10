@@ -148,12 +148,15 @@ namespace RhythmHunter.FightDemo
             float window = Mathf.Max(0, rhythmJudge.PerfectWindowMs - rhythmJudge.JudgementOffsetMs) + resolutionSafetyMs;
             foreach (var hit in enemyHits.ToArray())
             {
-                if (hit.hitBeat == long.MaxValue || timelineMs < hit.timeline + window) continue;
+                if (hit.hitBeat == long.MaxValue || timelineMs < hit.timeline) continue;
+                // A confirmed guard cannot become a miss. Resolve it at impact instead of
+                // holding its sound/visual feedback until the late-input window closes.
+                bool blocked = guardedBeats.Contains(hit.hitBeat);
+                if (!blocked && timelineMs < hit.timeline + window) continue;
                 if (!enemyHits.Remove(hit) || hit.version != rosterVersion) continue;
                 if (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
-                bool blocked = guardedBeats.Contains(hit.hitBeat);
                 float damage = blocked || !HealthSystemEnabled ? 0 : QuantizeCombatValue(hit.damage);
-                if (blocked) { blockedAttackCount++; ShowBlockedEffectIcon(); } else receivedAttackCount++;
+                if (blocked) { blockedAttackCount++; PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
                 ApplyPartyDamage(damage, hit.hitBeat);
                 if (damage > 0 && hit.source != null && tankSlot != null)
                     hit.source.PlayOnHitEffect(false, tankSlot.ImpactEffectAnchor);

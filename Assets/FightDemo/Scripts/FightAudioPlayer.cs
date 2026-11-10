@@ -82,6 +82,20 @@ namespace RhythmHunter.FightDemo
 
     public sealed partial class FightCombatController
     {
+        [Header("Successful Block Audio")]
+        [SerializeField] private bool playSuccessfulBlockSound = true;
+        [Tooltip("只在實際格擋到敵人傷害時播放；不因施放防護罩或成功輸入而播放。")]
+        [SerializeField] private string successfulBlockSoundEventPath = "event:/SoundEffects/InCombat/Paladin_NormalParry";
+        [SerializeField, Range(0, 1)] private float successfulBlockSoundVolume = 1;
+
+        private void PlaySuccessfulBlockFeedback()
+        {
+            ShowBlockedEffectIcon();
+            if (playSuccessfulBlockSound)
+                AudioPlayer.Play(successfulBlockSoundEventPath, successfulBlockSoundVolume,
+                    tankSlot != null ? tankSlot.transform.position : transform.position);
+        }
+
         private FightAudioPlayer battleAudio;
         public FightAudioPlayer AudioPlayer
         {

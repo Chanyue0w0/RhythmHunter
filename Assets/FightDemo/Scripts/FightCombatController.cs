@@ -923,7 +923,10 @@ namespace RhythmHunter.FightDemo
             }
 
             float lateWindowMs = Mathf.Max(0f, rhythmJudge.PerfectWindowMs - rhythmJudge.JudgementOffsetMs);
-            if (timelineMs < pendingAttackTimelineMs + lateWindowMs + resolutionSafetyMs)
+            bool guarded = UsesEqualBeats ? guardedBeats.Contains(pendingAttackGlobalBeat)
+                : guardedGlobalBeat == pendingAttackGlobalBeat;
+            if (timelineMs < pendingAttackTimelineMs ||
+                (!guarded && timelineMs < pendingAttackTimelineMs + lateWindowMs + resolutionSafetyMs))
                 return;
 
             ResolvePendingEnemyAttack(pendingAttackRosterVersion, pendingEnemyActionId, pendingEnemyAttacker);
@@ -938,17 +941,15 @@ namespace RhythmHunter.FightDemo
             if (!IsCurrentPendingEnemyAttack(expectedRosterVersion, expectedActionId, expectedAttacker))
                 return;
 
-            // The attack animation may reach its damage frame before the late half of
-            // the Perfect window closes. Keep the pending action alive so a valid
-            // same-beat guard is accepted across the complete judgement window.
-            if (pendingEnemyAnimationDriven && !HasEnemyResolutionWindowElapsed())
+            bool blocked = UsesEqualBeats ? guardedBeats.Contains(pendingAttackGlobalBeat)
+                : guardedGlobalBeat == pendingAttackGlobalBeat;
+            // Only unresolved guards need the remaining late-input window.
+            if (pendingEnemyAnimationDriven && !blocked && !HasEnemyResolutionWindowElapsed())
             {
                 pendingEnemyAnimationDriven = false;
                 return;
             }
 
-            bool blocked = UsesEqualBeats ? guardedBeats.Contains(pendingAttackGlobalBeat)
-                : guardedGlobalBeat == pendingAttackGlobalBeat;
             FightUnitSlot attacker = pendingEnemyAttacker != null ? pendingEnemyAttacker : activeEnemySlot;
             float configuredDamage = UsesFrontHeroControls && attacker != null
                 ? Mathf.Max(0.5f, attacker.AttackPower)
@@ -959,7 +960,7 @@ namespace RhythmHunter.FightDemo
             if (blocked)
             {
                 blockedAttackCount++;
-                ShowBlockedEffectIcon();
+                PlaySuccessfulBlockFeedback();
             }
             else
                 receivedAttackCount++;
