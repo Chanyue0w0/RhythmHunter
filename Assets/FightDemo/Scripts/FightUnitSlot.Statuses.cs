@@ -123,6 +123,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!CanHaveStatus) { ClearTimedStatuses(); return; }
             if (CombatController != null && (CombatController.EnemyActionsPaused || CombatController.TeamSkillRunning)) return;
+            ExpireAimed(beat);
             if (beat > slimeUntil) { slimeUntil = long.MinValue; ReleaseSlimeFloor(ref slimeFloorVisual); }
             if (beat > stunUntil) stunUntil = long.MinValue;
             if (bleedRemaining <= 0 || beat <= lastBleedBeat) return;
@@ -137,6 +138,7 @@ namespace RhythmHunter.FightDemo
 
         public void ClearTimedStatuses()
         {
+            ClearAimed();
             ReleaseSlimeFloor(ref slimeFloorVisual);
             foreach (var hit in slimeDetonations)
             {

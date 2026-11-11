@@ -18,6 +18,11 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Screen-space horizontal travel: positive = right, negative = left.")]
         [SerializeField] private float popupRightDistance = .6f;
         [SerializeField, Min(0)] private float popupJumpHeight = .25f;
+        [Header("Aimed State Artwork")]
+        [SerializeField] private Sprite aimedGreenSprite;
+        [SerializeField] private Sprite aimedGoldSprite;
+        [SerializeField] private Color aimedGreenTint = new(.4f, 1, .4f, 1);
+        [SerializeField] private Color aimedGoldTint = new(1, .78f, .15f, 1);
         private SpriteRenderer[] sprites;
         private Color[] colors;
         private SpriteRenderer targetSprite;
@@ -92,6 +97,18 @@ namespace RhythmHunter.FightDemo
             transform.localScale = baseScale;
         }
 
+        internal void SetAimedAppearance(bool gold)
+        {
+            if (Kind != 4) return;
+            var sprite = gold ? aimedGoldSprite : aimedGreenSprite;
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                if (sprite != null) sprites[i].sprite = sprite;
+                colors[i] = gold ? aimedGoldTint : aimedGreenTint;
+            }
+            if (!pulsing) RestoreAlpha();
+        }
+
         internal bool Advance(float seconds, float beats)
         {
             if (!IsPopup)
@@ -105,9 +122,9 @@ namespace RhythmHunter.FightDemo
                     // Fast expansion, followed by a shrink and fade. Gameplay state
                     // is already resolved; this pulse never delays status consumption.
                     float size = p < .3f ? Mathf.Lerp(1, triggerPulseScale, p / .3f)
-                        : Mathf.Lerp(triggerPulseScale, .6f, (p - .3f) / .7f);
+                        : Mathf.Lerp(triggerPulseScale, Kind == 4 ? 1 : .6f, (p - .3f) / .7f);
                     transform.localScale = baseScale * size;
-                    SetAlpha(1 - Mathf.InverseLerp(.45f, 1, p));
+                    SetAlpha(Kind == 4 && !Finishing ? 1 : 1 - Mathf.InverseLerp(.45f, 1, p));
                     if (p >= 1)
                     {
                         if (Finishing) return false;

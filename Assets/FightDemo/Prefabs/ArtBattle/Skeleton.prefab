@@ -143,6 +143,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  enableAimedFollowUp: 1
+  aimedApplication: 0
+  aimedActivation: 0
+  aimedGreenBeats: 4
+  aimedGoldBeats: 8
+  aimedFollowUpDamage: 1
+  aimedPreparationEffect: {fileID: 4322276170900854079, guid: 43866926db4e59c4591ebb297d0438ac, type: 3}
+  aimedPreparationEffectLifetime: 0.5
+  aimedGoldProjectile: {fileID: 4474199922380967310, guid: 8737dba6d958ac24987ac65d7fbc908b, type: 3}
+  aimedTargetEffect: {fileID: 0}
   basicBreakPower: 0
   skillBreakPower: 0
   bossPattern:
@@ -199,7 +209,7 @@ MonoBehaviour:
   basicArmorRecoveryAmount: 1
   teamSkillArmorRecovery: 0
   teamSkillArmorRecoveryAmount: 1
-  basicAppliesBleeding: 1
+  basicAppliesBleeding: 0
   bleedDamage: 0.5
   bleedBeats: 4
   fragmentDamage: 1
@@ -213,7 +223,7 @@ MonoBehaviour:
   enemyAttackUsesEffectFrames: 0
   attackWindupBeats: 0
   attackInterruptible: 1
-  normalAbilityEffectPrefab: {fileID: 4474199922380967310, guid: 77690aa7d14a054419e5d76eedfe305d, type: 3}
+  normalAbilityEffectPrefab: {fileID: 4474199922380967310, guid: 8737dba6d958ac24987ac65d7fbc908b, type: 3}
   useFallbackAbilityEffects: 0
   skillEffectPrefab: {fileID: 0}
   abilityEffectLifetime: 1.5

@@ -448,6 +448,7 @@ namespace RhythmHunter.FightDemo
         {
             UpdateBattleEntrance();
             UpdateSkillVisualPause();
+            UpdateNormalImpacts();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
             UpdateTeamSkillBurst();
@@ -508,7 +509,7 @@ namespace RhythmHunter.FightDemo
             if (command == FightInputRouter.HeroCommand.TeamSkill)
             {
                 if (UsesEqualBeats && rhythmJudge != null && inputRouter != null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
-                if (WaveTransitionActive)
+                if (WaveTransitionActive || suspendFeverActivation)
                 {
                     if (rhythmJudge == null) return;
                     var result = rhythmJudge.JudgeInput(inputRouter != null ? inputRouter.CurrentInputAgeMs : 0);
@@ -521,6 +522,7 @@ namespace RhythmHunter.FightDemo
             if (TeamSkillRunning) return;
             if (UsesEqualBeats && command == FightInputRouter.HeroCommand.Ultimate)
             {
+                if (suspendFeverActivation) return;
                 TryStartTeamUltimate();
                 return;
             }
@@ -540,7 +542,7 @@ namespace RhythmHunter.FightDemo
         {
             PlaySuccessfulInputSound(result);
             HeroCalled?.Invoke(new HeroCallResult(FightInputRouter.HeroCommand.TeamSkill, result, false, false,
-                "Wave transition — rhythm only; TeamSkill not activated"));
+                "Rhythm only — Fever not activated"));
         }
 
         private void SubmitFrontHeroCommand(FightInputRouter.HeroCommand command)
@@ -619,12 +621,14 @@ namespace RhythmHunter.FightDemo
             float power = skill ? actor.SkillPower : actor.AttackPower;
             if (!skill)
                 power = actor.NormalAbilityPower;
+            if (!skill && UsesEqualBeats && IsAttackCall(behavior)) TriggerAimedFollowUp(actor);
             string result = PerformConfiguredAbility(
                 hero,
                 action,
                 behavior,
                 power,
                 judgement.NearestBeat.GlobalBeat);
+
 
             activeEnemySlot = FindFrontLivingEnemy();
             if (!skill && UsesEqualBeats)
@@ -1364,9 +1368,11 @@ namespace RhythmHunter.FightDemo
                 ApplyHeroDamage(actionRosterVersion, attacker, target, damage, action == ActionType.Skill);
                 return;
             }
-            // The rhythm judgement owns damage timing. Resolve before starting any
-            // animation so projectile speed, effect lifetime, and frame events are visual-only.
-            ApplyHeroDamage(actionRosterVersion, attacker, target, damage, action == ActionType.Skill);
+            // Equal-beat normal hits and Aimed projectiles share one song-beat impact delay.
+            // Particle lifetime never decides gameplay timing; legacy skills retain their path.
+            if (UsesEqualBeats && action != ActionType.Skill && !transitionBlocked)
+                ScheduleNormalImpact(attacker, target, () => ApplyHeroDamage(actionRosterVersion, attacker, target, damage, false));
+            else ApplyHeroDamage(actionRosterVersion, attacker, target, damage, action == ActionType.Skill);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
@@ -1397,7 +1403,12 @@ namespace RhythmHunter.FightDemo
                 ApplyAreaDamage(actionRosterVersion, attacker, damage);
                 return;
             }
-            ApplyAreaDamage(actionRosterVersion, attacker, damage);
+            if (UsesEqualBeats && action != ActionType.Skill && !WaveTransitionActive)
+            {
+                foreach (var target in effectTargets)
+                    ScheduleNormalImpact(attacker, target, () => ApplyHeroDamage(actionRosterVersion, attacker, target, damage, false));
+            }
+            else ApplyAreaDamage(actionRosterVersion, attacker, damage);
             bool animated = attacker.PlayCombatAnimation(
                 animation,
                 () => PlayHeroAttackWarning(actionRosterVersion, attacker),
@@ -1508,7 +1519,8 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot attacker,
             FightUnitSlot target,
             float damage,
-            bool skill = true)
+            bool skill = true,
+            bool aimedFollowUp = false)
         {
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target) || damage <= 0)
                 return;
@@ -1518,6 +1530,7 @@ namespace RhythmHunter.FightDemo
             {
                 bool wasAlive = target.CurrentHp > 0;
                 float dealt = target.TakeDamage(ModifyBossDamage(target, damage));
+                if (!aimedFollowUp && target.CurrentHp > 0) target.NotifyAimedDirectHit(attacker);
                 if (dealt > 0 || IsBurstRetainedTarget(target) && ModifyBossDamage(target, damage) > 0)
                     attacker.PlayOnHitEffect(skill, target.ImpactEffectAnchor);
                 if (wasAlive) CancelDefeatedEnemyAttack(target);

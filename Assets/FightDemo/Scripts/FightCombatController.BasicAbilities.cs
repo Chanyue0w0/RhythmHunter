@@ -53,6 +53,15 @@ namespace RhythmHunter.FightDemo
             int required = actor.CharacterDefinition != null ? actor.CharacterDefinition.ConsecutiveInputBeats : 3;
             if (aimedShotProgress < required)
             {
+                var data = actor.CharacterDefinition;
+                if (data != null && data.EnableAimedFollowUp)
+                {
+                    if (data.AimedPreparationEffect != null)
+                        actor.EffectPlayer.SpawnConfiguredAbility(data.AimedPreparationEffect, actor.CastEffectAnchor,
+                            data.AimedPreparationEffectLifetime, FightAttackEffect.VisualStyle.Skill, Color.yellow);
+                    if (!WaveTransitionActive && data.AimedApplication == FightCharacterDefinition.AimedApplicationMode.GreenOnPreparation)
+                        FindFrontLivingEnemy()?.ApplyAimed(actor, false);
+                }
                 bool animated = actor.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Aim, null, null, null,
                     effect => { if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self) actor.PlayFrameEffect(effect); });
                 if (!animated) actor.PlayAttackFrameWarning(false);
@@ -60,6 +69,15 @@ namespace RhythmHunter.FightDemo
             }
 
             ResetBasicAbilityProgress();
+            if (actor.CharacterDefinition != null && actor.CharacterDefinition.EnableAimedFollowUp)
+            {
+                var marked = FindAimedTarget(actor, false);
+                var shotTarget = actor.CharacterDefinition.AimedApplication == FightCharacterDefinition.AimedApplicationMode.GreenOnPreparation
+                    ? marked : FindFrontLivingEnemy();
+                if (shotTarget != null && !WaveTransitionActive) LaunchAimedShot(actor, shotTarget, power, false);
+                else PlayTransitionAttackWithoutTarget(actor, FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
+                return "Golden shot — applies Aimed on hit, including blocked hits";
+            }
             // Reacquire on the final input; never retain a target from preparation.
             var target = FindFrontLivingEnemy();
             if (target == null)

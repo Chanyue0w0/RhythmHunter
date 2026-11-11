@@ -75,6 +75,7 @@ namespace RhythmHunter.FightDemo
         internal void UnregisterBattleEffect(FightBattleEffect effect) => battleEffects.Remove(effect);
         private void ClearCombatEffectsKeepingDamageNumbers()
         {
+            ClearNormalImpacts();
             StopBattleAudio();
             ClearSkillVisuals();
             ClearStatusIconsExceptDeath(true);
@@ -89,6 +90,7 @@ namespace RhythmHunter.FightDemo
         }
         private void ClearBattleEffects()
         {
+            ClearNormalImpacts();
             StopBattleAudio();
             ClearSkillVisuals();
             ClearStatusIcons();

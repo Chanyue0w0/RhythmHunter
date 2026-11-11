@@ -11,6 +11,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightStatusIcon weakEffectIcon;
         [SerializeField] private FightStatusIcon bleedEffectIcon;
         [SerializeField] private FightStatusIcon deathEffectIcon;
+        [SerializeField] private FightStatusIcon aimedEffectIcon;
         [SerializeField, Min(0)] private int statusIconPrewarmPerType = 4;
         [SerializeField, Min(1)] private int maxBlockedEffectIcons = 32;
         [SerializeField, Min(0)] private float statusIconSpacing = .55f;
@@ -19,12 +20,12 @@ namespace RhythmHunter.FightDemo
         [Tooltip("額外圖示偏移；指定相機時 X=畫面右、Y=畫面上、Z=遠離相機。")]
         [SerializeField] private Vector3 statusIconOffset;
         private Transform statusIconRoot, statusIconStorage;
-        private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new(), new() };
+        private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new(), new(), new() };
         private readonly List<FightStatusIcon> activeStatusIcons = new();
         public int ActiveStatusIconCount => activeStatusIcons.Count;
         public int CreatedStatusIconCount { get; private set; }
 
-        private FightStatusIcon IconPrefab(int kind) => kind == 0 ? blockedEffectIcon : kind == 1 ? weakEffectIcon : kind == 2 ? bleedEffectIcon : deathEffectIcon;
+        private FightStatusIcon IconPrefab(int kind) => kind == 0 ? blockedEffectIcon : kind == 1 ? weakEffectIcon : kind == 2 ? bleedEffectIcon : kind == 3 ? deathEffectIcon : aimedEffectIcon;
 
         private void EnsureStatusIconPool()
         {
@@ -73,8 +74,20 @@ namespace RhythmHunter.FightDemo
             if (this == null || target == null) return;
             bool visible = isActiveAndEnabled && showStatusIcons && !battleEnded && target.gameObject.activeInHierarchy && target.HasCharacter && target.CurrentHp > 0;
             bool weak = visible && target.IsFragile, bleed = visible && target.BleedBeatsRemaining > 0;
-            SyncStatusIcon(target, 1, weak, weak && bleed ? -statusIconSpacing * .5f : 0);
-            SyncStatusIcon(target, 2, bleed, weak && bleed ? statusIconSpacing * .5f : 0);
+            bool aimed = visible && target.HasAimed;
+            int count = (weak ? 1 : 0) + (bleed ? 1 : 0) + (aimed ? 1 : 0), lane = 0;
+            SyncStatusIcon(target, 1, weak, weak ? (lane++ - (count - 1) * .5f) * statusIconSpacing : 0);
+            SyncStatusIcon(target, 2, bleed, bleed ? (lane++ - (count - 1) * .5f) * statusIconSpacing : 0);
+            SyncStatusIcon(target, 4, aimed, aimed ? (lane - (count - 1) * .5f) * statusIconSpacing : 0);
+            foreach (var icon in activeStatusIcons)
+                if (icon != null && icon.Target == target && icon.Kind == 4) icon.SetAimedAppearance(target.HasGoldAimed);
+        }
+
+        public void PulseAimedIcon(FightUnitSlot target)
+        {
+            RefreshStatusIcons(target);
+            foreach (var icon in activeStatusIcons)
+                if (icon != null && icon.Target == target && icon.Kind == 4) { icon.Trigger(false); return; }
         }
 
         private void SyncStatusIcon(FightUnitSlot target, int kind, bool wanted, float lane)
