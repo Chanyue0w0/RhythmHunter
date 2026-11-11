@@ -47,8 +47,10 @@ namespace RhythmHunter.FightDemoEditor
         {
             // Keep the authored battle VFX preview policy unchanged. Other purchased
             // particle prefabs automatically get the universal renderer, without asset edits.
-            return stage != null && !stage.assetPath.StartsWith("Assets/FightDemo/Prefabs/VFX/") &&
-                stage.prefabContentsRoot != null &&
+            if (stage == null || stage.prefabContentsRoot == null) return false;
+            var settings = stage.prefabContentsRoot.GetComponent<RhythmHunter.FightDemo.FightEffectSettings>();
+            bool spatialEffect = settings != null && settings.spawnOrientation == RhythmHunter.FightDemo.FightEffectSettings.SpawnOrientation.WorldUpright;
+            return (spatialEffect || !stage.assetPath.StartsWith("Assets/FightDemo/Prefabs/VFX/")) &&
                 stage.prefabContentsRoot.GetComponentInChildren<ParticleSystem>(true) != null;
         }
 

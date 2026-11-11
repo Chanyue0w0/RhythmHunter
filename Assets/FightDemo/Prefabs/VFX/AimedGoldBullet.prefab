@@ -14452,7 +14452,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: fbf262426f371d34eba7313337052371, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.97960603, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -14492,6 +14492,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightEffectSettings
   destroyAfterParticles: 0
+  spawnOrientation: 0
+  useOwnerFeet: 0
+  spawnOffset: {x: 0, y: 0, z: 0}
+  followPositionOnly: 0
   flyToTarget: 1
   flightBeats: 0.4
   forwardSpawnDistance: 0.25

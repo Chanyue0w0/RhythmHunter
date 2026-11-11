@@ -149,7 +149,7 @@ MonoBehaviour:
   aimedGreenBeats: 4
   aimedGoldBeats: 8
   aimedFollowUpDamage: 1
-  aimedPreparationEffect: {fileID: 4322276170900854079, guid: 43866926db4e59c4591ebb297d0438ac, type: 3}
+  aimedPreparationEffect: {fileID: 1517168813687633172, guid: 11a528c9decfd7c4dba726f40ed8462c, type: 3}
   aimedPreparationEffectLifetime: 0.5
   aimedGoldProjectile: {fileID: 4474199922380967310, guid: 8737dba6d958ac24987ac65d7fbc908b, type: 3}
   aimedTargetEffect: {fileID: 0}

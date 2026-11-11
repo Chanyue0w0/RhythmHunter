@@ -8,6 +8,14 @@ namespace RhythmHunter.FightDemo
     {
         [Tooltip("Wait for all child particles to finish, then use the battle effect cleanup path.")]
         public bool destroyAfterParticles;
+        public enum SpawnOrientation { Anchor, Prefab, WorldUpright }
+        [Header("Placement (configured abilities)")]
+        public SpawnOrientation spawnOrientation;
+        [Tooltip("Use the owner's FootAnchor instead of the supplied cast/impact anchor. For self auras only.")]
+        public bool useOwnerFeet;
+        [Tooltip("Offset in the chosen effect orientation, independent of the character's scale.")]
+        public Vector3 spawnOffset;
+        public bool followPositionOnly;
         [Header("Normal attack projectile")]
         public bool flyToTarget;
         [Min(.01f)] public float flightBeats = .6f;

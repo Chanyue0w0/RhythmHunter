@@ -43,8 +43,18 @@ namespace RhythmHunter.FightDemo
                 return;
 
             Transform spawn = anchor != null ? anchor : transform;
-            GameObject effect = Instantiate(effectPrefab, spawn.position, spawn.rotation);
+            var settings = effectPrefab.GetComponent<FightEffectSettings>();
+            var slot = GetComponent<FightUnitSlot>() ?? GetComponentInParent<FightUnitSlot>();
+            if (settings != null && settings.useOwnerFeet && slot != null && slot.ActorInstance != null)
+                spawn = slot.ActorInstance.transform.Find("FootAnchor") ?? slot.ActorInstance.transform;
+            Quaternion rotation = FightEffectPlacement.Rotation(settings, effectPrefab.transform, spawn);
+            Vector3 offset = settings != null ? rotation * settings.spawnOffset : Vector3.zero;
+            GameObject effect = Instantiate(effectPrefab, spawn.position + offset, rotation);
             SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
+            if (settings != null && settings.followPositionOnly)
+                (effect.GetComponent<FightEffectPlacement>() ?? effect.AddComponent<FightEffectPlacement>()).Bind(spawn, offset);
+            var occlusion = effect.GetComponent<FightAuraOcclusion>();
+            if (occlusion != null && slot != null) occlusion.Bind(slot.CombatAnimator != null ? slot.CombatAnimator.TargetRenderer : null);
             effect.SetActive(true);
 
             FightAttackEffect attackEffect = effect.GetComponent<FightAttackEffect>();
