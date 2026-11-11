@@ -274,6 +274,22 @@ namespace RhythmHunter.FightDemo
         }
         private double idlePausedBeats, pauseBeatPosition;
         public bool PlaybackPaused => playbackPaused;
+        private bool visualSequence, loopVisualSequence, visualSequenceComplete;
+
+        // Reuses the same frame stepping, tempo, pause and sprite texture binding as characters.
+        // No gameplay callbacks are registered for auxiliary visuals such as weapons.
+        public bool PlayVisualSequence(SpriteRenderer renderer, Sequence sequence, bool loop)
+        {
+            if (renderer == null || sequence == null || sequence.Frames.Count == 0) return false;
+            FinishActiveSequence(false);
+            targetRenderer = renderer;
+            activeSequence = sequence;
+            activeFrame = 0; frameElapsed = 0;
+            visualSequence = true; loopVisualSequence = loop; visualSequenceComplete = false;
+            playbackVersion++;
+            EnterFrame(0);
+            return true;
+        }
 
         public void SetPlaybackPaused(bool paused)
         {
@@ -540,6 +556,7 @@ namespace RhythmHunter.FightDemo
         {
             if (playbackPaused) return;
             RefreshSongTempo();
+            if (visualSequenceComplete) return;
             if (activeSequence == null)
             {
                 UpdateIdle();
@@ -565,6 +582,11 @@ namespace RhythmHunter.FightDemo
                 int nextFrame = activeFrame + 1;
                 if (nextFrame >= activeSequence.Frames.Count)
                 {
+                    if (visualSequence)
+                    {
+                        if (loopVisualSequence) { EnterFrame(0); continue; }
+                        visualSequenceComplete = true; frameElapsed = 0; return;
+                    }
                     FinishActiveSequence(true);
                     return;
                 }
@@ -639,6 +661,7 @@ namespace RhythmHunter.FightDemo
             bool raiseDamage = flushGameplayEvents && !damageRaised && activeSequence.DamageFrame >= 0;
             playbackVersion++;
             activeSequence = null;
+            visualSequence = loopVisualSequence = visualSequenceComplete = false;
             warningCallback = null;
             attackEffectCallback = null;
             frameEffectCallback = null;

@@ -11,6 +11,20 @@ namespace RhythmHunter.FightDemo
         private FightWeaponVisual weapon;
         private Transform anchor;
         private bool flipX, flipY;
+        private string requestedAnimationState;
+        public bool SetWeaponAnimationState(string stateId)
+        {
+            if (weapon != null && !weapon.SetWeaponAnimationState(stateId)) return false;
+            requestedAnimationState = stateId;
+            return true;
+        }
+        public bool SetWeaponChargeStage(FightWeaponVisual.ChargeStage stage)
+        {
+            if (weapon == null) return false;
+            bool changed = weapon.SetWeaponChargeStage(stage);
+            if (changed) requestedAnimationState = weapon.CurrentStateId;
+            return changed;
+        }
         public FightWeaponVisual Weapon => weapon;
         public WeaponAttachmentData Data => attachmentData;
         public FightWeaponVisual Prefab => weaponPrefab;
@@ -45,10 +59,13 @@ namespace RhythmHunter.FightDemo
                 anchor.SetParent(characterAnimator.TargetRenderer.transform, false);
             }
             weapon = Instantiate(prefab, anchor, false);
+            weapon.BindAnimationSource(characterAnimator);
+            if (requestedAnimationState != null) weapon.SetWeaponAnimationState(requestedAnimationState);
             if (Application.isPlaying)
                 foreach (var presentation in FindObjectsByType<Art2.Art2ActorPresentation>(FindObjectsSortMode.None))
                     if (presentation.isActiveAndEnabled && presentation.gameObject.scene == gameObject.scene)
-                        presentation.RegisterWeaponRenderer(weapon.Renderer);
+                        foreach (var renderer in weapon.GetComponentsInChildren<SpriteRenderer>(true))
+                            presentation.RegisterWeaponRenderer(renderer);
             if (weapon.Renderer != null && weapon.Renderer.sprite != null)
             {
                 var properties = new MaterialPropertyBlock();

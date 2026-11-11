@@ -3,7 +3,8 @@ using UnityEngine;
 namespace RhythmHunter.FightDemo
 {
     // A weapon remains a single combined hand + weapon sprite. No combat events live here.
-    public sealed class FightWeaponVisual : MonoBehaviour
+    [DefaultExecutionOrder(-10)]
+    public sealed partial class FightWeaponVisual : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer spriteRenderer;
         [Tooltip("Grip in the weapon root's local units. Does not change the source sprite pivot.")]

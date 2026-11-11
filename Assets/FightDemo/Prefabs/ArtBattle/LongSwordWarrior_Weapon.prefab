@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2052762948902822046, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_Name
-      value: Warrior_WeaponPrototype
+      value: LongSwordWarrior_Weapon
       objectReference: {fileID: 0}
     - target: {fileID: 3114776657493095983, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_Sprite
@@ -322,4 +322,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightWeaponAttachment
   characterAnimator: {fileID: 171498678944177670}
   attachmentData: {fileID: 11400000, guid: 6084499d349fb574594df21fcf17f3d5, type: 2}
-  weaponPrefab: {fileID: 5893797948898326619, guid: 25c5cc5bee2e4f645affeb00dd028cf0, type: 3}
+  weaponPrefab: {fileID: 821360242863731885, guid: 50773fe191a743f48a5d440652cbb24f, type: 3}

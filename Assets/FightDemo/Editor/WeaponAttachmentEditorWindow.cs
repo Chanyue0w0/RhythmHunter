@@ -18,6 +18,8 @@ namespace RhythmHunter.FightDemoEditor
         private bool snap = true, playing, unsavedPose, mirrorX, mirrorY;
         private float zoom = 100, previewBpm = 120;
         private double lastTime, elapsed;
+        private int weaponState;
+        private double weaponPreviewBeats;
         private PreviewRenderUtility preview;
         private SpriteRenderer bodyPreview, weaponPreview;
         private Material previewMaterial;
@@ -162,6 +164,7 @@ namespace RhythmHunter.FightDemoEditor
         {
             double now = EditorApplication.timeSinceStartup, delta = now - lastTime; lastTime = now;
             if (!playing || animator == null || Frames.Count == 0) return;
+            weaponPreviewBeats += delta * previewBpm / 60d;
             elapsed += delta;
             var sequence = Source < 0 ? null : animator.FindSequence((FightCharacterCombatAnimator.CombatAnimation)Source);
             var serialized = new SerializedObject(animator);
@@ -231,6 +234,14 @@ namespace RhythmHunter.FightDemoEditor
                 if (!string.IsNullOrEmpty(path)) { data = CreateInstance<WeaponAttachmentData>(); AssetDatabase.CreateAsset(data, path); LoadPose(); }
             }
             weaponPrefab = (FightWeaponVisual)EditorGUILayout.ObjectField("武器 Prefab", weaponPrefab, typeof(FightWeaponVisual), false);
+            if (weaponPrefab != null && weaponPrefab.AnimationStates.Count > 0)
+            {
+                var names = new List<string>();
+                foreach (var state in weaponPrefab.AnimationStates) names.Add(state != null ? state.stateId : "(empty)");
+                int selectedState = EditorGUILayout.Popup("武器動畫狀態", Mathf.Clamp(weaponState, 0, names.Count - 1), names.ToArray());
+                if (selectedState != weaponState) { weaponState = selectedState; weaponPreviewBeats = 0; }
+                EditorGUILayout.HelpBox("此視窗預覽武器 Sprite 與定位；齒輪及粒子請在 Prefab／Play 中預覽。", MessageType.None);
+            }
             }
             int nextSource = EditorGUILayout.Popup("角色動畫", sourceChoice, labels.ToArray());
             if (nextSource != sourceChoice) { if (unsavedPose) SavePose(); sourceChoice = nextSource; frame = 0; elapsed = 0; LoadPose(); }
@@ -288,6 +299,23 @@ namespace RhythmHunter.FightDemoEditor
                     AssetDatabase.SaveAssets();
                 }
         }
+        private Sprite PreviewWeaponSprite()
+        {
+            if (weaponPrefab.AnimationStates.Count == 0) return weaponPrefab.Renderer?.sprite;
+            var state = weaponPrefab.AnimationStates[Mathf.Clamp(weaponState, 0, weaponPrefab.AnimationStates.Count - 1)];
+            if (state == null) return weaponPrefab.Renderer?.sprite;
+            var sequence = state.BuildSequence();
+            if (sequence.Frames.Count == 0) return weaponPrefab.Renderer?.sprite;
+            double total = 0;
+            for (int i = 0; i < sequence.Frames.Count; i++) total += sequence.GetFrameBeats(i);
+            double phase = state.loop ? weaponPreviewBeats % total : Math.Min(weaponPreviewBeats, total);
+            for (int i = 0; i < sequence.Frames.Count; i++)
+            {
+                phase -= sequence.GetFrameBeats(i);
+                if (phase < 0 || i == sequence.Frames.Count - 1) return sequence.Frames[i];
+            }
+            return sequence.Frames[0];
+        }
         private void EnsurePreview()
         {
             if (preview != null) return;
@@ -315,7 +343,7 @@ namespace RhythmHunter.FightDemoEditor
             {
                 bodyPreview.sprite = CurrentSprite;
                 bodyPreview.flipX = mirrorX; bodyPreview.flipY = mirrorY;
-                weaponPreview.sprite = weaponPrefab != null && pose.visible ? weaponPrefab.Renderer?.sprite : null;
+                weaponPreview.sprite = weaponPrefab != null && pose.visible ? PreviewWeaponSprite() : null;
                 if (weaponPrefab != null)
                 {
                     var rotation = Quaternion.Euler(0, 0, pose.rotation - weaponPrefab.ForwardAngle);
