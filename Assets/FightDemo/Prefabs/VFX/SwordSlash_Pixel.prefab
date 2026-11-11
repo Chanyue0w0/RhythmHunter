@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.44933495, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7144598328821449544}
@@ -5012,6 +5012,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightEffectSettings
   destroyAfterParticles: 1
+  spawnOrientation: 0
+  useOwnerFeet: 0
+  spawnOffset: {x: 0, y: 0, z: 0}
+  followPositionOnly: 0
+  flyToTarget: 0
+  flightBeats: 0.6
+  forwardSpawnDistance: 0.25
   onHitPrefab: {fileID: 6979637366035971696, guid: 212baa71c8eaf55459ac92e19170b711, type: 3}
   onHitLifetime: 1.5
 --- !u!1 &6978022340649210885

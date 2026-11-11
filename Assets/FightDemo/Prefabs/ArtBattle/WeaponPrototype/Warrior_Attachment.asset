@@ -58,12 +58,12 @@ MonoBehaviour:
     rotation: 90
     visible: 1
   - frameId: 405698cbc7074a60b937af2a9a886ea4
-    position: {x: 0.35, y: 0.25}
-    rotation: 90
+    position: {x: -1.6, y: -0.22}
+    rotation: 135
     visible: 1
   - frameId: b85417553abc4ba5878f10214b98b073
-    position: {x: 0.35, y: 0.25}
-    rotation: 90
+    position: {x: -0.98, y: 0.69}
+    rotation: 104.81347
     visible: 1
   - frameId: e3581113680f409695bcdb8290fd92c7
     position: {x: 0.35, y: 0.25}

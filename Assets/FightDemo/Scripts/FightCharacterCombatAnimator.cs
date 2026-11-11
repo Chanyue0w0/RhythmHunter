@@ -23,7 +23,8 @@ namespace RhythmHunter.FightDemo
             [InspectorName("Die")] Death = 6,
             [InspectorName("Opening Idle")] OpeningIdle = 7,
             [InspectorName("Drink")] Drink = 8,
-            [InspectorName("Aim")] Aim = 9
+            [InspectorName("Aim")] Aim = 9,
+            [InspectorName("Charged Normal")] ChargedNormalAttack = 10
         }
 
         public enum EffectLocation { Self, AttackTarget }

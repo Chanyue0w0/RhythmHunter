@@ -449,6 +449,7 @@ namespace RhythmHunter.FightDemo
             UpdateBattleEntrance();
             UpdateSkillVisualPause();
             UpdateNormalImpacts();
+            UpdateSwordStreaks();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
             UpdateTeamSkillBurst();
@@ -463,6 +464,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            ResetSwordCharges();
             ResetDamageNumberPool();
             entrancePending = false;
             ResetTeamSkill();
@@ -566,7 +568,8 @@ namespace RhythmHunter.FightDemo
         {
             bool perfect = judgement.Judgement == FmodRhythmJudge.Grade.Perfect;
             TrackAimedShotJudgement(hero.UnitSlot, judgement);
-            hero.UnitSlot.PlayInputFeedback(perfect);
+            TrackSwordJudgement(hero.UnitSlot, judgement);
+            hero.UnitSlot.PlayInputFeedback(perfect, GetSwordChargeStage(hero.UnitSlot) == 3);
             if (!perfect)
             {
                 HeroCalled?.Invoke(new HeroCallResult(command, judgement, false, false, judgement.Message));
@@ -671,6 +674,10 @@ namespace RhythmHunter.FightDemo
                 return PerformAimedShot(actor, power, globalBeat);
             if (actor.CharacterDefinition != null && !WaveTransitionActive)
                 ApplyBossBreak(skill ? actor.CharacterDefinition.SkillBreakPower : actor.CharacterDefinition.BasicBreakPower, globalBeat);
+
+            if (!skill && UsesEqualBeats && actor.CharacterDefinition != null && actor.CharacterDefinition.EnableSwordCharge &&
+                behavior == FightCharacterDefinition.AbilityBehavior.DamageFront)
+                return PerformSwordAttack(actor, power, globalBeat);
 
             switch (behavior)
             {
@@ -1520,7 +1527,9 @@ namespace RhythmHunter.FightDemo
             FightUnitSlot target,
             float damage,
             bool skill = true,
-            bool aimedFollowUp = false)
+            bool aimedFollowUp = false,
+            GameObject onHitOverride = null,
+            GameObject additionalOnHitEffect = null)
         {
             if (!IsCurrentHeroAction(expectedRosterVersion, attacker, target) || damage <= 0)
                 return;
@@ -1532,7 +1541,15 @@ namespace RhythmHunter.FightDemo
                 float dealt = target.TakeDamage(ModifyBossDamage(target, damage));
                 if (!aimedFollowUp && target.CurrentHp > 0) target.NotifyAimedDirectHit(attacker);
                 if (dealt > 0 || IsBurstRetainedTarget(target) && ModifyBossDamage(target, damage) > 0)
-                    attacker.PlayOnHitEffect(skill, target.ImpactEffectAnchor);
+                {
+                    if (onHitOverride != null)
+                        attacker.EffectPlayer.SpawnConfiguredAbility(onHitOverride, target.ImpactEffectAnchor, 0,
+                            FightAttackEffect.VisualStyle.Light, Color.white);
+                    else attacker.PlayOnHitEffect(skill, target.ImpactEffectAnchor);
+                    if (additionalOnHitEffect != null)
+                        attacker.EffectPlayer.SpawnConfiguredAbility(additionalOnHitEffect, target.ImpactEffectAnchor, 0,
+                            FightAttackEffect.VisualStyle.Light, Color.white);
+                }
                 if (wasAlive) CancelDefeatedEnemyAttack(target);
                 target.PlayCombatAnimation(
                     FightCharacterCombatAnimator.CombatAnimation.Hit,

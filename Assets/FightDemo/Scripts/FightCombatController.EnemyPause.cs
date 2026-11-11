@@ -53,6 +53,9 @@ namespace RhythmHunter.FightDemo
             EnemyActionsPaused = false;
             if (resumeAttack && aimedShotProgress > 0)
                 lastAimedShotBeat = latestCombatBeat - 1;
+            if (resumeAttack)
+                foreach (var state in swordCharges.Values)
+                    if (state.lastCall != long.MinValue) state.lastCall = latestCombatBeat - 1;
             if (resumeAttack) ResumeScheduledEnemyHits();
             foreach (var animator in frozenEnemyAnimators)
                 if (animator != null) animator.SetPlaybackPaused(false);

@@ -39,6 +39,7 @@ namespace RhythmHunter.FightDemo
             waveWaitBeatsRemaining = Mathf.Max(0, waveTransitionWaitBeats);
             lastWaveWaitBeat = latestCombatBeat;
             ResetBasicAbilityProgress();
+            BreakSwordStreaks();
             CancelEnemyCombatWork();
             float restored = RecoverPartyArmor(FightCharacterDefinition.ArmorRestoreMode.Full);
             if (restored > 0 && waveArmorRecoveryEffect != null && tankSlot != null)
@@ -86,6 +87,7 @@ namespace RhythmHunter.FightDemo
                 beat.GlobalBeat <= lastNormalBattleBeat) return;
             lastNormalBattleBeat = beat.GlobalBeat;
             NormalBattleBeatCount++;
+            AdvanceSwordChargeBeat();
             AdvanceWavePressureBeat();
             foreach (var enemy in fightScene2Enemies.ToArray())
             {
@@ -115,6 +117,7 @@ namespace RhythmHunter.FightDemo
         {
             if (battleEnded) return;
             battleEnded = true;
+            ResetSwordCharges();
             BattleWon = won;
             AwaitingNextWave = false;
             waveWaitBeatsRemaining = 0;

@@ -17,6 +17,8 @@ namespace RhythmHunter.FightDemo
             public double progress;
             public FightUnitSlot actor, target;
             public Action resolve;
+            public Action onCancelled;
+            public float delayBeats;
             public GameObject projectile;
             public Vector3 origin;
         }
@@ -85,11 +87,13 @@ namespace RhythmHunter.FightDemo
                 effect => { if (effect.location == FightCharacterCombatAnimator.EffectLocation.Self) actor.PlayFrameEffect(effect); });
         }
 
-        private void ScheduleNormalImpact(FightUnitSlot actor, FightUnitSlot target, Action resolve, GameObject projectile = null)
+        private void ScheduleNormalImpact(FightUnitSlot actor, FightUnitSlot target, Action resolve, GameObject projectile = null,
+            float delayBeats = -1, Action onCancelled = null)
         {
             if (normalImpacts.Count == 0 && beatClock != null)
                 hasNormalImpactTime = beatClock.TryGetTimelinePositionMs(out normalImpactLastMs);
             normalImpacts.Add(new NormalImpact { roster = rosterVersion, actor = actor, target = target, resolve = resolve,
+                delayBeats = delayBeats < 0 ? normalAttackImpactBeats : delayBeats, onCancelled = onCancelled,
                 projectile = projectile, origin = projectile != null ? projectile.transform.position : Vector3.zero });
         }
 
@@ -109,12 +113,13 @@ namespace RhythmHunter.FightDemo
                 var hit = normalImpacts[i];
                 bool valid = !battleEnded && IsCurrentHeroAction(hit.roster, hit.actor, hit.target) && hit.target.CurrentHp > 0;
                 hit.progress += beats;
-                float progress = Mathf.Clamp01((float)(hit.progress / Mathf.Max(.01f, normalAttackImpactBeats)));
+                float progress = Mathf.Clamp01((float)(hit.progress / Mathf.Max(.01f, hit.delayBeats)));
                 if (valid && hit.projectile != null) hit.projectile.transform.position = Vector3.Lerp(hit.origin, hit.target.ImpactEffectAnchor.position, progress);
                 if (valid && progress < 1) { i++; continue; }
                 normalImpacts.RemoveAt(i);
                 if (hit.projectile != null) hit.projectile.GetComponent<FightBattleEffect>().Cancel();
                 if (valid) hit.resolve?.Invoke();
+                else hit.onCancelled?.Invoke();
                 // A lethal hit can synchronously clear/rebuild the wave and this list.
             }
         }

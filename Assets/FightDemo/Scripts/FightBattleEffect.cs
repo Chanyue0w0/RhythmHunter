@@ -90,6 +90,7 @@ namespace RhythmHunter.FightDemo
         }
         private void ClearBattleEffects()
         {
+            ResetSwordCharges();
             ClearNormalImpacts();
             StopBattleAudio();
             ClearSkillVisuals();

@@ -169,7 +169,7 @@ namespace RhythmHunter.FightDemoEditor
                 Set(fight, "bossActor", null);
                 enemy.ApplyAimed(shooter, true);
                 int hits = 0;
-                Invoke(fight, "ScheduleNormalImpact", warrior, enemy, (Action)(() => hits++), null);
+                Invoke(fight, "ScheduleNormalImpact", warrior, enemy, (Action)(() => hits++), null, -1f, null);
                 Invoke(fight, "TriggerAimedFollowUp", warrior);
                 Invoke(fight, "AdvanceNormalImpacts", .39d);
                 Check(hits == 0 && enemy.CurrentHp == before, "Melee and follow-up both wait for impact");

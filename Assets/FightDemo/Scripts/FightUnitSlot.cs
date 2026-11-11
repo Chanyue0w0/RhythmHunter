@@ -522,13 +522,16 @@ namespace RhythmHunter.FightDemo
             receiver.SpawnGuardLayer(new Color(0.15f, 0.85f, 1f, 0.58f), 0.95f, 0.95f, 2.25f, -150f, 45f);
         }
 
-        public void PlayInputFeedback(bool onBeat)
+        public void PlayInputFeedback(bool onBeat, bool suppressJump = false)
         {
             if (onBeat)
                 onBeatFeedbackPlayCount++;
             else
                 missFeedbackPlayCount++;
-            BeginInputFeedback(onBeat);
+            if (onBeat && suppressJump)
+                ResetInputFeedback();
+            else
+                BeginInputFeedback(onBeat);
         }
 
         // Entrance presentation reuses the attack hop without recording a successful input.
