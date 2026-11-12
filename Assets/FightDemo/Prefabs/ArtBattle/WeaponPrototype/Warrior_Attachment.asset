@@ -38,8 +38,8 @@ MonoBehaviour:
     rotation: 61.1892
     visible: 1
   - frameId: bd89680b38ba4461888ed0ceca84e73a
-    position: {x: -2.14, y: -1.69}
-    rotation: -161.92769
+    position: {x: -2.03, y: -1.41}
+    rotation: -171.14204
     visible: 1
   - frameId: d5cf4af1c36f4547a974c1bd3a43f3d2
     position: {x: -1.48, y: -0.02}
@@ -66,8 +66,8 @@ MonoBehaviour:
     rotation: 104.81347
     visible: 1
   - frameId: e3581113680f409695bcdb8290fd92c7
-    position: {x: 0.35, y: 0.25}
-    rotation: 90
+    position: {x: 1.8, y: -1.9}
+    rotation: -25.40772
     visible: 1
   - frameId: 7396f219a1754b01b0d3654fec4429bf
     position: {x: 0.35, y: 0.25}
