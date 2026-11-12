@@ -21,11 +21,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(.01f)] private float pressureReductionSlideBeats = .15f;
         [SerializeField] private Color pressureBarColor = new(1, .18f, .12f, 1);
         [SerializeField] private Color pressureBarEmptyColor = new(.12f, .025f, .025f, .8f);
-        [SerializeField, Range(0, 1)] private float pressureWarningOpacity = .6f;
-        [SerializeField, Range(.01f, 1)] private float pressureRevealBeats = .2f;
         [SerializeField] private Vector2 pressureBeatShake = new(0, 2);
         [SerializeField] private Vector2 pressureBreakShake = new(10, 5);
         [SerializeField, Range(.05f, 1)] private float pressureShakeBeats = .4f;
+        [Header("Pressure UI Warning (Bar + Icon)")]
+        [SerializeField, Min(0), InspectorName("UI Warning Lead Beats")] private float pressureIconLeadBeats = 1;
+        [SerializeField, Min(.01f), InspectorName("UI Reveal Beats")] private float pressureIconRevealBeats = .15f;
+        private CanvasGroup pressureIconGroup;
         private RectTransform pressureBarRoot;
         private CanvasGroup pressureBarGroup;
         private Image pressureBarIcon;
@@ -59,6 +61,9 @@ namespace RhythmHunter.FightDemo
             pressureRightEdge = CreatePressureImage("PressureRightEdge");
             pressureBarIcon = new GameObject("PressuredEffectIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
             pressureBarIcon.transform.SetParent(pressureBarRoot, false);
+            pressureIconGroup = pressureBarIcon.gameObject.AddComponent<CanvasGroup>();
+            pressureIconGroup.ignoreParentGroups = false;
+            pressureIconGroup.blocksRaycasts = pressureIconGroup.interactable = false;
             pressureBarIcon.raycastTarget = false;
             pressureBarIcon.preserveAspect = true;
             pressureBarIcon.rectTransform.pivot = new Vector2(.5f, 0);
@@ -105,7 +110,9 @@ namespace RhythmHunter.FightDemo
             }
             // Keep an emptied bar just long enough to show the final player-caused break.
             bool finishing = fight.PressureRestActive && (trail > .0001f || timing && beat < pressureBreakBeat + pressureShakeBeats);
-            bool visible = showPressureDurationBar && fight.isActiveAndEnabled && (fight.PressureVisualsActive || finishing);
+            double untilStart = fight.PressureNextStartBeat - fight.WaveCombatBeatCount - pressureLastPhase;
+            bool uiWarning = fight.PressureWarningActive && untilStart <= pressureIconLeadBeats;
+            bool visible = showPressureDurationBar && fight.isActiveAndEnabled && (fight.PressurePhaseActive || uiWarning || finishing);
             if (!visible)
             {
                 if (pressureBarRoot != null) pressureBarRoot.gameObject.SetActive(false);
@@ -125,11 +132,7 @@ namespace RhythmHunter.FightDemo
             pressureBarGroup.alpha = 1;
             if (fight.PressureWarningActive)
             {
-                double warningRemaining = fight.PressureNextStartBeat - fight.WaveCombatBeatCount - phase;
-                float progress = Mathf.Clamp01(1 - (float)warningRemaining / Mathf.Max(1, fight.PressureWarningLeadBeats));
-                pressureBarGroup.alpha = warningRemaining <= pressureRevealBeats
-                    ? Mathf.Lerp(pressureWarningOpacity, 1, 1 - (float)warningRemaining / pressureRevealBeats)
-                    : pressureWarningOpacity * progress;
+                pressureBarGroup.alpha = Mathf.Clamp01((pressureIconLeadBeats - (float)untilStart) / Mathf.Max(.01f, pressureIconRevealBeats));
                 pressureBarRoot.anchoredPosition = pressureBarOffset;
             }
             float remaining = fight.PressureWarningActive ? 1 : fight.PressurePhaseActive
@@ -158,10 +161,11 @@ namespace RhythmHunter.FightDemo
                 pressureBarIcon.color = source != null ? source.color : Color.white;
             }
             pressureBarIcon.enabled = showPressureStoneIcon && pressureBarIcon.sprite != null;
+            pressureIconGroup.alpha = 1;
             float iconPulse = fight.PressurePhaseActive ? Mathf.Sin(Mathf.PI * Mathf.Clamp01((float)phase / pressureStonePulseBeats)) : 0;
             pressureBarIcon.rectTransform.sizeDelta = pressureStoneIconSize;
-            pressureBarIcon.rectTransform.anchoredPosition = pressureStoneIconOffset + Vector2.up *
-                (pressureBarSize.y * .5f + iconPulse * pressureStoneJumpHeight);
+            pressureBarIcon.rectTransform.anchoredPosition = new Vector2(pressureStoneIconOffset.x,
+                pressureBarSize.y * .5f + Mathf.Max(0, pressureStoneIconOffset.y));
             pressureBarIcon.rectTransform.localScale = Vector3.one * (1 + iconPulse * pressureStonePulseAmount);
         }
     }

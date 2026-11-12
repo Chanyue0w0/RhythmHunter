@@ -46,7 +46,6 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector2 pressureStoneIconOffset = Vector2.zero;
         [SerializeField, Range(0, 1)] private float pressureStonePulseAmount = .3f;
         [SerializeField, Range(.05f, 1)] private float pressureStonePulseBeats = .35f;
-        [SerializeField, Min(0)] private float pressureStoneJumpHeight = 5;
 
 
         [Header("Accepted Beat Point Feedback")]

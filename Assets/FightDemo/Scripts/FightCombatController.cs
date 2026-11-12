@@ -895,6 +895,7 @@ namespace RhythmHunter.FightDemo
             pendingAttackBar = beat.Bar;
             pendingAttackTimelineMs = beat.TimelinePositionMs;
             pendingEnemyAttacker = activeEnemySlot;
+            pendingEnemyGuardChip = CurrentPressureGuardChip;
             pendingEnemyAnimationDriven = false;
             int windup = activeEnemySlot != null && activeEnemySlot.CharacterDefinition != null
                 ? activeEnemySlot.CharacterDefinition.AttackWindupBeats : 0;
@@ -974,12 +975,11 @@ namespace RhythmHunter.FightDemo
                 ? Mathf.Max(0.5f, attacker.AttackPower)
                 : enemyAttackDamage;
             if (pendingBossDamage > 0) configuredDamage = pendingBossDamage;
-            float damage = blocked || !HealthSystemEnabled ? 0f : QuantizeCombatValue(configuredDamage);
+            float damage = ResolveEnemyHitDamage(configuredDamage, blocked, pendingEnemyGuardChip);
 
             if (blocked)
             {
                 blockedAttackCount++;
-                RecordPressureBlock();
                 PlaySuccessfulBlockFeedback();
             }
             else
@@ -994,7 +994,7 @@ namespace RhythmHunter.FightDemo
             if (HealthSystemEnabled)
             {
                 if (UsesEqualBeats)
-                    ApplyPartyDamage(damage, pendingAttackGlobalBeat);
+                    damage = ApplyEnemyPartyDamage(damage, blocked, pendingAttackGlobalBeat);
                 else
                     partyHp = Mathf.Max(0f, partyHp - damage);
                 if (damage > 0 && attacker != null && tankSlot != null)
@@ -1016,6 +1016,7 @@ namespace RhythmHunter.FightDemo
             pendingEnemyAttack = false;
             pendingEnemyAnimationDriven = false;
             pendingEnemyAttacker = null;
+            if (blocked) RecordPressureBlock();
             pendingAttackRosterVersion = -1;
             pendingEnemyActionId = long.MinValue;
             EnemyAttackResolved?.Invoke(new EnemyAttackResult(

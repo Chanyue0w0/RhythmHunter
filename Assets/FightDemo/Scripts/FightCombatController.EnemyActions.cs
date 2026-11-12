@@ -13,6 +13,7 @@ namespace RhythmHunter.FightDemo
             public long hitBeat = long.MaxValue;
             public int timeline, bar, version;
             public float damage;
+            public float guardChip;
             public bool launched, interruptible;
         }
         private readonly List<ScheduledEnemyHit> enemyHits = new();
@@ -46,7 +47,7 @@ namespace RhythmHunter.FightDemo
             RecordEnemyActionCadence(source);
             enemyHits.Add(new ScheduledEnemyHit { source = source,
                 due = NormalBattleBeatCount + definition.AttackWindupBeats,
-                version = rosterVersion, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
+                version = rosterVersion, guardChip = CurrentPressureGuardChip, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
             int version = rosterVersion;
             bool Valid() => version == rosterVersion && !battleEnded && source != null && source.CurrentHp > 0;
             bool started = source.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.NormalAttack,
@@ -66,7 +67,7 @@ namespace RhythmHunter.FightDemo
             foreach (int offset in beatOffsets) if (offset < 1) return false;
             foreach (int offset in beatOffsets)
                 enemyHits.Add(new ScheduledEnemyHit { source = source, due = NormalBattleBeatCount + offset,
-                    version = rosterVersion, damage = damage, launched = launchedProjectile, interruptible = interruptible });
+                    version = rosterVersion, guardChip = CurrentPressureGuardChip, damage = damage, launched = launchedProjectile, interruptible = interruptible });
             source.PlayAttackFrameWarning(true);
             return true;
         }
@@ -86,7 +87,7 @@ namespace RhythmHunter.FightDemo
                 if (sequence.PlaysAttackEffectAt(i))
                 {
                     enemyHits.Add(new ScheduledEnemyHit { source = source, due = NormalBattleBeatCount + offset,
-                        version = rosterVersion, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
+                        version = rosterVersion, guardChip = CurrentPressureGuardChip, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
                     count++;
                 }
                 offset += sequence.GetFrameBeats(i);
@@ -155,9 +156,10 @@ namespace RhythmHunter.FightDemo
                 if (!blocked && timelineMs < hit.timeline + window) continue;
                 if (!enemyHits.Remove(hit) || hit.version != rosterVersion) continue;
                 if (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
-                float damage = blocked || !HealthSystemEnabled ? 0 : QuantizeCombatValue(hit.damage);
-                if (blocked) { blockedAttackCount++; RecordPressureBlock(); PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
-                ApplyPartyDamage(damage, hit.hitBeat);
+                float damage = ResolveEnemyHitDamage(hit.damage, blocked, hit.guardChip);
+                if (blocked) { blockedAttackCount++; PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
+                damage = ApplyEnemyPartyDamage(damage, blocked, hit.hitBeat);
+                if (blocked) RecordPressureBlock();
                 if (damage > 0 && hit.source != null && tankSlot != null)
                     hit.source.PlayOnHitEffect(false, tankSlot.ImpactEffectAnchor);
                 if (!blocked && !battleEnded) tankSlot?.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Hit, null, null, null);

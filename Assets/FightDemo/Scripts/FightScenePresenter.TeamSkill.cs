@@ -39,6 +39,7 @@ namespace RhythmHunter.FightDemo
             teamSkillPanel.gameObject.SetActive(true);
             UpdateTeamUltimateHud();
             string title = fight.TeamSkillRunning ? $"TEAM SKILL — {fight.TeamSkillBeatsRemaining} BEATS"
+                : fight.FeverBlockedByPressure ? $"FEVER LOCKED — PRESSURE  MP {fight.TeamSkillGaugeExact:0.#} / {fight.TeamSkillGaugeMax}"
                 : fight.TeamSkillReady ? $"TEAM SKILL READY  [A / R]  MP {fight.TeamSkillGaugeMax}"
                 : $"TEAM MANA  {fight.TeamSkillGaugeExact:0.#} / {fight.TeamSkillGaugeMax}";
             teamSkillLabel.text = title + "\n" + (fight.TeamUltimateRunning ? "Waiting for Ultimate performance" : fight.TeamSkillStatus);

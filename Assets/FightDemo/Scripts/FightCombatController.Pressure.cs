@@ -28,6 +28,32 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private int pressureRestBeats = 20;
         [SerializeField, Min(0)] private float ordinaryManaMultiplier = .5f;
         [SerializeField, Min(0)] private float pressureManaMultiplier = 2;
+        [Tooltip("Pressure 攻擊遭到格擋時仍造成的傷害，先扣護甲再扣 HP。未格擋不增傷；0 表示關閉。")]
+        [SerializeField, Min(0)] private float pressureGuardChipDamage = .5f;
+        [Header("Pressure Reward / Fever")]
+        [SerializeField] private bool refillManaAfterPressure = true;
+        [SerializeField] private bool blockFeverDuringPressure = true;
+        public bool FeverBlockedByPressure => blockFeverDuringPressure && PressurePhaseActive;
+        private bool pressureRewardPaid = true;
+        private float CurrentPressureGuardChip => PressurePhaseActive ? Mathf.Max(0, pressureGuardChipDamage) : 0;
+        private float pendingEnemyGuardChip;
+        private readonly HashSet<long> pressureChipHitBeats = new();
+        private float ApplyEnemyPartyDamage(float damage, bool blocked, long hitBeat)
+        {
+            if (blocked && pressureChipHitBeats.Contains(hitBeat)) return 0;
+            int version = rosterVersion;
+            float applied = ApplyPartyDamage(damage, hitBeat);
+            // Only actual guarded damage consumes this beat's allowance. Late callbacks
+            // retain their original hit beat; never deduplicate by frame or arrival order.
+            if (blocked && applied > 0 && version == rosterVersion) pressureChipHitBeats.Add(hitBeat);
+            return applied > 0 ? damage : 0;
+        }
+        private float ResolveEnemyHitDamage(float amount, bool blocked, float guardChip)
+        {
+            if (!HealthSystemEnabled) return 0;
+            float normalDamage = QuantizeCombatValue(amount);
+            return blocked ? Mathf.Min(normalDamage, QuantizeCombatValue(guardChip)) : normalDamage;
+        }
         private double pressureRemaining;
         private long pressureNextStart = -1, pressureRestUntil;
         private float pressureDamageProgress;
@@ -54,6 +80,8 @@ namespace RhythmHunter.FightDemo
 
         private void ResetWavePressure()
         {
+            pressureChipHitBeats.Clear();
+            pressureRewardPaid = true;
             ClearPressureCadence();
             WaveCombatBeatCount = 0;
             wavePressure = rosterManager != null
@@ -79,6 +107,7 @@ namespace RhythmHunter.FightDemo
             }
             else if (pressureNextStart >= 0 && WaveCombatBeatCount >= pressureNextStart)
             {
+                pressureRewardPaid = false;
                 pressureRemaining = Math.Max(1, wavePressure.durationBeats);
                 pressureDamageProgress = 0;
                 pressureBlockProgress = 0;
@@ -134,6 +163,16 @@ namespace RhythmHunter.FightDemo
                 CadenceFor(enemy).normalReady = NormalBattleBeatCount + Math.Max(0, pressureRestBeats);
             }
             pressureCadenceActive = false;
+            if (!pressureRewardPaid && !battleEnded && partyHp > 0)
+            {
+                pressureRewardPaid = true;
+                if (refillManaAfterPressure)
+                {
+                    teamSkillGauge = TeamSkillGaugeMax;
+                    teamSkillGaugeFraction = 0;
+                    TeamSkillStatus = "PRESSURE CLEARED — MP FULL";
+                }
+            }
         }
 
         private EnemyCadence CadenceFor(FightUnitSlot enemy)
