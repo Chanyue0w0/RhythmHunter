@@ -72,7 +72,11 @@
                     return half4(normalWS * 0.5h + 0.5h, color.a);
                 if (_SurfaceDebugMode > 1.5h)
                     color.rgb = half3(0.5h, 0.5h, 0.5h);
-                half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS), _DiffuseFloor) + _EmissionStrength);
+                // Opt-in per renderer: scenery defaults to zero, including shared-material users.
+                half facing = saturate(dot(normalWS, _CharacterFillDirection.xyz));
+                half3 fill = _CharacterFillColor.rgb * _CharacterFillColor.a *
+                    lerp(_CharacterFillDirection.w, 1.0h, facing);
+                half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS), _DiffuseFloor) + _EmissionStrength + fill);
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 rgb = FocusWallFog(rgb, focusWeight);
                 return half4(rgb, color.a);

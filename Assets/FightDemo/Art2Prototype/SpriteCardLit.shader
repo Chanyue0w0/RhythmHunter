@@ -13,6 +13,8 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         _AmbientStrength ("Ambient Strength", Range(0,2)) = 0.8
         _LightInfluence ("Light Influence", Range(0,2)) = 0.65
         _EmissionStrength ("Emission Strength", Range(0,4)) = 0
+        [PerRendererData] _CharacterFillColor ("Character Fill (RGB color, A intensity)", Color) = (0,0,0,0)
+        [PerRendererData] _CharacterFillDirection ("Character Fill Direction and Softness", Vector) = (0,1,-1,0.6)
         _BlurRadius ("Distant Blur (Source Pixels)", Range(0,2)) = 0
         _FocusSaturation ("Focus Saturation", Range(0,1)) = 1
         _FocusContrast ("Focus Contrast", Range(0,1)) = 1
@@ -30,6 +32,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
             float4 _MainTex_TexelSize;
             CBUFFER_START(UnityPerMaterial)
                 half4 _AmbientTint, _AtmosphereTint;
+                half4 _CharacterFillColor, _CharacterFillDirection;
                 half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix, _ShadowCutoff;
                 half _UseNormalMap, _NormalStrength, _DiffuseFloor, _SurfaceDebugMode;
                 half _FocusSaturation, _FocusContrast;

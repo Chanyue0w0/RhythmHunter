@@ -6,6 +6,9 @@ namespace RhythmHunter.FightDemo
     public sealed partial class FightCombatController
     {
         private FightEnemyPressureSettings wavePressure = new();
+        [UnityEngine.SerializeField, UnityEngine.Min(0)]
+        [UnityEngine.Tooltip("密集攻擊視覺提示提前幾個普通戰鬥拍開始；不改變敵人實際攻擊時程。0 表示不提前。")]
+        private int pressureWarningBeats = 5;
         private sealed class EnemyCadence
         {
             public double actionEnd;
@@ -18,6 +21,9 @@ namespace RhythmHunter.FightDemo
         public bool PressurePhaseEnabled => wavePressure.enablePressurePhase;
         public bool PressurePhaseActive => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive &&
             wavePressure.IsActiveAt(WaveCombatBeatCount);
+        public bool PressureWarningActive => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive &&
+            wavePressure.IsWarningAt(WaveCombatBeatCount, pressureWarningBeats);
+        public bool PressureVisualsActive => PressurePhaseActive || PressureWarningActive;
         public long PressurePhaseRemainingBeats => PressurePhaseActive ? wavePressure.RemainingAt(WaveCombatBeatCount) : 0;
         public long PressureNextStartBeat => battleEnded || AwaitingNextWave ? -1 : wavePressure.NextStartAt(WaveCombatBeatCount);
         public int PressureRecoveryBeats => wavePressure.recoveryBeats;

@@ -65,6 +65,14 @@ namespace RhythmHunter.FightDemo.Art2
             if (actorMaterial != null) renderer.sharedMaterial = actorMaterial;
             renderer.shadowCastingMode = castSpriteShadows ? UnityEngine.Rendering.ShadowCastingMode.TwoSided : UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = true;
+            RegisterFill(renderer);
+        }
+
+        private void RegisterFill(SpriteRenderer renderer)
+        {
+            var fill = GetComponent<Art2CharacterFillLighting>();
+            var slot = renderer.GetComponentInParent<FightUnitSlot>();
+            if (fill != null && slot != null) fill.Register(renderer, slot.Team);
         }
 
         private void LateUpdate()
@@ -96,6 +104,7 @@ namespace RhythmHunter.FightDemo.Art2
                     renderer.sortingLayerID = 0;
                     renderer.sortingOrder = 0;
                     if (actorMaterial != null) renderer.sharedMaterial = actorMaterial;
+                    RegisterFill(renderer);
                 }
             }
             // Run after initial grounding so even the first shadow frame uses the final feet.

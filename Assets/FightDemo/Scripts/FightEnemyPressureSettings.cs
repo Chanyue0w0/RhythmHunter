@@ -33,6 +33,13 @@ namespace RhythmHunter.FightDemo
 
         public bool IsActiveAt(long waveBeat) => RemainingAt(waveBeat) > 0;
 
+        public bool IsWarningAt(long waveBeat, int leadBeats)
+        {
+            if (leadBeats <= 0 || IsActiveAt(waveBeat)) return false;
+            long next = NextStartAt(waveBeat);
+            return next >= 0 && next > waveBeat && next - waveBeat <= leadBeats;
+        }
+
         public long RemainingAt(long waveBeat)
         {
             if (!enablePressurePhase || !Validate(out _) || waveBeat < startBeat) return 0;

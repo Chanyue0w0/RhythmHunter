@@ -190,6 +190,7 @@ namespace RhythmHunter.FightDemo
         private void OnDisable()
         {
             Unsubscribe();
+            if (pressureStoneIcon != null) pressureStoneIcon.gameObject.SetActive(false);
         }
 
         private void Unsubscribe()
@@ -645,7 +646,7 @@ namespace RhythmHunter.FightDemo
         {
             bool burst = fight != null && fight.TeamSkillBurstActive;
             Color color = burst ? Gold : HasTimelineArt ? Color.white : beatPointColor;
-            bool pressure = fight != null && fight.isActiveAndEnabled && fight.PressurePhaseActive;
+            bool pressure = fight != null && fight.isActiveAndEnabled && fight.PressureVisualsActive;
             Sprite pointSprite = pressure && pressureTimelinePointSprite != null
                 ? pressureTimelinePointSprite : timelinePointSprite;
             Color pointColor = pressure

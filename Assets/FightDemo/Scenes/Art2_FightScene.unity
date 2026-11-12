@@ -9939,6 +9939,13 @@ MonoBehaviour:
   showTimelineBar: 0
   timelinePointSprite: {fileID: 21300000, guid: 5d43eb9f5d875f849a405800c5f58f78, type: 3}
   pressureTimelinePointSprite: {fileID: 21300000, guid: 854f7c29d01a747449e9546fd099283c, type: 3}
+  showPressureStoneIcon: 1
+  pressureStoneIconPrefab: {fileID: 224913720994293302, guid: 9b5a1b613309f7b409d600090feaa62e, type: 3}
+  pressureStoneIconSize: {x: 32, y: 32}
+  pressureStoneIconOffset: {x: 0, y: 0}
+  pressureStonePulseAmount: 0.3
+  pressureStonePulseBeats: 0.35
+  pressureStoneJumpHeight: 5
   stoneEmptySprite: {fileID: 21300000, guid: c52009719b5f35f46bbbad10c8943544, type: 3}
   stoneFillSprite: {fileID: 21300000, guid: 63315626d9124774585cd363f137ac7a, type: 3}
   stoneReadyFrames:
@@ -10006,6 +10013,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
+  pressureWarningBeats: 5
   playSuccessfulBlockSound: 1
   successfulBlockSoundEventPath: event:/SoundEffects/InCombat/Paladin_NormalParry
   successfulBlockSoundVolume: 1
@@ -10702,6 +10710,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2147100001}
   - component: {fileID: 2147100002}
+  - component: {fileID: 2147100003}
   m_Layer: 0
   m_Name: Art2_2_5D_Prototype
   m_TagString: Untagged
@@ -10766,6 +10775,31 @@ MonoBehaviour:
   contactShadowProjectionHeight: 0.25
   contactShadowMaxOffset: 0.45
   groundHeight: 0.025
+--- !u!114 &2147100003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 135496e18c7a4bc6bded1b0acc477184, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableFill: 1
+  heroes:
+    enabled: 1
+    color: {r: 1, g: 0.94, b: 0.85, a: 1}
+    intensity: 0.22
+    direction: {x: 0, y: 1, z: -1}
+    softness: 0.6
+  enemies:
+    enabled: 1
+    color: {r: 0.85, g: 0.93, b: 1, a: 1}
+    intensity: 0.16
+    direction: {x: 0, y: 1, z: -1}
+    softness: 0.6
 --- !u!1001 &2147100100
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11674,7 +11708,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 9.302e-42, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 4.5912e-41, y: 0, z: 0, w: -1.7380461e+17}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11838,7 +11872,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 174.47443, w: 0}
+  m_BoundingSphereOverride: {x: 8.305307e-19, y: 0.0000027447934, z: 0.0000026408352, w: 5.558869e-16}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12324,7 +12358,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 7.052582e-29, z: 2.7106292e-20, w: 7.0521006e-29}
+  m_BoundingSphereOverride: {x: NaN, y: NaN, z: 0, w: 1e-45}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12488,7 +12522,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 8.8136e-41}
+  m_BoundingSphereOverride: {x: 3.4978127e-20, y: 5.51118e-40, z: 2.7056e-41, w: 5.050952e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

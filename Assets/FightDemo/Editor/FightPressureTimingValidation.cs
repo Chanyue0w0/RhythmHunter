@@ -60,9 +60,16 @@ namespace RhythmHunter.FightDemoEditor
                 Check(!p.IsActiveAt(beat), "Pressure active outside window at " + beat);
             Check(p.RemainingAt(20) == 20 && p.RemainingAt(39) == 1 && p.RemainingAt(60) == 20 && p.RemainingAt(100) == 20, "Boundary length/repeat drift");
             Check(p.NextStartAt(0) == 20 && p.NextStartAt(40) == 60, "Next start wrong");
+            Check(!p.IsWarningAt(14, 5) && p.IsWarningAt(15, 5) && p.IsWarningAt(19, 5), "Five beat warning boundary wrong");
+            Check(!p.IsActiveAt(15) && !p.IsActiveAt(19), "Warning must not accelerate attacks");
+            Check(!p.IsWarningAt(20, 5) && !p.IsWarningAt(39, 5) && !p.IsWarningAt(40, 5), "Warning active inside/after pressure");
+            Check(!p.IsWarningAt(54, 5) && p.IsWarningAt(55, 5) && p.IsWarningAt(59, 5), "Repeated warning boundary wrong");
+            Check(!p.IsWarningAt(19, 0), "Zero lead did not disable warning");
             p.repeat = false;
+            Check(!p.IsWarningAt(55, 5), "One-shot warning repeated");
             Check(p.IsActiveAt(20) && !p.IsActiveAt(60) && p.NextStartAt(40) == -1, "One shot repeated");
             p.enablePressurePhase = false;
+            Check(!p.IsWarningAt(15, 5), "Disabled pressure still warns");
             Check(!p.IsActiveAt(20) && p.NextStartAt(0) == -1, "Disabled window active");
             p.enablePressurePhase = p.repeat = true; p.repeatEveryBeats = 19;
             Check(!p.Validate(out _) && !p.IsActiveAt(20), "Overlapping intervals accepted");

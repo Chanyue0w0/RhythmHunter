@@ -36,7 +36,7 @@ namespace RhythmHunter.FightDemo
 
         private void LateUpdate()
         {
-            bool next = combat != null && combat.isActiveAndEnabled && combat.PressurePhaseActive;
+            bool next = combat != null && combat.isActiveAndEnabled && combat.PressureVisualsActive;
             if (next != active)
             {
                 active = next;
