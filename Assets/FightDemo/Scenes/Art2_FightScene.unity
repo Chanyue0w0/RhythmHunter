@@ -297,6 +297,85 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!212 &33716879 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2822, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &35082289
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 35082291}
+  - component: {fileID: 35082290}
+  m_Layer: 0
+  m_Name: WarriorFloorOcclusion_Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &35082290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 35082289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5870066df274f64ba9440afd1b3f6c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2FloorOcclusion
+  enableCorrection: 1
+  targetCamera: {fileID: 2147100302}
+  previewInSceneView: 1
+  floors:
+  - {fileID: 1398058805}
+  sceneryOccluders:
+  - {fileID: 632852954}
+  - {fileID: 699185075}
+  - {fileID: 1701508855}
+  - {fileID: 635056680}
+  - {fileID: 1513715654}
+  - {fileID: 1674957629}
+  - {fileID: 1879600867}
+  - {fileID: 640384061}
+  - {fileID: 1077444149}
+  - {fileID: 2147500012}
+  - {fileID: 2147500022}
+  - {fileID: 2147500032}
+  - {fileID: 2147500042}
+  - {fileID: 1833590338}
+  - {fileID: 33716879}
+  - {fileID: 2147100222}
+  battleSlots:
+  - {fileID: 581508853}
+  - {fileID: 616141045}
+  - {fileID: 928599}
+  - {fileID: 2037638511}
+  - {fileID: 287245178}
+  - {fileID: 828184398}
+  previewWarriors: []
+--- !u!4 &35082291
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 35082289}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &42493751
 GameObject:
   m_ObjectHideFlags: 0
@@ -3494,9 +3573,24 @@ MonoBehaviour:
   missShakeStrength: 0.12
   missShakeDuration: 0.16
   missShakeFrequency: 60
+--- !u!212 &632852954 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2022, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &635056680 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2222, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &640384060 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2451, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &640384061 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2452, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &651918782
@@ -3648,6 +3742,11 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: "X/Y/B (Q/W/E) = Front / Middle / Back \u2022 Basic Ability on every beat"
+--- !u!212 &699185075 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2132, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &707206170
 GameObject:
   m_ObjectHideFlags: 0
@@ -5313,6 +5412,11 @@ MeshRenderer:
   m_SortingOrder: 40
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!212 &1077444149 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2462, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1085211408
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6974,6 +7078,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4204335622044879702, guid: 36f448331cb44310bc10b52d1c294d8b, type: 3}
   m_PrefabInstance: {fileID: 1386015747}
   m_PrefabAsset: {fileID: 0}
+--- !u!23 &1398058805 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1103, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1423671221
 GameObject:
   m_ObjectHideFlags: 0
@@ -7751,6 +7860,11 @@ MonoBehaviour:
     widthPixels: 335.9
     depth: 2.01
     worldOffset: {x: 0, y: 0}
+--- !u!212 &1513715654 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2322, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1562105380
 GameObject:
   m_ObjectHideFlags: 0
@@ -8643,6 +8757,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2431, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
+--- !u!212 &1674957629 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2432, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1678343432
 GameObject:
   m_ObjectHideFlags: 0
@@ -8765,6 +8884,11 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!212 &1701508855 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2142, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1756861567
 GameObject:
   m_ObjectHideFlags: 0
@@ -9327,9 +9451,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1833135287}
   m_CullTransparentMesh: 1
+--- !u!212 &1833590338 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2722, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1879600866 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2441, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &1879600867 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2442, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1905371428
@@ -11539,7 +11673,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.781788e-38, y: 2.2e-44, z: 1.5751624e-36, w: 2.2e-44}
+  m_BoundingSphereOverride: {x: 1.8e-43, y: 1.22e-43, z: 1.1e-44, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11703,7 +11837,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1, y: 1, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 1.7867791e-35, y: 1.8459024e-38, z: 6.245425e-39, w: 3.6299613e-35}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12167,7 +12301,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1, y: 1, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: -4.4274534e-14, y: 7.191856e+35, z: 1.1627664e-36, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12331,7 +12465,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.4617e-41, y: 8e-45, z: 0, w: 1.7e-44}
+  m_BoundingSphereOverride: {x: 5.510166e-39, y: 2.388592e-39, z: 1.7340284e-37, w: 6.906032e-37}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12408,9 +12542,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2531, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
+--- !u!212 &2147500012 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2532, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2147500021 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2541, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2147500022 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2542, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2147500031 stripped
@@ -12418,9 +12562,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2631, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
+--- !u!212 &2147500032 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2632, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2147500041 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2641, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
+  m_PrefabInstance: {fileID: 2147100100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2147500042 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 2642, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2147500100
@@ -22597,3 +22751,4 @@ SceneRoots:
   - {fileID: 1020409250}
   - {fileID: 3982489932239055210}
   - {fileID: 998264671892661519}
+  - {fileID: 35082291}
