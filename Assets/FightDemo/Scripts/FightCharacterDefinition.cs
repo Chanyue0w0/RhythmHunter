@@ -49,6 +49,30 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int consecutiveInputBeats = 3;
         [Tooltip("Guard covers these judged beats, including every eligible hit on each beat.")]
         [SerializeField, Min(1)] private int basicGuardBeats = 1;
+        [Header("Basic Guard Slime Projectile (visual only)")]
+        [SerializeField] private GameObject guardProjectilePrefab;
+        [SerializeField, Min(.01f)] private float guardProjectileFlightBeats = .1f;
+        [SerializeField, Min(.01f)] private float guardProjectileFadeBeats = .4f;
+        [Tooltip("小史萊姆命中後，延遲幾拍才生成護盾特效；不延遲格擋判定。")]
+        [SerializeField, Min(0)] private float guardEffectDelayAfterImpactBeats = .1f;
+        public float GuardEffectDelayAfterImpactBeats => guardEffectDelayAfterImpactBeats;
+        [SerializeField] private Vector3 guardProjectileFinalScale = Vector3.one * 1.5f;
+        [SerializeField] private Vector3 guardProjectileSpawnOffset;
+        public enum GuardProjectileAnchor { Feet, Cast, Impact, ActorRoot }
+        [Tooltip("小史萊姆抵達的目標掛點，預設為腳底；會搜尋完整角色子階層。")]
+        [SerializeField] private GuardProjectileAnchor guardProjectileTargetAnchor = GuardProjectileAnchor.Feet;
+        [Tooltip("選填：相對於目標角色根物件的路徑，或子物件名稱。留空使用上方掛點選項。")]
+        [SerializeField] private string guardProjectileTargetPath;
+        [Tooltip("命中掛點的世界座標偏移：X 左右、Y 高度、Z 場景深度；放大淡出時仍使用此偏移。")]
+        [SerializeField] private Vector3 guardProjectileTargetOffset;
+        public GameObject GuardProjectilePrefab => guardProjectilePrefab;
+        public float GuardProjectileFlightBeats => guardProjectileFlightBeats;
+        public float GuardProjectileFadeBeats => guardProjectileFadeBeats;
+        public Vector3 GuardProjectileFinalScale => guardProjectileFinalScale;
+        public Vector3 GuardProjectileSpawnOffset => guardProjectileSpawnOffset;
+        public GuardProjectileAnchor GuardProjectileTargetAnchor => guardProjectileTargetAnchor;
+        public string GuardProjectileTargetPath => guardProjectileTargetPath;
+        public Vector3 GuardProjectileTargetOffset => guardProjectileTargetOffset;
         [SerializeField] private bool basicInterruptsEnemy;
         [SerializeField, Min(0)] private float successfulInterruptDamageBonus;
         [SerializeField, Min(0.5f)] private float attackPower = 1f;

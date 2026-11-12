@@ -697,7 +697,7 @@ namespace RhythmHunter.FightDemo
                     PlayAnimatedHeroUtility(
                         actor,
                         UsesEqualBeats ? animation : FightCharacterCombatAnimator.CombatAnimation.Guard,
-                        () => actor.PlayGuardAt(skill, UsesEqualBeats ? tankSlot : null),
+                        () => PlayGuardProjectileVisual(actor, skill, UsesEqualBeats ? tankSlot : actor),
                         null);
                     return UsesEqualBeats ? $"{abilityName} blocks enemy damage on this beat only"
                         : $"{abilityName} blocks all damage from the next enemy attack";

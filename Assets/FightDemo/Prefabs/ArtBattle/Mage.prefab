@@ -81,6 +81,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db8b55aa206d49278240b6f8048ab59a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterDefinition
+  enableAimedFollowUp: 0
+  aimedApplication: 0
+  aimedActivation: 0
+  aimedGreenBeats: 4
+  aimedGoldBeats: 8
+  aimedFollowUpDamage: 1
+  aimedPreparationEffect: {fileID: 0}
+  aimedPreparationEffectLifetime: 0.5
+  aimedGoldProjectile: {fileID: 0}
+  aimedTargetEffect: {fileID: 0}
   basicBreakPower: 0
   skillBreakPower: 0
   bossPattern:
@@ -111,6 +121,16 @@ MonoBehaviour:
   qteImpactEffectLifetime: 1.5
   slimeFloorPrefab: {fileID: 1041651202, guid: 5992d79d9aed4e0593f8679a075eebf4, type: 3}
   slimeFloorOffset: {x: 0, y: 0, z: -0.1}
+  enableSwordCharge: 0
+  swordHitsPerStage: 1
+  swordFullChargeBeats: 5
+  swordChargedDamage: 2
+  swordDelayedDamage: 1
+  swordDelayedHitBeats: 0.5
+  swordChargedSlashEffect: {fileID: 0}
+  swordChargedOnHitEffect: {fileID: 0}
+  swordDelayedOnHitEffect: {fileID: 0}
+  swordChargeAura: {fileID: 0}
   characterId: Mage
   displayName: MAGE
   team: 1
@@ -123,6 +143,15 @@ MonoBehaviour:
   normalAbilityPower: 0
   consecutiveInputBeats: 3
   basicGuardBeats: 1
+  guardProjectilePrefab: {fileID: 785548156698405980, guid: 5b13e7d081d135447adede0f2cc44a22, type: 3}
+  guardProjectileFlightBeats: 0.1
+  guardProjectileFadeBeats: 0.4
+  guardEffectDelayAfterImpactBeats: 0.1
+  guardProjectileFinalScale: {x: 1.5, y: 1.5, z: 1.5}
+  guardProjectileSpawnOffset: {x: 0, y: 0, z: 0}
+  guardProjectileTargetAnchor: 0
+  guardProjectileTargetPath: 
+  guardProjectileTargetOffset: {x: -0.2, y: 0.7, z: 0}
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1

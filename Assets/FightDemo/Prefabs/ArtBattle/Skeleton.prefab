@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 2020991759165375788}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -0.3}
+  m_LocalPosition: {x: -0.23, y: 1.12, z: -0.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 5142627548222390241}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.21500003, y: 1.7784166, z: -0.2}
+  m_LocalPosition: {x: -0.68, y: 2.21, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -87,7 +87,7 @@ Transform:
   m_GameObject: {fileID: 7076834730351093558}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -0.3}
+  m_LocalPosition: {x: -0.23, y: 1.18, z: -0.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -183,6 +183,16 @@ MonoBehaviour:
   qteImpactEffectLifetime: 1.5
   slimeFloorPrefab: {fileID: 0}
   slimeFloorOffset: {x: 0, y: 0, z: -0.1}
+  enableSwordCharge: 0
+  swordHitsPerStage: 1
+  swordFullChargeBeats: 5
+  swordChargedDamage: 2
+  swordDelayedDamage: 1
+  swordDelayedHitBeats: 0.5
+  swordChargedSlashEffect: {fileID: 0}
+  swordChargedOnHitEffect: {fileID: 0}
+  swordDelayedOnHitEffect: {fileID: 0}
+  swordChargeAura: {fileID: 0}
   characterId: SkeletonGunner
   displayName: SKELETON GUNNER
   team: 1
@@ -195,6 +205,14 @@ MonoBehaviour:
   normalAbilityPower: 1
   consecutiveInputBeats: 2
   basicGuardBeats: 1
+  guardProjectilePrefab: {fileID: 0}
+  guardProjectileFlightBeats: 0.1
+  guardProjectileFadeBeats: 0.4
+  guardProjectileFinalScale: {x: 1.5, y: 1.5, z: 1.5}
+  guardProjectileSpawnOffset: {x: 0, y: 0, z: 0}
+  guardProjectileTargetAnchor: 0
+  guardProjectileTargetPath: 
+  guardProjectileTargetOffset: {x: 0, y: 0, z: 0}
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
   attackPower: 1
@@ -276,7 +294,7 @@ Transform:
   m_GameObject: {fileID: 9080165771705310887}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.29000002, y: -0.3215834, z: -0.2}
+  m_LocalPosition: {x: -0.23, y: 0.23, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
