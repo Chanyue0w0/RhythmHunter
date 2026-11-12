@@ -69,6 +69,10 @@ MonoBehaviour:
     position: {x: 1.8, y: -1.9}
     rotation: -25.40772
     visible: 1
+  - frameId: 79c04327223c46e8baa8ad4cecc803e7
+    position: {x: 1.8, y: -1.9}
+    rotation: -25.40772
+    visible: 1
   - frameId: 7396f219a1754b01b0d3654fec4429bf
     position: {x: 0.35, y: 0.25}
     rotation: 90
