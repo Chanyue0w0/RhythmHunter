@@ -11,10 +11,10 @@ namespace RhythmHunter.FightDemo
         private sealed class SwordCharge
         {
             public int stage = 1, hits, generation;
-            public bool nextChargedAttackHeavy = true;
             public long lastCall = long.MinValue, fullUntil = long.MinValue;
             public FightWeaponAttachment attachment;
             public FightCharacterDefinition definition;
+            public FightCharacterCombatAnimator animator;
             public void BreakStreak() { hits = 0; lastCall = long.MinValue; generation++; }
         }
         private readonly Dictionary<FightUnitSlot, SwordCharge> swordCharges = new();
@@ -27,7 +27,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!swordCharges.TryGetValue(actor, out var state))
             {
-                state = new SwordCharge { definition = actor.CharacterDefinition,
+                state = new SwordCharge { definition = actor.CharacterDefinition, animator = actor.CombatAnimator,
                     attachment = actor.ActorInstance != null ? actor.ActorInstance.GetComponentInChildren<FightWeaponAttachment>(true) : null };
                 swordCharges.Add(actor, state);
                 ShowSwordStage(state);
@@ -36,6 +36,7 @@ namespace RhythmHunter.FightDemo
         }
         private void ShowSwordStage(SwordCharge state)
         {
+            if (state.animator != null) state.animator.SetChargedIdle(state.stage == 3);
             state.attachment?.SetWeaponChargeStage(state.stage == 3 ? FightWeaponVisual.ChargeStage.FullCharged : state.stage == 2
                 ? FightWeaponVisual.ChargeStage.HalfCharged : FightWeaponVisual.ChargeStage.Uncharged);
             if (state.definition != null) state.definition.SetSwordChargeAura(state.stage == 3, this);
@@ -96,10 +97,9 @@ namespace RhythmHunter.FightDemo
             state.lastCall = beat;
             var target = FindFrontLivingEnemy();
             bool charged = state.stage == 3;
-            var animation = charged && state.nextChargedAttackHeavy
+            var animation = charged
                 ? FightCharacterCombatAnimator.CombatAnimation.HeavyAttack
                 : FightCharacterCombatAnimator.CombatAnimation.NormalAttack;
-            if (charged) state.nextChargedAttackHeavy = !state.nextChargedAttackHeavy;
             if (target == null || WaveTransitionActive)
             {
                 state.BreakStreak();
@@ -127,7 +127,6 @@ namespace RhythmHunter.FightDemo
                         if (state.stage == 3)
                         {
                             state.fullUntil = NormalBattleBeatCount + data.SwordFullChargeBeats;
-                            state.nextChargedAttackHeavy = true;
                         }
                         ShowSwordStage(state);
                     }

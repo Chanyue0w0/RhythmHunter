@@ -8,7 +8,7 @@ namespace RhythmHunter.FightDemoEditor
     public sealed class FightCharacterCombatAnimatorEditor : Editor
     {
         public bool EmbeddedPreview { get; set; }
-        private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false, false };
+        private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false, false, true };
 
         public override void OnInspectorGUI()
         {
@@ -23,6 +23,7 @@ namespace RhythmHunter.FightDemoEditor
             Field("fallbackBpm");
 
             DrawSequence(8, 7, "Idle / Opening Idle — 普通待機（開場與戰鬥）");
+            DrawSequence(11, 11, "Charged Idle — 滿充能待機（僅第 3 階）");
             DrawSequence(9, 8, "Drink — 喝酒");
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("useDrunkIdle"),

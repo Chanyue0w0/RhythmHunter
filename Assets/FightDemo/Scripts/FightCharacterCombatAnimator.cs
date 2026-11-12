@@ -24,7 +24,8 @@ namespace RhythmHunter.FightDemo
             [InspectorName("Opening Idle")] OpeningIdle = 7,
             [InspectorName("Drink")] Drink = 8,
             [InspectorName("Aim")] Aim = 9,
-            [InspectorName("Charged Normal")] ChargedNormalAttack = 10
+            [InspectorName("Charged Normal")] ChargedNormalAttack = 10,
+            [InspectorName("Fully Charged Idle")] ChargedIdle = 11
         }
 
         public enum EffectLocation { Self, AttackTarget }
@@ -219,6 +220,16 @@ namespace RhythmHunter.FightDemo
         private bool damageRaised;
         private bool playbackPaused;
         private bool openingIdle;
+        private bool chargedIdle;
+        public bool UsesChargedIdle => chargedIdle;
+        public void SetChargedIdle(bool enabled)
+        {
+            if (chargedIdle == enabled) return;
+            chargedIdle = enabled;
+            shownFrame = -1;
+            // Select the idle for the next return without interrupting an attack.
+            if (activeSequence == null && !playbackPaused) UpdateIdle();
+        }
         private double openingIdleStartBeat;
         public bool IsOpeningIdle => openingIdle;
 
@@ -399,6 +410,11 @@ namespace RhythmHunter.FightDemo
         {
             RefreshSongTempo();
             Sequence entry = openingIdle || !useDrunkIdle ? FindSequence(CombatAnimation.OpeningIdle) : null;
+            if (chargedIdle && !openingIdle)
+            {
+                var charged = FindSequence(CombatAnimation.ChargedIdle);
+                if (charged != null && charged.Frames.Count > 0) entry = charged;
+            }
             if (entry != null && entry.Frames.Count > 0 && targetRenderer != null)
             {
                 double totalBeats = 0;

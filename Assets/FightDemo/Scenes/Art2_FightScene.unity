@@ -11539,7 +11539,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 1.928607e-39}
+  m_BoundingSphereOverride: {x: 1.781788e-38, y: 2.2e-44, z: 1.5751624e-36, w: 2.2e-44}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11703,7 +11703,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 1, y: 1, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12167,7 +12167,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 9.1835e-41, y: 5.877474e-37, z: 1.1158013e-38, w: NaN}
+  m_BoundingSphereOverride: {x: 1, y: 1, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12331,7 +12331,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: NaN, y: 6e-45, z: 3e-45, w: 0}
+  m_BoundingSphereOverride: {x: 2.4617e-41, y: 8e-45, z: 0, w: 1.7e-44}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12537,6 +12537,10 @@ PrefabInstance:
     - target: {fileID: 2518297401521456719, guid: 06e26fde9abc6ff4e8df08b07c14aee3, type: 3}
       propertyPath: m_Name
       value: SwordSlash_Pixel_Yellow
+      objectReference: {fileID: 0}
+    - target: {fileID: 2518297401521456719, guid: 06e26fde9abc6ff4e8df08b07c14aee3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6834105636234166058, guid: 06e26fde9abc6ff4e8df08b07c14aee3, type: 3}
       propertyPath: InitialModule.rotation3D

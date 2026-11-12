@@ -15,6 +15,12 @@ namespace RhythmHunter.FightDemoEditor
         static FightSwordChargeSetup() => EditorApplication.update += Poll;
         static void Poll()
         {
+            if (File.Exists("Temp/ChargedIdleSetup.request") && !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                File.Delete("Temp/ChargedIdleSetup.request");
+                try { ConfigureChargedIdle(); }
+                catch (Exception e) { File.WriteAllText("Temp/ChargedIdleValidation.result", "FAIL: " + e); }
+            }
             if (File.Exists("Temp/SwordAuraValidation.request") && !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 File.Delete("Temp/SwordAuraValidation.request");
@@ -26,6 +32,63 @@ namespace RhythmHunter.FightDemoEditor
             File.Delete(request);
             try { Run(); }
             catch (Exception e) { File.WriteAllText("Temp/SwordChargeValidation.result", "FAIL: " + e); Debug.LogException(e); }
+        }
+        [MenuItem("Rhythm Hunter/Abilities/Configure Warrior Charged Idle")]
+        public static void ConfigureChargedIdle()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            const string path = "Assets/FightDemo/Prefabs/ArtBattle/LongSwordWarrior_Weapon.prefab";
+            var root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var animator = root.GetComponentInChildren<FightCharacterCombatAnimator>(true);
+                var normal = animator.FindSequence(FightCharacterCombatAnimator.CombatAnimation.OpeningIdle);
+                if (normal == null || normal.Frames.Count == 0) throw new Exception("No ordinary idle to seed charged idle");
+                var charged = animator.FindSequence(FightCharacterCombatAnimator.CombatAnimation.ChargedIdle);
+                if (charged == null)
+                {
+                    charged = new FightCharacterCombatAnimator.Sequence();
+                    charged.Configure(FightCharacterCombatAnimator.CombatAnimation.ChargedIdle, normal.Frames, normal.FramesPerSecond, -1, -1, -1);
+                    if (normal.UseFrameBeatDurations)
+                    {
+                        var beats = new List<float>();
+                        for (int i = 0; i < normal.Frames.Count; i++) beats.Add(normal.GetFrameBeats(i));
+                        charged.ConfigureFrameBeats(beats);
+                    }
+                    charged.EnsureAttachmentFrameIds();
+                    var sequences = new List<FightCharacterCombatAnimator.Sequence>(animator.Sequences) { charged };
+                    animator.Configure(animator.TargetRenderer, sequences);
+                    var attachment = root.GetComponentInChildren<FightWeaponAttachment>(true);
+                    if (attachment != null && attachment.Data != null)
+                    {
+                        for (int i = 0; i < normal.Frames.Count; i++)
+                            if (attachment.Data.TryGet(normal.AttachmentFrameId(i), out var pose))
+                            {
+                                pose.frameId = charged.AttachmentFrameId(i);
+                                attachment.Data.Set(pose);
+                            }
+                        EditorUtility.SetDirty(attachment.Data);
+                    }
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                    AssetDatabase.SaveAssets();
+                }
+                animator.BindBeatSource(null);
+                animator.SetChargedIdle(true);
+                if (animator.DisplayedFrame.Source != (int)FightCharacterCombatAnimator.CombatAnimation.ChargedIdle)
+                    throw new Exception("Charged idle not selected");
+                animator.SetChargedIdle(false);
+                if (animator.DisplayedFrame.Source != (int)FightCharacterCombatAnimator.CombatAnimation.OpeningIdle)
+                    throw new Exception("Normal idle not restored");
+                if (!animator.Play(FightCharacterCombatAnimator.CombatAnimation.NormalAttack)) throw new Exception("No attack to validate");
+                animator.SetChargedIdle(true);
+                if (animator.ActiveAnimation != FightCharacterCombatAnimator.CombatAnimation.NormalAttack) throw new Exception("Charge interrupted attack");
+                Invoke(animator, "AdvancePlayback", 10f);
+                Invoke(animator, "UpdateIdle");
+                if (animator.DisplayedFrame.Source != (int)FightCharacterCombatAnimator.CombatAnimation.ChargedIdle) throw new Exception("Attack did not return to charged idle");
+                if (charged.AttachmentFrameId(0) == normal.AttachmentFrameId(0)) throw new Exception("Idle poses share IDs");
+                File.WriteAllText("Temp/ChargedIdleValidation.result", "PASS: charged idle selection, ordinary idle restore, no attack interruption, return after attack, independent attachment frame IDs");
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
         }
         public static void ValidateAura()
         {
