@@ -12,7 +12,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector2 pressureBarAnchor = new(.5f, .76f);
         [SerializeField] private Vector2 pressureBarOffset = Vector2.zero;
         [SerializeField] private Vector2 pressureBarSize = new(360, 18);
-        [SerializeField, Min(0)] private float pressureBarGap = 5;
+        [SerializeField] private Vector2 pressureEdgeSize = new(5, 28);
+        [SerializeField] private Color pressureEdgeColor = new(1, .65f, .45f, 1);
+        [Header("Pressure Reduction Trail")]
+        [SerializeField] private Color pressureTrailColor = new(1, .85f, .1f, 1);
+        [SerializeField, Min(0)] private float pressureTrailHoldBeats = 2;
+        [SerializeField, Min(.01f)] private float pressureTrailFadeBeats = .5f;
+        [SerializeField, Min(.01f)] private float pressureReductionSlideBeats = .15f;
         [SerializeField] private Color pressureBarColor = new(1, .18f, .12f, 1);
         [SerializeField] private Color pressureBarEmptyColor = new(.12f, .025f, .025f, .8f);
         [SerializeField, Range(0, 1)] private float pressureWarningOpacity = .6f;
@@ -23,7 +29,19 @@ namespace RhythmHunter.FightDemo
         private RectTransform pressureBarRoot;
         private CanvasGroup pressureBarGroup;
         private Image pressureBarIcon;
-        private readonly Image[] pressureBarCells = new Image[10];
+        private Image pressureTrack, pressureFill, pressureTrail, pressureLeftEdge, pressureRightEdge;
+        private float pressureSeenRemoved, pressureTrailDebt, pressureSlideDebt;
+        private double pressureTrailStarted, pressureSlideStarted;
+        private double pressureVisualBeat, pressureLastSongBeat = double.NaN;
+        private float pressureLastPhase;
+
+        private Image CreatePressureImage(string name)
+        {
+            var item = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
+            item.transform.SetParent(pressureBarRoot, false);
+            item.raycastTarget = false;
+            return item;
+        }
         private GameObject pressureBarIconSource;
         private int pressureBarRevision, pressureBarWave = -1;
         private double pressureBreakBeat = double.NegativeInfinity;
@@ -34,13 +52,11 @@ namespace RhythmHunter.FightDemo
             pressureBarRoot.SetParent(playerUiRoot != null ? playerUiRoot : playerUiCanvas.transform, false);
             pressureBarGroup = pressureBarRoot.GetComponent<CanvasGroup>();
             pressureBarGroup.blocksRaycasts = pressureBarGroup.interactable = false;
-            for (int i = 0; i < pressureBarCells.Length; i++)
-            {
-                var cell = new GameObject($"PressureCell_{i + 1}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
-                cell.transform.SetParent(pressureBarRoot, false);
-                cell.raycastTarget = false;
-                pressureBarCells[i] = cell;
-            }
+            pressureTrack = CreatePressureImage("PressureTrack");
+            pressureTrail = CreatePressureImage("PressureReductionTrail_Yellow");
+            pressureFill = CreatePressureImage("PressureRemaining");
+            pressureLeftEdge = CreatePressureImage("PressureLeftEdge");
+            pressureRightEdge = CreatePressureImage("PressureRightEdge");
             pressureBarIcon = new GameObject("PressuredEffectIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
             pressureBarIcon.transform.SetParent(pressureBarRoot, false);
             pressureBarIcon.raycastTarget = false;
@@ -62,25 +78,45 @@ namespace RhythmHunter.FightDemo
                 pressureBarWave = fight.CurrentWave;
                 pressureBarRevision = 0;
                 pressureBreakBeat = double.NegativeInfinity;
+                pressureSeenRemoved = 0;
+                pressureTrailDebt = pressureSlideDebt = 0;
+                pressureVisualBeat = 0;
+                pressureLastSongBeat = double.NaN;
             }
+            bool frozen = fight.IsPaused || fight.TimingCalibrationActive || fight.EnemyActionsPaused || fight.TeamSkillRunning;
+            if (timing && !double.IsNaN(pressureLastSongBeat) && !frozen)
+                pressureVisualBeat += Math.Max(0, beat - pressureLastSongBeat);
+            if (timing) pressureLastSongBeat = beat;
+            if (timing && !frozen) pressureLastPhase = (float)(beat - Math.Floor(beat));
+            float trailFactor = 1 - Mathf.Clamp01((float)(pressureVisualBeat - pressureTrailStarted - pressureTrailHoldBeats) / Mathf.Max(.01f, pressureTrailFadeBeats));
+            float slideFactor = 1 - Mathf.SmoothStep(0, 1, Mathf.Clamp01((float)(pressureVisualBeat - pressureSlideStarted) / Mathf.Max(.01f, pressureReductionSlideBeats)));
+            float trail = pressureTrailDebt * trailFactor;
+            float slide = pressureSlideDebt * slideFactor;
             if (pressureBarRevision != fight.PressureBreakRevision)
             {
                 pressureBarRevision = fight.PressureBreakRevision;
                 pressureBreakBeat = fight.PressureLastBreakSongBeat;
+                float removed = Mathf.Max(0, fight.PressureRemovedBeats - pressureSeenRemoved) / fight.PressureDurationBeats;
+                pressureSeenRemoved = fight.PressureRemovedBeats;
+                pressureTrailDebt = trail = Mathf.Clamp01(trail + removed);
+                pressureSlideDebt = slide = Mathf.Clamp01(slide + removed);
+                pressureTrailStarted = pressureSlideStarted = pressureVisualBeat;
+                trailFactor = 1;
             }
             // Keep an emptied bar just long enough to show the final player-caused break.
-            bool finishing = fight.PressureRestActive && timing && beat < pressureBreakBeat + pressureShakeBeats;
+            bool finishing = fight.PressureRestActive && (trail > .0001f || timing && beat < pressureBreakBeat + pressureShakeBeats);
             bool visible = showPressureDurationBar && fight.isActiveAndEnabled && (fight.PressureVisualsActive || finishing);
             if (!visible)
             {
                 if (pressureBarRoot != null) pressureBarRoot.gameObject.SetActive(false);
+                pressureTrailDebt = pressureSlideDebt = 0;
                 return;
             }
             if (pressureBarRoot == null) BuildPressureBar();
             pressureBarRoot.gameObject.SetActive(true);
             pressureBarRoot.anchorMin = pressureBarRoot.anchorMax = pressureBarAnchor;
             pressureBarRoot.sizeDelta = pressureBarSize;
-            double phase = timing ? beat - Math.Floor(beat) : 1;
+            double phase = pressureLastPhase;
             float ordinaryPulse = fight.PressurePhaseActive ? Mathf.Sin(Mathf.PI * Mathf.Clamp01((float)phase / pressureShakeBeats)) : 0;
             double breakAge = beat - pressureBreakBeat;
             float strongPulse = timing && breakAge >= 0 && breakAge < pressureShakeBeats
@@ -89,21 +125,31 @@ namespace RhythmHunter.FightDemo
             pressureBarGroup.alpha = 1;
             if (fight.PressureWarningActive)
             {
-                double remaining = fight.PressureNextStartBeat - fight.WaveCombatBeatCount - phase;
-                float progress = Mathf.Clamp01(1 - (float)remaining / Mathf.Max(1, fight.PressureWarningLeadBeats));
-                pressureBarGroup.alpha = remaining <= pressureRevealBeats
-                    ? Mathf.Lerp(pressureWarningOpacity, 1, 1 - (float)remaining / pressureRevealBeats)
+                double warningRemaining = fight.PressureNextStartBeat - fight.WaveCombatBeatCount - phase;
+                float progress = Mathf.Clamp01(1 - (float)warningRemaining / Mathf.Max(1, fight.PressureWarningLeadBeats));
+                pressureBarGroup.alpha = warningRemaining <= pressureRevealBeats
+                    ? Mathf.Lerp(pressureWarningOpacity, 1, 1 - (float)warningRemaining / pressureRevealBeats)
                     : pressureWarningOpacity * progress;
                 pressureBarRoot.anchoredPosition = pressureBarOffset;
             }
-            float width = Mathf.Max(1, (pressureBarSize.x - pressureBarGap * 9) / 10);
-            int pairs = finishing ? 0 : fight.PressureVisiblePairs;
-            for (int i = 0; i < 10; i++)
-            {
-                pressureBarCells[i].rectTransform.sizeDelta = new Vector2(width, pressureBarSize.y);
-                pressureBarCells[i].rectTransform.anchoredPosition = new Vector2((i - 4.5f) * (width + pressureBarGap), 0);
-                pressureBarCells[i].color = i >= 5 - pairs && i < 5 + pairs ? pressureBarColor : pressureBarEmptyColor;
-            }
+            float remaining = fight.PressureWarningActive ? 1 : fight.PressurePhaseActive
+                ? Mathf.Clamp01((fight.PressureRemainingExact - (float)phase) / fight.PressureDurationBeats) : 0;
+            float fill = Mathf.Clamp01(remaining + slide);
+            float ghost = Mathf.Clamp01(remaining + trail);
+            pressureTrack.rectTransform.sizeDelta = pressureBarSize;
+            pressureTrack.color = pressureBarEmptyColor;
+            pressureFill.rectTransform.sizeDelta = new Vector2(pressureBarSize.x * fill, pressureBarSize.y);
+            pressureFill.color = pressureBarColor;
+            pressureTrail.rectTransform.sizeDelta = new Vector2(pressureBarSize.x * ghost, pressureBarSize.y);
+            Color trailColor = pressureTrailColor;
+            trailColor.a *= trailFactor;
+            pressureTrail.color = trailColor;
+            pressureTrail.enabled = trail > .0001f;
+            pressureLeftEdge.rectTransform.sizeDelta = pressureRightEdge.rectTransform.sizeDelta = pressureEdgeSize;
+            pressureLeftEdge.color = pressureRightEdge.color = pressureEdgeColor;
+            pressureLeftEdge.rectTransform.anchoredPosition = Vector2.left * (pressureBarSize.x * fill * .5f);
+            pressureRightEdge.rectTransform.anchoredPosition = Vector2.right * (pressureBarSize.x * fill * .5f);
+            pressureLeftEdge.enabled = pressureRightEdge.enabled = fill > .0001f;
             if (pressureBarIconSource != pressureStoneIconPrefab)
             {
                 pressureBarIconSource = pressureStoneIconPrefab;

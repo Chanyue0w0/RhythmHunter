@@ -85,7 +85,7 @@ namespace RhythmHunter.FightDemoEditor
                 var root = (RectTransform)Get(presenter, "pressureBarRoot");
                 Check(root != null && root.name == "PlayerPressureDurationBar", "Player pressure bar missing");
                 Check(root.GetComponent<CanvasGroup>().alpha < 1 && root.anchoredPosition == (Vector2)Get(presenter, "pressureBarOffset"), "Warning opacity/movement wrong");
-                Check(root.GetComponentsInChildren<Image>(true).Length == 11, "Expected 10 cells and one icon");
+                Check(root.GetComponentsInChildren<Image>(true).Length == 6, "Expected track, trail, fill, two edges and icon");
                 while (fight.WaveCombatBeatCount < 19) Beat();
                 Call(presenter, "RenderPressureBar", 19.5d, true);
                 float semi = root.GetComponent<CanvasGroup>().alpha;
@@ -93,16 +93,43 @@ namespace RhythmHunter.FightDemoEditor
                 Call(presenter, "RenderPressureBar", 19.95d, true);
                 Check(root.GetComponent<CanvasGroup>().alpha > semi && root.anchoredPosition == (Vector2)Get(presenter, "pressureBarOffset"), "Final warning reveal must not shake");
                 Beat();
-                Check(fight.PressurePhaseRemainingBeats == 20 && fight.PressureVisiblePairs == 5, "Pressure start");
+                Check(fight.PressurePhaseRemainingBeats == 20 && fight.PressureVisiblePairs == 20 && fight.PressurePairBeats == 1, "Default twenty-segment pressure start");
+                enemy.TakeDamage(4);
+                Check(fight.PressureRemainingExact == 20, "Four damage must not reduce pressure");
+                enemy.TakeDamage(1);
+                Check(fight.PressureRemainingExact == 19, "Five damage must remove one beat");
+                for (int i = 0; i < 4; i++) Call(fight, "RecordPressureBlock");
+                Check(fight.PressureRemainingExact == 19, "Four blocks must not reduce pressure");
+                Call(fight, "RecordPressureBlock");
+                Check(fight.PressureRemainingExact == 18, "Five blocks must remove one beat");
+                Set(fight, "pressureReductionSegments", 40);
+                enemy.TakeDamage(5);
+                Check(fight.PressureRemainingExact == 17.5f, "Configurable segments must support fractional reduction");
+                // Retain the larger reduction fixture for trail, overkill and lifecycle regression below.
+                Set(fight, "pressureReductionSegments", 5);
+                Set(fight, "pressureDamagePerPair", 3f);
+                Set(fight, "pressureBlocksPerPair", 3);
+                Set(fight, "pressureRemaining", 20d);
+                Set(fight, "<PressureBreakRevision>k__BackingField", 0);
+                Set(fight, "<PressureRemovedBeats>k__BackingField", 0f);
                 Call(presenter, "RenderPressureBar", 20.1d, true);
                 Check(root.GetComponent<CanvasGroup>().alpha == 1 && root.anchoredPosition != (Vector2)Get(presenter, "pressureBarOffset"), "Active bar should be opaque and bounce");
+                var fill = (Image)Get(presenter, "pressureFill");
+                var trailImage = (Image)Get(presenter, "pressureTrail");
+                float fullWidth = fill.rectTransform.sizeDelta.x;
+                Call(presenter, "RenderPressureBar", 20.6d, true);
+                Check(fill.rectTransform.sizeDelta.x < fullWidth && !trailImage.enabled, "Natural countdown must shrink smoothly without yellow trail");
                 Gain(20); Check(fight.TeamSkillGaugeExact == 1.5f, "Pressure MP multiplier");
                 Beat(); Beat();
                 enemy.TakeDamage(2); Check(fight.PressurePhaseRemainingBeats == 18, "Partial damage reduced pressure");
                 enemy.TakeDamage(1); Check(fight.PressurePhaseRemainingBeats == 14 && fight.PressureVisiblePairs == 4, "18 minus 4 must equal 14");
                 Call(presenter, "RenderPressureBar", 22.5d, true);
-                var cells = (Image[])Get(presenter, "pressureBarCells");
-                Check(cells[0].color == cells[9].color && cells[0].color != cells[1].color && cells[1].color == cells[8].color, "Cells must empty symmetrically from outside");
+                float beforeSlide = fill.rectTransform.sizeDelta.x;
+                Call(presenter, "RenderPressureBar", 22.7d, true);
+                var left = (Image)Get(presenter, "pressureLeftEdge");
+                var right = (Image)Get(presenter, "pressureRightEdge");
+                Check(fill.rectTransform.sizeDelta.x < beforeSlide && Mathf.Abs(left.rectTransform.anchoredPosition.x + right.rectTransform.anchoredPosition.x) < .001f, "Rapid reduction must move both edges symmetrically");
+                Check(trailImage.enabled && Mathf.Abs(trailImage.rectTransform.sizeDelta.x - fill.rectTransform.sizeDelta.x - 72) < .01f, "Yellow trail must show exactly four of twenty beats (72px)");
                 Call(presenter, "RenderPressureBar", 23.05d, true);
                 Check(Mathf.Abs(root.anchoredPosition.x) > 1, "Player break must strongly shake on next beat");
                 Call(fight, "RecordPressureBlock"); Call(fight, "RecordPressureBlock");
@@ -114,6 +141,13 @@ namespace RhythmHunter.FightDemoEditor
                 enemy.TakeDamage(2);
                 Check(!fight.PressurePhaseActive && fight.PressureRestActive && fight.PressureNextStartBeat == 62, "Early end/rest/restart delay");
                 Check(fight.ScheduledEnemyHitCount == 1, "End must retain projectile and cancel melee");
+                Call(presenter, "RenderPressureBar", 23.1d, true);
+                Call(presenter, "RenderPressureBar", 23.4d, true);
+                Check(root.gameObject.activeSelf && fill.rectTransform.sizeDelta.x == 0 && trailImage.enabled, "Final reduction must retain yellow trail after gameplay ends");
+                Call(presenter, "RenderPressureBar", 25.2d, true);
+                Check(root.gameObject.activeSelf && trailImage.color.a < 1, "Yellow trail should fade only after hold duration");
+                Call(presenter, "RenderPressureBar", 25.7d, true);
+                Check(!root.gameObject.activeSelf, "Completed final trail should hide bar");
                 Check(!(bool)Call(fight, "EnemyCadenceReady", enemy, global), "Rest allowed new attack");
                 Check(!fight.ScheduleEnemyHits(enemy, new[] { 1 }, 1), "Rest accepted scheduled attack");
                 Gain(23); Check(fight.TeamSkillGaugeExact == 2, "Rest must return to ordinary MP gain");
@@ -135,7 +169,7 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.PressureRestActive && fight.PressureNextStartBeat == 122, "Natural end/repeat");
                 Call(fight, "ResetWavePressure");
                 Check(!fight.PressureRestActive && !fight.PressurePhaseActive && fight.PressureNextStartBeat == 20, "Wave reset retained state");
-                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: warning fade/no shake; opaque beat bounce; ten symmetric cells; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
+                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
             }
             finally
             {

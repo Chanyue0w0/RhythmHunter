@@ -23,8 +23,8 @@ MonoBehaviour:
     back: {fileID: 1049329208925010419, guid: d1687460d02df1b47bac316481cf4276, type: 3}
     pressure:
       enablePressurePhase: 1
-      startBeat: 40
-      durationBeats: 20
+      startBeat: 20
+      durationBeats: 40
       recoveryBeats: 2
       repeat: 1
       repeatEveryBeats: 60

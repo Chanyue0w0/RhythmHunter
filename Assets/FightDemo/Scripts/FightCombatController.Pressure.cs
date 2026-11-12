@@ -21,8 +21,10 @@ namespace RhythmHunter.FightDemo
         public long WaveCombatBeatCount { get; private set; }
         public bool PressurePhaseEnabled => wavePressure.enablePressurePhase;
         [Header("Pressure Break / Rest")]
-        [SerializeField, Min(.5f)] private float pressureDamagePerPair = 3;
-        [SerializeField, Min(1)] private int pressureBlocksPerPair = 3;
+        [SerializeField, Min(.5f), InspectorName("Damage Per Segment")] private float pressureDamagePerPair = 5;
+        [SerializeField, Min(1), InspectorName("Blocks Per Segment")] private int pressureBlocksPerPair = 5;
+        [Tooltip("每次達標削減的拍數 = 本次 Pressured 總持續拍數 / 此段數。20 拍除以 20 段 = 每次削減 1 拍；段數越大，每次削減越少。")]
+        [SerializeField, Min(1), InspectorName("Reduction Segments")] private int pressureReductionSegments = 20;
         [SerializeField, Min(0)] private int pressureRestBeats = 20;
         [SerializeField, Min(0)] private float ordinaryManaMultiplier = .5f;
         [SerializeField, Min(0)] private float pressureManaMultiplier = 2;
@@ -31,6 +33,8 @@ namespace RhythmHunter.FightDemo
         private float pressureDamageProgress;
         private int pressureBlockProgress;
         public int PressureBreakRevision { get; private set; }
+        public float PressureRemovedBeats { get; private set; }
+        public int PressureDurationBeats => Math.Max(1, wavePressure.durationBeats);
         public long PressureLastBreakSongBeat { get; private set; }
         private bool PressureBattleAvailable => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive;
         public bool PressurePhaseActive => PressureBattleAvailable && pressureRemaining > 0;
@@ -41,8 +45,8 @@ namespace RhythmHunter.FightDemo
         public bool PressureVisualsActive => PressurePhaseActive || PressureWarningActive;
         public long PressurePhaseRemainingBeats => PressurePhaseActive ? (long)Math.Ceiling(pressureRemaining) : 0;
         public float PressureRemainingExact => PressurePhaseActive ? (float)pressureRemaining : 0;
-        public int PressureVisiblePairs => PressurePhaseActive ? Math.Min(5, (int)Math.Ceiling(pressureRemaining / PressurePairBeats - .00001)) : 5;
-        public float PressurePairBeats => Math.Max(1, wavePressure.durationBeats) / 5f;
+        public int PressureVisiblePairs => PressurePhaseActive ? Math.Min(Math.Max(1, pressureReductionSegments), (int)Math.Ceiling(pressureRemaining / PressurePairBeats - .00001)) : Math.Max(1, pressureReductionSegments);
+        public float PressurePairBeats => (float)PressureDurationBeats / Math.Max(1, pressureReductionSegments);
         public int PressureWarningLeadBeats => pressureWarningBeats;
         public long PressureNextStartBeat => PressureBattleAvailable ? pressureNextStart : -1;
         public int PressureRecoveryBeats => wavePressure.recoveryBeats;
@@ -59,6 +63,7 @@ namespace RhythmHunter.FightDemo
             pressureDamageProgress = 0;
             pressureBlockProgress = 0;
             PressureBreakRevision = 0;
+            PressureRemovedBeats = 0;
             PressureLastBreakSongBeat = long.MinValue;
             pressureNextStart = wavePressure.enablePressurePhase && wavePressure.Validate(out _) ? wavePressure.startBeat : -1;
         }
@@ -103,7 +108,9 @@ namespace RhythmHunter.FightDemo
         private void ReducePressurePairs(int pairs)
         {
             if (pairs <= 0 || !PressurePhaseActive) return;
-            pressureRemaining = Math.Max(0, pressureRemaining - pairs * PressurePairBeats);
+            double removed = Math.Min(pressureRemaining, pairs * PressurePairBeats);
+            PressureRemovedBeats += (float)removed;
+            pressureRemaining = Math.Max(0, pressureRemaining - removed);
             PressureBreakRevision++;
             PressureLastBreakSongBeat = beatClock != null ? beatClock.LatestBeat.GlobalBeat + 1 : latestCombatBeat + 1;
             if (pressureRemaining <= .00001) EndPressurePhase();

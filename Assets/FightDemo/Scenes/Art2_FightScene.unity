@@ -9934,6 +9934,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3686a9e83f96b84b904c1223cd7b674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightScenePresenter
+  showPressureDurationBar: 1
+  pressureBarAnchor: {x: 0.5, y: 0.76}
+  pressureBarOffset: {x: 0, y: 0}
+  pressureBarSize: {x: 360, y: 18}
+  pressureEdgeSize: {x: 5, y: 28}
+  pressureEdgeColor: {r: 1, g: 0.65, b: 0.45, a: 1}
+  pressureTrailColor: {r: 1, g: 0.85, b: 0.1, a: 1}
+  pressureTrailHoldBeats: 2
+  pressureTrailFadeBeats: 0.5
+  pressureReductionSlideBeats: 0.15
+  pressureBarColor: {r: 1, g: 0.18, b: 0.12, a: 1}
+  pressureBarEmptyColor: {r: 0.12, g: 0.025, b: 0.025, a: 0.8}
+  pressureWarningOpacity: 0.6
+  pressureRevealBeats: 0.2
+  pressureBeatShake: {x: 0, y: 2}
+  pressureBreakShake: {x: 10, y: 5}
+  pressureShakeBeats: 0.4
   timelineScale: 1.9
   timelineBarSprite: {fileID: 21300000, guid: 3364845ec05154c4b83eede94957e942, type: 3}
   showTimelineBar: 0
@@ -10046,6 +10063,12 @@ MonoBehaviour:
   damageGlyphMaxCachedPerDigit: 64
   enableCharacterPassives: 0
   pressureWarningBeats: 5
+  pressureDamagePerPair: 3
+  pressureBlocksPerPair: 5
+  pressureReductionSegments: 20
+  pressureRestBeats: 20
+  ordinaryManaMultiplier: 0.5
+  pressureManaMultiplier: 2
   showStatusIcons: 1
   blockedEffectIcon: {fileID: 11400000, guid: 2a00d1707c09407c9e7e402ded2978fc, type: 3}
   weakEffectIcon: {fileID: 11400000, guid: 9ff13082aa054a0ca58cfafa99f96b14, type: 3}
