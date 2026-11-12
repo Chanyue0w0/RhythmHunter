@@ -36,7 +36,7 @@ namespace RhythmHunter.FightDemoEditor
                 throw new InvalidOperationException("Stop Play before running the preview-scene validation.");
             ValidateWindows();
             ValidateBattle();
-            const string result = "PASS: 19/20/39/40/59/60 boundaries; one-shot/repeat/disabled/invalid data; stage snapshot; ordinary clock deduplication; preparation/entry/pause/calibration/TeamSkill freeze; stun does not freeze group; real Wave transition/reset; victory/defeat/restart.";
+            const string result = "PASS: legacy fixed-window helpers; runtime 20/40/80 boundaries; one-shot/repeat/disabled/invalid data; stage snapshot; ordinary clock deduplication; preparation/entry/pause/calibration/TeamSkill freeze; stun does not freeze group; real Wave transition/reset; victory/defeat/restart.";
             Directory.CreateDirectory("Temp");
             File.WriteAllText("Temp/PressureTimingValidation.result", result);
             Debug.Log(result);
@@ -72,9 +72,9 @@ namespace RhythmHunter.FightDemoEditor
             Check(!p.IsWarningAt(15, 5), "Disabled pressure still warns");
             Check(!p.IsActiveAt(20) && p.NextStartAt(0) == -1, "Disabled window active");
             p.enablePressurePhase = p.repeat = true; p.repeatEveryBeats = 19;
-            Check(!p.Validate(out _) && !p.IsActiveAt(20), "Overlapping intervals accepted");
+            Check(p.Validate(out _), "Legacy repeat interval must not constrain runtime configuration");
             p.repeatEveryBeats = 0;
-            Check(!p.Validate(out _) && p.RemainingAt(100) == 0, "Invalid repeat causes divide by zero");
+            Check(p.Validate(out _), "Legacy repeat interval must not invalidate runtime configuration");
             p.repeatEveryBeats = 40; p.startBeat = 0;
             Check(!p.Validate(out _), "Invalid start accepted");
         }
@@ -125,13 +125,13 @@ namespace RhythmHunter.FightDemoEditor
                 Beat(); Check(fight.WaveCombatBeatCount == 21, "Individual stun froze group pressure");
                 while (fight.WaveCombatBeatCount < 39) Beat();
                 Check(fight.PressurePhaseRemainingBeats == 1, "Last active beat incorrect");
-                Beat(); Check(!fight.PressurePhaseActive && fight.PressureNextStartBeat == 60, "Beat 40 did not end");
-                while (fight.WaveCombatBeatCount < 60) Beat();
+                Beat(); Check(!fight.PressurePhaseActive && fight.PressureNextStartBeat == 80, "Beat 40 did not end");
+                while (fight.WaveCombatBeatCount < 80) Beat();
                 Check(fight.PressurePhaseActive && fight.PressurePhaseRemainingBeats == 20, "Second window did not start");
                 foreach (var enemy in roster.ActiveEnemies) enemy.TakeDamage(1000);
                 Call(fight, "CheckWaveCompletion");
                 Check(fight.AwaitingNextWave && !fight.PressurePhaseActive, "Wave clear retained pressure");
-                Beat(); Check(fight.WaveCombatBeatCount == 60, "Inter-wave wait consumed beat");
+                Beat(); Check(fight.WaveCombatBeatCount == 80, "Inter-wave wait consumed beat");
                 Set(fight, "latestCombatBeat", global + 1); Call(fight, "AdvanceWaveBoundary");
                 Set(fight, "latestCombatBeat", global + 2); Call(fight, "AdvanceWaveBoundary");
                 Check(fight.CurrentWave == 2 && fight.WaveCombatBeatCount == 0 && !fight.PressurePhaseEnabled, "Wave change did not reset/apply second configuration");

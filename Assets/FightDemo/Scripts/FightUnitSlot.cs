@@ -339,6 +339,7 @@ namespace RhythmHunter.FightDemo
                 ClearFragile();
             }
             currentHp -= applied;
+            CombatController?.RecordPressureDamage(this, applied);
             // Burst presentation shows full resolved damage; actual HP loss remains capped at zero.
             if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained ? resolvedDamage : applied);
             // Consume before callbacks; secondary damage and DoT cannot trigger fragments.

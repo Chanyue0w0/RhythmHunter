@@ -10,6 +10,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private bool startWithFullTeamSkill = false;
         [SerializeField, Min(1)] private int teamSkillGaugeGain = 1;
         private int teamSkillGauge, teamSkillStep;
+        private float teamSkillGaugeFraction;
+        public float TeamSkillGaugeExact => teamSkillGauge + teamSkillGaugeFraction;
         private long nextTeamSkillBeat = long.MaxValue;
         private long lastGaugeBeat = long.MinValue;
         private long lastTeamSkillBeat = long.MinValue;
@@ -39,7 +41,10 @@ namespace RhythmHunter.FightDemo
                 result.NearestBeat.GlobalBeat <= lastTeamUltimateBeat ||
                 result.NearestBeat.GlobalBeat <= lastGaugeBeat || result.NearestBeat.GlobalBeat <= lastTeamSkillBeat) return;
             lastGaugeBeat = result.NearestBeat.GlobalBeat;
-            teamSkillGauge = Mathf.Min(TeamSkillGaugeMax, teamSkillGauge + Mathf.Max(1, teamSkillGaugeGain));
+            float gain = Mathf.Max(1, teamSkillGaugeGain) * ordinaryManaMultiplier * (PressurePhaseActive ? pressureManaMultiplier : 1);
+            float total = Mathf.Clamp(TeamSkillGaugeExact + gain, 0, TeamSkillGaugeMax);
+            teamSkillGauge = Mathf.FloorToInt(total);
+            teamSkillGaugeFraction = total - teamSkillGauge;
             TeamSkillStatus = TeamSkillReady ? "READY  A / R" : "Build charge with Basic abilities";
         }
 
@@ -66,7 +71,7 @@ namespace RhythmHunter.FightDemo
                 teamSkillDurations[i] = teamSkillActors[i]?.UnitSlot?.CharacterDefinition?.TeamSkillPerformanceBeats ?? 1;
                 teamSkillEffectOffsets[i] = teamSkillActors[i]?.UnitSlot?.CharacterDefinition?.TeamSkillEffectBeatOffset ?? 0;
             }
-            teamSkillGauge = 0; teamSkillStep = 0;
+            teamSkillGauge = 0; teamSkillGaugeFraction = 0; teamSkillStep = 0;
             teamSkillPlaybackVersion++;
             teamSkillWindow.Begin(latestCombatBeat + 1, teamSkillBurstBeats);
             burstFrameEvents.Clear();
@@ -198,7 +203,7 @@ namespace RhythmHunter.FightDemo
             ResetEnemyPause();
             ResetBossState();
             ResetTeamUltimate();
-            teamSkillGauge = 0; teamSkillStep = 0; lastGaugeBeat = long.MinValue;
+            teamSkillGauge = 0; teamSkillGaugeFraction = 0; teamSkillStep = 0; lastGaugeBeat = long.MinValue;
             lastTeamSkillBeat = long.MinValue;
             nextTeamSkillBeat = long.MaxValue;
             pendingTeamSkillHero = null;

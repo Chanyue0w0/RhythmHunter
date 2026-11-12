@@ -37,18 +37,18 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector2 stoneSuccessEffectSize = new(240, 240);
         [SerializeField, Min(.1f)] private float stoneSuccessEffectViewSize = 1.4f;
         private FightUiParticleBurst stoneParticleBurst;
-        [Header("Pressure Stone Indicator")]
+        [Header("Pressure Bar Icon")]
         [SerializeField] private bool showPressureStoneIcon = true;
         [Tooltip("Read the SpriteRenderer artwork from this status prefab into a reusable UI Image.")]
         [SerializeField] private GameObject pressureStoneIconPrefab;
         [SerializeField] private Vector2 pressureStoneIconSize = new(32, 32);
-        [Tooltip("UI offset from the stone's upper edge, before timeline scaling.")]
+        [Tooltip("Offset from the pressure bar upper edge.")]
         [SerializeField] private Vector2 pressureStoneIconOffset = Vector2.zero;
         [SerializeField, Range(0, 1)] private float pressureStonePulseAmount = .3f;
         [SerializeField, Range(.05f, 1)] private float pressureStonePulseBeats = .35f;
         [SerializeField, Min(0)] private float pressureStoneJumpHeight = 5;
-        private Image pressureStoneIcon;
-        private GameObject pressureStoneIconSource;
+
+
         [Header("Accepted Beat Point Feedback")]
         [SerializeField] private bool removeAcceptedBeatPoints = true;
         [Tooltip("拍點消除特效：UI RectTransform Prefab。早按時在左右拍點位置生成；拍點已抵達時在中央生成。")]
@@ -129,52 +129,14 @@ namespace RhythmHunter.FightDemo
             timelineCenter.rectTransform.sizeDelta = stoneArtSize;
             stoneEffectAnchor.sizeDelta = stoneParticleBurst != null ? stoneSuccessEffectSize : stoneArtSize;
             foreach (var point in approachingPoints) point.rectTransform.sizeDelta = timelinePointArtSize;
-            float fill = Mathf.Clamp01((float)fight.TeamSkillGauge / Mathf.Max(1, fight.TeamSkillGaugeMax));
+            float fill = Mathf.Clamp01(fight.TeamSkillGaugeExact / Mathf.Max(1, fight.TeamSkillGaugeMax));
             bool timing = TryGetStoneBeat(out double beat);
             RenderStoneArtwork(fill, beat, timing);
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int timelineMs))
                 RenderStoneBounce(Mathf.Max(0, (float)(timelineMs - stoneHitTimelineMs)) / stoneHitDurationMs);
             else
                 RenderStoneBounce(double.PositiveInfinity);
-            UpdatePressureStoneIcon(beat, timing);
-        }
 
-        private void UpdatePressureStoneIcon(double beat, bool timing)
-        {
-            bool visible = showPressureStoneIcon && pressureStoneIconPrefab != null &&
-                fight != null && fight.isActiveAndEnabled && fight.PressureVisualsActive;
-            if (!visible)
-            {
-                if (pressureStoneIcon != null) pressureStoneIcon.gameObject.SetActive(false);
-                return;
-            }
-            if (pressureStoneIcon == null)
-            {
-                pressureStoneIcon = new GameObject("PressureStoneIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
-                pressureStoneIcon.transform.SetParent(timelineRoot, false);
-                pressureStoneIcon.raycastTarget = false;
-                pressureStoneIcon.preserveAspect = true;
-                var rect = pressureStoneIcon.rectTransform;
-                rect.anchorMin = rect.anchorMax = Vector2.one * .5f;
-                rect.pivot = new Vector2(.5f, 0);
-            }
-            if (pressureStoneIconSource != pressureStoneIconPrefab)
-            {
-                pressureStoneIconSource = pressureStoneIconPrefab;
-                var source = pressureStoneIconPrefab.GetComponentInChildren<SpriteRenderer>(true);
-                pressureStoneIcon.sprite = source != null ? source.sprite : null;
-                pressureStoneIcon.color = source != null ? source.color : Color.white;
-            }
-            pressureStoneIcon.gameObject.SetActive(pressureStoneIcon.sprite != null);
-            // Absolute song beat phase: no accumulated timer, extra clock or per-beat instantiation.
-            float phase = timing ? (float)(beat - System.Math.Floor(beat)) : 1;
-            float p = Mathf.Clamp01(phase / Mathf.Max(.05f, pressureStonePulseBeats));
-            float pulse = Mathf.Sin(p * Mathf.PI);
-            var iconRect = pressureStoneIcon.rectTransform;
-            iconRect.sizeDelta = pressureStoneIconSize;
-            iconRect.localScale = Vector3.one * (1 + pulse * pressureStonePulseAmount);
-            iconRect.anchoredPosition = timelineCenter.rectTransform.anchoredPosition + pressureStoneIconOffset +
-                Vector2.up * (stoneArtSize.y * .5f * timelineCenter.rectTransform.localScale.y + pulse * pressureStoneJumpHeight);
         }
 
         private void RenderStoneArtwork(float fill, double beat, bool timing)

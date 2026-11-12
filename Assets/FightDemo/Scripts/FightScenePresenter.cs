@@ -190,7 +190,7 @@ namespace RhythmHunter.FightDemo
         private void OnDisable()
         {
             Unsubscribe();
-            if (pressureStoneIcon != null) pressureStoneIcon.gameObject.SetActive(false);
+            if (pressureBarRoot != null) pressureBarRoot.gameObject.SetActive(false);
         }
 
         private void Unsubscribe()
@@ -220,6 +220,7 @@ namespace RhythmHunter.FightDemo
             UpdateTeamSkillHud();
             UpdateBossHud();
             UpdateTimelineArtwork();
+            UpdatePressureBar();
             if (fight != null && fight.IsPaused) return;
             UpdatePlaybackReadout();
             UpdateBeatProgress();

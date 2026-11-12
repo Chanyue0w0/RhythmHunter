@@ -60,7 +60,7 @@ namespace RhythmHunter.FightDemo
         public bool ScheduleEnemyHits(FightUnitSlot source, int[] beatOffsets, float damage,
             bool interruptible = true, bool launchedProjectile = false)
         {
-            if (battleEnded || AwaitingBattleStart || AwaitingNextWave || EnemyActionsPaused || IsPaused || TimingCalibrationActive ||
+            if (PressureRestActive || battleEnded || AwaitingBattleStart || AwaitingNextWave || EnemyActionsPaused || IsPaused || TimingCalibrationActive ||
                 source == null || source.CurrentHp <= 0 || source.IsStunned || !fightScene2Enemies.Contains(source) ||
                 beatOffsets == null || beatOffsets.Length == 0 || damage <= 0 || float.IsNaN(damage) || float.IsInfinity(damage)) return false;
             foreach (int offset in beatOffsets) if (offset < 1) return false;
@@ -156,7 +156,7 @@ namespace RhythmHunter.FightDemo
                 if (!enemyHits.Remove(hit) || hit.version != rosterVersion) continue;
                 if (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
                 float damage = blocked || !HealthSystemEnabled ? 0 : QuantizeCombatValue(hit.damage);
-                if (blocked) { blockedAttackCount++; PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
+                if (blocked) { blockedAttackCount++; RecordPressureBlock(); PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
                 ApplyPartyDamage(damage, hit.hitBeat);
                 if (damage > 0 && hit.source != null && tankSlot != null)
                     hit.source.PlayOnHitEffect(false, tankSlot.ImpactEffectAnchor);

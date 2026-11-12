@@ -19,7 +19,7 @@ namespace RhythmHunter.FightDemoEditor
                     EditorGUILayout.IntField("Wave", fight.CurrentWave);
                     EditorGUILayout.LongField("Wave Combat Beat", fight.WaveCombatBeatCount);
                     EditorGUILayout.TextField("Phase", fight.BattleEnded ? "ENDED" : fight.AwaitingBattleStart || fight.BattleEntranceRunning ? "ENTRY" :
-                        fight.AwaitingNextWave ? "WAVE TRANSITION" : !fight.PressurePhaseEnabled ? "DISABLED" : fight.PressurePhaseActive ? "PRESSURE" : "NORMAL");
+                        fight.AwaitingNextWave ? "WAVE TRANSITION" : !fight.PressurePhaseEnabled ? "DISABLED" : fight.PressurePhaseActive ? "PRESSURE" : fight.PressureRestActive ? "REST" : fight.PressureWarningActive ? "WARNING" : "NORMAL");
                     EditorGUILayout.LongField("Remaining Beats", fight.PressurePhaseRemainingBeats);
                     EditorGUILayout.LongField("Next Start Beat (-1 = none)", fight.PressureNextStartBeat);
                     EditorGUILayout.IntField("Recovery Beats", fight.PressureRecoveryBeats);

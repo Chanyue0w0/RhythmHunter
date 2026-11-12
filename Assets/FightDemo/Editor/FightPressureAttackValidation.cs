@@ -92,7 +92,7 @@ namespace RhythmHunter.FightDemoEditor
                         enemies.Select(e => e.CombatAnimator.ActiveFrame).SequenceEqual(frames), "Pause consumed cadence/animation");
                     Call(fight, "EndEnemyPause", true);
                 }
-                while (fight.WaveCombatBeatCount < 70) Tick();
+                while (fight.WaveCombatBeatCount < (enabled ? 90 : 70)) Tick();
                 foreach (var enemy in enemies)
                 {
                     var pressureStarts = starts[enemy].Where(b => b >= 20 && b < 40).ToArray();
@@ -107,10 +107,10 @@ namespace RhythmHunter.FightDemoEditor
                             Check(interval >= Math.Ceiling(duration + recovery - .00001) && interval <= Math.Ceiling(duration + recovery - .00001) + 1,
                                 enemy.DisplayName + " recovery did not use full animation + rest: " + interval);
                         }
-                        Check(!starts[enemy].Any(b => b >= 40 && b < 56), "Exit caught up an old normal attack");
-                        Check(starts[enemy].Any(b => b >= 60 && b < 70), "Repeat pressure did not resume");
+                        Check(!starts[enemy].Any(b => b >= 40 && b < 60), "Exit caught up an old normal attack");
+                        Check(starts[enemy].Any(b => b >= 80 && b < 90), "Repeat pressure did not resume");
                     }
-                    else Check(starts[enemy].SequenceEqual(new long[] { 16, 32, 48, 64 }), "Disabled pressure changed ordinary intervals");
+                    else Check(starts[enemy].SequenceEqual(Enumerable.Range(1, 70 / enemy.AttackIntervalBeats).Select(n => (long)n * enemy.AttackIntervalBeats)), "Disabled pressure changed ordinary intervals for " + enemy.DisplayName + ": " + string.Join(",", starts[enemy]));
                     report.Add($"enabled={enabled} rest={recovery} {enemy.DisplayName}: starts {string.Join(",", starts[enemy])}");
                 }
                 if (enabled)

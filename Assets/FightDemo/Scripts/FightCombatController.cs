@@ -865,7 +865,7 @@ namespace RhythmHunter.FightDemo
                 // Authored enemies act from every formation position. Front selection
                 // determines player targets, not which enemies are allowed to attack.
                 StartAuthoredEnemyTurns(beat.GlobalBeat);
-                if (!pendingEnemyAttack && lastEnemyQueuedBeat != beat.GlobalBeat && activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
+                if (!PressureRestActive && !pendingEnemyAttack && lastEnemyQueuedBeat != beat.GlobalBeat && activeEnemySlot != null && IsEnemyAttackBeat(beat.GlobalBeat) &&
                     (activeEnemySlot.CharacterDefinition == null || (BossActive && activeEnemySlot == bossActor)) &&
                     !enemyHits.Exists(hit => hit.source == activeEnemySlot && !hit.launched) &&
                     (!BossActive || lastBossAttackBeat != beat.GlobalBeat))
@@ -979,6 +979,7 @@ namespace RhythmHunter.FightDemo
             if (blocked)
             {
                 blockedAttackCount++;
+                RecordPressureBlock();
                 PlaySuccessfulBlockFeedback();
             }
             else

@@ -123,8 +123,10 @@ namespace RhythmHunter.FightDemo
             waveWaitBeatsRemaining = 0;
             rosterVersion++;
             int mana = teamSkillGauge;
+            float manaFraction = teamSkillGaugeFraction;
             ResetTeamSkill();
             teamSkillGauge = mana;
+            teamSkillGaugeFraction = manaFraction;
             CancelEnemyCombatWork();
             foreach (var hero in new[] { frontHero.UnitSlot, secondHero.UnitSlot, thirdHero.UnitSlot })
                 if (hero != null) hero.CombatAnimator?.InterruptPlayback();

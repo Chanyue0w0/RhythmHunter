@@ -12327,7 +12327,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   combat: {fileID: 2021200326}
   mainLight: {fileID: 2147300102}
-  pressureColor: {r: 1, g: 0.025, b: 0.025, a: 1}
+  pressureColor: {r: 1, g: 0, b: 0, a: 1}
   pressureIntensityMultiplier: 0
   transitionSeconds: 0.15
   enemyEffectPrefab: {fileID: 5140673042484358998, guid: de0ee0966f8c6c24f9bb40a2e84ad687, type: 3}

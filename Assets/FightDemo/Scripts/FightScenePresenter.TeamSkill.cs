@@ -40,10 +40,10 @@ namespace RhythmHunter.FightDemo
             UpdateTeamUltimateHud();
             string title = fight.TeamSkillRunning ? $"TEAM SKILL — {fight.TeamSkillBeatsRemaining} BEATS"
                 : fight.TeamSkillReady ? $"TEAM SKILL READY  [A / R]  MP {fight.TeamSkillGaugeMax}"
-                : $"TEAM MANA  {fight.TeamSkillGauge} / {fight.TeamSkillGaugeMax}";
+                : $"TEAM MANA  {fight.TeamSkillGaugeExact:0.#} / {fight.TeamSkillGaugeMax}";
             teamSkillLabel.text = title + "\n" + (fight.TeamUltimateRunning ? "Waiting for Ultimate performance" : fight.TeamSkillStatus);
             teamSkillFill.color = fight.TeamSkillReady ? Gold : Cyan;
-            teamSkillFill.rectTransform.localScale = new Vector3((float)fight.TeamSkillGauge / Mathf.Max(1, fight.TeamSkillGaugeMax), 1, 1);
+            teamSkillFill.rectTransform.localScale = new Vector3(fight.TeamSkillGaugeExact / Mathf.Max(1, fight.TeamSkillGaugeMax), 1, 1);
         }
 
         private void UpdateBurstHud()

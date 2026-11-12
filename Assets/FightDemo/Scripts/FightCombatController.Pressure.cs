@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using System.Collections.Generic;
 
 namespace RhythmHunter.FightDemo
@@ -19,13 +20,31 @@ namespace RhythmHunter.FightDemo
         private bool pressureCadenceActive;
         public long WaveCombatBeatCount { get; private set; }
         public bool PressurePhaseEnabled => wavePressure.enablePressurePhase;
-        public bool PressurePhaseActive => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive &&
-            wavePressure.IsActiveAt(WaveCombatBeatCount);
-        public bool PressureWarningActive => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive &&
-            wavePressure.IsWarningAt(WaveCombatBeatCount, pressureWarningBeats);
+        [Header("Pressure Break / Rest")]
+        [SerializeField, Min(.5f)] private float pressureDamagePerPair = 3;
+        [SerializeField, Min(1)] private int pressureBlocksPerPair = 3;
+        [SerializeField, Min(0)] private int pressureRestBeats = 20;
+        [SerializeField, Min(0)] private float ordinaryManaMultiplier = .5f;
+        [SerializeField, Min(0)] private float pressureManaMultiplier = 2;
+        private double pressureRemaining;
+        private long pressureNextStart = -1, pressureRestUntil;
+        private float pressureDamageProgress;
+        private int pressureBlockProgress;
+        public int PressureBreakRevision { get; private set; }
+        public long PressureLastBreakSongBeat { get; private set; }
+        private bool PressureBattleAvailable => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive;
+        public bool PressurePhaseActive => PressureBattleAvailable && pressureRemaining > 0;
+        public bool PressureRestActive => PressureBattleAvailable && WaveCombatBeatCount < pressureRestUntil;
+        public bool PressureWarningActive => PressureBattleAvailable && !PressurePhaseActive && !PressureRestActive &&
+            pressureNextStart >= 0 && pressureNextStart > WaveCombatBeatCount &&
+            pressureNextStart - WaveCombatBeatCount <= pressureWarningBeats;
         public bool PressureVisualsActive => PressurePhaseActive || PressureWarningActive;
-        public long PressurePhaseRemainingBeats => PressurePhaseActive ? wavePressure.RemainingAt(WaveCombatBeatCount) : 0;
-        public long PressureNextStartBeat => battleEnded || AwaitingNextWave ? -1 : wavePressure.NextStartAt(WaveCombatBeatCount);
+        public long PressurePhaseRemainingBeats => PressurePhaseActive ? (long)Math.Ceiling(pressureRemaining) : 0;
+        public float PressureRemainingExact => PressurePhaseActive ? (float)pressureRemaining : 0;
+        public int PressureVisiblePairs => PressurePhaseActive ? Math.Min(5, (int)Math.Ceiling(pressureRemaining / PressurePairBeats - .00001)) : 5;
+        public float PressurePairBeats => Math.Max(1, wavePressure.durationBeats) / 5f;
+        public int PressureWarningLeadBeats => pressureWarningBeats;
+        public long PressureNextStartBeat => PressureBattleAvailable ? pressureNextStart : -1;
         public int PressureRecoveryBeats => wavePressure.recoveryBeats;
         public IReadOnlyList<FightUnitSlot> PressureEnemySlots => fightScene2Enemies;
 
@@ -35,10 +54,80 @@ namespace RhythmHunter.FightDemo
             WaveCombatBeatCount = 0;
             wavePressure = rosterManager != null
                 ? rosterManager.GetWavePressureSettings(CurrentWave - 1) : new FightEnemyPressureSettings();
+            pressureRemaining = 0;
+            pressureRestUntil = 0;
+            pressureDamageProgress = 0;
+            pressureBlockProgress = 0;
+            PressureBreakRevision = 0;
+            PressureLastBreakSongBeat = long.MinValue;
+            pressureNextStart = wavePressure.enablePressurePhase && wavePressure.Validate(out _) ? wavePressure.startBeat : -1;
         }
 
         // Called only when the existing normal-battle clock accepts a new beat.
-        private void AdvanceWavePressureBeat() => WaveCombatBeatCount++;
+        private void AdvanceWavePressureBeat()
+        {
+            WaveCombatBeatCount++;
+            if (pressureRemaining > 0)
+            {
+                pressureRemaining = Math.Max(0, pressureRemaining - 1);
+                if (pressureRemaining <= 0) EndPressurePhase();
+            }
+            else if (pressureNextStart >= 0 && WaveCombatBeatCount >= pressureNextStart)
+            {
+                pressureRemaining = Math.Max(1, wavePressure.durationBeats);
+                pressureDamageProgress = 0;
+                pressureBlockProgress = 0;
+                pressureNextStart = -1;
+            }
+        }
+
+        internal void RecordPressureDamage(FightUnitSlot target, float actualHpLoss)
+        {
+            if (!PressurePhaseActive || target == null || !fightScene2Enemies.Contains(target) || actualHpLoss <= 0) return;
+            pressureDamageProgress += actualHpLoss;
+            int pairs = (int)Math.Floor((pressureDamageProgress + .00001f) / Mathf.Max(.5f, pressureDamagePerPair));
+            pressureDamageProgress -= pairs * Mathf.Max(.5f, pressureDamagePerPair);
+            ReducePressurePairs(pairs);
+        }
+
+        private void RecordPressureBlock()
+        {
+            if (!PressurePhaseActive) return;
+            pressureBlockProgress++;
+            int threshold = Math.Max(1, pressureBlocksPerPair);
+            int pairs = pressureBlockProgress / threshold;
+            pressureBlockProgress %= threshold;
+            ReducePressurePairs(pairs);
+        }
+
+        private void ReducePressurePairs(int pairs)
+        {
+            if (pairs <= 0 || !PressurePhaseActive) return;
+            pressureRemaining = Math.Max(0, pressureRemaining - pairs * PressurePairBeats);
+            PressureBreakRevision++;
+            PressureLastBreakSongBeat = beatClock != null ? beatClock.LatestBeat.GlobalBeat + 1 : latestCombatBeat + 1;
+            if (pressureRemaining <= .00001) EndPressurePhase();
+        }
+
+        private void EndPressurePhase()
+        {
+            pressureRemaining = 0;
+            pressureDamageProgress = 0;
+            pressureBlockProgress = 0;
+            pressureRestUntil = WaveCombatBeatCount + Math.Max(0, pressureRestBeats);
+            pressureNextStart = wavePressure.repeat ? pressureRestUntil + Math.Max(1, wavePressure.startBeat) : -1;
+            // Cancel unexecuted attacks; launched projectiles retain their normal resolution.
+            enemyHits.RemoveAll(hit => !hit.launched);
+            pendingEnemyAttack = pendingEnemyAnimationDriven = pendingEnemyWindup = false;
+            pendingEnemyAttacker = null;
+            foreach (var enemy in fightScene2Enemies)
+            {
+                if (enemy == null) continue;
+                enemy.CombatAnimator?.InterruptPlayback();
+                CadenceFor(enemy).normalReady = NormalBattleBeatCount + Math.Max(0, pressureRestBeats);
+            }
+            pressureCadenceActive = false;
+        }
 
         private EnemyCadence CadenceFor(FightUnitSlot enemy)
         {
@@ -72,6 +161,7 @@ namespace RhythmHunter.FightDemo
 
         private bool EnemyCadenceReady(FightUnitSlot enemy, long globalBeat)
         {
+            if (PressureRestActive) return false;
             if (PressurePhaseEnabled)
             {
                 var cadence = CadenceFor(enemy);
