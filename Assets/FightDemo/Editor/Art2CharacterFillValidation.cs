@@ -54,6 +54,7 @@ namespace RhythmHunter.FightDemoEditor
                 renderer.transform.SetParent(root.transform); renderer.gameObject.layer = 31;
                 renderer.sprite = sprite; renderer.sharedMaterial = material;
                 var fill = root.AddComponent<Art2CharacterFillLighting>();
+                fill.enableRim = false;
                 fill.heroes.color = Color.red; fill.heroes.intensity = .5f;
                 fill.enemies.color = Color.blue; fill.enemies.intensity = .5f;
                 fill.heroes.softness = fill.enemies.softness = 1;
@@ -73,7 +74,29 @@ namespace RhythmHunter.FightDemoEditor
                 // Shared material remains unmodified: a second renderer is not opted into fill.
                 renderer.SetPropertyBlock(null);
                 if (Render().maxColorComponent > baseline.maxColorComponent + .02f) throw new Exception("Shared material leaked fill");
-                File.WriteAllText("Temp/Art2CharacterFill.result", $"PASS GPU: hero={hero}, enemy={enemy}; toggle, disable restoration and shared material isolation passed.");
+                // Transparent border fixture verifies a one-sided edge, not an all-around outline.
+                UnityEngine.Object.DestroyImmediate(sprite);
+                texture.Reinitialize(16, 16); texture.filterMode = FilterMode.Point;
+                var pixels = new Color[256];
+                for (int y = 4; y < 12; y++) for (int x = 4; x < 12; x++) pixels[y * 16 + x] = Color.white;
+                texture.SetPixels(pixels); texture.Apply();
+                sprite = Sprite.Create(texture, new Rect(0, 0, 16, 16), Vector2.one * .5f, 8);
+                renderer.sprite = sprite;
+                var edgeBlock = new MaterialPropertyBlock();
+                edgeBlock.SetColor("_CharacterRimColor", new Color(1, 0, 0, .5f));
+                edgeBlock.SetVector("_CharacterRimParams", new Vector4(1, 0, 1, 0));
+                renderer.SetPropertyBlock(edgeBlock); Render();
+                float left = 0, right = 0;
+                for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++)
+                    if (x < 32) left += readback.GetPixel(x, y).r; else right += readback.GetPixel(x, y).r;
+                if (right < 1 || left > right * .1f) throw new Exception($"One-sided rim failed: left={left}, right={right}");
+                edgeBlock.SetVector("_CharacterRimParams", new Vector4(-1, 0, 1, 0));
+                renderer.SetPropertyBlock(edgeBlock); Render();
+                left = right = 0;
+                for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++)
+                    if (x < 32) left += readback.GetPixel(x, y).r; else right += readback.GetPixel(x, y).r;
+                if (left < 1 || right > left * .1f) throw new Exception("Rim direction did not reverse");
+                File.WriteAllText("Temp/Art2CharacterFill.result", $"PASS GPU: hero={hero}, enemy={enemy}; toggle, disable restoration, shared material isolation and one-sided rim direction reversal passed.");
                 void Tick() => typeof(Art2CharacterFillLighting).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(fill, null);
                 Color Render()
                 {

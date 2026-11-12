@@ -77,6 +77,13 @@
                 half3 fill = _CharacterFillColor.rgb * _CharacterFillColor.a *
                     lerp(_CharacterFillDirection.w, 1.0h, facing);
                 half3 rgb = color.rgb * (Art2Light(normalWS, input.positionWS, input.vertexLight, GetNormalizedScreenSpaceUV(input.positionCS), _DiffuseFloor) + _EmissionStrength + fill);
+                if (_CharacterRimColor.a > 0.001h)
+                {
+                    float2 edgeOffset = _CharacterRimParams.xy * _CharacterRimParams.z * _MainTex_TexelSize.xy;
+                    half neighbour = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv + edgeOffset).a;
+                    half edge = saturate(color.a - neighbour);
+                    rgb += _CharacterRimColor.rgb * _CharacterRimColor.a * edge;
+                }
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 rgb = FocusWallFog(rgb, focusWeight);
                 return half4(rgb, color.a);

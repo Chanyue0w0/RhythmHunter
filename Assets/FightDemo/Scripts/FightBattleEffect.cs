@@ -71,7 +71,11 @@ namespace RhythmHunter.FightDemo
     public sealed partial class FightCombatController
     {
         private readonly HashSet<FightBattleEffect> battleEffects = new();
-        internal void RegisterBattleEffect(FightBattleEffect effect) => battleEffects.Add(effect);
+        public event System.Action<FightBattleEffect> BattleEffectSpawned;
+        internal void RegisterBattleEffect(FightBattleEffect effect)
+        {
+            if (battleEffects.Add(effect)) BattleEffectSpawned?.Invoke(effect);
+        }
         internal void UnregisterBattleEffect(FightBattleEffect effect) => battleEffects.Remove(effect);
         private void ClearCombatEffectsKeepingDamageNumbers()
         {

@@ -9939,13 +9939,6 @@ MonoBehaviour:
   showTimelineBar: 0
   timelinePointSprite: {fileID: 21300000, guid: 5d43eb9f5d875f849a405800c5f58f78, type: 3}
   pressureTimelinePointSprite: {fileID: 21300000, guid: 854f7c29d01a747449e9546fd099283c, type: 3}
-  showPressureStoneIcon: 1
-  pressureStoneIconPrefab: {fileID: 224913720994293302, guid: 9b5a1b613309f7b409d600090feaa62e, type: 3}
-  pressureStoneIconSize: {x: 32, y: 32}
-  pressureStoneIconOffset: {x: 0, y: 0}
-  pressureStonePulseAmount: 0.3
-  pressureStonePulseBeats: 0.35
-  pressureStoneJumpHeight: 5
   stoneEmptySprite: {fileID: 21300000, guid: c52009719b5f35f46bbbad10c8943544, type: 3}
   stoneFillSprite: {fileID: 21300000, guid: 63315626d9124774585cd363f137ac7a, type: 3}
   stoneReadyFrames:
@@ -9965,6 +9958,13 @@ MonoBehaviour:
   stoneSuccessEffectLifetime: 1.2
   stoneSuccessEffectSize: {x: 240, y: 240}
   stoneSuccessEffectViewSize: 1.4
+  showPressureStoneIcon: 1
+  pressureStoneIconPrefab: {fileID: 224913720994293302, guid: 9b5a1b613309f7b409d600090feaa62e, type: 3}
+  pressureStoneIconSize: {x: 32, y: 32}
+  pressureStoneIconOffset: {x: 0, y: 0}
+  pressureStonePulseAmount: 0.3
+  pressureStonePulseBeats: 0.35
+  pressureStoneJumpHeight: 5
   removeAcceptedBeatPoints: 1
   beatPointHitEffectPrefab: {fileID: 0}
   beatPointHitEffectLifetime: 0.5
@@ -10013,7 +10013,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
-  pressureWarningBeats: 5
   playSuccessfulBlockSound: 1
   successfulBlockSoundEventPath: event:/SoundEffects/InCombat/Paladin_NormalParry
   successfulBlockSoundVolume: 1
@@ -10046,6 +10045,7 @@ MonoBehaviour:
   damageNumberMaxActive: 64
   damageGlyphMaxCachedPerDigit: 64
   enableCharacterPassives: 0
+  pressureWarningBeats: 5
   showStatusIcons: 1
   blockedEffectIcon: {fileID: 11400000, guid: 2a00d1707c09407c9e7e402ded2978fc, type: 3}
   weakEffectIcon: {fileID: 11400000, guid: 9ff13082aa054a0ca58cfafa99f96b14, type: 3}
@@ -10711,6 +10711,8 @@ GameObject:
   - component: {fileID: 2147100001}
   - component: {fileID: 2147100002}
   - component: {fileID: 2147100003}
+  - component: {fileID: 2147100005}
+  - component: {fileID: 2147100004}
   m_Layer: 0
   m_Name: Art2_2_5D_Prototype
   m_TagString: Untagged
@@ -10788,6 +10790,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableFill: 1
+  enableRim: 0
+  rimColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+  rimIntensity: 0.18
+  rimWidthPixels: 1
+  rimLight: {fileID: 0}
+  rimDirection: {x: -1, y: 1}
   heroes:
     enabled: 1
     color: {r: 1, g: 0.94, b: 0.85, a: 1}
@@ -10800,6 +10808,96 @@ MonoBehaviour:
     intensity: 0.16
     direction: {x: 0, y: 1, z: -1}
     softness: 0.6
+--- !u!114 &2147100004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9632f258bc5943d3a0690ae23b58e6f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2SkillFlashLighting
+  enableSkillFlashes: 1
+  combat: {fileID: 2021200326}
+  maxConcurrentLights: 2
+  rules:
+  - enabled: 1
+    effectName: LightExplosionQuick
+    color: {r: 1, g: 0.65, b: 0.2, a: 1}
+    intensity: 1.5
+    range: 3
+    durationBeats: 0.3
+    worldOffset: {x: 0, y: 0.7, z: -0.2}
+  - enabled: 1
+    effectName: SwordSlash_Pixel_Yellow
+    color: {r: 1, g: 0.65, b: 0.2, a: 1}
+    intensity: 0.8
+    range: 2.5
+    durationBeats: 0.2
+    worldOffset: {x: 0, y: 0.7, z: -0.2}
+  - enabled: 1
+    effectName: FireExplosion
+    color: {r: 1, g: 0.3, b: 0.08, a: 1}
+    intensity: 1.5
+    range: 3
+    durationBeats: 0.35
+    worldOffset: {x: 0, y: 0.7, z: -0.2}
+--- !u!114 &2147100005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edbd9224ac244056b22cbe2622fae863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2SceneLightingTuning
+  enableSceneSeparation: 1
+  backgroundAmbientMultiplier: 0.8
+  foregroundAmbientMultiplier: 0.65
+  enableSurfaceLighting: 1
+  normalStrength: 1.2
+  surfaceAmbientMultiplier: 0.8
+  surfaceDiffuseWrap: 0.12
+  targets:
+  - renderer: {fileID: 632852954}
+    foreground: 0
+    normalMap: {fileID: 0}
+  - renderer: {fileID: 699185075}
+    foreground: 0
+    normalMap: {fileID: 0}
+  - renderer: {fileID: 1701508855}
+    foreground: 0
+    normalMap: {fileID: 0}
+  - renderer: {fileID: 635056680}
+    foreground: 0
+    normalMap: {fileID: 0}
+  - renderer: {fileID: 1513715654}
+    foreground: 0
+    normalMap: {fileID: 0}
+  - renderer: {fileID: 2147500012}
+    foreground: 0
+    normalMap: {fileID: 2800000, guid: 186ab7dd9bf949ab96249c71667f68af, type: 3}
+  - renderer: {fileID: 2147500022}
+    foreground: 0
+    normalMap: {fileID: 2800000, guid: aaeddf988b624baab7fd5f1b6abab10a, type: 3}
+  - renderer: {fileID: 2147500032}
+    foreground: 0
+    normalMap: {fileID: 2800000, guid: 64351f4f54de4b14bc6bed6dda840f00, type: 3}
+  - renderer: {fileID: 2147500042}
+    foreground: 0
+    normalMap: {fileID: 2800000, guid: bdbe740d8d184094a65431e166af4872, type: 3}
+  - renderer: {fileID: 1833590338}
+    foreground: 1
+    normalMap: {fileID: 0}
+  - renderer: {fileID: 33716879}
+    foreground: 1
+    normalMap: {fileID: 0}
 --- !u!1001 &2147100100
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11708,7 +11806,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5912e-41, y: 0, z: 0, w: -1.7380461e+17}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 1.6531e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11872,7 +11970,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 8.305307e-19, y: 0.0000027447934, z: 0.0000026408352, w: 5.558869e-16}
+  m_BoundingSphereOverride: {x: 0, y: 1, z: 1, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12358,7 +12456,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: NaN, y: NaN, z: 0, w: 1e-45}
+  m_BoundingSphereOverride: {x: 0, y: 2.9401496e-15, z: 1.0077347e+12, w: 8.351696e-25}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12522,7 +12620,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 3.4978127e-20, y: 5.51118e-40, z: 2.7056e-41, w: 5.050952e-39}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
