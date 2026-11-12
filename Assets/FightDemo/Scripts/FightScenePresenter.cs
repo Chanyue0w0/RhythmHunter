@@ -645,6 +645,12 @@ namespace RhythmHunter.FightDemo
         {
             bool burst = fight != null && fight.TeamSkillBurstActive;
             Color color = burst ? Gold : HasTimelineArt ? Color.white : beatPointColor;
+            bool pressure = fight != null && fight.isActiveAndEnabled && fight.PressurePhaseActive;
+            Sprite pointSprite = pressure && pressureTimelinePointSprite != null
+                ? pressureTimelinePointSprite : timelinePointSprite;
+            Color pointColor = pressure
+                ? (HasTimelineArt && pressureTimelinePointSprite != null ? Color.white : Color.red)
+                : color;
             double spacingMs = intervalMs * (burst ? .5 : 1);
             double beatPosition = (evaluatedMs - anchorMs) / spacingMs;
             float phase = (float)(beatPosition - System.Math.Floor(beatPosition));
@@ -663,7 +669,9 @@ namespace RhythmHunter.FightDemo
                 float distance = TimelinePointDistance(i, phase, count, burst);
                 approachingPoints[i * 2].rectTransform.anchoredPosition = new Vector2(-distance, 0f);
                 approachingPoints[i * 2 + 1].rectTransform.anchoredPosition = new Vector2(distance, 0f);
-                approachingPoints[i * 2].color = approachingPoints[i * 2 + 1].color = color;
+                approachingPoints[i * 2].color = approachingPoints[i * 2 + 1].color = pointColor;
+                if (HasTimelineArt)
+                    approachingPoints[i * 2].sprite = approachingPoints[i * 2 + 1].sprite = pointSprite;
             }
             // Timeline-driven pulse freezes with paused audio and resets with a new anchor.
             float pulse = Mathf.Clamp01(1f - (float)(phase * spacingMs / 110.0));

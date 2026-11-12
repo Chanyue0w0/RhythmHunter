@@ -21,6 +21,7 @@ namespace RhythmHunter.FightDemo
         public long PressurePhaseRemainingBeats => PressurePhaseActive ? wavePressure.RemainingAt(WaveCombatBeatCount) : 0;
         public long PressureNextStartBeat => battleEnded || AwaitingNextWave ? -1 : wavePressure.NextStartAt(WaveCombatBeatCount);
         public int PressureRecoveryBeats => wavePressure.recoveryBeats;
+        public IReadOnlyList<FightUnitSlot> PressureEnemySlots => fightScene2Enemies;
 
         private void ResetWavePressure()
         {

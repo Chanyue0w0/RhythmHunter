@@ -9938,6 +9938,7 @@ MonoBehaviour:
   timelineBarSprite: {fileID: 21300000, guid: 3364845ec05154c4b83eede94957e942, type: 3}
   showTimelineBar: 0
   timelinePointSprite: {fileID: 21300000, guid: 5d43eb9f5d875f849a405800c5f58f78, type: 3}
+  pressureTimelinePointSprite: {fileID: 21300000, guid: 854f7c29d01a747449e9546fd099283c, type: 3}
   stoneEmptySprite: {fileID: 21300000, guid: c52009719b5f35f46bbbad10c8943544, type: 3}
   stoneFillSprite: {fileID: 21300000, guid: 63315626d9124774585cd363f137ac7a, type: 3}
   stoneReadyFrames:
@@ -11673,7 +11674,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.8e-43, y: 1.22e-43, z: 1.1e-44, w: 0}
+  m_BoundingSphereOverride: {x: 9.302e-42, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -11837,7 +11838,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.7867791e-35, y: 1.8459024e-38, z: 6.245425e-39, w: 3.6299613e-35}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 174.47443, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12048,6 +12049,7 @@ GameObject:
   - component: {fileID: 2147300102}
   - component: {fileID: 2147300103}
   - component: {fileID: 2147300104}
+  - component: {fileID: 2147300105}
   m_Layer: 0
   m_Name: ShadowTestLight_MoveMe
   m_TagString: Untagged
@@ -12178,6 +12180,27 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!114 &2147300105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147300100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05cdd9f7ada34727a75184ebaa9b662c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  combat: {fileID: 2021200326}
+  mainLight: {fileID: 2147300102}
+  pressureColor: {r: 1, g: 0.025, b: 0.025, a: 1}
+  pressureIntensityMultiplier: 0
+  transitionSeconds: 0.15
+  enemyEffectPrefab: {fileID: 5140673042484358998, guid: de0ee0966f8c6c24f9bb40a2e84ad687, type: 3}
+  effectOffset: {x: 0, y: 0, z: 0}
+  effectRotationOffset: {x: 0, y: 0, z: 0}
+  effectScaleMultiplier: {x: 1, y: 1, z: 1}
 --- !u!1 &2147300200
 GameObject:
   m_ObjectHideFlags: 0
@@ -12301,7 +12324,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: -4.4274534e-14, y: 7.191856e+35, z: 1.1627664e-36, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 7.052582e-29, z: 2.7106292e-20, w: 7.0521006e-29}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12465,7 +12488,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.510166e-39, y: 2.388592e-39, z: 1.7340284e-37, w: 6.906032e-37}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 8.8136e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

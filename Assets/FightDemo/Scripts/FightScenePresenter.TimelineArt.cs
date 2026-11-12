@@ -13,6 +13,8 @@ namespace RhythmHunter.FightDemo
         [Tooltip("只控制節拍器底圖；拍點、中央石頭與判定保持運作。")]
         [SerializeField] private bool showTimelineBar = true;
         [SerializeField] private Sprite timelinePointSprite;
+        [Tooltip("密集攻擊期間的拍點圖片；結束後還原。未指定時使用紅色染色。")]
+        [SerializeField] private Sprite pressureTimelinePointSprite;
         [SerializeField] private Sprite stoneEmptySprite;
         [SerializeField] private Sprite stoneFillSprite;
         [SerializeField] private Sprite[] stoneReadyFrames;
