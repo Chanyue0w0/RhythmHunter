@@ -110,7 +110,7 @@ namespace RhythmHunter.FightDemo
                 : "Armor: abilities / wave clear only";
             basicText.text = BasicStatus();
             if (fight.UsesBattlePreparation) basicText.text = $"WAVE {fight.CurrentWave}/{fight.WaveCount}   " + basicText.text;
-            basicText.gameObject.SetActive(!fight.AwaitingBattleStart && !fight.BattleEnded);
+            basicText.gameObject.SetActive(!fight.AwaitingBattleStart && (!fight.BattleEnded || !fight.BattleWon));
             var enemies = fight.RosterManager != null ? fight.RosterManager.ActiveEnemies : null;
             for (int i = 0; i < 3; i++)
             {

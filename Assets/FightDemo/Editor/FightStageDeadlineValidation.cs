@@ -38,6 +38,8 @@ namespace RhythmHunter.FightDemoEditor
                     var fight = all.OfType<FightCombatController>().Single();
                     var results = all.OfType<FightStageResults>().Single();
                     var presenter = all.OfType<FightScenePresenter>().Single();
+                    // Preview scenes do not run the clock's Awake metadata resolution.
+                    Set(results.BeatClock, "openingTempo", 120f);
                     foreach (var sound in all.OfType<FightAudioPlayer>()) Set(sound, "soundEnabled", false);
                     stage = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<FightStageDefinition>("Assets/FightDemo/Levels/Stage01.asset"));
                     Set(stage, "useNormalEndDeadline", true);
@@ -135,6 +137,34 @@ namespace RhythmHunter.FightDemoEditor
                         }
                         Call(results, "Finish", true);
                         Check(results.ClearedWaves < results.TotalWaves, "Partial victory reported all Waves cleared");
+                    }
+                    if (scenario == "defeat")
+                    {
+                        Call(presenter, "BuildEqualBeatTimeline");
+                        Set(presenter, "defeatUiStarted", false);
+                        Call(presenter, "BeginDefeatUi");
+                        var stone = (UnityEngine.UI.Image)typeof(FightScenePresenter).GetField("timelineCenter", Flags).GetValue(presenter);
+                        var points = (UnityEngine.UI.Image[])typeof(FightScenePresenter).GetField("approachingPoints", Flags).GetValue(presenter);
+                        var hud = (Canvas)typeof(FightScenePresenter).GetField("playerUiCanvas", Flags).GetValue(presenter);
+                        float startY = stone.rectTransform.anchoredPosition.y;
+                        Call(presenter, "AdvanceDefeatUi", .1f);
+                        Check(stone.rectTransform.anchoredPosition.y > startY && hud.gameObject.activeSelf, "Stone did not jump or HUD disappeared early");
+                        Call(presenter, "AdvanceDefeatUi", .7f);
+                        Check(stone.rectTransform.anchoredPosition.y < startY && points.All(p => p.color.a == 0) && hud.gameObject.activeSelf, "Stone fall / beat fade / retained HUD failed");
+                        Call(results, "Finish", false);
+                        var panel = all.OfType<FightVictoryPanel>().Single();
+                        Call(panel, "Show");
+                        var group = (CanvasGroup)typeof(FightVictoryPanel).GetField("presentationGroup", Flags).GetValue(panel);
+                        float delay = (float)typeof(FightVictoryPanel).GetField("presentationDelay", Flags).GetValue(panel);
+                        Check(delay > 0 && group.alpha == 0 && !group.interactable && fight.BattleEnded, "Defeat must lock combat before displaying results");
+                        Call(panel, "AdvancePresentation", delay * .5f);
+                        Check(group.alpha == 0 && !group.interactable, "Defeat appeared before two beats");
+                        Call(panel, "AdvancePresentation", delay * .5f);
+                        Call(panel, "AdvancePresentation", .175f);
+                        Check(group.alpha > 0 && group.alpha < 1 && !group.interactable, "Defeat fade or input lock failed");
+                        Call(panel, "AdvancePresentation", .2f);
+                        Check(group.alpha == 1 && group.interactable, "Defeat fade did not finish");
+                        Check(!hud.gameObject.activeSelf, "HUD remained after defeat panel finished appearing");
                     }
                     Call(fight, "ResetStageDeadline");
                     Check(!fight.StageTimeExpired && !fight.StageOvertimeActive && fight.StageMusicSeconds == 0, "Timer reset failed");

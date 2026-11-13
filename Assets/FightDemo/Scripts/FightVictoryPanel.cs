@@ -16,7 +16,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Color backdropColor = new(.015f, .025f, .04f, .88f);
         [SerializeField] private Color accentColor = new(1f, .8f, .28f);
         [SerializeField] private Color defeatAccentColor = new(1f, .35f, .3f);
+        [Header("Defeat Presentation")]
+        [Tooltip("Wait after defeat before fading in results. Uses the song tempo at defeat.")]
+        [SerializeField, Min(0)] private float defeatDelayBeats = 2;
+        [SerializeField, Min(0)] private float defeatFadeSeconds = .35f;
         private GameObject canvasObject;
+        private CanvasGroup presentationGroup;
+        private float presentationDelay, presentationFadeElapsed;
         private float shownAt;
         public bool IsVisible => canvasObject != null && canvasObject.activeSelf;
         private void OnEnable()
@@ -37,6 +43,12 @@ namespace RhythmHunter.FightDemo
         }
         private void Update()
         {
+            if (IsVisible && presentationGroup != null && presentationGroup.alpha < 1)
+            {
+                if (results != null && results.PresentationPaused) return;
+                AdvancePresentation(Time.unscaledDeltaTime);
+            }
+            if (presentationGroup != null && !presentationGroup.interactable) return;
             if (!IsVisible || Time.unscaledTime - shownAt < .4f) return;
             if (Gamepad.current?.buttonSouth.wasPressedThisFrame ?? false) Restart();
         }
@@ -59,6 +71,21 @@ namespace RhythmHunter.FightDemo
             shownAt = Time.unscaledTime;
             canvasObject = new GameObject("PlayerResultCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);
+            presentationGroup = canvasObject.AddComponent<CanvasGroup>();
+            float secondsPerBeat = 0;
+            var clock = results.BeatClock;
+            if (clock != null)
+            {
+                secondsPerBeat = (float)(clock.MillisecondsPerBeat > 0 ? clock.MillisecondsPerBeat / 1000d : clock.OpeningSecondsPerBeat);
+                secondsPerBeat /= Mathf.Max(.01f, clock.MusicPitch);
+            }
+            // Presentation only: combat/input and result statistics are already locked at defeat.
+            // Snapshot tempo because the music may finish fading out during this wait.
+            presentationDelay = results.Won ? 0 : defeatDelayBeats * secondsPerBeat;
+            presentationFadeElapsed = 0;
+            presentationGroup.alpha = results.Won ? 1 : 0;
+            presentationGroup.interactable = results.Won;
+            presentationGroup.blocksRaycasts = results.Won;
             var canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 200;
@@ -86,11 +113,25 @@ namespace RhythmHunter.FightDemo
         }
         private void Restart()
         {
+            if (presentationGroup != null && !presentationGroup.interactable) return;
             foreach (var root in gameObject.scene.GetRootGameObjects())
             {
                 var pause = root.GetComponentInChildren<FightPauseController>(true);
                 if (pause != null) { pause.RestartBattle(); return; }
             }
+        }
+        private void AdvancePresentation(float seconds)
+        {
+            float delayConsumed = Mathf.Min(presentationDelay, seconds);
+            presentationDelay -= delayConsumed;
+            seconds -= delayConsumed;
+            if (presentationDelay > 0) return;
+            presentationFadeElapsed += seconds;
+            presentationGroup.alpha = defeatFadeSeconds <= 0 ? 1 : Mathf.Clamp01(presentationFadeElapsed / defeatFadeSeconds);
+            if (presentationGroup.alpha < 1) return;
+            presentationGroup.interactable = presentationGroup.blocksRaycasts = true;
+            if (results != null && !results.Won) GetComponent<FightScenePresenter>()?.HideBattleUiAfterDefeat();
+            shownAt = Time.unscaledTime;
         }
     }
 }

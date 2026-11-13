@@ -213,6 +213,12 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (fight != null && fight.BattleEnded && !fight.BattleWon)
+            {
+                BeginDefeatUi();
+                if (!fight.IsPaused) AdvanceDefeatUi(Time.unscaledDeltaTime);
+                return;
+            }
             ApplyVisibilityControls();
             if (warningText != null && warningText.gameObject.activeSelf != showEnemyStatusUi)
                 warningText.gameObject.SetActive(showEnemyStatusUi);
@@ -514,6 +520,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnBattleLost()
         {
+            BeginDefeatUi();
             SetResult("DEFEAT", Red, "Stop Play Mode to reset the prototype", 999f);
             if (warningText != null)
                 warningText.text = "BATTLE ENDED";

@@ -23,6 +23,8 @@ namespace RhythmHunter.FightDemo
         public int TotalWaves { get; private set; }
         public double OvertimeSeconds => SongLengthSeconds > 0 ? Math.Max(0, SongProgressSeconds - SongLengthSeconds) : 0;
         public event Action ResultReady;
+        public FmodBeatClock BeatClock => beatClock;
+        public bool PresentationPaused => fight != null && fight.IsPaused;
 
         private void OnEnable()
         {
