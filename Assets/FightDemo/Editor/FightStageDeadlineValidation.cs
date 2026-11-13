@@ -37,6 +37,7 @@ namespace RhythmHunter.FightDemoEditor
                     var all = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<MonoBehaviour>(true)).ToArray();
                     var fight = all.OfType<FightCombatController>().Single();
                     var results = all.OfType<FightStageResults>().Single();
+                    var presenter = all.OfType<FightScenePresenter>().Single();
                     foreach (var sound in all.OfType<FightAudioPlayer>()) Set(sound, "soundEnabled", false);
                     stage = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<FightStageDefinition>("Assets/FightDemo/Levels/Stage01.asset"));
                     Set(stage, "useNormalEndDeadline", true);
@@ -53,6 +54,26 @@ namespace RhythmHunter.FightDemoEditor
                     Set(fight, "beatClock", null); Set(fight, "waveEntrance", null);
                     Check(fight.TryBeginBattle(), "Battle did not start");
                     Set(fight, "stageDeadlineMs", 63471);
+                    if (scenario == "combat")
+                    {
+                        Call(fight, "EvaluateStageDeadline", 0);
+                        Call(presenter, "UpdateStageCountdownLine");
+                        var line = (RectTransform)typeof(FightScenePresenter).GetField("stageCountdownRoot", Flags).GetValue(presenter);
+                        Check(line != null && line.gameObject.activeSelf && line.parent.name == "PlayerUI", "Countdown missing from player UI");
+                        var fill = line.Find("RemainingTime").GetComponent<UnityEngine.UI.Image>();
+                        Check(fill.rectTransform.anchorMin.x == 0 && fill.rectTransform.anchorMax.x == 1 && !fill.raycastTarget, "Full countdown geometry/input blocking wrong");
+                        Call(fight, "EvaluateStageDeadline", 31735);
+                        foreach (float width in new[] { 1280f, 1920f, 2560f })
+                        {
+                            ((RectTransform)line.parent).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+                            Call(presenter, "UpdateStageCountdownLine");
+                            Check(Mathf.Abs(line.rect.width - width) < .1f && Mathf.Abs(fill.rectTransform.rect.width - width * .5f) < .1f, "Countdown did not stretch/shrink symmetrically");
+                        }
+                        Set(presenter, "showStageCountdownLine", false); Call(presenter, "UpdateStageCountdownLine");
+                        Check(!line.gameObject.activeSelf, "Countdown toggle failed");
+                        Set(presenter, "showStageCountdownLine", true); Call(presenter, "UpdateStageCountdownLine");
+                        Check(line.gameObject.activeSelf && line.childCount == 1, "Countdown toggle recreated children");
+                    }
                     int clears = 0; fight.WaveCleared += _ => clears++;
                     Call(fight, "EvaluateStageDeadline", 63470);
                     Check(!fight.StageTimeExpired && !fight.BattleEnded, scenario + " expired early");
@@ -90,6 +111,12 @@ namespace RhythmHunter.FightDemoEditor
                             Call(fight, "EvaluateStageDeadline", 64000);
                         }
                         Check(fight.StageOvertimeActive && !fight.BattleEnded && fight.TeamSkillActivationBlocked, "Combat overtime not active/locked");
+                        if (scenario == "combat")
+                        {
+                            Call(presenter, "UpdateStageCountdownLine");
+                            var fill = (UnityEngine.UI.Image)typeof(FightScenePresenter).GetField("stageCountdownFill", Flags).GetValue(presenter);
+                            Check(!fill.enabled && fill.rectTransform.anchorMin.x == .5f && fill.rectTransform.anchorMax.x == .5f, "Overtime countdown refilled");
+                        }
                         foreach (var enemy in fight.RosterManager.ActiveEnemies) enemy.TakeDamage(10000);
                         Call(fight, "EvaluateStageDeadline", 65000);
                         Check(!fight.BattleEnded, "Skipped death presentation");
@@ -100,6 +127,12 @@ namespace RhythmHunter.FightDemoEditor
                         }
                         Call(fight, "EvaluateStageDeadline", 66000);
                         Check(fight.BattleEnded && fight.BattleWon && fight.CurrentWave == 1 && clears == 1, "Overtime spawned next Wave or missed clear");
+                        Call(presenter, "UpdateStageCountdownLine");
+                        if (scenario == "combat")
+                        {
+                            var line = (RectTransform)typeof(FightScenePresenter).GetField("stageCountdownRoot", Flags).GetValue(presenter);
+                            Check(!line.gameObject.activeSelf, "Countdown remained visible over results");
+                        }
                         Call(results, "Finish", true);
                         Check(results.ClearedWaves < results.TotalWaves, "Partial victory reported all Waves cleared");
                     }

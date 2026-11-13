@@ -10252,6 +10252,11 @@ MonoBehaviour:
   stoneLockSprite: {fileID: 21300000, guid: 446c0705101165f428ff215e0104088d, type: 3}
   stoneLockSize: {x: 100, y: 100}
   stoneLockOffset: {x: 0, y: 0}
+  showStageCountdownLine: 1
+  stageCountdownHeight: 10
+  stageCountdownBottomOffset: 0
+  stageCountdownColor: {r: 0.8, g: 0.9, b: 1, a: 0.95}
+  stageCountdownTrackColor: {r: 0.1, g: 0.15, b: 0.2, a: 0.3}
   stoneFillVisibleRange: {x: 0.13333334, y: 0.8666667}
   stoneReadyFrames:
   - {fileID: 21300000, guid: 53907aa8d7412114aacbed4970ed5e3d, type: 3}

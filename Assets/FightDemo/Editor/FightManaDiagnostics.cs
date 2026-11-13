@@ -24,6 +24,11 @@ namespace RhythmHunter.FightDemoEditor
         static object Read(object o, string n) => o?.GetType().GetField(n, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(o);
         static void Snapshot()
         {
+            if (File.Exists("Temp/CountdownPlay.request") && !EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isCompiling && !EditorApplication.isUpdating)
+            {
+                File.Delete("Temp/CountdownPlay.request");
+                EditorApplication.isPlaying = true;
+            }
             if (File.Exists("Temp/ManaValidation.request") && !EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isCompiling && !EditorApplication.isUpdating)
             {
                 File.Delete("Temp/ManaValidation.request");
@@ -35,11 +40,33 @@ namespace RhythmHunter.FightDemoEditor
             foreach (var fight in UnityEngine.Object.FindObjectsByType<FightCombatController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 log.AppendLine($"Scene={fight.gameObject.scene.name} active={fight.isActiveAndEnabled} MP={fight.TeamSkillGaugeExact}/{fight.TeamSkillGaugeMax} equal={fight.UsesEqualBeats} skill={fight.TeamSkillRunning} ultimate={fight.TeamUltimateRunning}");
+                log.AppendLine($"Deadline enabled={fight.StageDeadlineEnabled} awaiting={fight.AwaitingBattleStart} ended={fight.BattleEnded} limit={fight.StageTimeLimitSeconds} remaining={fight.StageSecondsRemaining} expired={fight.StageTimeExpired}");
                 foreach (var n in new[] { "teamSkillGaugeGain", "lastGaugeBeat", "lastTeamSkillBeat", "lastTeamUltimateBeat", "latestCombatBeat", "pressureManaMultiplier" }) log.AppendLine(n + "=" + Read(fight, n));
             }
             foreach (var presenter in UnityEngine.Object.FindObjectsByType<FightScenePresenter>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 var fill = Read(presenter, "stoneFillImage") as Image;
+                log.AppendLine($"Countdown configured={Read(presenter, "showStageCountdownLine")} screen={Screen.width}x{Screen.height}");
+                var line = Read(presenter, "stageCountdownRoot") as RectTransform;
+                log.AppendLine("Countdown root=" + (line == null ? "MISSING" : line.rect.ToString()));
+                for (Transform t = line; t != null; t = t.parent)
+                {
+                    log.AppendLine($"Ancestor {t.name} active={t.gameObject.activeInHierarchy} scale={t.lossyScale} rect={(t as RectTransform)?.rect}");
+                    var canvas = t.GetComponent<Canvas>();
+                    if (canvas != null) log.AppendLine($"Canvas enabled={canvas.enabled} mode={canvas.renderMode} order={canvas.sortingOrder} scale={canvas.scaleFactor}");
+                }
+                var countdownFill = Read(presenter, "stageCountdownFill") as Image;
+                if (countdownFill != null) log.AppendLine($"Countdown fill enabled={countdownFill.enabled} color={countdownFill.color} rect={countdownFill.rectTransform.rect} culled={countdownFill.canvasRenderer.cull}");
+                if (line != null)
+                {
+                    var corners = new Vector3[4]; line.GetWorldCorners(corners);
+                    log.AppendLine("Countdown corners=" + string.Join(",", corners.Select(c => c.ToString())));
+                    if (EditorApplication.isPlaying && File.Exists("Temp/CountdownScreenshot.request"))
+                    {
+                        File.Delete("Temp/CountdownScreenshot.request");
+                        ScreenCapture.CaptureScreenshot("Temp/CountdownGame.png");
+                    }
+                }
                 log.AppendLine($"Presenter={presenter.gameObject.scene.name} active={presenter.isActiveAndEnabled} fill={fill?.fillAmount} enabled={fill?.enabled} active={fill?.gameObject.activeInHierarchy} rect={fill?.rectTransform.rect} color={fill?.color} sprite={fill?.sprite?.name}");
             }
             File.WriteAllText("Temp/ManaDiagnostics.txt", log.ToString());

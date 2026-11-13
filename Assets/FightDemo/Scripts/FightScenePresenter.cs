@@ -191,6 +191,7 @@ namespace RhythmHunter.FightDemo
         {
             Unsubscribe();
             if (pressureBarRoot != null) pressureBarRoot.gameObject.SetActive(false);
+            if (stageCountdownRoot != null) stageCountdownRoot.gameObject.SetActive(false);
         }
 
         private void Unsubscribe()
@@ -221,6 +222,7 @@ namespace RhythmHunter.FightDemo
             UpdateBossHud();
             UpdateTimelineArtwork();
             UpdatePressureBar();
+            UpdateStageCountdownLine();
             if (fight != null && fight.IsPaused) return;
             UpdatePlaybackReadout();
             UpdateBeatProgress();
