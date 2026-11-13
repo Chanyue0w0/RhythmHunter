@@ -15,6 +15,17 @@ namespace RhythmHunter.FightDemoEditor
         static FightGoblinHitSetup() => EditorApplication.update += Poll;
         static void Poll()
         {
+            const string validation = "Temp/GoblinDeathValidation.request";
+            if (File.Exists(validation) && !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                File.Delete(validation);
+                try
+                {
+                    ValidateDamageReactions();
+                    File.WriteAllText("Temp/GoblinDeathValidation.result", "PASS: Normal/Killer/Giant lethal damage cancels attacks and pending uninterruptible hits, preserves death GetHurt and hop, then removes actor; existing rest reactions verified.");
+                }
+                catch (Exception e) { File.WriteAllText("Temp/GoblinDeathValidation.result", "FAIL: " + e); Debug.LogException(e); }
+            }
             const string request = "Temp/GoblinHitSetup.request";
             if (!File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode) return;
             File.Delete(request);
@@ -110,6 +121,20 @@ namespace RhythmHunter.FightDemoEditor
                     enemy.TakeDamage(1);
                     Check(animator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.NormalAttack && animator.ActiveFrame == frame && callbacks == 0,
                         kind + " hurt interrupted attack or flushed callback");
+                    Set(fight, "pressureRestUntil", 0L);
+                    Check(fight.ScheduleEnemyHits(enemy, new[] { 1, 2 }, 1, false, false), "Could not schedule uninterruptible death fixture");
+                    enemy.TakeDamage(1000);
+                    Check(enemy.CurrentHp == 0 && enemy.ActorInstance != null && enemy.DeathPresentationPending, kind + " disappeared before death reaction");
+                    Check(animator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit && callbacks == 0 && fight.ScheduledEnemyHitCount == 0,
+                        kind + " death did not cancel attack and all pending hits");
+                    Call(fight, "CancelDefeatedEnemyAttack", enemy);
+                    Check(enemy.DeathPresentationPending, "Legacy cancellation interrupted death reaction");
+                    Call(animator, "AdvancePlayback", seconds * .1f);
+                    Call(enemy, "LateUpdate");
+                    Check(enemy.ActorInstance != null && enemy.ActorInstance.transform.position.y > origin.y, kind + " death hop missing");
+                    Call(animator, "AdvancePlayback", seconds);
+                    Call(enemy, "LateUpdate");
+                    Check(enemy.ActorInstance == null && !enemy.DeathPresentationPending, kind + " death visual not removed after reaction");
                 }
                 finally { EditorSceneManager.ClosePreviewScene(scene); }
             }

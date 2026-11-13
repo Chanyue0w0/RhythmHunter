@@ -12,6 +12,22 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(.01f, .5f)] private float restHitHopBeats = .5f;
         [SerializeField, Min(0)] private float restHitShakeDistance = .015f;
         private bool restHitHopActive;
+        private bool deathPresentationStarted;
+        public bool DeathPresentationPending => team == UnitTeam.Enemy && currentHp <= 0 && actorInstance != null && !RetainedForBurst &&
+            (!deathPresentationStarted || combatAnimator != null && combatAnimator.IsPlaying &&
+            combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit);
+
+        private void BeginDeathPresentation()
+        {
+            if (deathPresentationStarted || actorInstance == null) return;
+            deathPresentationStarted = true;
+            ResetInputFeedback();
+            combatAnimator?.InterruptPlayback();
+            if (combatAnimator == null) return;
+            // Enemy-action pauses must not prevent a defeated enemy's final reaction.
+            combatAnimator.SetPlaybackPaused(false);
+            if (combatAnimator.Play(FightCharacterCombatAnimator.CombatAnimation.Hit)) BeginRestHitHop();
+        }
 
         private void BeginRestHitHop()
         {
@@ -25,7 +41,7 @@ namespace RhythmHunter.FightDemo
         private void UpdateRestHitHop()
         {
             if (!restHitHopActive) return;
-            if (!enableRestHitHop || currentHp <= 0 || inputFeedbackTarget == null || combatAnimator == null ||
+            if (!enableRestHitHop || (currentHp <= 0 && !deathPresentationStarted) || inputFeedbackTarget == null || combatAnimator == null ||
                 !combatAnimator.IsPlaying || combatAnimator.ActiveAnimation != FightCharacterCombatAnimator.CombatAnimation.Hit)
             {
                 ResetInputFeedback();

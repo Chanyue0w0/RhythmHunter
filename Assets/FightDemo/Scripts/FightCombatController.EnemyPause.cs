@@ -99,6 +99,14 @@ namespace RhythmHunter.FightDemo
             return true;
         }
 
+        public void CancelEnemyActionForDeath(FightUnitSlot enemy)
+        {
+            if (enemy == null) return;
+            // Death ignores interrupt immunity. Launched projectiles retain their existing independent lifetime.
+            enemyHits.RemoveAll(hit => hit.source == enemy && !hit.launched);
+            InterruptEnemyAttack(enemy);
+        }
+
         public void CancelEnemyActionForStun(FightUnitSlot enemy)
         {
             if (enemy == null || !fightScene2Enemies.Contains(enemy) ||

@@ -293,6 +293,8 @@ namespace RhythmHunter.FightDemo
             // Finish damage/on-hit callbacks first. Keep logical slots fixed for targeting and waves.
             // Burst attacks retain their original targets until all final animations/projectiles finish.
             if (team != UnitTeam.Enemy || currentHp > 0 || RetainedForBurst || actorInstance == null) return;
+            if (!deathPresentationStarted) BeginDeathPresentation();
+            if (DeathPresentationPending) return;
             ClearTimedStatuses();
             ClearFragile();
             combatAnimator?.InterruptPlayback();
@@ -303,6 +305,8 @@ namespace RhythmHunter.FightDemo
 
         public void RestoreFullHealth()
         {
+            deathPresentationStarted = false;
+            ResetInputFeedback();
             ClearTimedStatuses();
             ClearFragile();
             currentHp = maxHp;
@@ -341,6 +345,8 @@ namespace RhythmHunter.FightDemo
             }
             bool restHit = team == UnitTeam.Enemy && CombatController != null && CombatController.PressureRestActive;
             currentHp -= applied;
+            if (wasAlive && currentHp <= 0 && team == UnitTeam.Enemy)
+                CombatController?.CancelEnemyActionForDeath(this);
             if (restHit && applied > 0 && currentHp > 0 && kind != DamageKind.DamageOverTime &&
                 PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Hit, null, null, null) &&
                 combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit && !combatAnimator.PlaybackPaused)
@@ -359,6 +365,7 @@ namespace RhythmHunter.FightDemo
             // Only the lethal transition emits zero HP; overkill must not repeat kill/reward callbacks.
             if (wasAlive && currentHp <= 0 && team == UnitTeam.Enemy)
             {
+                if (!RetainedForBurst) BeginDeathPresentation();
                 if (CombatController != null) CombatController.ShowDeathEffectIcon(this);
                 EnemyDefeated?.Invoke(this, ImpactEffectAnchor != null ? ImpactEffectAnchor.position : transform.position);
             }
@@ -828,6 +835,7 @@ namespace RhythmHunter.FightDemo
 
         private void RemoveSpawnedActor()
         {
+            deathPresentationStarted = false;
             ResetInputFeedback();
             if (actorInstance == null)
                 return;

@@ -97,7 +97,7 @@ namespace RhythmHunter.FightDemo
 
         private void CancelDefeatedEnemyAttack(FightUnitSlot target)
         {
-            if (target != null && target.CurrentHp <= 0) InterruptEnemyAttack(target);
+            if (target != null && target.CurrentHp <= 0 && !target.DeathPresentationPending) CancelEnemyActionForDeath(target);
         }
 
         private bool IsBossAttackBeat(long beat)

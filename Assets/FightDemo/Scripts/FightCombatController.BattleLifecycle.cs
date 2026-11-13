@@ -35,6 +35,8 @@ namespace RhythmHunter.FightDemo
             // Zero HP still means defeated; keep this wave available for burst overkill presentation.
             if (TeamSkillRunning) return;
             if (FindFrontLivingEnemy() != null) return;
+            foreach (var enemy in fightScene2Enemies)
+                if (enemy != null && enemy.DeathPresentationPending) return;
             AwaitingNextWave = true;
             waveWaitBeatsRemaining = Mathf.Max(0, waveTransitionWaitBeats);
             lastWaveWaitBeat = latestCombatBeat;
