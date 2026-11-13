@@ -17,6 +17,11 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Sprite pressureTimelinePointSprite;
         [SerializeField] private Sprite stoneEmptySprite;
         [SerializeField] private Sprite stoneFillSprite;
+        [Header("Fever Lock Chain")]
+        [SerializeField] private Sprite stoneLockSprite;
+        [SerializeField] private Vector2 stoneLockSize = new(45, 47);
+        [SerializeField] private Vector2 stoneLockOffset = Vector2.zero;
+        private Image stoneLockImage;
         [Tooltip("填滿圖片可見部分的垂直範圍（0=圖片底端、1=頂端），排除透明留白；不改動圖片或 PPU。")]
         [SerializeField] private Vector2 stoneFillVisibleRange = new Vector2(0, 1);
         [SerializeField] private Sprite[] stoneReadyFrames;
@@ -88,6 +93,11 @@ namespace RhythmHunter.FightDemo
             stoneFillImage.type = Image.Type.Filled;
             stoneFillImage.fillMethod = Image.FillMethod.Vertical;
             stoneFillImage.fillOrigin = (int)Image.OriginVertical.Bottom;
+            stoneLockImage = new GameObject("StoneFeverLockChain", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
+            stoneLockImage.transform.SetParent(timelineCenter.transform, false);
+            stoneLockImage.raycastTarget = false;
+            stoneLockImage.preserveAspect = true;
+            stoneLockImage.transform.SetAsLastSibling();
             stoneEffectAnchor = new GameObject("StoneSuccessEffectAnchor", typeof(RectTransform)).GetComponent<RectTransform>();
             stoneEffectAnchor.SetParent(timelineCenter.transform.parent, false);
             stoneEffectAnchor.anchorMin = timelineCenter.rectTransform.anchorMin;
@@ -121,6 +131,13 @@ namespace RhythmHunter.FightDemo
         private void UpdateTimelineArtwork()
         {
             if (stoneFillImage == null || fight == null) return;
+            if (stoneLockImage != null)
+            {
+                stoneLockImage.sprite = stoneLockSprite;
+                stoneLockImage.rectTransform.sizeDelta = stoneLockSize;
+                stoneLockImage.rectTransform.anchoredPosition = stoneLockOffset;
+                stoneLockImage.enabled = stoneLockSprite != null && fight.TeamSkillActivationBlocked;
+            }
             timelineRoot.anchoredPosition = new Vector2(0, timelineBottomOffset);
             timelineTrack.enabled = showTimelineBar;
             timelineRoot.localScale = Vector3.one * Mathf.Max(.1f, timelineScale);

@@ -67,6 +67,22 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.TeamSkillGaugeExact == 0 && fight.TeamSkillGaugeMax == 90, "Expected scene MP 0/90");
                 Call(presenter, "BuildEqualBeatTimeline");
                 var fill = (Image)Read(presenter, "stoneFillImage");
+                var chain = (Image)Read(presenter, "stoneLockImage");
+                Check(chain != null && chain.sprite != null && chain.enabled, "Suspended Fever chain missing");
+                Check(chain.transform.parent == fill.transform.parent && chain.transform.GetSiblingIndex() > fill.transform.GetSiblingIndex(), "Chain must follow stone above fill");
+                Set(fight, "suspendFeverActivation", false);
+                Set(fight, "latestCombatBeat", 10L);
+                Call(presenter, "UpdateTimelineArtwork");
+                Check(!chain.enabled && !fight.TryStartTeamSkill(), "Empty MP alone must not show chain or allow Fever");
+                Set(fight, "pressureRemaining", 20d);
+                Set(fight, "teamSkillGauge", fight.TeamSkillGaugeMax);
+                Call(presenter, "UpdateTimelineArtwork");
+                Check(chain.enabled && !fight.TryStartTeamSkill(), "Pressure must lock full MP Fever");
+                Set(fight, "pressureRemaining", 0d);
+                Call(presenter, "UpdateTimelineArtwork");
+                Check(!chain.enabled, "Chain did not clear when Pressure ended");
+                Set(fight, "teamSkillGauge", 0);
+                Set(fight, "suspendFeverActivation", true);
                 long beat = 100;
                 float expected = 0;
                 var report = new StringBuilder();
@@ -88,7 +104,7 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.TeamSkillGaugeExact == 5, "Pressure call did not gain 2 MP");
                 Call(presenter, "RenderStoneArtwork", 0f, 0d, false);
                 Check(!fill.enabled && fill.fillAmount == 0, "Zero MP should not show a filled pixel");
-                File.WriteAllText("Temp/ManaValidation.result", "PASS: real hero judgement/ability path grants 1 MP per hero and 2 under Pressure; first MP passes visible image bottom; zero MP hidden.\n" + report);
+                File.WriteAllText("Temp/ManaValidation.result", "PASS: Fever chain follows stone above fill, locks suspended/Pressure with full MP, hides for insufficient MP alone and on Pressure exit; real hero judgement grants 1 MP and 2 under Pressure; first MP visible; zero MP hidden.\n" + report);
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
         }

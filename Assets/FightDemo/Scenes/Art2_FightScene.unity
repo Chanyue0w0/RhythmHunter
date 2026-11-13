@@ -171,6 +171,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
+  enableRestHitHop: 1
+  restHitHopDistance: 0.12
+  restHitHopHeight: 0.16
+  restHitHopBeats: 0.5
+  restHitShakeDistance: 0.015
   slotId: EnemySlot_GoblinShield
   displayName: GOBLIN SHIELD
   team: 0
@@ -1845,6 +1850,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
+  enableRestHitHop: 1
+  restHitHopDistance: 0.12
+  restHitHopHeight: 0.16
+  restHitHopBeats: 0.5
+  restHitShakeDistance: 0.015
   slotId: HeroSlot_Bard
   displayName: BARD
   team: 1
@@ -3413,6 +3423,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
+  enableRestHitHop: 1
+  restHitHopDistance: 0.12
+  restHitHopHeight: 0.16
+  restHitHopBeats: 0.5
+  restHitShakeDistance: 0.015
   slotId: EnemySlot_GoblinMage
   displayName: GOBLIN MAGE
   team: 0
@@ -3538,6 +3553,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
+  enableRestHitHop: 1
+  restHitHopDistance: 0.12
+  restHitHopHeight: 0.16
+  restHitHopBeats: 0.5
+  restHitShakeDistance: 0.015
   slotId: EnemySlot_GoblinMercenary
   displayName: GOBLIN MERCENARY
   team: 0
@@ -4829,6 +4849,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
+  enableRestHitHop: 1
+  restHitHopDistance: 0.12
+  restHitHopHeight: 0.16
+  restHitHopBeats: 0.5
+  restHitShakeDistance: 0.015
   slotId: HeroSlot_Mage
   displayName: MAGE
   team: 1
@@ -10224,6 +10249,9 @@ MonoBehaviour:
   pressureTimelinePointSprite: {fileID: 21300000, guid: 854f7c29d01a747449e9546fd099283c, type: 3}
   stoneEmptySprite: {fileID: 21300000, guid: c52009719b5f35f46bbbad10c8943544, type: 3}
   stoneFillSprite: {fileID: 21300000, guid: 63315626d9124774585cd363f137ac7a, type: 3}
+  stoneLockSprite: {fileID: 21300000, guid: 446c0705101165f428ff215e0104088d, type: 3}
+  stoneLockSize: {x: 100, y: 100}
+  stoneLockOffset: {x: 0, y: 0}
   stoneFillVisibleRange: {x: 0.13333334, y: 0.8666667}
   stoneReadyFrames:
   - {fileID: 21300000, guid: 53907aa8d7412114aacbed4970ed5e3d, type: 3}
@@ -10299,7 +10327,7 @@ MonoBehaviour:
   playSuccessfulBlockSound: 1
   successfulBlockSoundEventPath: event:/SoundEffects/InCombat/Paladin_NormalParry
   successfulBlockSoundVolume: 1
-  suspendFeverActivation: 1
+  suspendFeverActivation: 0
   normalAttackImpactBeats: 0.4
   waveTransitionWaitBeats: 2
   waveArmorRecoveryEffect: {fileID: 0}
@@ -10652,6 +10680,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
+  enableRestHitHop: 1
+  restHitHopDistance: 0.12
+  restHitHopHeight: 0.16
+  restHitHopBeats: 0.5
+  restHitShakeDistance: 0.015
   slotId: HeroSlot_Paladin
   displayName: PALADIN
   team: 1
@@ -12099,7 +12132,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 2.112278e-39}
+  m_BoundingSphereOverride: {x: 9.26e-43, y: 8e-44, z: 0, w: 4.3e-44}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12263,7 +12296,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 2.112278e-39}
+  m_BoundingSphereOverride: {x: 4.7685476e-20, y: 5.14285e-39, z: 1.0748e-41, w: 3e-45}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12759,7 +12792,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 3.397975e-39}
+  m_BoundingSphereOverride: {x: 4.5915e-41, y: NaN, z: 0, w: NaN}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12923,7 +12956,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1, y: 1, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 7.069606e+28, y: NaN, z: 2.633632e+20, w: NaN}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
