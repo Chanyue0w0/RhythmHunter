@@ -17,8 +17,8 @@ namespace RhythmHunter.RhythmDemo
         [Header("Music Sections (non-Boss)")]
         [Tooltip("Testing only. Off leaves battle music unchanged until stage integration.")]
         [SerializeField] private SectionPreview sectionPreview;
+        [Tooltip("Fade duration when stopping music. Native overtime loops keep full volume.")]
         [SerializeField, Min(0)] private float sectionFadeOutSeconds = .15f;
-        [SerializeField, Min(0)] private float sectionFadeInSeconds = .15f;
         [SerializeField] private string overtimeParameter = "Overtime";
         [SerializeField] private SongMarker[] songMarkers = Array.Empty<SongMarker>();
         [SerializeField, HideInInspector] private string markerEventPath;
@@ -38,6 +38,12 @@ namespace RhythmHunter.RhythmDemo
         private bool normalEndSent, fadeStopping;
         private int fadeStopStart;
         private float fadeStopDuration, sectionGain = 1, fadeStopGain;
+        private bool stageManagedSections, stageSectionsConfigured;
+        public void ConfigureStageSections(bool enabled)
+        {
+            stageSectionsConfigured = true;
+            stageManagedSections = enabled;
+        }
 
         public void ConfigureSongMarkers(SongMarker[] markers)
         {
@@ -93,7 +99,8 @@ namespace RhythmHunter.RhythmDemo
 #if UNITY_EDITOR
             if (EditorMarkerResolver != null) ConfigureSongMarkers(EditorMarkerResolver(musicEventPath));
 #endif
-            if (sectionPreview == SectionPreview.LoopOvertime) EnableOvertimeMusic();
+            // Arm before the endpoint; a frame-late gameplay timeout cannot miss the native loop.
+            if (stageManagedSections || !stageSectionsConfigured && sectionPreview == SectionPreview.LoopOvertime) EnableOvertimeMusic();
         }
         public bool EnableOvertimeMusic()
         {
@@ -129,19 +136,12 @@ namespace RhythmHunter.RhythmDemo
                 gain = fadeStopGain * (1 - Mathf.Clamp01((ContinuousPosition(raw) - fadeStopStart) / Mathf.Max(1, fadeStopDuration)));
                 if (gain <= 0) { StopMusic(); return; }
             }
-            else if (HasSectionMarkers)
+            else if (!OvertimeMusicEnabled && !stageSectionsConfigured &&
+                sectionPreview == SectionPreview.StopAtNormalEnd && HasSectionMarkers)
             {
                 TryGetMarkerPosition("Normal_End", out int normalEndMs);
-                TryGetMarkerPosition("Overtime_Start", out int start);
-                TryGetMarkerPosition("Overtime_End", out int end);
-                int stop = OvertimeMusicEnabled ? end : normalEndMs;
-                if (OvertimeMusicEnabled || sectionPreview == SectionPreview.StopAtNormalEnd)
-                {
-                    if (sectionFadeOutSeconds > 0) gain *= Mathf.Clamp01((stop - raw) / (sectionFadeOutSeconds * 1000));
-                    if (OvertimeMusicEnabled && CompletedMusicLoops > 0 && sectionFadeInSeconds > 0)
-                        gain *= Mathf.Clamp01((raw - start) / (sectionFadeInSeconds * 1000));
-                    if (!OvertimeMusicEnabled && raw >= stop) { StopMusic(); return; }
-                }
+                if (sectionFadeOutSeconds > 0) gain *= Mathf.Clamp01((normalEndMs - raw) / (sectionFadeOutSeconds * 1000));
+                if (raw >= normalEndMs) { StopMusic(); return; }
             }
             sectionGain = gain;
             musicInstance.setVolume(musicVolume * sectionGain);

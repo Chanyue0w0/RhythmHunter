@@ -10459,7 +10459,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock
   sectionPreview: 2
   sectionFadeOutSeconds: 0.15
-  sectionFadeInSeconds: 0.15
   overtimeParameter: Overtime
   songMarkers:
   - name: Overtime_Start

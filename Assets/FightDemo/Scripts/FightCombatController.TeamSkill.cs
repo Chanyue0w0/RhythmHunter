@@ -32,7 +32,7 @@ namespace RhythmHunter.FightDemo
             ? hero.UnitSlot.CharacterDefinition?.TeamSkillManaCost ?? 0 : 0;
         public bool TeamSkillRunning => nextTeamSkillBeat != long.MaxValue;
         // Shared by activation and the gem lock. Insufficient MP alone is not a lock.
-        public bool TeamSkillActivationBlocked => suspendFeverActivation || FeverBlockedByPressure ||
+        public bool TeamSkillActivationBlocked => suspendFeverActivation || FeverBlockedByPressure || StageTimeExpired ||
             !UsesEqualBeats || battleEnded || AwaitingBattleStart || WaveTransitionActive ||
             TeamSkillRunning || TeamUltimateRunning || IsPaused || TimingCalibrationActive ||
             latestCombatBeat < 0 || latestCombatBeat <= resumeAfterCalibrationBeat || TeamSkillGaugeMax <= 0 ||

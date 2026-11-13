@@ -45,6 +45,11 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private EnemyWave[] additionalWaves = Array.Empty<EnemyWave>();
         private FightCharacterDefinition[][] stageWaves;
         private FightEnemyPressureSettings[] stagePressure;
+        private FightStageDefinition.WaveKind[] stageWaveKinds;
+        public bool UsesStageDeadline { get; private set; }
+        public FightStageDefinition.WaveKind GetWaveKind(int zeroBasedWave) =>
+            stageWaveKinds != null && zeroBasedWave >= 0 && zeroBasedWave < stageWaveKinds.Length
+                ? stageWaveKinds[zeroBasedWave] : FightStageDefinition.WaveKind.Combat;
         // Return a copy so Inspector/asset edits cannot mutate the active battle snapshot.
         public FightEnemyPressureSettings GetWavePressureSettings(int zeroBasedWave) =>
             stagePressure != null && zeroBasedWave >= 0 && zeroBasedWave < stagePressure.Length
@@ -65,14 +70,18 @@ namespace RhythmHunter.FightDemo
             Array.Sort(order, (a, b) => enemySpawnSlots[b].SlotIndex.CompareTo(enemySpawnSlots[a].SlotIndex));
             var snapshot = new FightCharacterDefinition[stage.Waves.Count][];
             var pressureSnapshot = new FightEnemyPressureSettings[stage.Waves.Count];
+            var kindSnapshot = new FightStageDefinition.WaveKind[stage.Waves.Count];
             for (int w = 0; w < snapshot.Length; w++)
             {
                 snapshot[w] = new FightCharacterDefinition[3];
+                kindSnapshot[w] = stage.Waves[w].kind;
                 pressureSnapshot[w] = stage.Waves[w].pressure?.Copy() ?? new FightEnemyPressureSettings();
                 for (int p = 0; p < 3; p++) snapshot[w][order[p]] = stage.Waves[w].At(p);
             }
             stageWaves = snapshot; // Do not mutate shared assets or re-read edits mid-battle.
             stagePressure = pressureSnapshot;
+            stageWaveKinds = kindSnapshot;
+            UsesStageDeadline = stage.UseNormalEndDeadline;
             enemyPrefabs = (FightCharacterDefinition[])snapshot[0].Clone();
             error = null; return true;
         }

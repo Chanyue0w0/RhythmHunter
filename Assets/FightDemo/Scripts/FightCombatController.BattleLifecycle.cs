@@ -55,7 +55,7 @@ namespace RhythmHunter.FightDemo
             CheckWaveCompletion();
             if (battleEnded) return true;
             if (!AwaitingNextWave || TeamSkillRunning || TeamUltimateRunning) return false;
-            if (CurrentWave >= WaveCount) { FinishBattle(true); return true; }
+            if (StageTimeExpired || CurrentWave >= WaveCount) { FinishBattle(true); return true; }
             // Count unique musical beats, not elapsed seconds or normal-combat status beats.
             // Pausing/calibration never consumes the gap; duplicate callbacks cannot shorten it.
             if (latestCombatBeat > lastWaveWaitBeat)
@@ -119,6 +119,7 @@ namespace RhythmHunter.FightDemo
         {
             if (battleEnded) return;
             battleEnded = true;
+            stageOvertimeActive = false;
             ResetSwordCharges();
             BattleWon = won;
             AwaitingNextWave = false;
@@ -132,6 +133,7 @@ namespace RhythmHunter.FightDemo
             CancelEnemyCombatWork();
             foreach (var hero in new[] { frontHero.UnitSlot, secondHero.UnitSlot, thirdHero.UnitSlot })
                 if (hero != null) hero.CombatAnimator?.InterruptPlayback();
+            if (StageDeadlineEnabled) beatClock?.FadeOutAndStop();
             if (won) BattleVictory?.Invoke(); else BattleLost?.Invoke();
         }
     }

@@ -452,6 +452,9 @@ namespace RhythmHunter.FightDemo
             UpdateSwordStreaks();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
+            UpdateStageDeadline();
+            if (battleEnded) return;
+
             UpdateTeamSkillBurst();
             AdvanceSkillVisualLifetimes(Time.deltaTime);
             AdvanceSlimeDetonations(Time.deltaTime);
@@ -830,6 +833,8 @@ namespace RhythmHunter.FightDemo
 
             latestCombatBeat = beat.GlobalBeat;
             if (TimingCalibrationActive || battleEnded) return;
+            UpdateStageDeadline();
+            if (battleEnded) return;
             waveEntrance?.RefreshProgress();
             if (WaveEntranceRunning)
             {
@@ -1118,6 +1123,7 @@ namespace RhythmHunter.FightDemo
             battleEnded = false;
             BattleWon = AwaitingNextWave = false;
             CurrentWave = 1;
+            ResetStageDeadline();
             ResetWavePressure();
             NormalBattleBeatCount = 0;
             waveWaitBeatsRemaining = 0;

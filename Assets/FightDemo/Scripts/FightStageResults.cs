@@ -44,6 +44,11 @@ namespace RhythmHunter.FightDemo
             if (!Started && beatClock.IsPlaying && (fight.BattleEntranceRunning || !fight.AwaitingBattleStart)) Begin();
             if (Started && SongLengthSeconds <= 0 && beatClock.TryGetSongLengthSeconds(out float length)) SongLengthSeconds = length;
             Advance(Time.unscaledDeltaTime, beatClock.MusicPitch, fight.IsPaused || fight.TimingCalibrationActive);
+            if (fight.StageDeadlineEnabled && fight.StageTimeLimitSeconds > 0)
+            {
+                SongLengthSeconds = fight.StageTimeLimitSeconds;
+                SongProgressSeconds = fight.StageMusicSeconds;
+            }
         }
         private void Begin()
         {
@@ -72,7 +77,12 @@ namespace RhythmHunter.FightDemo
             if (!Started) Begin();
             Completed = true;
             Won = won;
-            if (won) ClearedWaves = TotalWaves;
+            if (won && !fight.StageTimeExpired) ClearedWaves = TotalWaves;
+            if (fight.StageDeadlineEnabled && fight.StageTimeLimitSeconds > 0)
+            {
+                SongLengthSeconds = fight.StageTimeLimitSeconds;
+                SongProgressSeconds = fight.StageMusicSeconds;
+            }
             ResultReady?.Invoke();
         }
     }
