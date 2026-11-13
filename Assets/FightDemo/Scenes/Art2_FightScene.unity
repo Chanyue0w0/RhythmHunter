@@ -12631,6 +12631,11 @@ MonoBehaviour:
   angryEffectOffset: {x: 0, y: -0.62, z: 0}
   angryEffectRotationOffset: {x: 0, y: 0, z: 0}
   angryEffectScaleMultiplier: {x: 1, y: 1, z: 1}
+  showStunEffect: 1
+  stunEffectPrefab: {fileID: 1579228454164836287, guid: e88b0e7c01ea89543be2a69a988ada06, type: 3}
+  stunEffectOffset: {x: 0, y: 0, z: 0}
+  stunEffectRotationOffset: {x: 0, y: 0, z: 0}
+  stunEffectScaleMultiplier: {x: 1, y: 1, z: 1}
 --- !u!1 &2147300200
 GameObject:
   m_ObjectHideFlags: 0

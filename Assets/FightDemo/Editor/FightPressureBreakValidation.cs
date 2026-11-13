@@ -132,6 +132,9 @@ namespace RhythmHunter.FightDemoEditor
                 var pressureVisuals = components.OfType<FightPressureVisuals>().Single();
                 Call(pressureVisuals, "UpdateAngryEffects");
                 var angryEntries = (IDictionary)Get(pressureVisuals, "angryEffects");
+                Call(pressureVisuals, "UpdateStunEffects");
+                var stunEntries = (IDictionary)Get(pressureVisuals, "stunEffects");
+                Check(stunEntries.Count == 0, "Rest effect must stay hidden during Pressure");
                 int expectedAngry = fight.PressureEnemySlots.Count(slot => slot.HasCharacter && slot.CurrentHp > 0 && slot.ActorInstance != null && slot.ActorInstance.activeInHierarchy && slot.isActiveAndEnabled);
                 Check(expectedAngry > 0 && angryEntries.Count == expectedAngry, "Each living enemy needs one Pressure head effect");
                 Call(pressureVisuals, "UpdateAngryEffects");
@@ -216,7 +219,19 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.PressureRestActive, "Rest ended before 20 beats");
                 Call(pressureVisuals, "UpdateAngryEffects");
                 Check(angryEntries.Count == 0, "Pressure head effects must clear on rest");
+                Call(pressureVisuals, "UpdateStunEffects");
+                Check(stunEntries.Count == expectedAngry, "Rest must show one stun effect per living enemy");
+                Call(pressureVisuals, "UpdateStunEffects");
+                Check(stunEntries.Count == expectedAngry, "Duplicate rest effect");
+                enemy.ActorInstance.SetActive(false);
+                Call(pressureVisuals, "UpdateStunEffects");
+                Check(stunEntries.Count == expectedAngry - 1, "Removed actor retained rest effect");
+                enemy.ActorInstance.SetActive(true);
+                Call(pressureVisuals, "UpdateStunEffects");
+                Check(stunEntries.Count == expectedAngry, "Rest effect failed to restore for active actor");
                 Beat(); Check(!fight.PressureRestActive && !fight.PressurePhaseActive, "Rest exit must begin separate wait");
+                Call(pressureVisuals, "UpdateStunEffects");
+                Check(stunEntries.Count == 0, "Rest exit must remove stun effects");
                 while (fight.WaveCombatBeatCount < 60) Beat();
                 Check(!fight.PressureVisualsActive, "Repeat warning appeared too early");
                 Beat();
@@ -248,7 +263,7 @@ namespace RhythmHunter.FightDemoEditor
                 Set(fight, "partyHp", 0f);
                 Call(fight, "EndPressurePhase");
                 Check(fight.TeamSkillGaugeExact == 1, "Defeated party must not earn survival reward");
-                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: Pressure head effect spawn/no duplicates/cleanup; natural/early pressure reward, one-shot/toggle/death guards; Pressure Fever lock and prior-Fever deferral; whole UI one-beat quick warning; 64px skull anchored above bar; three same-beat projectiles only chip once but count three blocks; unblocked/next-beat/late callback/zero-damage cases; pressure guard chip, armor first, HP overflow, no unblocked bonus, normal block unchanged; five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
+                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: Stun rest-only spawn/no duplicates/actor cleanup/rest exit; Pressure head effect spawn/no duplicates/cleanup; natural/early pressure reward, one-shot/toggle/death guards; Pressure Fever lock and prior-Fever deferral; whole UI one-beat quick warning; 64px skull anchored above bar; three same-beat projectiles only chip once but count three blocks; unblocked/next-beat/late callback/zero-damage cases; pressure guard chip, armor first, HP overflow, no unblocked bonus, normal block unchanged; five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
             }
             finally
             {

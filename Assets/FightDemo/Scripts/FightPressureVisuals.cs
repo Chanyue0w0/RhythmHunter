@@ -31,12 +31,21 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector3 angryEffectRotationOffset;
         [SerializeField] private Vector3 angryEffectScaleMultiplier = Vector3.one;
 
+        [Header("Pressure Rest Head Effect")]
+        [SerializeField] private bool showStunEffect = true;
+        [SerializeField] private GameObject stunEffectPrefab;
+        [Tooltip("Pressure 結束後休息期間的頭頂特效，世界座標偏移。")]
+        [SerializeField] private Vector3 stunEffectOffset;
+        [SerializeField] private Vector3 stunEffectRotationOffset;
+        [SerializeField] private Vector3 stunEffectScaleMultiplier = Vector3.one;
+
         private sealed class Entry
         {
             public GameObject actor, effect;
         }
         private readonly Dictionary<FightUnitSlot, Entry> effects = new();
         private readonly Dictionary<FightUnitSlot, Entry> angryEffects = new();
+        private readonly Dictionary<FightUnitSlot, Entry> stunEffects = new();
         private readonly List<FightUnitSlot> stale = new();
         public FightCombatController CombatController => combat;
         public float PressureLightBlend { get; private set; }
@@ -71,6 +80,7 @@ namespace RhythmHunter.FightDemo
             }
             UpdateLight();
             UpdateAngryEffects();
+            UpdateStunEffects();
             if (!active) return;
 
             stale.Clear();
@@ -106,46 +116,54 @@ namespace RhythmHunter.FightDemo
         private static bool Eligible(FightUnitSlot slot) => slot != null && slot.isActiveAndEnabled &&
             slot.HasCharacter && slot.CurrentHp > 0 && slot.ActorInstance != null && slot.ActorInstance.activeInHierarchy;
 
-        private void UpdateAngryEffects()
+        private void UpdateAngryEffects() => UpdateHeadEffects(angryEffects,
+            showAngryEffect && combat != null && combat.PressurePhaseActive,
+            angryEffectPrefab, angryEffectOffset, angryEffectRotationOffset, angryEffectScaleMultiplier, "PressureAngry_");
+
+        private void UpdateStunEffects() => UpdateHeadEffects(stunEffects,
+            showStunEffect && combat != null && combat.PressureRestActive,
+            stunEffectPrefab, stunEffectOffset, stunEffectRotationOffset, stunEffectScaleMultiplier, "PressureStun_");
+
+        private void UpdateHeadEffects(Dictionary<FightUnitSlot, Entry> entries, bool visible,
+            GameObject prefab, Vector3 offset, Vector3 rotationOffset, Vector3 scaleMultiplier, string prefix)
         {
-            // Unlike the lighting warning, anger starts only with actual Pressure.
-            if (!showAngryEffect || angryEffectPrefab == null || combat == null || !combat.isActiveAndEnabled || !combat.PressurePhaseActive)
+            if (!visible || prefab == null || combat == null || !combat.isActiveAndEnabled)
             {
-                ClearAngryEffects();
+                ClearHeadEffects(entries);
                 return;
             }
             stale.Clear();
-            foreach (var pair in angryEffects)
+            foreach (var pair in entries)
                 if (!Eligible(pair.Key) || pair.Value.actor != pair.Key.ActorInstance || pair.Value.effect == null)
                     stale.Add(pair.Key);
             foreach (var slot in stale)
             {
-                RemoveEffect(angryEffects[slot].effect);
-                angryEffects.Remove(slot);
+                RemoveEffect(entries[slot].effect);
+                entries.Remove(slot);
             }
             foreach (var slot in combat.PressureEnemySlots)
             {
                 if (!Eligible(slot)) continue;
-                if (!angryEffects.TryGetValue(slot, out var entry))
+                if (!entries.TryGetValue(slot, out var entry))
                 {
-                    var effect = Instantiate(angryEffectPrefab);
+                    var effect = Instantiate(prefab);
                     UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
-                    effect.name = "PressureAngry_" + slot.name;
+                    effect.name = prefix + slot.name;
                     entry = new Entry { actor = slot.ActorInstance, effect = effect };
-                    angryEffects.Add(slot, entry);
+                    entries.Add(slot, entry);
                     (effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>()).Configure(combat, true, 0);
                 }
                 var anchor = slot.HeadAnchor != null ? slot.HeadAnchor : slot.ImpactEffectAnchor != null ? slot.ImpactEffectAnchor : slot.transform;
-                entry.effect.transform.SetPositionAndRotation(anchor.position + angryEffectOffset,
-                    Quaternion.Euler(angryEffectRotationOffset) * angryEffectPrefab.transform.rotation);
-                entry.effect.transform.localScale = Vector3.Scale(angryEffectPrefab.transform.localScale, angryEffectScaleMultiplier);
+                entry.effect.transform.SetPositionAndRotation(anchor.position + offset,
+                    Quaternion.Euler(rotationOffset) * prefab.transform.rotation);
+                entry.effect.transform.localScale = Vector3.Scale(prefab.transform.localScale, scaleMultiplier);
             }
         }
 
-        private void ClearAngryEffects()
+        private static void ClearHeadEffects(Dictionary<FightUnitSlot, Entry> entries)
         {
-            foreach (var entry in angryEffects.Values) RemoveEffect(entry.effect);
-            angryEffects.Clear();
+            foreach (var entry in entries.Values) RemoveEffect(entry.effect);
+            entries.Clear();
         }
 
         private void UpdateLight()
@@ -175,7 +193,8 @@ namespace RhythmHunter.FightDemo
         private void OnDisable()
         {
             ClearEffects();
-            ClearAngryEffects();
+            ClearHeadEffects(angryEffects);
+            ClearHeadEffects(stunEffects);
             if (ownsColor && mainLight != null)
             {
                 mainLight.color = originalColor;
