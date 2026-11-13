@@ -65,6 +65,7 @@ namespace RhythmHunter.FightDemoEditor
                 Set(fight, "beatClock", null); Set(fight, "waveEntrance", null);
                 Check(fight.TryBeginBattle(), "Cannot begin battle");
                 Check(fight.TeamSkillGaugeExact == 0 && fight.TeamSkillGaugeMax == 90, "Expected scene MP 0/90");
+                Set(fight, "suspendFeverActivation", true); // Explicit fixture; scene may enable Fever.
                 Call(presenter, "BuildEqualBeatTimeline");
                 var fill = (Image)Read(presenter, "stoneFillImage");
                 var chain = (Image)Read(presenter, "stoneLockImage");
