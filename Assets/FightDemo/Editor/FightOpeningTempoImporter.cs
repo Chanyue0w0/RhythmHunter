@@ -20,6 +20,7 @@ namespace RhythmHunter.FightDemoEditor
         static FightOpeningTempoImporter()
         {
             FmodBeatClock.EditorOpeningTempoResolver = ReadTempo;
+            FmodBeatClock.EditorMarkerResolver = ReadMarkers;
         }
 
         public int callbackOrder => 0;
@@ -28,6 +29,7 @@ namespace RhythmHunter.FightDemoEditor
             foreach (var root in scene.GetRootGameObjects())
                 foreach (var clock in root.GetComponentsInChildren<FmodBeatClock>(true))
                 {
+                    clock.ConfigureSongMarkers(ReadMarkers(clock.MusicEventPath));
                     var fight = clock.GetComponent<FightCombatController>();
                     if (fight == null || !fight.AutoPlayBattleEntrance) continue;
                     float tempo = ReadTempo(clock.MusicEventPath);
@@ -59,6 +61,22 @@ namespace RhythmHunter.FightDemoEditor
                 Debug.LogError("[FightOpeningTempo] " + error.Message);
                 return 0;
             }
+        }
+
+        public static FmodBeatClock.SongMarker[] ReadMarkers(string eventPath)
+        {
+            var entry = EventManager.EventFromPath(eventPath);
+            if (entry == null) return Array.Empty<FmodBeatClock.SongMarker>();
+            string root = Path.GetFullPath(Path.Combine(Application.dataPath, "../ProjectFMOD"));
+            string filename = "{" + entry.Guid.ToString().Trim('{', '}') + "}.xml";
+            var files = Directory.GetFiles(root, filename, SearchOption.AllDirectories);
+            if (files.Length != 1) return Array.Empty<FmodBeatClock.SongMarker>();
+            return XDocument.Load(files[0]).Descendants("object")
+                .Where(x => (string)x.Attribute("class") == "NamedMarker")
+                .Select(x => new FmodBeatClock.SongMarker {
+                    name = x.Elements("property").FirstOrDefault(p => (string)p.Attribute("name") == "name")?.Element("value")?.Value,
+                    positionMs = (int)Math.Round(Value(x, "position", 0) * 1000d)
+                }).OrderBy(x => x.positionMs).ToArray();
         }
 
         private static float Value(XElement element, string property, float fallback)

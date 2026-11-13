@@ -13,7 +13,7 @@ namespace RhythmHunter.RhythmDemo
     /// Owns the FMOD music instance and exposes a main-thread beat clock.
     /// The FMOD audio callback only copies plain timing data into a thread-safe queue.
     /// </summary>
-    public sealed class FmodBeatClock : MonoBehaviour
+    public sealed partial class FmodBeatClock : MonoBehaviour
     {
         public readonly struct BeatSnapshot
         {
@@ -194,7 +194,7 @@ namespace RhythmHunter.RhythmDemo
                 ReleaseBeatTapping();
             if (beatTappingInstance.isValid())
                 beatTappingInstance.setVolume(Mathf.Clamp01(beatTappingVolume));
-            if (!paused) ProcessPendingBeats();
+            if (!paused) { ProcessPendingBeats(); UpdateMusicSections(); }
         }
 
         private void OnDisable()
@@ -237,7 +237,7 @@ namespace RhythmHunter.RhythmDemo
             if (!musicInstance.isValid())
                 return;
 
-            RESULT result = musicInstance.setVolume(musicVolume);
+            RESULT result = musicInstance.setVolume(musicVolume * sectionGain);
             if (result != RESULT.OK)
                 ReportError($"FMOD failed to set music volume for '{musicEventPath}': {result}");
         }
@@ -259,6 +259,7 @@ namespace RhythmHunter.RhythmDemo
                 return;
 
             musicInstance.setPaused(paused);
+            PrepareMusicSections();
 
             RESULT result = musicInstance.start();
             if (result != RESULT.OK)
@@ -290,6 +291,7 @@ namespace RhythmHunter.RhythmDemo
                 return false;
 
             RESULT result = musicInstance.getTimelinePosition(out timelinePositionMs);
+            if (result == RESULT.OK) timelinePositionMs = ContinuousPosition(timelinePositionMs);
             return result == RESULT.OK;
         }
 
@@ -381,7 +383,7 @@ namespace RhythmHunter.RhythmDemo
             timelineBeatCallback = TimelineBeatCallback;
             RESULT callbackResult = musicInstance.setCallback(
                 timelineBeatCallback,
-                EVENT_CALLBACK_TYPE.TIMELINE_BEAT);
+                EVENT_CALLBACK_TYPE.TIMELINE_BEAT | EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
 
             if (callbackResult != RESULT.OK)
             {
@@ -401,12 +403,15 @@ namespace RhythmHunter.RhythmDemo
                 int upper = Mathf.Max(1, data.TimeSignatureUpper);
                 int lower = Mathf.Max(1, data.TimeSignatureLower);
                 float tempo = Mathf.Max(1f, data.Tempo);
+                int continuousPosition = MapBeatPosition(data.TimelinePositionMs);
+                // A loop endpoint and its start can report the same musical instant.
+                if (OvertimeMusicEnabled && hasAnchor && continuousPosition <= latestBeat.TimelinePositionMs + 2) continue;
 
                 latestBeat = new BeatSnapshot(
                     receivedBeatCount,
                     Mathf.Max(1, data.Bar),
                     Mathf.Clamp(data.Beat, 1, upper),
-                    data.TimelinePositionMs,
+                    continuousPosition,
                     tempo,
                     upper,
                     lower);
@@ -471,6 +476,7 @@ namespace RhythmHunter.RhythmDemo
 
         private void ShutdownMusic()
         {
+            ResetMusicSections();
             ReleaseBeatTapping();
             initialized = false;
             playbackStarted = false;
@@ -536,7 +542,7 @@ namespace RhythmHunter.RhythmDemo
             IntPtr eventInstancePointer,
             IntPtr parameterPointer)
         {
-            if (callbackType != EVENT_CALLBACK_TYPE.TIMELINE_BEAT || parameterPointer == IntPtr.Zero)
+            if ((callbackType != EVENT_CALLBACK_TYPE.TIMELINE_BEAT && callbackType != EVENT_CALLBACK_TYPE.TIMELINE_MARKER) || parameterPointer == IntPtr.Zero)
                 return RESULT.OK;
 
             EventInstance callbackInstance = new(eventInstancePointer);
@@ -547,6 +553,13 @@ namespace RhythmHunter.RhythmDemo
             GCHandle handle = GCHandle.FromIntPtr(userDataPointer);
             if (!(handle.Target is FmodBeatClock clock))
                 return RESULT.OK;
+
+            if (callbackType == EVENT_CALLBACK_TYPE.TIMELINE_MARKER)
+            {
+                var marker = Marshal.PtrToStructure<TIMELINE_MARKER_PROPERTIES>(parameterPointer);
+                clock.pendingMarkers.Enqueue(new SongMarker { name = marker.name, positionMs = marker.position });
+                return RESULT.OK;
+            }
 
             TIMELINE_BEAT_PROPERTIES properties =
                 Marshal.PtrToStructure<TIMELINE_BEAT_PROPERTIES>(parameterPointer);

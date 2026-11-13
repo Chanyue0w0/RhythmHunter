@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{927bcdc0-c104-468e-8a42-461006c3194d}">
+		<property name="name">
+			<value>Overtime</value>
+		</property>
+		<relationship name="folder">
+			<destination>{16b513bf-dbd5-447f-8bbd-a8ab9ebbdb40}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{c6ed647e-2235-48e3-943b-1bbf80bc364c}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{c6ed647e-2235-48e3-943b-1bbf80bc364c}" />
+</objects>

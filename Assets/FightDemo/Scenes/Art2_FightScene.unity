@@ -10457,6 +10457,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3814f07b225d8f34084d9aed7684d7c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock
+  sectionPreview: 2
+  sectionFadeOutSeconds: 0.15
+  sectionFadeInSeconds: 0.15
+  overtimeParameter: Overtime
+  songMarkers:
+  - name: Overtime_Start
+    positionMs: 47603
+  - name: Normal_End
+    positionMs: 63471
+  - name: Overtime_End
+    positionMs: 63471
+  - name: Boss_End
+    positionMs: 119713
+  markerEventPath: event:/Ritual Slam _120_3
   musicEventPath: event:/Ritual Slam _120_3
   musicStartDelaySeconds: 1
   musicVolume: 0.673
