@@ -102,7 +102,7 @@ namespace RhythmHunter.FightDemoEditor
                     Call(fight, "GainTeamSkill", result);
                 }
                 while (fight.WaveCombatBeatCount < 15) Beat();
-                Check(fight.PressureWarningActive && !fight.PressurePhaseActive, "Five beat warning");
+                Check(!fight.PressureVisualsActive && fight.PressureWarningLeadBeats == 1, "All warnings must wait until one beat before Pressure");
                 enemy.TakeDamage(3); Call(fight, "RecordPressureBlock");
                 Check((float)Get(fight, "pressureDamageProgress") == 0 && (int)Get(fight, "pressureBlockProgress") == 0, "Warning must not accumulate breaks");
                 Gain(15); Check(fight.TeamSkillGaugeExact == .5f, "Ordinary input should grant .5 MP");
@@ -115,6 +115,7 @@ namespace RhythmHunter.FightDemoEditor
                 Call(presenter, "RenderPressureBar", 18.99d, true);
                 Check(Get(presenter, "pressureBarRoot") == null || !((RectTransform)Get(presenter, "pressureBarRoot")).gameObject.activeSelf, "UI must stay hidden until final warning beat");
                 Beat();
+                Check(fight.PressureWarningActive && fight.PressureVisualsActive && !fight.PressurePhaseActive, "Shared one-beat warning missing");
                 Call(presenter, "RenderPressureBar", 19.05d, true);
                 root = (RectTransform)Get(presenter, "pressureBarRoot");
                 Check(root != null && root.name == "PlayerPressureDurationBar", "Player pressure bar missing");
@@ -207,7 +208,9 @@ namespace RhythmHunter.FightDemoEditor
                 while (fight.WaveCombatBeatCount < 41) Beat();
                 Check(fight.PressureRestActive, "Rest ended before 20 beats");
                 Beat(); Check(!fight.PressureRestActive && !fight.PressurePhaseActive, "Rest exit must begin separate wait");
-                while (fight.WaveCombatBeatCount < 57) Beat();
+                while (fight.WaveCombatBeatCount < 60) Beat();
+                Check(!fight.PressureVisualsActive, "Repeat warning appeared too early");
+                Beat();
                 Check(fight.PressureWarningActive, "Repeat warning missing");
                 while (fight.WaveCombatBeatCount < 62) Beat();
                 Check(fight.PressurePhaseActive && fight.PressureRemainingExact == 20, "Repeat full duration");

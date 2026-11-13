@@ -29,6 +29,9 @@ namespace RhythmHunter.FightDemo
         }
         private readonly Dictionary<FightUnitSlot, Entry> effects = new();
         private readonly List<FightUnitSlot> stale = new();
+        public FightCombatController CombatController => combat;
+        public float PressureLightBlend { get; private set; }
+        private float fromBlend;
         private bool active, ownsColor;
         private Color originalColor, fromColor, targetColor;
         private float originalIntensity, fromIntensity;
@@ -39,6 +42,8 @@ namespace RhythmHunter.FightDemo
             bool next = combat != null && combat.isActiveAndEnabled && combat.PressureVisualsActive;
             if (next != active)
             {
+                fromBlend = PressureLightBlend;
+                transitionTime = 0;
                 active = next;
                 if (mainLight != null)
                 {
@@ -93,10 +98,12 @@ namespace RhythmHunter.FightDemo
 
         private void UpdateLight()
         {
-            if (!ownsColor || mainLight == null) return;
+
             if (combat == null || !combat.IsPaused && !combat.TimingCalibrationActive)
                 transitionTime += Time.deltaTime;
             float t = transitionSeconds <= 0 ? 1 : Mathf.Clamp01(transitionTime / transitionSeconds);
+            PressureLightBlend = Mathf.Lerp(fromBlend, active ? 1 : 0, t);
+            if (!ownsColor || mainLight == null) return;
             mainLight.color = Color.Lerp(fromColor, targetColor, t);
             float targetIntensity = active ? originalIntensity * pressureIntensityMultiplier : originalIntensity;
             mainLight.intensity = Mathf.Lerp(fromIntensity, targetIntensity, t);
@@ -121,6 +128,7 @@ namespace RhythmHunter.FightDemo
                 mainLight.color = originalColor;
                 mainLight.intensity = originalIntensity;
             }
+            PressureLightBlend = 0;
             ownsColor = active = false;
         }
     }

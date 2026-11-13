@@ -9,7 +9,7 @@ namespace RhythmHunter.FightDemo
         private FightEnemyPressureSettings wavePressure = new();
         [UnityEngine.SerializeField, UnityEngine.Min(0)]
         [UnityEngine.Tooltip("密集攻擊視覺提示提前幾個普通戰鬥拍開始；不改變敵人實際攻擊時程。0 表示不提前。")]
-        private int pressureWarningBeats = 5;
+        private int pressureWarningBeats = 1;
         private sealed class EnemyCadence
         {
             public double actionEnd;
