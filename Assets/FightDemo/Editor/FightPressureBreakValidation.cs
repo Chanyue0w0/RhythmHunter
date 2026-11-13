@@ -129,6 +129,13 @@ namespace RhythmHunter.FightDemoEditor
                 Check(skull.rectTransform.pivot.y == 0 && skull.rectTransform.anchoredPosition.y == ((Vector2)Get(presenter, "pressureBarSize")).y * .5f, "Skull bottom must touch bar top without overlap");
                 Beat();
                 Check(fight.PressurePhaseRemainingBeats == 20 && fight.PressureVisiblePairs == 20 && fight.PressurePairBeats == 1, "Default twenty-segment pressure start");
+                var pressureVisuals = components.OfType<FightPressureVisuals>().Single();
+                Call(pressureVisuals, "UpdateAngryEffects");
+                var angryEntries = (IDictionary)Get(pressureVisuals, "angryEffects");
+                int expectedAngry = fight.PressureEnemySlots.Count(slot => slot.HasCharacter && slot.CurrentHp > 0 && slot.ActorInstance != null && slot.ActorInstance.activeInHierarchy && slot.isActiveAndEnabled);
+                Check(expectedAngry > 0 && angryEntries.Count == expectedAngry, "Each living enemy needs one Pressure head effect");
+                Call(pressureVisuals, "UpdateAngryEffects");
+                Check(angryEntries.Count == expectedAngry, "Duplicate Pressure head effect");
                 enemy.TakeDamage(4);
                 Check(fight.PressureRemainingExact == 20, "Four damage must not reduce pressure");
                 enemy.TakeDamage(1);
@@ -207,6 +214,8 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.BlockedAttackCount == beforeBlocks + 3 && fight.PartyHp == beforeHp, "Guard chip still counts as a successful block and consumes armor first");
                 while (fight.WaveCombatBeatCount < 41) Beat();
                 Check(fight.PressureRestActive, "Rest ended before 20 beats");
+                Call(pressureVisuals, "UpdateAngryEffects");
+                Check(angryEntries.Count == 0, "Pressure head effects must clear on rest");
                 Beat(); Check(!fight.PressureRestActive && !fight.PressurePhaseActive, "Rest exit must begin separate wait");
                 while (fight.WaveCombatBeatCount < 60) Beat();
                 Check(!fight.PressureVisualsActive, "Repeat warning appeared too early");
@@ -239,7 +248,7 @@ namespace RhythmHunter.FightDemoEditor
                 Set(fight, "partyHp", 0f);
                 Call(fight, "EndPressurePhase");
                 Check(fight.TeamSkillGaugeExact == 1, "Defeated party must not earn survival reward");
-                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: natural/early pressure reward, one-shot/toggle/death guards; Pressure Fever lock and prior-Fever deferral; whole UI one-beat quick warning; 64px skull anchored above bar; three same-beat projectiles only chip once but count three blocks; unblocked/next-beat/late callback/zero-damage cases; pressure guard chip, armor first, HP overflow, no unblocked bonus, normal block unchanged; five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
+                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: Pressure head effect spawn/no duplicates/cleanup; natural/early pressure reward, one-shot/toggle/death guards; Pressure Fever lock and prior-Fever deferral; whole UI one-beat quick warning; 64px skull anchored above bar; three same-beat projectiles only chip once but count three blocks; unblocked/next-beat/late callback/zero-damage cases; pressure guard chip, armor first, HP overflow, no unblocked bonus, normal block unchanged; five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
             }
             finally
             {

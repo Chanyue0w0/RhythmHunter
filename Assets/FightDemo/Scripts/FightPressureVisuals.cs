@@ -23,11 +23,20 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector3 effectRotationOffset;
         [SerializeField] private Vector3 effectScaleMultiplier = Vector3.one;
 
+        [Header("Pressure Enemy Head Effect")]
+        [SerializeField] private bool showAngryEffect = true;
+        [SerializeField] private GameObject angryEffectPrefab;
+        [Tooltip("頭頂特效的世界座標偏移；不繼承角色傾斜角度與縮放。")]
+        [SerializeField] private Vector3 angryEffectOffset;
+        [SerializeField] private Vector3 angryEffectRotationOffset;
+        [SerializeField] private Vector3 angryEffectScaleMultiplier = Vector3.one;
+
         private sealed class Entry
         {
             public GameObject actor, effect;
         }
         private readonly Dictionary<FightUnitSlot, Entry> effects = new();
+        private readonly Dictionary<FightUnitSlot, Entry> angryEffects = new();
         private readonly List<FightUnitSlot> stale = new();
         public FightCombatController CombatController => combat;
         public float PressureLightBlend { get; private set; }
@@ -61,6 +70,7 @@ namespace RhythmHunter.FightDemo
                 if (!active) ClearEffects();
             }
             UpdateLight();
+            UpdateAngryEffects();
             if (!active) return;
 
             stale.Clear();
@@ -96,6 +106,48 @@ namespace RhythmHunter.FightDemo
         private static bool Eligible(FightUnitSlot slot) => slot != null && slot.isActiveAndEnabled &&
             slot.HasCharacter && slot.CurrentHp > 0 && slot.ActorInstance != null && slot.ActorInstance.activeInHierarchy;
 
+        private void UpdateAngryEffects()
+        {
+            // Unlike the lighting warning, anger starts only with actual Pressure.
+            if (!showAngryEffect || angryEffectPrefab == null || combat == null || !combat.isActiveAndEnabled || !combat.PressurePhaseActive)
+            {
+                ClearAngryEffects();
+                return;
+            }
+            stale.Clear();
+            foreach (var pair in angryEffects)
+                if (!Eligible(pair.Key) || pair.Value.actor != pair.Key.ActorInstance || pair.Value.effect == null)
+                    stale.Add(pair.Key);
+            foreach (var slot in stale)
+            {
+                RemoveEffect(angryEffects[slot].effect);
+                angryEffects.Remove(slot);
+            }
+            foreach (var slot in combat.PressureEnemySlots)
+            {
+                if (!Eligible(slot)) continue;
+                if (!angryEffects.TryGetValue(slot, out var entry))
+                {
+                    var effect = Instantiate(angryEffectPrefab);
+                    UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
+                    effect.name = "PressureAngry_" + slot.name;
+                    entry = new Entry { actor = slot.ActorInstance, effect = effect };
+                    angryEffects.Add(slot, entry);
+                    (effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>()).Configure(combat, true, 0);
+                }
+                var anchor = slot.HeadAnchor != null ? slot.HeadAnchor : slot.ImpactEffectAnchor != null ? slot.ImpactEffectAnchor : slot.transform;
+                entry.effect.transform.SetPositionAndRotation(anchor.position + angryEffectOffset,
+                    Quaternion.Euler(angryEffectRotationOffset) * angryEffectPrefab.transform.rotation);
+                entry.effect.transform.localScale = Vector3.Scale(angryEffectPrefab.transform.localScale, angryEffectScaleMultiplier);
+            }
+        }
+
+        private void ClearAngryEffects()
+        {
+            foreach (var entry in angryEffects.Values) RemoveEffect(entry.effect);
+            angryEffects.Clear();
+        }
+
         private void UpdateLight()
         {
 
@@ -113,7 +165,7 @@ namespace RhythmHunter.FightDemo
         {
             if (effect == null) return;
             effect.SetActive(false);
-            Destroy(effect);
+            if (Application.isPlaying) Destroy(effect); else DestroyImmediate(effect);
         }
         private void ClearEffects()
         {
@@ -123,6 +175,7 @@ namespace RhythmHunter.FightDemo
         private void OnDisable()
         {
             ClearEffects();
+            ClearAngryEffects();
             if (ownsColor && mainLight != null)
             {
                 mainLight.color = originalColor;
