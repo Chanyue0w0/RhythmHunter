@@ -17,6 +17,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Sprite pressureTimelinePointSprite;
         [SerializeField] private Sprite stoneEmptySprite;
         [SerializeField] private Sprite stoneFillSprite;
+        [Tooltip("填滿圖片可見部分的垂直範圍（0=圖片底端、1=頂端），排除透明留白；不改動圖片或 PPU。")]
+        [SerializeField] private Vector2 stoneFillVisibleRange = new Vector2(0, 1);
         [SerializeField] private Sprite[] stoneReadyFrames;
         [SerializeField] private Vector2 timelinePointArtSize = new(6, 34);
         [SerializeField] private Vector2 stoneArtSize = new(70, 90);
@@ -150,8 +152,10 @@ namespace RhythmHunter.FightDemo
             timelineCenter.sprite = animated && stoneReadyFrames[frame] != null ? stoneReadyFrames[frame] : stoneEmptySprite;
             timelineCenter.color = Color.white;
             timelineCenter.rectTransform.localScale = Vector3.one;
-            stoneFillImage.enabled = !animated;
-            stoneFillImage.fillAmount = fill;
+            stoneFillImage.enabled = !animated && fill > 0;
+            float bottom = Mathf.Clamp01(stoneFillVisibleRange.x);
+            float top = Mathf.Clamp(stoneFillVisibleRange.y, bottom, 1);
+            stoneFillImage.fillAmount = fill <= 0 ? 0 : Mathf.Lerp(bottom, top, Mathf.Clamp01(fill));
         }
 
         private void RenderStoneBounce(double progress)
