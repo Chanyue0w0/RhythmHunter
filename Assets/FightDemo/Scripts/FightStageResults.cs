@@ -25,6 +25,8 @@ namespace RhythmHunter.FightDemo
         public event Action ResultReady;
         public FmodBeatClock BeatClock => beatClock;
         public bool PresentationPaused => fight != null && fight.IsPaused;
+        public bool DefeatSlowMotionActive => fight != null && fight.DefeatSlowMotionActive;
+        public float DefeatPresentationProgress => fight != null ? fight.DefeatPresentationProgress : 1;
 
         private void OnEnable()
         {

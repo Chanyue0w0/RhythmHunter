@@ -299,7 +299,7 @@ namespace RhythmHunter.FightDemo
         public float PartyArmor => partyArmor;
         public float MaxPartyArmor => maxPartyArmor;
         public int ArmorRecoveryBeatsRemaining => 0;
-        public bool BattleEnded => battleEnded;
+        public bool BattleEnded => battleEnded || DefeatSlowMotionActive;
         public bool UsesBattlePreparation => UsesEqualBeats && rosterManager != null && rosterManager.RequiresBattlePreparation;
         public bool AwaitingBattleStart => UsesBattlePreparation && !rosterManager.BattleStarted;
         public bool NaturalArmorRecoveryEnabled => false;
@@ -446,6 +446,14 @@ namespace RhythmHunter.FightDemo
 
         private void Update()
         {
+            if (DefeatSlowMotionActive)
+            {
+                if (IsPaused) return;
+                AdvanceDefeatSlowMotion(Time.unscaledDeltaTime);
+                UpdateNormalImpacts();
+                if (DefeatSlowMotionActive && beatClock != null && beatClock.TryGetTimelinePositionMs(out int deathTime)) ResolveEnemyCombatWork(deathTime);
+                return;
+            }
             UpdateBattleEntrance();
             UpdateSkillVisualPause();
             UpdateNormalImpacts();
@@ -467,6 +475,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            RestoreDefeatPlayback();
             ResetSwordCharges();
             ResetDamageNumberPool();
             entrancePending = false;
@@ -507,6 +516,7 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
+            if (DefeatSlowMotionActive && (!DefeatInputGraceActive || command == FightInputRouter.HeroCommand.TeamSkill || command == FightInputRouter.HeroCommand.Ultimate)) return;
             if (battleEnded || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))
                 return;
@@ -832,6 +842,7 @@ namespace RhythmHunter.FightDemo
             if (IsPaused) return;
 
             latestCombatBeat = beat.GlobalBeat;
+            if (DefeatSlowMotionActive) return;
             if (TimingCalibrationActive || battleEnded) return;
             UpdateStageDeadline();
             if (battleEnded) return;
@@ -1109,6 +1120,8 @@ namespace RhythmHunter.FightDemo
 
         private void ResetBattleStateForRoster()
         {
+            RestoreDefeatPlayback();
+            defeatElapsedBeats = 0;
             ResetTeamSkill();
             pendingEnemyAttack = false;
             pendingEnemyAnimationDriven = false;
@@ -1157,6 +1170,7 @@ namespace RhythmHunter.FightDemo
 
         public float ApplyPartyDamage(float amount, long globalBeat)
         {
+            if (DefeatSlowMotionActive) return 0;
             if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || AwaitingBattleStart || amount <= 0f)
                 return 0f;
             float damage = Mathf.Max(0f, Mathf.Round(amount * 2f) * 0.5f);
@@ -1489,6 +1503,7 @@ namespace RhythmHunter.FightDemo
 
         private void HealPartyHealth(FightUnitSlot healer, float amount)
         {
+            if (DefeatSlowMotionActive) return;
             if (healer == null || amount <= 0f || (UsesEqualBeats && battleEnded))
                 return;
 

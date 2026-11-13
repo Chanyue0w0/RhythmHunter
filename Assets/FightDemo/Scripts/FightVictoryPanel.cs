@@ -23,6 +23,7 @@ namespace RhythmHunter.FightDemo
         private GameObject canvasObject;
         private CanvasGroup presentationGroup;
         private float presentationDelay, presentationFadeElapsed;
+        private bool slowMotionPresentation;
         private float shownAt;
         public bool IsVisible => canvasObject != null && canvasObject.activeSelf;
         private void OnEnable()
@@ -46,7 +47,12 @@ namespace RhythmHunter.FightDemo
             if (IsVisible && presentationGroup != null && presentationGroup.alpha < 1)
             {
                 if (results != null && results.PresentationPaused) return;
-                AdvancePresentation(Time.unscaledDeltaTime);
+                if (slowMotionPresentation)
+                {
+                    presentationGroup.alpha = results.DefeatPresentationProgress;
+                    if (presentationGroup.alpha >= 1) CompletePresentation();
+                }
+                else AdvancePresentation(Time.unscaledDeltaTime);
             }
             if (presentationGroup != null && !presentationGroup.interactable) return;
             if (!IsVisible || Time.unscaledTime - shownAt < .4f) return;
@@ -82,6 +88,7 @@ namespace RhythmHunter.FightDemo
             // Presentation only: combat/input and result statistics are already locked at defeat.
             // Snapshot tempo because the music may finish fading out during this wait.
             presentationDelay = results.Won ? 0 : defeatDelayBeats * secondsPerBeat;
+            slowMotionPresentation = !results.Won && results.DefeatSlowMotionActive;
             presentationFadeElapsed = 0;
             presentationGroup.alpha = results.Won ? 1 : 0;
             presentationGroup.interactable = results.Won;
@@ -129,6 +136,10 @@ namespace RhythmHunter.FightDemo
             presentationFadeElapsed += seconds;
             presentationGroup.alpha = defeatFadeSeconds <= 0 ? 1 : Mathf.Clamp01(presentationFadeElapsed / defeatFadeSeconds);
             if (presentationGroup.alpha < 1) return;
+            CompletePresentation();
+        }
+        private void CompletePresentation()
+        {
             presentationGroup.interactable = presentationGroup.blocksRaycasts = true;
             if (results != null && !results.Won) GetComponent<FightScenePresenter>()?.HideBattleUiAfterDefeat();
             shownAt = Time.unscaledTime;

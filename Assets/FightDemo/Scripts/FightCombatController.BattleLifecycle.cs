@@ -30,6 +30,7 @@ namespace RhythmHunter.FightDemo
 
         private void CheckWaveCompletion()
         {
+            if (DefeatSlowMotionActive) return;
             if (!UsesBattlePreparation || AwaitingBattleStart || battleEnded || AwaitingNextWave || !HealthSystemEnabled) return;
             if (endBattleOnZeroHp && partyHp <= 0) { FinishBattle(false); return; }
             // Zero HP still means defeated; keep this wave available for burst overkill presentation.
@@ -117,7 +118,13 @@ namespace RhythmHunter.FightDemo
 
         private void FinishBattle(bool won)
         {
+            if (DefeatSlowMotionActive) return;
             if (battleEnded) return;
+            if (!won && partyHp <= 0 && enableDefeatSlowMotion && Application.isPlaying && beatClock != null && beatClock.IsPlaying)
+            {
+                BeginDefeatSlowMotion();
+                return;
+            }
             battleEnded = true;
             stageOvertimeActive = false;
             ResetSwordCharges();

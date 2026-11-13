@@ -59,6 +59,7 @@ namespace RhythmHunter.FightDemo
 
         public void SetPaused(bool value)
         {
+            if (value && GetComponent<FightCombatController>()?.DefeatSlowMotionActive == true) return;
             if (restarting) return;
             if (clock == null || value == IsPaused || !clock.SetPaused(value)) return;
             if (value) { previousTimeScale = Time.timeScale; Time.timeScale = 0; }

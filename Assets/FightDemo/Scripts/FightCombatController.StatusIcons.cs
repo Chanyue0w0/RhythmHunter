@@ -138,7 +138,7 @@ namespace RhythmHunter.FightDemo
         {
             float beatSeconds = beatClock != null && beatClock.HasTimingAnchor ? (float)(beatClock.MillisecondsPerBeat / 1000d)
                 : beatClock != null && beatClock.HasOpeningTempo ? (float)beatClock.OpeningSecondsPerBeat : .5f;
-            float beats = delta * (beatClock != null ? beatClock.MusicPitch : 1) / Mathf.Max(.001f, beatSeconds);
+            float beats = delta * BeatPresentationDeltaScale * (beatClock != null ? beatClock.MusicPitch : 1) / Mathf.Max(.001f, beatSeconds);
             for (int i = activeStatusIcons.Count - 1; i >= 0; i--)
                 if (activeStatusIcons[i] == null || !activeStatusIcons[i].Advance(delta, beats)) ReturnStatusIcon(activeStatusIcons[i]);
         }

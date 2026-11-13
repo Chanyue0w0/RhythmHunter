@@ -115,10 +115,14 @@ namespace RhythmHunter.RhythmDemo
         [ContextMenu("Music Test/Fade Out And Stop")]
         private void PreviewFadeStop() { if (Application.isPlaying) FadeOutAndStop(); }
         public void FadeOutAndStop()
+            => FadeOutAndStop(sectionFadeOutSeconds);
+
+        // Duration in song seconds, so a pitched-down event fades over the same musical beats.
+        public void FadeOutAndStop(float songSeconds)
         {
             if (!IsPlaying || fadeStopping || !TryGetTimelinePositionMs(out fadeStopStart)) return;
             fadeStopping = true;
-            fadeStopDuration = Mathf.Max(0, sectionFadeOutSeconds * 1000);
+            fadeStopDuration = Mathf.Max(0, songSeconds * 1000);
             fadeStopGain = sectionGain;
             if (fadeStopDuration == 0) StopMusic();
         }

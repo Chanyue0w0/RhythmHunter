@@ -613,7 +613,7 @@ namespace RhythmHunter.FightDemo
             if (beatSource != null && beatSource.BeatClock != null && beatSource.BeatClock.HasTimingAnchor)
                 secondsPerBeat = beatSource.BeatClock.MillisecondsPerBeat / 1000d;
             frameElapsed += activeSequence.UseFrameBeatDurations
-                ? deltaTime * pitch / (float)Math.Max(0.001d, secondsPerBeat)
+                ? deltaTime * pitch * (beatSource != null ? beatSource.BeatPresentationDeltaScale : 1) / (float)Math.Max(0.001d, secondsPerBeat)
                 : deltaTime;
             while (activeSequence != null && playbackVersion == version)
             {

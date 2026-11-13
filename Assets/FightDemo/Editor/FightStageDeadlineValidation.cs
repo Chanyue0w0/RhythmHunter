@@ -28,6 +28,7 @@ namespace RhythmHunter.FightDemoEditor
         [MenuItem("Rhythm Hunter/Diagnostics/Validate Stage Deadline")]
         public static void Validate()
         {
+            ValidateDefeatSlowMotion();
             foreach (string scenario in new[] { "combat", "gap", "treasure", "fever", "defeat", "early", "restricted_early", "restricted_gap", "restricted_last" })
             {
                 var scene = EditorSceneManager.OpenPreviewScene("Assets/FightDemo/Scenes/Art2_FightScene.unity");
@@ -170,6 +171,42 @@ namespace RhythmHunter.FightDemoEditor
                     Check(!fight.StageTimeExpired && !fight.StageOvertimeActive && fight.StageMusicSeconds == 0, "Timer reset failed");
                 }
                 finally { if (stage != null) UnityEngine.Object.DestroyImmediate(stage); EditorSceneManager.ClosePreviewScene(scene); }
+            }
+        }
+        private static void ValidateDefeatSlowMotion()
+        {
+            float originalScale = Time.timeScale, originalFixed = Time.fixedDeltaTime;
+            var scene = EditorSceneManager.OpenPreviewScene("Assets/FightDemo/Scenes/Art2_FightScene.unity");
+            FightCombatController fight = null;
+            try
+            {
+                fight = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<FightCombatController>(true)).Single();
+                var clock = fight.BeatClock;
+                Set(clock, "openingTempo", 120f);
+                clock.SetPlaybackPitch(1);
+                Set(fight, "partyHp", 0f);
+                int losses = 0; fight.BattleLost += () => losses++;
+                Call(fight, "BeginDefeatSlowMotion");
+                Check(fight.BattleEnded && !fight.BattleWon && losses == 1 && fight.DefeatInputGraceActive, "Slow defeat did not latch loss/open grace");
+                Check(Mathf.Approximately(clock.MusicPitch, .5f) && Mathf.Approximately(Time.timeScale, originalScale * .5f) && Mathf.Approximately(fight.BeatPresentationDeltaScale, 2), "Slow defeat speed/beat animation compensation wrong");
+                Call(fight, "FinishBattle", true);
+                Check(!fight.BattleWon && losses == 1, "Grace reversed defeat or duplicated result");
+                Call(fight, "AdvanceDefeatSlowMotion", .9f);
+                Check(fight.DefeatInputGraceActive && fight.DefeatPresentationProgress < .5f, "Grace closed before one slowed beat");
+                Call(fight, "AdvanceDefeatSlowMotion", .2f);
+                Check(!fight.DefeatInputGraceActive && fight.DefeatSlowMotionActive, "Grace remained after one slowed beat");
+                Call(fight, "AdvanceDefeatSlowMotion", 1.1f);
+                Check(fight.BattleEnded && !fight.BattleWon && !fight.DefeatSlowMotionActive && fight.DefeatPresentationProgress == 1 && losses == 1, "Slow defeat did not finish once");
+                Check(Mathf.Approximately(clock.MusicPitch, 1) && Mathf.Approximately(Time.timeScale, originalScale) && Mathf.Approximately(Time.fixedDeltaTime, originalFixed), "Slow defeat did not restore playback");
+                Call(fight, "BeginDefeatSlowMotion");
+                Call(fight, "RestoreDefeatPlayback");
+                Check(!fight.DefeatSlowMotionActive && Mathf.Approximately(Time.timeScale, originalScale) && Mathf.Approximately(clock.MusicPitch, 1), "Interrupted slow defeat did not restore playback");
+            }
+            finally
+            {
+                if (fight != null) Call(fight, "RestoreDefeatPlayback");
+                Time.timeScale = originalScale; Time.fixedDeltaTime = originalFixed;
+                EditorSceneManager.ClosePreviewScene(scene);
             }
         }
     }
