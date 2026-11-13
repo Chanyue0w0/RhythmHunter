@@ -8,7 +8,7 @@ namespace RhythmHunter.FightDemo
         [Header("Team Skill (Equal Beat)")]
         [Tooltip("Testing: start a new battle with full shared MP. Off starts at 0. Does not refill on wave changes or after casting.")]
         [SerializeField] private bool startWithFullTeamSkill = false;
-        [SerializeField, Min(1)] private int teamSkillGaugeGain = 1;
+        [SerializeField, Min(0)] private float teamSkillGaugeGain = 1f;
         private int teamSkillGauge, teamSkillStep;
         private float teamSkillGaugeFraction;
         public float TeamSkillGaugeExact => teamSkillGauge + teamSkillGaugeFraction;
@@ -41,7 +41,7 @@ namespace RhythmHunter.FightDemo
                 result.NearestBeat.GlobalBeat <= lastTeamUltimateBeat ||
                 result.NearestBeat.GlobalBeat <= lastGaugeBeat || result.NearestBeat.GlobalBeat <= lastTeamSkillBeat) return;
             lastGaugeBeat = result.NearestBeat.GlobalBeat;
-            float gain = Mathf.Max(1, teamSkillGaugeGain) * ordinaryManaMultiplier * (PressurePhaseActive ? pressureManaMultiplier : 1);
+            float gain = Mathf.Max(0, teamSkillGaugeGain) * (PressurePhaseActive ? pressureManaMultiplier : 1);
             float total = Mathf.Clamp(TeamSkillGaugeExact + gain, 0, TeamSkillGaugeMax);
             teamSkillGauge = Mathf.FloorToInt(total);
             teamSkillGaugeFraction = total - teamSkillGauge;

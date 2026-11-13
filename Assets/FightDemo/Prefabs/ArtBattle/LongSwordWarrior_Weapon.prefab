@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4232183820247662683, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
+      propertyPath: teamSkillManaCost
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 2052762948902822046, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_Name
       value: LongSwordWarrior_Weapon

@@ -326,6 +326,32 @@ namespace RhythmHunter.FightDemo
         public int DamageEventCount { get; private set; }
 
         public bool IsPlaying => activeSequence != null;
+        public float ActiveSequenceElapsedBeats
+        {
+            get
+            {
+                if (activeSequence == null) return 0;
+                float elapsed = frameElapsed;
+                for (int i = 0; i < activeFrame; i++)
+                    elapsed += activeSequence.UseFrameBeatDurations ? activeSequence.GetFrameBeats(i) : 1f / activeSequence.FramesPerSecond;
+                return activeSequence.UseFrameBeatDurations ? elapsed : elapsed / (float)Math.Max(.001d, secondsPerBeat);
+            }
+        }
+        public float ActiveSequenceProgress
+        {
+            get
+            {
+                if (activeSequence == null) return 1f;
+                float elapsed = frameElapsed, total = 0;
+                for (int i = 0; i < activeSequence.Frames.Count; i++)
+                {
+                    float duration = activeSequence.UseFrameBeatDurations ? activeSequence.GetFrameBeats(i) : 1f / activeSequence.FramesPerSecond;
+                    total += duration;
+                    if (i < activeFrame) elapsed += duration;
+                }
+                return total > 0 ? Mathf.Clamp01(elapsed / total) : 1f;
+            }
+        }
         public CombatAnimation ActiveAnimation => activeSequence != null
             ? activeSequence.Animation
             : CombatAnimation.NormalAttack;

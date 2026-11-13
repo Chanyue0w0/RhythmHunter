@@ -284,6 +284,7 @@ namespace RhythmHunter.FightDemo
 
         private void LateUpdate()
         {
+            UpdateRestHitHop();
             RemoveDefeatedEnemyPresentation();
         }
 
@@ -338,7 +339,12 @@ namespace RhythmHunter.FightDemo
                 if (CombatController != null) CombatController.PlayStatusIconTrigger(this, false, true);
                 ClearFragile();
             }
+            bool restHit = team == UnitTeam.Enemy && CombatController != null && CombatController.PressureRestActive;
             currentHp -= applied;
+            if (restHit && applied > 0 && currentHp > 0 && kind != DamageKind.DamageOverTime &&
+                PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Hit, null, null, null) &&
+                combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit && !combatAnimator.PlaybackPaused)
+                BeginRestHitHop();
             CombatController?.RecordPressureDamage(this, applied);
             // Burst presentation shows full resolved damage; actual HP loss remains capped at zero.
             if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained ? resolvedDamage : applied);
@@ -386,6 +392,11 @@ namespace RhythmHunter.FightDemo
             Action onDamage,
             Action<FightCharacterCombatAnimator.FrameEffect> onFrameEffect = null)
         {
+            // A hit reaction must never flush attack events or replace an enemy action.
+            if (team == UnitTeam.Enemy && animation == FightCharacterCombatAnimator.CombatAnimation.Hit &&
+                combatAnimator != null && combatAnimator.IsPlaying &&
+                combatAnimator.ActiveAnimation != FightCharacterCombatAnimator.CombatAnimation.Hit)
+                return false;
             return combatAnimator != null && combatAnimator.Play(
                 animation,
                 onWarning,
@@ -597,6 +608,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetInputFeedback()
         {
+            restHitHopActive = false;
             if (inputFeedbackRoutine != null)
                 StopCoroutine(inputFeedbackRoutine);
             if (inputFeedbackTarget != null)

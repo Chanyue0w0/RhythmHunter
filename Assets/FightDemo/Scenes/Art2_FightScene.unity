@@ -10332,7 +10332,6 @@ MonoBehaviour:
   pressureBlocksPerPair: 5
   pressureReductionSegments: 20
   pressureRestBeats: 20
-  ordinaryManaMultiplier: 0.5
   pressureManaMultiplier: 2
   pressureGuardChipDamage: 0.5
   refillManaAfterPressure: 1

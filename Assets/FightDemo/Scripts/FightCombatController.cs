@@ -1514,11 +1514,6 @@ namespace RhythmHunter.FightDemo
                 if (dealt > 0 || IsBurstRetainedTarget(target) && ModifyBossDamage(target, damage) > 0)
                     attacker.PlayOnHitEffect(true, target.ImpactEffectAnchor);
                 if (wasAlive) CancelDefeatedEnemyAttack(target);
-                target.PlayCombatAnimation(
-                    FightCharacterCombatAnimator.CombatAnimation.Hit,
-                    null,
-                    null,
-                    null);
             }
             activeEnemySlot = FindFrontLivingEnemy();
         }
@@ -1553,11 +1548,6 @@ namespace RhythmHunter.FightDemo
                             FightAttackEffect.VisualStyle.Light, Color.white);
                 }
                 if (wasAlive) CancelDefeatedEnemyAttack(target);
-                target.PlayCombatAnimation(
-                    FightCharacterCombatAnimator.CombatAnimation.Hit,
-                    null,
-                    null,
-                    null);
             }
             activeEnemySlot = FindFrontLivingEnemy();
         }

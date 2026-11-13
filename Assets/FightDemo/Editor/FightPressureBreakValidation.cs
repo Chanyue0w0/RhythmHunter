@@ -58,7 +58,7 @@ namespace RhythmHunter.FightDemoEditor
                 Set(fight, "pressureGuardChipDamage", .5f);
                 Set(fight, "refillManaAfterPressure", true);
                 Set(fight, "blockFeverDuringPressure", true);
-                Set(fight, "teamSkillGaugeGain", 1);
+                Set(fight, "teamSkillGaugeGain", 1f);
                 float savedHp = fight.PartyHp, savedArmor = fight.PartyArmor;
                 float Chip(float damage, bool blocked, float chip) => (float)Call(fight, "ResolveEnemyHitDamage", damage, blocked, chip);
                 Check(Chip(2, false, .5f) == 2 && Chip(1, true, 0) == 0, "No bonus on unblocked hits; ordinary guard remains complete");
@@ -105,8 +105,14 @@ namespace RhythmHunter.FightDemoEditor
                 Check(!fight.PressureVisualsActive && fight.PressureWarningLeadBeats == 1, "All warnings must wait until one beat before Pressure");
                 enemy.TakeDamage(3); Call(fight, "RecordPressureBlock");
                 Check((float)Get(fight, "pressureDamageProgress") == 0 && (int)Get(fight, "pressureBlockProgress") == 0, "Warning must not accumulate breaks");
-                Gain(15); Check(fight.TeamSkillGaugeExact == .5f, "Ordinary input should grant .5 MP");
-                Gain(15, true); Check(fight.TeamSkillGaugeExact == .5f, "Duplicate input granted MP");
+                Gain(15); Check(fight.TeamSkillGaugeExact == 1f, "Ordinary input should grant 1 MP");
+                Gain(15, true); Check(fight.TeamSkillGaugeExact == 1f, "Duplicate input granted MP");
+                Check(fight.TeamSkillGaugeMax == 90, "Three hero costs must total 90 MP");
+                Set(fight, "teamSkillGaugeGain", .5f);
+                Gain(16); Check(fight.TeamSkillGaugeExact == 1.5f, "Fractional MP lost");
+                Gain(17); Check(fight.TeamSkillGaugeExact == 2f, "Two half gains must accumulate");
+                Set(fight, "teamSkillGaugeGain", 1f);
+                Set(fight, "teamSkillGauge", 1); Set(fight, "teamSkillGaugeFraction", 0f);
                 Set(presenter, "fight", fight); Set(presenter, "beatClock", null);
                 Call(presenter, "EnsureUiGroups"); Call(presenter, "UpdatePressureBar");
                 var root = (RectTransform)Get(presenter, "pressureBarRoot");
@@ -164,7 +170,7 @@ namespace RhythmHunter.FightDemoEditor
                 float fullWidth = fill.rectTransform.sizeDelta.x;
                 Call(presenter, "RenderPressureBar", 20.6d, true);
                 Check(fill.rectTransform.sizeDelta.x < fullWidth && !trailImage.enabled, "Natural countdown must shrink smoothly without yellow trail");
-                Gain(20); Check(fight.TeamSkillGaugeExact == 1.5f, "Pressure MP multiplier");
+                Gain(20); Check(fight.TeamSkillGaugeExact == 3f, "Pressure MP multiplier");
                 Set(fight, "teamSkillGauge", fight.TeamSkillGaugeMax); Set(fight, "teamSkillGaugeFraction", 0f);
                 Set(fight, "suspendFeverActivation", false);
                 Set(fight, "teamUltimateCharge", fight.TeamUltimateRequiredCharges);
@@ -263,7 +269,7 @@ namespace RhythmHunter.FightDemoEditor
                 Set(fight, "partyHp", 0f);
                 Call(fight, "EndPressurePhase");
                 Check(fight.TeamSkillGaugeExact == 1, "Defeated party must not earn survival reward");
-                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: Stun rest-only spawn/no duplicates/actor cleanup/rest exit; Pressure head effect spawn/no duplicates/cleanup; natural/early pressure reward, one-shot/toggle/death guards; Pressure Fever lock and prior-Fever deferral; whole UI one-beat quick warning; 64px skull anchored above bar; three same-beat projectiles only chip once but count three blocks; unblocked/next-beat/late callback/zero-damage cases; pressure guard chip, armor first, HP overflow, no unblocked bonus, normal block unchanged; five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; .5/1 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
+                File.WriteAllText("Temp/PressureBreakValidation.result", "PASS: Stun rest-only spawn/no duplicates/actor cleanup/rest exit; Pressure head effect spawn/no duplicates/cleanup; natural/early pressure reward, one-shot/toggle/death guards; Pressure Fever lock and prior-Fever deferral; whole UI one-beat quick warning; 64px skull anchored above bar; three same-beat projectiles only chip once but count three blocks; unblocked/next-beat/late callback/zero-damage cases; pressure guard chip, armor first, HP overflow, no unblocked bonus, normal block unchanged; five damage/five blocks; twenty default segments; configurable fractional reduction; warning fade/no shake; opaque beat bounce; continuous countdown; symmetric edges; rapid reduction; exact yellow trail amount; delayed fade and final-break cleanup; next-beat strong shake; 1/2 MP and duplicate rejection; 18->14; damage/block thresholds and remainder; early/natural end; projectile retained and dealt damage during rest; 20 beat rest + fresh start delay; TeamSkill freeze; wave reset.");
             }
             finally
             {

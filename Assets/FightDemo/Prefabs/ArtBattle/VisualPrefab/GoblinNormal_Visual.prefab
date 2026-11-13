@@ -134,15 +134,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   targetRenderer: {fileID: 5915600679224835315}
   beatSource: {fileID: 0}
   fallbackBpm: 120
+  useDrunkIdle: 0
   frames:
   - {fileID: 21300000, guid: 5df00a6b7582dc64392ca9af2af4a39e, type: 3}
   - {fileID: 21300000, guid: 0e3999aedd01dae4e9783c25805744b2, type: 3}
   - {fileID: 21300000, guid: a2e078d4d373d9d438e0aeef6aca2e9a, type: 3}
+  attachmentFrameIds:
+  - 2501d97b5f464d3ab68e82a77dab5cd3
+  - be8bc5a178004d3d9f753226649ea184
+  - f386d46ef93d4ee9a1a2cbfbfccf1aed
   useIdleFrameBeatDurations: 1
   idleFrameBeatDurations:
   - 0.33333334
@@ -157,9 +162,14 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 20b884669a8bd924fb1fc26bbd6e4166, type: 3}
     - {fileID: 21300000, guid: 238b49c0824a5044482c2bb559a6c709, type: 3}
     - {fileID: 21300000, guid: 021ac49cfdd95294a9481a74311e80a2, type: 3}
+    attachmentFrameIds:
+    - e27649cc5c2d495ebb11d02f4c0f8d3d
+    - 78eb1f312fe842fa8c5a5e27ed56a25d
+    - ee06f69f682e4f3497f10389490b4016
     frameEffects:
     - effects: []
       playAttackEffect: 0
+      playWarning: 0
     - effects:
       - prefab: {fileID: 6593023544061229464, guid: 2e1c2f459c628474c9a7928b57b34a9c, type: 3}
         soundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
@@ -172,8 +182,21 @@ MonoBehaviour:
         limitLifetime: 1
         lifetimeSeconds: 2.1
       playAttackEffect: 0
+      playWarning: 0
     - effects: []
       playAttackEffect: 0
+      playWarning: 0
+    warningEffect:
+      prefab: {fileID: 0}
+      soundEventPath: 
+      soundVolume: 1
+      location: 0
+      selfAnchor: {fileID: 0}
+      positionOffset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      followAnchor: 0
+      limitLifetime: 0
+      lifetimeSeconds: 1.5
     framesPerSecond: 16
     useFrameBeatDurations: 1
     frameBeatDurations:
@@ -182,4 +205,31 @@ MonoBehaviour:
     - 1
     warningFrame: -1
     attackEffectFrame: 2
+    damageFrame: -1
+  - animation: 5
+    frames:
+    - {fileID: 21300000, guid: 1e68121e14b9c434ba672e9c6a20d3db, type: 3}
+    - {fileID: 21300000, guid: 7c12fc7dc5158fb42bc5ca79946b73e4, type: 3}
+    attachmentFrameIds:
+    - bc56f3f13f9a4c70b976ca8b41ae9edc
+    - 7837142f0b7d4159a1f089477d62f9d2
+    frameEffects: []
+    warningEffect:
+      prefab: {fileID: 0}
+      soundEventPath: 
+      soundVolume: 1
+      location: 0
+      selfAnchor: {fileID: 0}
+      positionOffset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      followAnchor: 0
+      limitLifetime: 0
+      lifetimeSeconds: 1.5
+    framesPerSecond: 16
+    useFrameBeatDurations: 1
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    warningFrame: -1
+    attackEffectFrame: -1
     damageFrame: -1
