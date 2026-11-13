@@ -49,6 +49,9 @@ namespace RhythmHunter.FightDemo
         public bool UsesStageDeadline { get; private set; }
         public bool OvertimeOnlyOnFinalCombatWave { get; private set; }
         public int LastCombatWaveIndex { get; private set; } = -1;
+        public int OvertimeAccelerationIntervalBeats { get; private set; } = 20;
+        public int OvertimeRecoveryReductionBeats { get; private set; } = 1;
+        public int OvertimeMinimumRecoveryBeats { get; private set; }
         public FightStageDefinition.WaveKind GetWaveKind(int zeroBasedWave) =>
             stageWaveKinds != null && zeroBasedWave >= 0 && zeroBasedWave < stageWaveKinds.Length
                 ? stageWaveKinds[zeroBasedWave] : FightStageDefinition.WaveKind.Combat;
@@ -86,6 +89,9 @@ namespace RhythmHunter.FightDemo
             UsesStageDeadline = stage.UseNormalEndDeadline;
             OvertimeOnlyOnFinalCombatWave = stage.OvertimeOnlyOnFinalCombatWave;
             LastCombatWaveIndex = Array.FindLastIndex(kindSnapshot, kind => kind == FightStageDefinition.WaveKind.Combat);
+            OvertimeAccelerationIntervalBeats = stage.OvertimeAccelerationIntervalBeats;
+            OvertimeRecoveryReductionBeats = stage.OvertimeRecoveryReductionBeats;
+            OvertimeMinimumRecoveryBeats = stage.OvertimeMinimumRecoveryBeats;
             enemyPrefabs = (FightCharacterDefinition[])snapshot[0].Clone();
             error = null; return true;
         }

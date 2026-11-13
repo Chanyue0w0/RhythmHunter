@@ -30,6 +30,14 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Only the last Combat Wave permits overtime. Earlier Combat Waves (including their transition gap) expire as defeat. Treasure Waves still settle immediately.")]
         [SerializeField] private bool overtimeOnlyOnFinalCombatWave;
         public bool OvertimeOnlyOnFinalCombatWave => overtimeOnlyOnFinalCombatWave;
+        [Header("Overtime Pressure")]
+        [Tooltip("Ordinary combat beats between reductions to attack recovery. Does not change music or animation speed.")]
+        [SerializeField, Min(1)] private int overtimeAccelerationIntervalBeats = 20;
+        [SerializeField, Min(0)] private int overtimeRecoveryReductionBeats = 1;
+        [SerializeField, Min(0)] private int overtimeMinimumRecoveryBeats;
+        public int OvertimeAccelerationIntervalBeats => Mathf.Max(1, overtimeAccelerationIntervalBeats);
+        public int OvertimeRecoveryReductionBeats => Mathf.Max(0, overtimeRecoveryReductionBeats);
+        public int OvertimeMinimumRecoveryBeats => Mathf.Max(0, overtimeMinimumRecoveryBeats);
         [Tooltip("Song duration for results/overtime statistics. 0 = read FMOD event length. Set explicitly for looping/adaptive events. No overtime penalty.")]
         [SerializeField, Min(0)] private float plannedSongSeconds;
         [SerializeField] private List<Wave> waves = new();

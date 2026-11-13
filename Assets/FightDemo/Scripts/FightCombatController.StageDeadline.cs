@@ -60,7 +60,15 @@ namespace RhythmHunter.FightDemo
             if (TeamSkillRunning || TeamUltimateRunning) return;
             if (endBattleOnZeroHp && partyHp <= 0) { FinishBattle(false); return; }
             if (treasure || AwaitingNextWave) { FinishBattle(true); return; }
-            if (FindFrontLivingEnemy() != null) { stageOvertimeActive = true; return; }
+            if (FindFrontLivingEnemy() != null)
+            {
+                if (!stageOvertimeActive)
+                {
+                    stageOvertimeActive = true;
+                    BeginOvertimePressure();
+                }
+                return;
+            }
             foreach (var enemy in fightScene2Enemies)
                 if (enemy != null && enemy.DeathPresentationPending) return;
             CheckWaveCompletion(); // Award the current Wave clear once; retain true cleared-wave statistics.

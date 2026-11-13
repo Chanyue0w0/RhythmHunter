@@ -19,7 +19,7 @@ namespace RhythmHunter.FightDemo
         private readonly Dictionary<FightUnitSlot, EnemyCadence> enemyCadences = new();
         private bool pressureCadenceActive;
         public long WaveCombatBeatCount { get; private set; }
-        public bool PressurePhaseEnabled => wavePressure.enablePressurePhase;
+        public bool PressurePhaseEnabled => StageOvertimeActive || wavePressure.enablePressurePhase;
         [Header("Pressure Break / Rest")]
         [SerializeField, Min(.5f), InspectorName("Damage Per Segment")] private float pressureDamagePerPair = 5;
         [SerializeField, Min(1), InspectorName("Blocks Per Segment")] private int pressureBlocksPerPair = 5;
@@ -62,8 +62,8 @@ namespace RhythmHunter.FightDemo
         public int PressureDurationBeats => Math.Max(1, wavePressure.durationBeats);
         public long PressureLastBreakSongBeat { get; private set; }
         private bool PressureBattleAvailable => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive;
-        public bool PressurePhaseActive => PressureBattleAvailable && pressureRemaining > 0;
-        public bool PressureRestActive => PressureBattleAvailable && WaveCombatBeatCount < pressureRestUntil;
+        public bool PressurePhaseActive => PressureBattleAvailable && (StageOvertimeActive || pressureRemaining > 0);
+        public bool PressureRestActive => PressureBattleAvailable && !StageOvertimeActive && WaveCombatBeatCount < pressureRestUntil;
         public bool PressureWarningActive => PressureBattleAvailable && !PressurePhaseActive && !PressureRestActive &&
             pressureNextStart >= 0 && pressureNextStart > WaveCombatBeatCount &&
             pressureNextStart - WaveCombatBeatCount <= pressureWarningBeats;
@@ -74,13 +74,15 @@ namespace RhythmHunter.FightDemo
         public float PressurePairBeats => (float)PressureDurationBeats / Math.Max(1, pressureReductionSegments);
         public int PressureWarningLeadBeats => pressureWarningBeats;
         public long PressureNextStartBeat => PressureBattleAvailable ? pressureNextStart : -1;
-        public int PressureRecoveryBeats => wavePressure.recoveryBeats;
+        public int PressureRecoveryBeats => StageOvertimeActive ? OvertimeRecoveryBeats : wavePressure.recoveryBeats;
         public IReadOnlyList<FightUnitSlot> PressureEnemySlots => fightScene2Enemies;
 
         private void ResetWavePressure()
         {
             pressureChipHitBeats.Clear();
             pressureRewardPaid = true;
+            overtimePressureStartBeat = 0;
+            lastOvertimeRecoveryBeats = 0;
             ClearPressureCadence();
             WaveCombatBeatCount = 0;
             wavePressure = rosterManager != null
@@ -99,6 +101,7 @@ namespace RhythmHunter.FightDemo
         private void AdvanceWavePressureBeat()
         {
             WaveCombatBeatCount++;
+            if (StageOvertimeActive) { AdvanceOvertimePressureBeat(); return; }
             if (pressureRemaining > 0)
             {
                 pressureRemaining = Math.Max(0, pressureRemaining - 1);
@@ -116,7 +119,7 @@ namespace RhythmHunter.FightDemo
 
         internal void RecordPressureDamage(FightUnitSlot target, float actualHpLoss)
         {
-            if (!PressurePhaseActive || target == null || !fightScene2Enemies.Contains(target) || actualHpLoss <= 0) return;
+            if (StageOvertimeActive || !PressurePhaseActive || target == null || !fightScene2Enemies.Contains(target) || actualHpLoss <= 0) return;
             pressureDamageProgress += actualHpLoss;
             int pairs = (int)Math.Floor((pressureDamageProgress + .00001f) / Mathf.Max(.5f, pressureDamagePerPair));
             pressureDamageProgress -= pairs * Mathf.Max(.5f, pressureDamagePerPair);
@@ -125,7 +128,7 @@ namespace RhythmHunter.FightDemo
 
         private void RecordPressureBlock()
         {
-            if (!PressurePhaseActive) return;
+            if (StageOvertimeActive || !PressurePhaseActive) return;
             pressureBlockProgress++;
             int threshold = Math.Max(1, pressureBlocksPerPair);
             int pairs = pressureBlockProgress / threshold;
@@ -135,7 +138,7 @@ namespace RhythmHunter.FightDemo
 
         private void ReducePressurePairs(int pairs)
         {
-            if (pairs <= 0 || !PressurePhaseActive) return;
+            if (StageOvertimeActive || pairs <= 0 || !PressurePhaseActive) return;
             double removed = Math.Min(pressureRemaining, pairs * PressurePairBeats);
             PressureRemovedBeats += (float)removed;
             pressureRemaining = Math.Max(0, pressureRemaining - removed);
@@ -146,6 +149,7 @@ namespace RhythmHunter.FightDemo
 
         private void EndPressurePhase()
         {
+            if (StageOvertimeActive) return;
             pressureRemaining = 0;
             pressureDamageProgress = 0;
             pressureBlockProgress = 0;
@@ -218,7 +222,7 @@ namespace RhythmHunter.FightDemo
 
         private void RecordEnemyActionCadence(FightUnitSlot enemy)
         {
-            if (!PressurePhaseEnabled) return;
+            // Track action end even before pressure: overtime may begin during a normal attack.
             var sequence = enemy.CombatAnimator?.FindSequence(FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
             double duration = 0;
             if (sequence != null)

@@ -20,7 +20,13 @@ namespace RhythmHunter.FightDemoEditor
                     EditorGUILayout.LongField("Wave Combat Beat", fight.WaveCombatBeatCount);
                     EditorGUILayout.TextField("Phase", fight.BattleEnded ? "ENDED" : fight.AwaitingBattleStart || fight.BattleEntranceRunning ? "ENTRY" :
                         fight.AwaitingNextWave ? "WAVE TRANSITION" : !fight.PressurePhaseEnabled ? "DISABLED" : fight.PressurePhaseActive ? "PRESSURE" : fight.PressureRestActive ? "REST" : fight.PressureWarningActive ? "WARNING" : "NORMAL");
-                    EditorGUILayout.LongField("Remaining Beats", fight.PressurePhaseRemainingBeats);
+                    if (fight.StageOvertimeActive)
+                    {
+                        EditorGUILayout.TextField("Remaining Beats", "UNLIMITED / 加時");
+                        EditorGUILayout.LongField("Overtime Elapsed Beats", fight.OvertimeElapsedBeats);
+                        EditorGUILayout.IntField("Acceleration Steps", fight.OvertimeAccelerationSteps);
+                    }
+                    else EditorGUILayout.LongField("Remaining Beats", fight.PressurePhaseRemainingBeats);
                     EditorGUILayout.LongField("Next Start Beat (-1 = none)", fight.PressureNextStartBeat);
                     EditorGUILayout.IntField("Recovery Beats", fight.PressureRecoveryBeats);
                     EditorGUILayout.Toggle("Clock Frozen", fight.IsPaused || fight.TimingCalibrationActive || fight.TeamSkillRunning ||

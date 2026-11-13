@@ -135,7 +135,7 @@ namespace RhythmHunter.FightDemo
                 pressureBarGroup.alpha = Mathf.Clamp01((pressureIconLeadBeats - (float)untilStart) / Mathf.Max(.01f, pressureIconRevealBeats));
                 pressureBarRoot.anchoredPosition = pressureBarOffset;
             }
-            float remaining = fight.PressureWarningActive ? 1 : fight.PressurePhaseActive
+            float remaining = fight.StageOvertimeActive || fight.PressureWarningActive ? 1 : fight.PressurePhaseActive
                 ? Mathf.Clamp01((fight.PressureRemainingExact - (float)phase) / fight.PressureDurationBeats) : 0;
             float fill = Mathf.Clamp01(remaining + slide);
             float ghost = Mathf.Clamp01(remaining + trail);
