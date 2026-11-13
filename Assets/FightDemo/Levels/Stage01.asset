@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Stage 1
   musicEventPath: event:/Ritual Slam _120_3
   useNormalEndDeadline: 1
+  overtimeOnlyOnFinalCombatWave: 1
   plannedSongSeconds: 0
   waves:
   - name: Wave 1

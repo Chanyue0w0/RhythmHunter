@@ -50,10 +50,15 @@ namespace RhythmHunter.FightDemo
             stageSecondsRemaining = Mathf.Max(0, stageDeadlineMs / 1000f - (float)stageMusicSeconds);
             if (continuousMusicMs >= stageDeadlineMs) stageTimeExpired = true;
             if (!stageTimeExpired) return;
+            bool treasure = rosterManager.GetWaveKind(CurrentWave - 1) == FightStageDefinition.WaveKind.Treasure;
+            if (!treasure && rosterManager.OvertimeOnlyOnFinalCombatWave && CurrentWave - 1 != rosterManager.LastCombatWaveIndex)
+            {
+                FinishBattle(false);
+                return;
+            }
             // An already-started Fever may finish; no subsequent Wave can be spawned.
             if (TeamSkillRunning || TeamUltimateRunning) return;
             if (endBattleOnZeroHp && partyHp <= 0) { FinishBattle(false); return; }
-            bool treasure = rosterManager.GetWaveKind(CurrentWave - 1) == FightStageDefinition.WaveKind.Treasure;
             if (treasure || AwaitingNextWave) { FinishBattle(true); return; }
             if (FindFrontLivingEnemy() != null) { stageOvertimeActive = true; return; }
             foreach (var enemy in fightScene2Enemies)

@@ -27,6 +27,9 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Non-Boss stages only. Normal_End ends regular time; overtime clears only the current combat Wave.")]
         [SerializeField] private bool useNormalEndDeadline;
         public bool UseNormalEndDeadline => useNormalEndDeadline;
+        [Tooltip("Only the last Combat Wave permits overtime. Earlier Combat Waves (including their transition gap) expire as defeat. Treasure Waves still settle immediately.")]
+        [SerializeField] private bool overtimeOnlyOnFinalCombatWave;
+        public bool OvertimeOnlyOnFinalCombatWave => overtimeOnlyOnFinalCombatWave;
         [Tooltip("Song duration for results/overtime statistics. 0 = read FMOD event length. Set explicitly for looping/adaptive events. No overtime penalty.")]
         [SerializeField, Min(0)] private float plannedSongSeconds;
         [SerializeField] private List<Wave> waves = new();
