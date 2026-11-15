@@ -7039,6 +7039,67 @@ MeshRenderer:
   m_SortingOrder: 40
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &1352379436
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.1555353
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.00000009304449
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.8628601
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3802027496109382408, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829742452312400742, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_Intensity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6889634211504258921, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
+      propertyPath: m_Name
+      value: SwordSlash_Red
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fcf7c99f39a440d47baaa971ec8c2055, type: 3}
 --- !u!1 &1380923315
 GameObject:
   m_ObjectHideFlags: 0
@@ -8443,71 +8504,6 @@ MeshRenderer:
   m_SortingOrder: 40
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1001 &1580607859
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.8710115
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.78
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -2.5066965
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2938748625478755887, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3174668299078090755, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_Name
-      value: SwordSlash
-      objectReference: {fileID: 0}
-    - target: {fileID: 3174668299078090755, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8003540203956459459, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
-      propertyPath: m_Intensity
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 45e94e20c497fde4399955eeb8fef200, type: 3}
 --- !u!1 &1590038034
 GameObject:
   m_ObjectHideFlags: 0
@@ -12163,7 +12159,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1, y: 9.903823e+27, z: 1.8523599e+28, w: 1.6910476e+22}
+  m_BoundingSphereOverride: {x: 1.8331856e+31, y: 8.480153e-33, z: 7.175798e+22, w: 1.09002504e+27}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12327,7 +12323,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.9767295e+29, y: 2.7522286e+17, z: 7.397723e+31, w: 1.7247698e+25}
+  m_BoundingSphereOverride: {x: 1.9204616e+31, y: 0.000045877303, z: 1.3604871e+22, w: 3.3609978e+21}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12823,7 +12819,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.4797e-41, y: NaN, z: 1.6986227e+31, w: 3638.9045}
+  m_BoundingSphereOverride: {x: 1.81e-43, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12987,7 +12983,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: -6.599961e+29}
+  m_BoundingSphereOverride: {x: 4.5918e-41, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -33037,7 +33033,6 @@ SceneRoots:
   - {fileID: 1209692342}
   - {fileID: 1828441733}
   - {fileID: 1167096195}
-  - {fileID: 1580607859}
   - {fileID: 477276973}
   - {fileID: 7945793012929437500}
   - {fileID: 7249799138069407936}
@@ -33048,3 +33043,4 @@ SceneRoots:
   - {fileID: 998264671892661519}
   - {fileID: 832941533}
   - {fileID: 719652326}
+  - {fileID: 1352379436}

@@ -18,7 +18,7 @@ namespace RhythmHunter.FightDemo
         {
             if (defeatUiStarted) return;
             defeatUiStarted = true;
-            defeatStoneFalls = fight != null && fight.PartyHp <= 0;
+            defeatStoneFalls = fight != null && fight.BattleEnded && !fight.BattleWon;
             defeatUiElapsed = 0;
             defeatUiSecondsPerBeat = beatClock == null ? .5f : (float)(beatClock.MillisecondsPerBeat > 0
                 ? beatClock.MillisecondsPerBeat / 1000d : beatClock.OpeningSecondsPerBeat);

@@ -28,7 +28,8 @@ namespace RhythmHunter.FightDemoEditor
         [MenuItem("Rhythm Hunter/Diagnostics/Validate Stage Deadline")]
         public static void Validate()
         {
-            ValidateDefeatSlowMotion();
+            ValidateDefeatSlowMotion(0);
+            ValidateDefeatSlowMotion(4);
             foreach (string scenario in new[] { "combat", "gap", "treasure", "fever", "defeat", "early", "restricted_early", "restricted_gap", "restricted_last" })
             {
                 var scene = EditorSceneManager.OpenPreviewScene("Assets/FightDemo/Scenes/Art2_FightScene.unity");
@@ -48,7 +49,8 @@ namespace RhythmHunter.FightDemoEditor
                     if (scenario == "restricted_last")
                     {
                         var waves = (System.Collections.Generic.List<FightStageDefinition.Wave>)typeof(FightStageDefinition).GetField("waves", Flags).GetValue(stage);
-                        waves.Add(new FightStageDefinition.Wave { kind = FightStageDefinition.WaveKind.Treasure, front = stage.Waves[0].front });
+                        var fixtureEnemy = Enumerable.Range(0, 3).Select(stage.Waves[0].At).First(enemy => enemy != null);
+                        waves.Add(new FightStageDefinition.Wave { kind = FightStageDefinition.WaveKind.Treasure, front = fixtureEnemy });
                     }
                     if (scenario == "treasure") stage.Waves[0].kind = FightStageDefinition.WaveKind.Treasure;
                     Check(fight.RosterManager.TryConfigureStage(stage, out string error), error);
@@ -100,11 +102,11 @@ namespace RhythmHunter.FightDemoEditor
                             Check(!fight.BattleEnded && fight.StageOvertimeActive && fight.RosterManager.LastCombatWaveIndex == 1, "Trailing treasure incorrectly prevented last-combat overtime");
                         else
                             Check(fight.BattleEnded && !fight.BattleWon && !fight.StageOvertimeActive, "Earlier combat/gap must immediately defeat, including active Fever");
-                        continue;
+                        if (scenario != "restricted_early") continue;
                     }
                     if (scenario == "gap" || scenario == "treasure")
                         Check(fight.BattleEnded && fight.BattleWon && fight.CurrentWave == 1, scenario + " did not settle immediately");
-                    else if (scenario == "defeat") Check(fight.BattleEnded && !fight.BattleWon, "Zero HP must defeat");
+                    else if (scenario == "defeat" || scenario == "restricted_early") Check(fight.BattleEnded && !fight.BattleWon, "Expected defeat was not latched");
                     else
                     {
                         if (scenario == "fever")
@@ -139,7 +141,7 @@ namespace RhythmHunter.FightDemoEditor
                         Call(results, "Finish", true);
                         Check(results.ClearedWaves < results.TotalWaves, "Partial victory reported all Waves cleared");
                     }
-                    if (scenario == "defeat")
+                    if (scenario == "defeat" || scenario == "restricted_early")
                     {
                         Call(presenter, "BuildEqualBeatTimeline");
                         Set(presenter, "defeatUiStarted", false);
@@ -173,7 +175,7 @@ namespace RhythmHunter.FightDemoEditor
                 finally { if (stage != null) UnityEngine.Object.DestroyImmediate(stage); EditorSceneManager.ClosePreviewScene(scene); }
             }
         }
-        private static void ValidateDefeatSlowMotion()
+        private static void ValidateDefeatSlowMotion(float remainingHp)
         {
             float originalScale = Time.timeScale, originalFixed = Time.fixedDeltaTime;
             var scene = EditorSceneManager.OpenPreviewScene("Assets/FightDemo/Scenes/Art2_FightScene.unity");
@@ -184,7 +186,7 @@ namespace RhythmHunter.FightDemoEditor
                 var clock = fight.BeatClock;
                 Set(clock, "openingTempo", 120f);
                 clock.SetPlaybackPitch(1);
-                Set(fight, "partyHp", 0f);
+                Set(fight, "partyHp", remainingHp);
                 int losses = 0; fight.BattleLost += () => losses++;
                 Call(fight, "BeginDefeatSlowMotion");
                 Check(fight.BattleEnded && !fight.BattleWon && losses == 1 && fight.DefeatInputGraceActive, "Slow defeat did not latch loss/open grace");
@@ -197,6 +199,7 @@ namespace RhythmHunter.FightDemoEditor
                 Check(!fight.DefeatInputGraceActive && fight.DefeatSlowMotionActive, "Grace remained after one slowed beat");
                 Call(fight, "AdvanceDefeatSlowMotion", 1.1f);
                 Check(fight.BattleEnded && !fight.BattleWon && !fight.DefeatSlowMotionActive && fight.DefeatPresentationProgress == 1 && losses == 1, "Slow defeat did not finish once");
+                Check(fight.PartyHp == remainingHp, "Nonlethal defeat changed remaining HP");
                 Check(Mathf.Approximately(clock.MusicPitch, 1) && Mathf.Approximately(Time.timeScale, originalScale) && Mathf.Approximately(Time.fixedDeltaTime, originalFixed), "Slow defeat did not restore playback");
                 Call(fight, "BeginDefeatSlowMotion");
                 Call(fight, "RestoreDefeatPlayback");

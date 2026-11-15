@@ -120,7 +120,7 @@ namespace RhythmHunter.FightDemo
         {
             if (DefeatSlowMotionActive) return;
             if (battleEnded) return;
-            if (!won && partyHp <= 0 && enableDefeatSlowMotion && Application.isPlaying && beatClock != null && beatClock.IsPlaying)
+            if (!won && enableDefeatSlowMotion && Application.isPlaying && beatClock != null)
             {
                 BeginDefeatSlowMotion();
                 return;

@@ -1055,8 +1055,7 @@ namespace RhythmHunter.FightDemo
             if (partyHp > 0)
                 return;
 
-            battleEnded = true;
-            BattleLost?.Invoke();
+            FinishBattle(false);
         }
 
         private bool HasEnemyResolutionWindowElapsed()
