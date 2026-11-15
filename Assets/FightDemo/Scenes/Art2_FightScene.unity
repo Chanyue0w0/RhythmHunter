@@ -10225,6 +10225,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3686a9e83f96b84b904c1223cd7b674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightScenePresenter
+  defeatStoneJumpHeight: 65
+  defeatStoneJumpBeats: 0.3
+  defeatStoneFallBeats: 1.2
+  defeatBeatFadeBeats: 0.5
   showPressureDurationBar: 1
   pressureBarAnchor: {x: 0.5, y: 0.76}
   pressureBarOffset: {x: 0, y: 0}
@@ -10242,6 +10246,11 @@ MonoBehaviour:
   pressureShakeBeats: 0.4
   pressureIconLeadBeats: 1
   pressureIconRevealBeats: 0.15
+  showStageCountdownLine: 1
+  stageCountdownHeight: 10
+  stageCountdownBottomOffset: 0
+  stageCountdownColor: {r: 0.8, g: 0.9, b: 1, a: 0.95}
+  stageCountdownTrackColor: {r: 0.1, g: 0.15, b: 0.2, a: 0.3}
   timelineScale: 1.9
   timelineBarSprite: {fileID: 21300000, guid: 3364845ec05154c4b83eede94957e942, type: 3}
   showTimelineBar: 0
@@ -10252,11 +10261,6 @@ MonoBehaviour:
   stoneLockSprite: {fileID: 21300000, guid: 446c0705101165f428ff215e0104088d, type: 3}
   stoneLockSize: {x: 100, y: 100}
   stoneLockOffset: {x: 0, y: 0}
-  showStageCountdownLine: 1
-  stageCountdownHeight: 10
-  stageCountdownBottomOffset: 0
-  stageCountdownColor: {r: 0.8, g: 0.9, b: 1, a: 0.95}
-  stageCountdownTrackColor: {r: 0.1, g: 0.15, b: 0.2, a: 0.3}
   stoneFillVisibleRange: {x: 0.13333334, y: 0.8666667}
   stoneReadyFrames:
   - {fileID: 21300000, guid: 53907aa8d7412114aacbed4970ed5e3d, type: 3}
@@ -10360,6 +10364,10 @@ MonoBehaviour:
   damageGlyphPrewarmPerDigit: 4
   damageNumberMaxActive: 64
   damageGlyphMaxCachedPerDigit: 64
+  enableDefeatSlowMotion: 1
+  defeatPlaybackScale: 0.5
+  defeatSlowMotionBeats: 2
+  defeatInputGraceBeats: 1
   enableCharacterPassives: 0
   pressureWarningBeats: 1
   pressureDamagePerPair: 2
@@ -10370,6 +10378,9 @@ MonoBehaviour:
   pressureGuardChipDamage: 0.5
   refillManaAfterPressure: 1
   blockFeverDuringPressure: 1
+  stageTimeExpired: 0
+  stageOvertimeActive: 0
+  stageSecondsRemaining: 0
   showStatusIcons: 1
   blockedEffectIcon: {fileID: 11400000, guid: 2a00d1707c09407c9e7e402ded2978fc, type: 3}
   weakEffectIcon: {fileID: 11400000, guid: 9ff13082aa054a0ca58cfafa99f96b14, type: 3}
@@ -10608,6 +10619,8 @@ MonoBehaviour:
   backdropColor: {r: 0.015, g: 0.025, b: 0.04, a: 0.88}
   accentColor: {r: 1, g: 0.8, b: 0.28, a: 1}
   defeatAccentColor: {r: 1, g: 0.35, b: 0.3, a: 1}
+  defeatDelayBeats: 2
+  defeatFadeSeconds: 0.35
 --- !u!114 &2021200337
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12150,7 +12163,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 2.112278e-39}
+  m_BoundingSphereOverride: {x: 1, y: 9.903823e+27, z: 1.8523599e+28, w: 1.6910476e+22}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12314,7 +12327,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 2.112278e-39}
+  m_BoundingSphereOverride: {x: 2.9767295e+29, y: 2.7522286e+17, z: 7.397723e+31, w: 1.7247698e+25}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12810,7 +12823,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 3.397975e-39}
+  m_BoundingSphereOverride: {x: 2.4797e-41, y: NaN, z: 1.6986227e+31, w: 3638.9045}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12974,7 +12987,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1, y: 1, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: -6.599961e+29}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

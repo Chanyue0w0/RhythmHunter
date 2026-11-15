@@ -1,0 +1,330 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &21628946630740200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8946446362606103679}
+  m_Layer: 0
+  m_Name: GoblinKing_Visual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8946446362606103679
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 21628946630740200}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1889573094597611675}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7181416416738856315
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1889573094597611675}
+  - component: {fileID: 8576884855007983579}
+  - component: {fileID: 298298661553404314}
+  m_Layer: 0
+  m_Name: Visual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1889573094597611675
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7181416416738856315}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.0066874, z: -0.2}
+  m_LocalScale: {x: 0.7270607, y: 0.7270607, z: 0.85}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8946446362606103679}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &8576884855007983579
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7181416416738856315}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: bebcdfad8347cc64596d3cc87e8f4c86, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 12
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 21300000, guid: c02f8d032f05c5e47965bc7238c28198, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 2.74, y: 2.57}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!114 &298298661553404314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7181416416738856315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
+  targetRenderer: {fileID: 8576884855007983579}
+  beatSource: {fileID: 0}
+  fallbackBpm: 120
+  useDrunkIdle: 0
+  frames:
+  - {fileID: 21300000, guid: c02f8d032f05c5e47965bc7238c28198, type: 3}
+  - {fileID: 21300000, guid: d035dce35cc037943b7d775b0b271ba5, type: 3}
+  - {fileID: 21300000, guid: c539ac523831c354fbc997f34862efce, type: 3}
+  attachmentFrameIds:
+  - a7c2d5d1ff7d40d0ac9a3d3d8048a891
+  - 3eaa23764af843208e730b48f7be665b
+  - e46fce60596548a0ba886e2a7eb4c71e
+  useIdleFrameBeatDurations: 1
+  idleFrameBeatDurations:
+  - 0.33
+  - 0.33
+  - 0.34
+  cyclesPerBeat: 1
+  pingPong: 0
+  phaseOffset: 0
+  sequences:
+  - animation: 0
+    frames:
+    - {fileID: 21300000, guid: 43cb68048546cd046a6a090f1afee6a4, type: 3}
+    - {fileID: 21300000, guid: e42adf5adac880a4aa974cd2ac77f5f6, type: 3}
+    - {fileID: 21300000, guid: 16126dac3a8b81a47bb6c266cf7812b8, type: 3}
+    - {fileID: 21300000, guid: fd39d15cd45aa25458f7f6f8e978783f, type: 3}
+    - {fileID: 21300000, guid: 8ee9506fd2aa358408ad576bcf756965, type: 3}
+    - {fileID: 21300000, guid: 4d9aad9db6d5d854991e28104051ec9e, type: 3}
+    - {fileID: 21300000, guid: c8704dc062d90334c9cfd12018b3b545, type: 3}
+    - {fileID: 21300000, guid: f64b2159b2fc0e643ab7aabcc149d390, type: 3}
+    - {fileID: 21300000, guid: 43de3d1815851d643a4fa61ff7b74e87, type: 3}
+    - {fileID: 21300000, guid: d95faccd72f9e794d9424d9aa8be3ab7, type: 3}
+    attachmentFrameIds:
+    - e42d8a07f1e743b0971b1709ad2b8745
+    - 9e46d144d740435eb50fb1fcdea60519
+    - ef024a238bd4494f9f08d23fa12b68c7
+    - 06a524f726d8478e94e628358f9f44fd
+    - 8598b060e1b24d6c899eb0f8a69eebfd
+    - 0af4d41371904583b4f0204684bdccab
+    - 468997ed33ed4ee18cfaa81ad8cd5c3e
+    - 951e2e3222874e21ad204d15be66ef9d
+    - 576a94fd990e4a67979b6393568a882f
+    - 4fade7ba98244e2f92b5a0b9b3e57c80
+    frameEffects:
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 1
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 1
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 1
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 1
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    warningEffect:
+      prefab: {fileID: 6593023544061229464, guid: 2e1c2f459c628474c9a7928b57b34a9c, type: 3}
+      soundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
+      soundVolume: 1
+      location: 0
+      selfAnchor: {fileID: 0}
+      positionOffset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      followAnchor: 1
+      limitLifetime: 1
+      lifetimeSeconds: 0.5
+    framesPerSecond: 16
+    useFrameBeatDurations: 1
+    frameBeatDurations:
+    - 1
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.33
+    - 0.33
+    - 0.34
+    - 0.5
+    - 0.5
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: -1
+  - animation: 2
+    frames:
+    - {fileID: 21300000, guid: a1e25937c9ada6946a93b2bfe217dfbc, type: 3}
+    - {fileID: 21300000, guid: f3c6b40164a4c094b815b18d20e7b341, type: 3}
+    - {fileID: 21300000, guid: 872d82e77715b0741b230e6dd85a4524, type: 3}
+    - {fileID: 21300000, guid: 5e293fd4b7f79f7469de3a725e56e10a, type: 3}
+    - {fileID: 21300000, guid: 1c3c95ccce5ee984ca92022e6316f7ee, type: 3}
+    - {fileID: 21300000, guid: 8650ac347b47a17419d8fb2e2a7a244e, type: 3}
+    attachmentFrameIds:
+    - 25bbb9bb700845e899987a0012bd5c12
+    - 41c4ddbbd2ef466f9b6a2bc7e2d0c3ef
+    - ca79e276d7ca4cd185a82f30fbbb2ea3
+    - 98409ef65c93421796aaac13415382db
+    - e74995bfc46543869affb5bd1c963427
+    - 037909f40131473486eda65dc38af1b7
+    frameEffects:
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 1
+    - effects: []
+      playAttackEffect: 1
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    warningEffect:
+      prefab: {fileID: 6593023544061229464, guid: 2e1c2f459c628474c9a7928b57b34a9c, type: 3}
+      soundEventPath: event:/ZooGoblinFight/SoundEffects/Warning
+      soundVolume: 1
+      location: 0
+      selfAnchor: {fileID: 0}
+      positionOffset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      followAnchor: 1
+      limitLifetime: 1
+      lifetimeSeconds: 0.5
+    framesPerSecond: 16
+    useFrameBeatDurations: 1
+    frameBeatDurations:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: -1
+  - animation: 5
+    frames:
+    - {fileID: 21300000, guid: 935249f2e6dc7364c8df7bff569a1648, type: 3}
+    - {fileID: 21300000, guid: 0c8f418a44379be4ab2310605bc049cc, type: 3}
+    attachmentFrameIds:
+    - 8a4f3c56001d4893915b7324e933d85c
+    - 7736fd8c09594fbb99de4a105d3f8ed4
+    frameEffects:
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    - effects: []
+      playAttackEffect: 0
+      playWarning: 0
+    warningEffect:
+      prefab: {fileID: 0}
+      soundEventPath: 
+      soundVolume: 1
+      location: 0
+      selfAnchor: {fileID: 0}
+      positionOffset: {x: 0, y: 0, z: 0}
+      rotationOffset: {x: 0, y: 0, z: 0}
+      followAnchor: 0
+      limitLifetime: 0
+      lifetimeSeconds: 1.5
+    framesPerSecond: 16
+    useFrameBeatDurations: 1
+    frameBeatDurations:
+    - 0.5
+    - 0.5
+    warningFrame: -1
+    attackEffectFrame: -1
+    damageFrame: -1

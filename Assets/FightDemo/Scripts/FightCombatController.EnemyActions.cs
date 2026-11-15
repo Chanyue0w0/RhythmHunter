@@ -78,6 +78,14 @@ namespace RhythmHunter.FightDemo
             var definition = source != null ? source.CharacterDefinition : null;
             if (definition == null || source.IsStunned || !definition.EnemyAttackUsesEffectFrames) return false;
             var animation = FightCharacterCombatAnimator.CombatAnimation.NormalAttack;
+            float damage = source.AttackPower;
+            if (definition.EnemyAbilities.Count > 0)
+            {
+                var ability = definition.EnemyAbilities[Random.Range(0, definition.EnemyAbilities.Count)];
+                if (ability == null) return false;
+                animation = ability.animation;
+                damage = Mathf.Max(0, ability.damagePerHit);
+            }
             var sequence = source.CombatAnimator != null ? source.CombatAnimator.FindSequence(animation) : null;
             if (sequence == null || !sequence.UseFrameBeatDurations) return false;
             double offset = 0;
@@ -87,13 +95,13 @@ namespace RhythmHunter.FightDemo
                 if (sequence.PlaysAttackEffectAt(i))
                 {
                     enemyHits.Add(new ScheduledEnemyHit { source = source, due = NormalBattleBeatCount + offset,
-                        version = rosterVersion, guardChip = CurrentPressureGuardChip, damage = source.AttackPower, interruptible = definition.AttackInterruptible });
+                        version = rosterVersion, guardChip = CurrentPressureGuardChip, damage = damage, interruptible = definition.AttackInterruptible });
                     count++;
                 }
                 offset += sequence.GetFrameBeats(i);
             }
             if (count == 0) return false;
-            RecordEnemyActionCadence(source);
+            RecordEnemyAnimationCadence(source, animation);
             int version = rosterVersion;
             bool Valid() => version == rosterVersion && !battleEnded && source != null && source.CurrentHp > 0;
             source.PlayCombatAnimation(animation,

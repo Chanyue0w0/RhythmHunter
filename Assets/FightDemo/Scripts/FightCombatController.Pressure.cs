@@ -220,10 +220,13 @@ namespace RhythmHunter.FightDemo
             return IsScheduledAttackBeat(globalBeat - enemyPausedBeats, enemy.AttackIntervalBeats);
         }
 
-        private void RecordEnemyActionCadence(FightUnitSlot enemy)
+        private void RecordEnemyActionCadence(FightUnitSlot enemy) =>
+            RecordEnemyAnimationCadence(enemy, FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
+
+        private void RecordEnemyAnimationCadence(FightUnitSlot enemy, FightCharacterCombatAnimator.CombatAnimation animation)
         {
             // Track action end even before pressure: overtime may begin during a normal attack.
-            var sequence = enemy.CombatAnimator?.FindSequence(FightCharacterCombatAnimator.CombatAnimation.NormalAttack);
+            var sequence = enemy.CombatAnimator?.FindSequence(animation);
             double duration = 0;
             if (sequence != null)
                 for (int i = 0; i < sequence.Frames.Count; i++)
