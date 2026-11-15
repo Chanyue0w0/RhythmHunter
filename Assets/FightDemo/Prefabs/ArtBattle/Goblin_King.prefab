@@ -335,27 +335,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[3]'
-      value: 0.33
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[4]'
-      value: 0.33
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[5]'
-      value: 0.34
-      objectReference: {fileID: 0}
-    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
-      propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[7]'
       value: 0.33
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
-      propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[8]'
+      propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[7]'
       value: 0.34
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[8]'
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[0].frameBeatDurations.Array.data[9]'
-      value: 0.1
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[1].frameBeatDurations.Array.data[0]'
@@ -371,7 +371,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[1].frameBeatDurations.Array.data[3]'
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[1].frameBeatDurations.Array.data[4]'
@@ -379,7 +379,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[1].frameBeatDurations.Array.data[5]'
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[0].playWarning
@@ -390,6 +390,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[3].playWarning
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[6].playWarning
       value: 0
       objectReference: {fileID: 0}
@@ -398,32 +402,40 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[1].frameEffects.Array.data[2].playWarning
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[1].frameEffects.Array.data[3].playWarning
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
-      propertyPath: sequences.Array.data[0].frameEffects.Array.data[5].playAttackEffect
+      propertyPath: sequences.Array.data[1].frameEffects.Array.data[5].playWarning
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[0].frameEffects.Array.data[5].playAttackEffect
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[6].playAttackEffect
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[8].playAttackEffect
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[9].playAttackEffect
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
-      propertyPath: sequences.Array.data[1].frameEffects.Array.data[4].playAttackEffect
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
-      propertyPath: sequences.Array.data[1].frameEffects.Array.data[5].playAttackEffect
+      propertyPath: sequences.Array.data[1].frameEffects.Array.data[4].playAttackEffect
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[1].frameEffects.Array.data[5].playAttackEffect
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1889573094597611675, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: m_LocalScale.x
