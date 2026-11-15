@@ -3,13 +3,19 @@ using UnityEngine;
 namespace RhythmHunter.FightDemo.Art2
 {
     // Visual-only adapter on effect prefabs. Inactive in scenes without an Art2 camera.
-    [DefaultExecutionOrder(200), DisallowMultipleComponent]
+    [ExecuteAlways, DefaultExecutionOrder(200), DisallowMultipleComponent]
     public sealed class Art2EffectPresentation : MonoBehaviour
     {
         [SerializeField] private bool faceSpritesToCamera = true;
         [SerializeField] private bool faceBillboardParticlesToCamera = true;
         [SerializeField] private bool facePlanarMeshParticlesToCamera = true;
         [SerializeField] private bool keepAboveGround;
+        [Tooltip("Art2 cameras only: draw this effect against scenery/character depth, excluding the floor. Does not move or rotate it. Off by default.")]
+        [SerializeField] private bool ignoreFloorOcclusion;
+        public bool IgnoreFloorOcclusion => ignoreFloorOcclusion;
+        internal static readonly System.Collections.Generic.List<Art2EffectPresentation> Active = new();
+        private Renderer[] floorRenderers;
+        internal Renderer[] FloorRenderers => floorRenderers ??= GetComponentsInChildren<Renderer>(true);
         [SerializeField] private float groundHeight;
         [SerializeField, Min(0)] private float groundClearance = .03f;
         private Camera view;
@@ -19,16 +25,52 @@ namespace RhythmHunter.FightDemo.Art2
         private ParticleSystemRenderer[] particles;
         private bool initialized;
         private Vector3 appliedGroundLift;
+        private readonly System.Collections.Generic.List<(ParticleSystem particle, ParticleSystemCullingMode mode)> floorCullingOverrides = new();
+        private bool floorCullingApplied;
 
-        private void OnEnable() { initialized = false; view = null; appliedGroundLift = Vector3.zero; }
+        private void UpdateFloorParticleCulling(bool enable)
+        {
+            if (floorCullingApplied == enable) return;
+            floorCullingApplied = enable;
+            if (enable)
+            {
+                // The recovery pass excludes ordinary renderer culling. PauseAndCatchup/Pause
+                // would otherwise freeze mesh particles even though the custom pass draws them.
+                foreach (var particle in GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    var main = particle.main;
+                    floorCullingOverrides.Add((particle, main.cullingMode));
+                    main.cullingMode = ParticleSystemCullingMode.AlwaysSimulate;
+                }
+            }
+            else
+            {
+                foreach (var entry in floorCullingOverrides)
+                    if (entry.particle != null) { var main = entry.particle.main; main.cullingMode = entry.mode; }
+                floorCullingOverrides.Clear();
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (!Active.Contains(this)) Active.Add(this);
+            floorRenderers = null;
+            initialized = false; view = null; appliedGroundLift = Vector3.zero;
+        }
+        private void OnTransformChildrenChanged() => floorRenderers = null;
         private void OnDisable()
         {
+            Active.Remove(this);
+            UpdateFloorParticleCulling(false);
             transform.localPosition -= appliedGroundLift;
             appliedGroundLift = Vector3.zero;
         }
         private void LateUpdate()
         {
+            // Edit-mode registration is for the opt-in render pass only; never alter authored transforms.
+            if (!Application.isPlaying) return;
             if (!initialized) Initialize();
+            UpdateFloorParticleCulling(ignoreFloorOcclusion && view && view.isActiveAndEnabled);
             if (!view || !view.isActiveAndEnabled) return;
             if (faceSpritesToCamera)
                 for (int i = 0; i < sprites.Length; i++)
@@ -41,7 +83,12 @@ namespace RhythmHunter.FightDemo.Art2
                     applied[i] = view.transform.rotation * rolls[i];
                     t.rotation = applied[i];
                 }
-            if (keepAboveGround)
+            if (ignoreFloorOcclusion && appliedGroundLift != Vector3.zero)
+            {
+                transform.localPosition -= appliedGroundLift;
+                appliedGroundLift = Vector3.zero;
+            }
+            if (keepAboveGround && !ignoreFloorOcclusion)
             {
                 // Recompute from the authored position, rather than accumulating height as the camera moves.
                 transform.localPosition -= appliedGroundLift;
@@ -90,7 +137,7 @@ namespace RhythmHunter.FightDemo.Art2
                     if (renderer.renderMode == ParticleSystemRenderMode.VerticalBillboard) renderer.renderMode = ParticleSystemRenderMode.Billboard;
                     renderer.alignment = ParticleSystemRenderSpace.View;
                 }
-                if (keepAboveGround)
+                if (keepAboveGround && !ignoreFloorOcclusion)
                 {
                     var main = renderer.GetComponent<ParticleSystem>().main;
                     main.simulationSpace = ParticleSystemSimulationSpace.Local;

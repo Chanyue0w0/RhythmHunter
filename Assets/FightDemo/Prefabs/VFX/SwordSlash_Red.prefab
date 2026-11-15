@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 4429911894980521881}
   serializedVersion: 2
   m_LocalRotation: {x: -0.11164118, y: 0.26837337, z: -0.9539361, w: -0.07428355}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.8555999, y: 1.8556001, z: 1.8556002}
+  m_LocalPosition: {x: -0.21, y: 1.22, z: 0.82}
+  m_LocalScale: {x: 3.091406, y: 3.0914063, z: 3.0914066}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1795788333230845232}
@@ -47,7 +47,7 @@ ParticleSystem:
   lengthInSec: 0.5
   simulationSpeed: 1
   stopAction: 0
-  cullingMode: 1
+  cullingMode: 3
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 0
@@ -4922,8 +4922,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2EffectPresentation
   faceSpritesToCamera: 1
   faceBillboardParticlesToCamera: 1
-  facePlanarMeshParticlesToCamera: 1
+  facePlanarMeshParticlesToCamera: 0
   keepAboveGround: 0
+  ignoreFloorOcclusion: 1
   groundHeight: 0
   groundClearance: 0.03
 --- !u!114 &4202170968038354477
@@ -4939,7 +4940,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightEffectSettings
   destroyAfterParticles: 1
-  spawnOrientation: 0
+  spawnOrientation: 1
   useOwnerFeet: 0
   spawnOffset: {x: 0, y: 0, z: 0}
   followPositionOnly: 0
