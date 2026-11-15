@@ -29,7 +29,8 @@ namespace RhythmHunter.FightDemo.Art2
             foreach (var slot in battleSlots)
             {
                 if (slot == null || slot.ActorInstance == null) continue;
-                CollectActor(slot.ActorInstance, slot.CharacterDefinition != null && slot.CharacterDefinition.EnableSwordCharge, occluders, warriors);
+                CollectActor(slot.ActorInstance, slot.CharacterDefinition != null &&
+                    (slot.CharacterDefinition.EnableSwordCharge || slot.CharacterDefinition.IgnoreFloorOcclusion), occluders, warriors);
             }
             foreach (var warrior in previewWarriors)
                 if (warrior != null) CollectActor(warrior.gameObject, true, occluders, warriors);

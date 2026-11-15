@@ -134,6 +134,7 @@ namespace RhythmHunter.FightDemoEditor
                     anchor.localPosition = p;
                 }
                 Set(definition, "characterId", "Goblin_King"); Set(definition, "displayName", "GOBLIN KING");
+                Set(definition, "ignoreFloorOcclusion", true);
                 Set(definition, "basicAbilityName", "Strike"); Set(definition, "skillName", "HeavyStrike");
                 Set(definition, "attackPower", 1f);
                 Set(definition, "enemyAbilities", new List<FightCharacterDefinition.EnemyAbility>

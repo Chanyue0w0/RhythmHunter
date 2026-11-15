@@ -45,7 +45,7 @@ namespace RhythmHunter.FightDemoEditor
                 r.GetComponentInParent<FightUnitSlot>() == null && r.GetComponentInParent<FightCharacterDefinition>() == null &&
                 (r is SpriteRenderer && r.sharedMaterial.shader.name.StartsWith("RhythmHunter/Art2/SpriteCard") || r is MeshRenderer && r.sharedMaterial.renderQueue < 2500)).ToArray();
             settings.battleSlots = scene.GetRootGameObjects().SelectMany(go => go.GetComponentsInChildren<FightUnitSlot>(true)).ToArray();
-            settings.previewWarriors = scene.GetRootGameObjects().SelectMany(go => go.GetComponentsInChildren<FightCharacterDefinition>(true)).Where(d => d.EnableSwordCharge).ToArray();
+            settings.previewWarriors = scene.GetRootGameObjects().SelectMany(go => go.GetComponentsInChildren<FightCharacterDefinition>(true)).Where(d => d.EnableSwordCharge || d.IgnoreFloorOcclusion).ToArray();
             var renderer = AssetDatabase.LoadAssetAtPath<UniversalRendererData>("Assets/FightDemo/Art2Prototype/Art2ForwardPlusRenderer.asset");
             if (!renderer.rendererFeatures.Any(f => f is Art2FloorOcclusionFeature))
             {

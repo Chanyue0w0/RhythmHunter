@@ -156,6 +156,9 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int maxMana = 4;
 
         [Header("Visuals")]
+        [Tooltip("Opt into the Art2 scene floor-occlusion correction. Keeps scenery occlusion and shadows without moving the character or foot anchor.")]
+        [SerializeField] private bool ignoreFloorOcclusion;
+        public bool IgnoreFloorOcclusion => ignoreFloorOcclusion;
         [SerializeField] private Color accentColor = Color.white;
 
         public string CharacterId => characterId;
