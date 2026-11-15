@@ -79,20 +79,24 @@ namespace RhythmHunter.FightDemo
             if (definition == null || source.IsStunned || !definition.EnemyAttackUsesEffectFrames) return false;
             var animation = FightCharacterCombatAnimator.CombatAnimation.NormalAttack;
             float damage = source.AttackPower;
+            float healing = 0;
+            GameObject healingEffect = null;
             if (definition.EnemyAbilities.Count > 0)
             {
-                var ability = definition.EnemyAbilities[Random.Range(0, definition.EnemyAbilities.Count)];
+                var ability = definition.SelectEnemyAbility(Random.value);
                 if (ability == null) return false;
-                animation = ability.animation;
+                animation = ability.Animation;
                 damage = Mathf.Max(0, ability.damagePerHit);
+                healing = Mathf.Max(0, ability.healOnEffectFrame);
+                healingEffect = ability.healingEffectPrefab;
             }
             var sequence = source.CombatAnimator != null ? source.CombatAnimator.FindSequence(animation) : null;
-            if (sequence == null || !sequence.UseFrameBeatDurations) return false;
+            if (sequence == null || sequence.Frames.Count == 0 || !sequence.UseFrameBeatDurations) return false;
             double offset = 0;
             int count = 0;
             for (int i = 0; i < sequence.Frames.Count; i++)
             {
-                if (sequence.PlaysAttackEffectAt(i))
+                if (damage > 0 && sequence.PlaysAttackEffectAt(i))
                 {
                     enemyHits.Add(new ScheduledEnemyHit { source = source, due = NormalBattleBeatCount + offset,
                         version = rosterVersion, guardChip = CurrentPressureGuardChip, damage = damage, interruptible = definition.AttackInterruptible });
@@ -100,13 +104,29 @@ namespace RhythmHunter.FightDemo
                 }
                 offset += sequence.GetFrameBeats(i);
             }
-            if (count == 0) return false;
+            if (count == 0 && damage > 0) return false;
             RecordEnemyAnimationCadence(source, animation);
             int version = rosterVersion;
             bool Valid() => version == rosterVersion && !battleEnded && source != null && source.CurrentHp > 0;
+            bool healed = false;
             source.PlayCombatAnimation(animation,
                 () => { if (Valid()) source.PlayAttackFrameWarning(true); },
-                () => { if (Valid()) source.PlayLightAttackAt(tankSlot != null ? tankSlot.ImpactEffectAnchor : null); }, null);
+                () =>
+                {
+                    if (!Valid()) return;
+                    // Only an actually entered effect frame heals, never a legacy callback flush.
+                    var animator = source.CombatAnimator;
+                    if (healingEffect == null && !healed && healing > 0 && animator != null && animator.IsPlaying &&
+                        animator.ActiveAnimation == animation && sequence.PlaysAttackEffectAt(animator.ActiveFrame))
+                    { healed = true; source.Heal(healing); }
+                    if (damage > 0) source.PlayLightAttackAt(tankSlot != null ? tankSlot.ImpactEffectAnchor : null);
+                }, null, effect =>
+                {
+                    if (!Valid()) return;
+                    source.PlayFrameEffect(effect, tankSlot != null ? tankSlot.ImpactEffectAnchor : null);
+                    if (!healed && healing > 0 && healingEffect != null && effect.prefab == healingEffect)
+                    { healed = true; source.Heal(healing); }
+                });
             return true;
         }
 

@@ -60,6 +60,14 @@ namespace RhythmHunter.FightDemo
         public sealed class Sequence
         {
             [SerializeField] private CombatAnimation animation;
+            [SerializeField] private string animationName;
+            [SerializeField, HideInInspector] private int customSourceId;
+            public string Name => string.IsNullOrWhiteSpace(animationName) ? animation.ToString() : animationName;
+            public bool IsCustom => customSourceId >= 1000;
+            // Existing enum values remain stable handles for gameplay and weapon attachments.
+            // Custom handles never depend on the editable name or list order.
+            public void Rename(string value) => animationName = value?.Trim();
+            internal void SetCustomIdentity(int id, string name) { customSourceId = id; Rename(name); }
             [SerializeField] private List<Sprite> frames = new();
             [SerializeField, HideInInspector] private List<string> attachmentFrameIds = new();
             public string AttachmentFrameId(int index) => index >= 0 && index < attachmentFrameIds.Count ? attachmentFrameIds[index] : null;
@@ -93,7 +101,7 @@ namespace RhythmHunter.FightDemo
             [Tooltip("Legacy presentation event frame. Party-mode damage is resolved by the beat judgement, not this frame.")]
             [SerializeField] private int damageFrame;
 
-            public CombatAnimation Animation => animation;
+            public CombatAnimation Animation => IsCustom ? (CombatAnimation)customSourceId : animation;
             public IReadOnlyList<Sprite> Frames => frames;
             public float FramesPerSecond => framesPerSecond;
             public bool UseFrameBeatDurations => useFrameBeatDurations;
@@ -147,6 +155,8 @@ namespace RhythmHunter.FightDemo
         [Header("Editable Idle Sequence")]
         [Tooltip("Use the optional drunk idle after the entrance. Disabled: keep the ordinary Opening Idle sequence throughout battle. Prefabs without Opening Idle retain their existing idle.")]
         [SerializeField] private bool useDrunkIdle;
+        [SerializeField] private string idleAnimationName = "Idle";
+        public string IdleAnimationName => string.IsNullOrWhiteSpace(idleAnimationName) ? "Idle" : idleAnimationName;
         [SerializeField] private List<Sprite> frames = new();
         [SerializeField, HideInInspector] private List<string> attachmentFrameIds = new();
 
@@ -200,6 +210,43 @@ namespace RhythmHunter.FightDemo
 
         [Header("Combat Sequences")]
         [SerializeField] private List<Sequence> sequences = new();
+        [SerializeField, HideInInspector] private int nextCustomSourceId = 1000;
+        public void AddBuiltInSequence(Sequence sequence)
+        {
+            if (sequence == null || sequence.IsCustom || FindSequence(sequence.Animation) != null)
+                throw new ArgumentException("Built-in animation is null, custom or already exists.");
+            sequences.Add(sequence);
+        }
+
+        public Sequence AddCustomSequence(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name) || FindSequence(name) != null)
+                throw new ArgumentException("Animation name must be nonempty and unique.", nameof(name));
+            nextCustomSourceId = Math.Max(1000, nextCustomSourceId);
+            foreach (var sequence in sequences)
+                if (sequence != null && sequence.IsCustom) nextCustomSourceId = Math.Max(nextCustomSourceId, (int)sequence.Animation + 1);
+            var added = new Sequence();
+            added.Configure(CombatAnimation.NormalAttack, null, 16, -1, -1, -1);
+            added.ConfigureFrameBeats(null);
+            added.SetCustomIdentity(nextCustomSourceId++, name);
+            sequences.Add(added);
+            return added;
+        }
+
+        public Sequence FindSequence(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            foreach (var sequence in sequences)
+                if (sequence != null && string.Equals(sequence.Name, name.Trim(), StringComparison.Ordinal)) return sequence;
+            return null;
+        }
+
+        public bool Play(string name, Action onWarning = null, Action onAttackEffect = null,
+            Action onDamage = null, Action onCompleted = null, Action<FrameEffect> onFrameEffect = null)
+        {
+            var sequence = FindSequence(name);
+            return sequence != null && Play(sequence.Animation, onWarning, onAttackEffect, onDamage, onCompleted, onFrameEffect);
+        }
 
         private double beatAnchorTime;
         private long beatAnchorIndex;

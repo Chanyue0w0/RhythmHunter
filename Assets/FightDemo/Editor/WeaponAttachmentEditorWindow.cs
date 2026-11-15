@@ -96,7 +96,11 @@ namespace RhythmHunter.FightDemoEditor
             if (characterEditing)
             {
                 animationInspector = Editor.CreateEditor(animator);
-                if (animationInspector is FightCharacterCombatAnimatorEditor inspector) inspector.EmbeddedPreview = true;
+                if (animationInspector is FightCharacterCombatAnimatorEditor inspector)
+                {
+                    inspector.EmbeddedPreview = true;
+                    inspector.AnimationListChanged += () => { hasUnsavedChanges = true; RefreshSources(); LoadPose(); Repaint(); };
+                }
             }
             var binding = contents.GetComponentInChildren<FightWeaponAttachment>(true);
             if (binding != null) { data = binding.Data; weaponPrefab = binding.Prefab; }
@@ -110,10 +114,10 @@ namespace RhythmHunter.FightDemoEditor
             int previous = Source;
             sources.Clear(); labels.Clear();
             if (animator == null) return;
-            if (animator.FrameCount > 0) { sources.Add(-1); labels.Add("Legacy / Drunk Idle"); }
+            if (animator.FrameCount > 0) { sources.Add(-1); labels.Add(animator.IdleAnimationName + " (Base Idle)"); }
             foreach (var sequence in animator.Sequences)
                 if (sequence != null && !sources.Contains((int)sequence.Animation))
-                { sources.Add((int)sequence.Animation); labels.Add(sequence.Animation + $" ({sequence.Frames.Count})"); }
+                { sources.Add((int)sequence.Animation); labels.Add(sequence.Name + $" ({sequence.Frames.Count})"); }
             sourceChoice = Mathf.Max(0, sources.IndexOf(previous));
             frame = Mathf.Clamp(frame, 0, Mathf.Max(0, Frames.Count - 1));
         }

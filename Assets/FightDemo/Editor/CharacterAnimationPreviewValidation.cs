@@ -27,7 +27,7 @@ namespace RhythmHunter.FightDemoEditor
         static void Run()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-            const string original = "Assets/FightDemo/Prefabs/ArtBattle/LongswordWarrior.prefab";
+            const string original = "Assets/FightDemo/Prefabs/ArtBattle/LongSwordWarrior_Weapon.prefab";
             string copy = "Assets/__CharacterPreviewValidation_" + Guid.NewGuid().ToString("N") + ".prefab";
             var originalBytes = File.ReadAllBytes(original);
             WeaponAttachmentEditorWindow window = null;
@@ -64,7 +64,7 @@ namespace RhythmHunter.FightDemoEditor
                 Call(window, "Load", AssetDatabase.LoadAssetAtPath<GameObject>(copy));
                 animator = (FightCharacterCombatAnimator)Get(window, "animator");
                 Check(Mathf.Approximately(animator.FindSequence(FightCharacterCombatAnimator.CombatAnimation.NormalAttack).GetFrameBeats(0), .75f), "Edited duration not saved/reloaded");
-                Check(animator.GetComponentInParent<FightWeaponAttachment>() == null, "Character editor added weapon binding");
+                Check(animator.GetComponentsInParent<FightWeaponAttachment>(true).Length == AssetDatabase.LoadAssetAtPath<GameObject>(original).GetComponentsInChildren<FightWeaponAttachment>(true).Length, "Character editor changed weapon binding count");
                 Check(Convert.ToBase64String(originalBytes) == Convert.ToBase64String(File.ReadAllBytes(original)), "Original prefab changed");
                 File.WriteAllText("Temp/CharacterAnimationPreviewValidation.result", "PASS: existing Inspector reused; edited 0.75-beat duration saved/reloaded; cursor clamps to edited frame count; preview emits no gameplay events; no weapon binding added; original prefab unchanged.");
             }

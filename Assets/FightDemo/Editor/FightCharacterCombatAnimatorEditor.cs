@@ -1,114 +1,158 @@
+using System;
 using RhythmHunter.FightDemo;
 using UnityEditor;
 using UnityEngine;
 
 namespace RhythmHunter.FightDemoEditor
 {
+    [CustomPropertyDrawer(typeof(FightCharacterDefinition.EnemyAbility))]
+    public sealed class EnemyAbilityAnimationDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => (EditorGUIUtility.singleLineHeight + 2) * 7;
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+            position.height = EditorGUIUtility.singleLineHeight;
+            EditorGUI.LabelField(position, label, EditorStyles.boldLabel); position.y += position.height + 2;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("name")); position.y += position.height + 2;
+            var component = property.serializedObject.targetObject as Component;
+            var animator = component != null ? component.GetComponentInChildren<FightCharacterCombatAnimator>(true) : null;
+            var legacy = property.FindPropertyRelative("animation"); var handle = property.FindPropertyRelative("animationSourceId");
+            if (animator == null) EditorGUI.PropertyField(position, legacy);
+            else
+            {
+                var ids = new System.Collections.Generic.List<int>(); var names = new System.Collections.Generic.List<string>();
+                int current = handle.intValue >= 0 ? handle.intValue : legacy.intValue;
+                foreach (var sequence in animator.Sequences)
+                    if (sequence != null) { ids.Add((int)sequence.Animation); names.Add(sequence.Name); }
+                int index = ids.IndexOf(current);
+                if (index < 0) { index = ids.Count; ids.Add(current); names.Add("缺少動畫（引用 " + current + "，請重新選擇）"); }
+                EditorGUI.BeginChangeCheck();
+                int choice = EditorGUI.Popup(position, "播放動畫", index, names.ToArray());
+                if (EditorGUI.EndChangeCheck()) { handle.intValue = ids[choice]; if (ids[choice] < 1000) legacy.intValue = ids[choice]; }
+            }
+            position.y += position.height + 2;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("damagePerHit"));
+            position.y += position.height + 2;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("selectionWeight"), new GUIContent("抽選權重"));
+            position.y += position.height + 2;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("healOnEffectFrame"), new GUIContent("特效拍點回血量"));
+            position.y += position.height + 2;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("healingEffectPrefab"), new GUIContent("觸發回血的附加特效"));
+            EditorGUI.EndProperty();
+        }
+    }
+
     [CustomEditor(typeof(FightCharacterCombatAnimator))]
     public sealed class FightCharacterCombatAnimatorEditor : Editor
     {
         public bool EmbeddedPreview { get; set; }
-        private readonly bool[] expanded = { true, true, false, false, false, false, false, false, false, false, false, true };
+        public event Action AnimationListChanged;
+        private string newName = "New Animation";
+        private bool idleExpanded;
 
         public override void OnInspectorGUI()
         {
-            foreach (var inspected in targets) if (inspected == null) return;
+            if (target == null) return;
             serializedObject.Update();
             if (!EmbeddedPreview && GUILayout.Button("開啟角色動畫預覽／編輯視窗"))
                 WeaponAttachmentEditorWindow.OpenCharacter((FightCharacterCombatAnimator)target);
-            using (new EditorGUI.DisabledScope(true))
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Script"));
-            Field("targetRenderer");
-            Field("beatSource");
-            Field("fallbackBpm");
-
-            DrawSequence(8, 7, "Idle / Opening Idle — 普通待機（開場與戰鬥）");
-            DrawSequence(11, 11, "Charged Idle — 滿充能待機（僅第 3 階）");
-            DrawSequence(9, 8, "Drink — 喝酒");
-
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("useDrunkIdle"),
-                new GUIContent("啟用酒醉 Idle", "開場結束後使用附加酒醉待機；關閉時繼續普通 Idle。"));
-            expanded[0] = EditorGUILayout.Foldout(expanded[0], "附加 Idle — 酒醉／舊角色預設待機", true);
-            if (expanded[0])
+            using (new EditorGUI.DisabledScope(true)) EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Script"));
+            Field("targetRenderer"); Field("beatSource"); Field("fallbackBpm");
+            Field("useDrunkIdle");
+            idleExpanded = EditorGUILayout.Foldout(idleExpanded, "基礎 Idle（沿用舊待機資料）", true);
+            if (idleExpanded)
             {
-                EditorGUI.indentLevel++;
-                DrawFrames(serializedObject.FindProperty("frames"),
-                    serializedObject.FindProperty("useIdleFrameBeatDurations"),
-                    serializedObject.FindProperty("idleFrameBeatDurations"));
+                Field("idleAnimationName");
+                DrawFrames(serializedObject.FindProperty("frames"), serializedObject.FindProperty("useIdleFrameBeatDurations"), serializedObject.FindProperty("idleFrameBeatDurations"));
                 if (!serializedObject.FindProperty("useIdleFrameBeatDurations").boolValue) Field("cyclesPerBeat");
-                Field("pingPong");
-                Field("phaseOffset");
-                EditorGUI.indentLevel--;
+                Field("pingPong"); Field("phaseOffset");
             }
-
-            DrawSequence(1, 0, "Normal — 普通能力");
-            DrawSequence(10, 9, "Aim — 射手舉槍瞄準（準備拍）");
-            DrawSequence(2, 4, "TeamSkill — 隊伍技能");
-            DrawSequence(3, 5, "GetHurt — 受傷");
-            DrawSequence(4, 6, "Die — 死亡");
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("其他動作／舊流程", EditorStyles.boldLabel);
-            DrawSequence(5, 3, "Guard — 防禦");
-            DrawSequence(6, 2, "Heavy Attack — 重擊");
-            DrawSequence(7, 1, "Light Attack — 舊版輕擊");
-            EditorGUILayout.HelpBox("Team Skill 在第一張勾選『生成攻擊特效』的圖片結算能力；附加特效不會觸發傷害。Aim 只負責準備演出；Normal 播放射擊。", MessageType.Info);
-            serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawSequence(int foldout, int type, string title)
-        {
-            expanded[foldout] = EditorGUILayout.Foldout(expanded[foldout], title, true);
-            if (!expanded[foldout]) return;
-            EditorGUI.indentLevel++;
-            SerializedProperty list = serializedObject.FindProperty("sequences");
-            SerializedProperty sequence = null;
-            int matches = 0;
+            EditorGUILayout.HelpBox("動畫名稱可自由修改；程式用途與武器影格 ID 不隨改名或排序改變。新增自訂動畫可由 Boss 能力池選用，或使用 Play(名稱) 呼叫。", MessageType.Info);
+            var list = serializedObject.FindProperty("sequences");
             for (int i = 0; i < list.arraySize; i++)
             {
-                SerializedProperty item = list.GetArrayElementAtIndex(i);
-                if (item.FindPropertyRelative("animation").intValue != type) continue;
-                matches++;
-                if (sequence == null) sequence = item;
-            }
-            if (matches > 1)
-                EditorGUILayout.HelpBox("此分類有重複序列，播放使用第一份。可在 Debug Inspector 檢查舊資料。", MessageType.Warning);
-            if (sequence == null)
-            {
-                if (GUILayout.Button("新增此類動畫"))
+                var sequence = list.GetArrayElementAtIndex(i);
+                int custom = sequence.FindPropertyRelative("customSourceId").intValue;
+                int type = sequence.FindPropertyRelative("animation").intValue;
+                string name = sequence.FindPropertyRelative("animationName").stringValue;
+                if (string.IsNullOrWhiteSpace(name)) name = ((FightCharacterCombatAnimator.CombatAnimation)type).ToString();
+                using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                 {
-                    int index = list.arraySize;
-                    list.InsertArrayElementAtIndex(index);
-                    sequence = list.GetArrayElementAtIndex(index);
-                    sequence.FindPropertyRelative("animation").intValue = type;
-                    sequence.FindPropertyRelative("frames").ClearArray();
-                    sequence.FindPropertyRelative("attachmentFrameIds").ClearArray();
-                    sequence.FindPropertyRelative("frameEffects").ClearArray();
-                    sequence.FindPropertyRelative("frameBeatDurations").ClearArray();
-                    sequence.FindPropertyRelative("useFrameBeatDurations").boolValue = true;
-                    sequence.FindPropertyRelative("framesPerSecond").floatValue = 16;
-                    sequence.FindPropertyRelative("warningFrame").intValue = -1;
-                    sequence.FindPropertyRelative("attackEffectFrame").intValue = -1;
-                    sequence.FindPropertyRelative("damageFrame").intValue = -1;
+                    sequence.isExpanded = EditorGUILayout.Foldout(sequence.isExpanded, name, true);
+                    if (!sequence.isExpanded) continue;
+                    EditorGUI.BeginChangeCheck();
+                    string edited = EditorGUILayout.DelayedTextField("動畫名稱", name);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        bool duplicate = false;
+                        for (int j = 0; j < list.arraySize; j++)
+                        {
+                            if (i == j) continue;
+                            var other = list.GetArrayElementAtIndex(j);
+                            string otherName = other.FindPropertyRelative("animationName").stringValue;
+                            if (string.IsNullOrWhiteSpace(otherName)) otherName = ((FightCharacterCombatAnimator.CombatAnimation)other.FindPropertyRelative("animation").intValue).ToString();
+                            duplicate |= string.Equals(otherName, edited.Trim(), StringComparison.Ordinal);
+                        }
+                        if (string.IsNullOrWhiteSpace(edited) || duplicate) EditorUtility.DisplayDialog("無法改名", "名稱不可空白或與此角色其他動畫重複。", "確定");
+                        else sequence.FindPropertyRelative("animationName").stringValue = edited.Trim();
+                    }
+                    EditorGUILayout.LabelField("程式用途（改名不影響）", custom >= 1000 ? "自訂／由能力指定" : ((FightCharacterCombatAnimator.CombatAnimation)type).ToString());
+                    EditorGUILayout.PropertyField(sequence.FindPropertyRelative("warningEffect"), new GUIContent("Warning 特效與音效（每次勾選共用）"), true);
+                    DrawFrames(sequence.FindPropertyRelative("frames"), sequence.FindPropertyRelative("useFrameBeatDurations"), sequence.FindPropertyRelative("frameBeatDurations"), sequence);
+                    if (!sequence.FindPropertyRelative("useFrameBeatDurations").boolValue) EditorGUILayout.PropertyField(sequence.FindPropertyRelative("framesPerSecond"));
+                    int move = 0; bool remove;
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        using (new EditorGUI.DisabledScope(i == 0)) if (GUILayout.Button("動畫上移")) move = -1;
+                        using (new EditorGUI.DisabledScope(i == list.arraySize - 1)) if (GUILayout.Button("動畫下移")) move = 1;
+                        remove = GUILayout.Button("刪除此動畫");
+                    }
+                    if (remove && EditorUtility.DisplayDialog("刪除動畫", $"刪除「{name}」及其影格／事件設定？引用它的能力不會自動改用其他動畫。可使用 Undo 還原。", "刪除", "取消"))
+                    { list.DeleteArrayElementAtIndex(i); break; }
+                    if (move != 0) { list.MoveArrayElement(i, i + move); break; }
                 }
             }
-            if (sequence != null)
+            newName = EditorGUILayout.TextField("新動畫名稱", newName);
+            if (GUILayout.Button("新增自訂動畫"))
             {
-                EditorGUILayout.PropertyField(sequence.FindPropertyRelative("warningEffect"), new GUIContent("Warning 特效與音效（每次勾選共用）"), true);
-                var warningData = sequence.FindPropertyRelative("warningEffect");
-                var warningRows = sequence.FindPropertyRelative("frameEffects");
-                bool hasWarning = sequence.FindPropertyRelative("warningFrame").intValue >= 0;
-                for (int row = 0; row < warningRows.arraySize; row++)
-                    hasWarning |= warningRows.GetArrayElementAtIndex(row).FindPropertyRelative("playWarning").boolValue;
-                if (hasWarning && warningData.FindPropertyRelative("prefab").objectReferenceValue == null)
-                    EditorGUILayout.HelpBox("已勾選 Warning，但尚未指定共用 Prefab；正式警告特效與音效不會播放。請展開上方 Warning 設定。", MessageType.Warning);
-                else if (hasWarning && string.IsNullOrWhiteSpace(warningData.FindPropertyRelative("soundEventPath").stringValue))
-                    EditorGUILayout.HelpBox("Warning 特效已指定，但 Sound Event Path 留空，因此不會播放警告音效。", MessageType.Info);
-                DrawFrames(sequence.FindPropertyRelative("frames"), sequence.FindPropertyRelative("useFrameBeatDurations"),
-                    sequence.FindPropertyRelative("frameBeatDurations"), type == 7 || type == 8 ? null : sequence);
-                if (!sequence.FindPropertyRelative("useFrameBeatDurations").boolValue)
-                    EditorGUILayout.PropertyField(sequence.FindPropertyRelative("framesPerSecond"));
+                serializedObject.ApplyModifiedProperties();
+                var animator = (FightCharacterCombatAnimator)target;
+                if (string.IsNullOrWhiteSpace(newName) || animator.FindSequence(newName) != null)
+                    EditorUtility.DisplayDialog("無法新增", "名稱不可空白或重複。", "確定");
+                else
+                {
+                    Undo.RecordObject(animator, "Add character animation");
+                    animator.AddCustomSequence(newName);
+                    EditorUtility.SetDirty(animator);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(animator);
+                    AnimationListChanged?.Invoke();
+                    GUI.changed = true;
+                }
+                serializedObject.Update();
             }
-            EditorGUI.indentLevel--;
+            if (GUILayout.Button("新增缺少的既有用途動畫…"))
+            {
+                serializedObject.ApplyModifiedProperties();
+                var animator = (FightCharacterCombatAnimator)target;
+                var menu = new GenericMenu();
+                foreach (FightCharacterCombatAnimator.CombatAnimation type in Enum.GetValues(typeof(FightCharacterCombatAnimator.CombatAnimation)))
+                {
+                    if (animator.FindSequence(type) != null) continue;
+                    var captured = type;
+                    menu.AddItem(new GUIContent(type.ToString()), false, () =>
+                    {
+                        Undo.RecordObject(animator, "Add built-in animation");
+                        var sequence = new FightCharacterCombatAnimator.Sequence();
+                        sequence.Configure(captured, null, 16, -1, -1, -1); sequence.ConfigureFrameBeats(null);
+                        animator.AddBuiltInSequence(sequence);
+                        EditorUtility.SetDirty(animator); PrefabUtility.RecordPrefabInstancePropertyModifications(animator);
+                        AnimationListChanged?.Invoke();
+                    });
+                }
+                menu.ShowAsContext();
+            }
+            serializedObject.ApplyModifiedProperties();
         }
 
         private static void DrawFrames(SerializedProperty frames, SerializedProperty useBeats, SerializedProperty durations,
