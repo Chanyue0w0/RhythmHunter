@@ -83,7 +83,7 @@ namespace RhythmHunter.FightDemo
             GameObject healingEffect = null;
             if (definition.EnemyAbilities.Count > 0)
             {
-                var ability = definition.SelectEnemyAbility(Random.value);
+                var ability = definition.SelectEnemyAbility(Random.value, PressurePhaseActive);
                 if (ability == null) return false;
                 animation = ability.Animation;
                 damage = Mathf.Max(0, ability.damagePerHit);

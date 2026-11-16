@@ -192,6 +192,7 @@ MonoBehaviour:
     animationSourceId: 1000
     damagePerHit: 0
     selectionWeight: 20
+    excludeDuringPressure: 1
     healOnEffectFrame: 30
     healingEffectPrefab: {fileID: 6288310626294540278, guid: 41bc7262402cda04cb52c6a2ba6a5e2b, type: 3}
   teamQteMode: 0

@@ -17,6 +17,8 @@ namespace RhythmHunter.FightDemo
             [Min(0)] public float damagePerHit = 1;
             [Min(0), Tooltip("Relative selection weight. Zero disables selection. 45 / 45 / 10 gives 45% / 45% / 10%.")]
             public float selectionWeight = 1;
+            [Tooltip("Exclude from new action rolls during active Pressure (including overtime); warning alone does not exclude it.")]
+            public bool excludeDuringPressure;
             [Min(0), Tooltip("Heal self once on the first entered attack-effect frame. Zero disables healing. Interrupted actions do not heal.")]
             public float healOnEffectFrame;
             [Tooltip("When assigned, heal when this additional frame-effect prefab spawns instead of the attack-effect marker. Once per cast.")]
@@ -26,17 +28,17 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Optional frame-authored abilities. Choose by relative weight per action; repeats allowed. Damage 0 permits non-damaging animations. Empty preserves the existing Normal attack.")]
         [SerializeField] private List<EnemyAbility> enemyAbilities = new();
         public IReadOnlyList<EnemyAbility> EnemyAbilities => enemyAbilities;
-        public EnemyAbility SelectEnemyAbility(float normalizedRoll)
+        public EnemyAbility SelectEnemyAbility(float normalizedRoll, bool pressureActive = false)
         {
             double total = 0;
             foreach (var ability in enemyAbilities)
-                if (ValidWeight(ability)) total += ability.selectionWeight;
+                if (ValidWeight(ability) && !(pressureActive && ability.excludeDuringPressure)) total += ability.selectionWeight;
             if (total <= 0 || float.IsNaN(normalizedRoll)) return null;
             double roll = Mathf.Clamp01(normalizedRoll) * total;
             EnemyAbility last = null;
             foreach (var ability in enemyAbilities)
             {
-                if (!ValidWeight(ability)) continue;
+                if (!ValidWeight(ability) || (pressureActive && ability.excludeDuringPressure)) continue;
                 last = ability;
                 if (roll < ability.selectionWeight) return ability;
                 roll -= ability.selectionWeight;

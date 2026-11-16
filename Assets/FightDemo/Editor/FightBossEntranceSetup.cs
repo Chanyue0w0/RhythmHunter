@@ -16,6 +16,38 @@ namespace RhythmHunter.FightDemoEditor
         static FightBossEntranceSetup() => EditorApplication.update+=Poll;
         static void Poll()
         {
+            const string pressureRequest="Temp/GoblinKingPressureSelection.request";
+            if(File.Exists(pressureRequest) && !EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isCompiling && !EditorApplication.isUpdating)
+            {
+                File.Delete(pressureRequest);
+                GameObject root=null;
+                try
+                {
+                    root=PrefabUtility.LoadPrefabContents("Assets/FightDemo/Prefabs/ArtBattle/Goblin_King.prefab");
+                    var definition=root.GetComponent<FightCharacterDefinition>();
+                    var normal=new System.Collections.Generic.Dictionary<string,int>();
+                    var pressure=new System.Collections.Generic.Dictionary<string,int>();
+                    for(int i=0;i<1000;i++)
+                    {
+                        float roll=(i+.5f)/1000;
+                        foreach(bool active in new[]{false,true})
+                        {
+                            var ability=definition.SelectEnemyAbility(roll,active);
+                            if(ability==null)throw new Exception("No ability selected");
+                            var counts=active?pressure:normal;counts.TryGetValue(ability.name,out int count);counts[ability.name]=count+1;
+                        }
+                    }
+                    if(normal["Strike"]!=400 || normal["HeavyStrike"]!=400 || normal["EatFruit"]!=200)throw new Exception("Normal weights changed");
+                    if(pressure.ContainsKey("EatFruit") || pressure["Strike"]!=500 || pressure["HeavyStrike"]!=500)throw new Exception("Pressure filtering incorrect");
+                    if(definition.SelectEnemyAbility(1,true).name=="EatFruit" || definition.SelectEnemyAbility(0,true).name=="EatFruit")throw new Exception("Boundary selected fruit");
+                    if(definition.SelectEnemyAbility(.9f,false).name!="EatFruit")throw new Exception("Fruit not restored after Pressure");
+                    foreach(var ability in definition.EnemyAbilities)ability.excludeDuringPressure=true;
+                    if(definition.SelectEnemyAbility(.5f,true)!=null)throw new Exception("Empty filtered pool should return null");
+                    File.WriteAllText("Temp/GoblinKingPressureSelection.result","PASS: 1000 deterministic rolls per mode; normal 400/400/200, Pressure 500/500/0; endpoints, post-Pressure restoration and all-excluded pool verified. Prefab not modified by test.");
+                }
+                catch(Exception e){File.WriteAllText("Temp/GoblinKingPressureSelection.result","FAIL: "+e);}
+                finally {if(root)PrefabUtility.UnloadPrefabContents(root);}
+            }
             const string focusRequest="Temp/Art2CinematicFocusSetup.request";
             if(File.Exists(focusRequest) && !EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isCompiling && !EditorApplication.isUpdating)
             {

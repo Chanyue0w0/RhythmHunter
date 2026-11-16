@@ -8,7 +8,7 @@ namespace RhythmHunter.FightDemoEditor
     [CustomPropertyDrawer(typeof(FightCharacterDefinition.EnemyAbility))]
     public sealed class EnemyAbilityAnimationDrawer : PropertyDrawer
     {
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => (EditorGUIUtility.singleLineHeight + 2) * 7;
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => (EditorGUIUtility.singleLineHeight + 2) * 8;
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -35,6 +35,8 @@ namespace RhythmHunter.FightDemoEditor
             EditorGUI.PropertyField(position, property.FindPropertyRelative("damagePerHit"));
             position.y += position.height + 2;
             EditorGUI.PropertyField(position, property.FindPropertyRelative("selectionWeight"), new GUIContent("抽選權重"));
+            position.y += position.height + 2;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("excludeDuringPressure"), new GUIContent("Pressure 期間不抽選"));
             position.y += position.height + 2;
             EditorGUI.PropertyField(position, property.FindPropertyRelative("healOnEffectFrame"), new GUIContent("特效拍點回血量"));
             position.y += position.height + 2;
