@@ -499,7 +499,7 @@ PrefabInstance:
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[5].frames.Array.data[0]'
       value: 
-      objectReference: {fileID: 21300000, guid: c9a49997adf8cb345adc09710f6e8303, type: 3}
+      objectReference: {fileID: 21300000, guid: aab4f12d1efbf084d9505b8762d59747, type: 3}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[3].frames.Array.data[10]'
       value: 
