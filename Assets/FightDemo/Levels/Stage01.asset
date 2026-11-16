@@ -20,7 +20,8 @@ MonoBehaviour:
     waitBeforeDoorBeats: 6
     doorOpenBeats: 1
     openingAnimationName: OpenIdle
-    openingIdleBeats: 2
+    openingIdleBeats: 4
+    doorBossScale: 0.6
     jumpBeats: 1
     ascentFraction: 0.5
     extraJumpHeight: 2
@@ -31,11 +32,17 @@ MonoBehaviour:
     doorLightEnabled: 1
     doorLightColor: {r: 0.09095693, g: 0.087839924, b: 0.13397168, a: 1}
     doorLightIntensity: 12
-    doorLightRange: 25
-    doorLightAngle: 65
-    doorLightOffset: {x: 0, y: 2, z: 0}
+    doorLightRange: 10
+    doorLightAngle: 49
+    doorLightOffset: {x: 0, y: 2, z: 3}
     doorLightEuler: {x: 25, y: 180, z: 0}
     doorLightFadeOutBeats: 1
+    doorLightCastShadows: 1
+    doorLightExcludeHeroes: 1
+    doorLightShadowStrength: 1
+    doorLightShadowBias: 0.05
+    doorLightShadowNormalBias: 0.05
+    fanFollowsDoorLight: 1
     fanBrightness: 1.5
     fanLength: 12
     fanEndWidth: 10

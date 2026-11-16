@@ -28,7 +28,7 @@ namespace RhythmHunter.FightDemo
         {
             public FightUnitSlot slot;
             public Transform root;
-            public Vector3 restLocal, destination, origin, footOffset;
+            public Vector3 restLocal, restScale, destination, origin, footOffset;
             public float topY;
         }
         private readonly List<Entry> entries = new();
@@ -75,7 +75,7 @@ namespace RhythmHunter.FightDemo
                     var animator=slot.CombatAnimator;
                     var sequence=animator?.FindSequence(s.openingAnimationName);
                     if(sequence!=null) animator.PlayVisualSequence(animator.TargetRenderer,sequence,true);
-                    entries.Add(new Entry { slot=slot,root=slot.ActorRoot,restLocal=slot.ActorRoot.localPosition });
+                    entries.Add(new Entry { slot=slot,root=slot.ActorRoot,restLocal=slot.ActorRoot.localPosition,restScale=slot.ActorRoot.localScale });
                     // Hide just this first frame until Art2 has grounded the new actor.
                     foreach(var renderer in slot.ActorInstance.GetComponentsInChildren<Renderer>()) renderer.forceRenderingOff=true;
                 }
@@ -107,6 +107,7 @@ namespace RhythmHunter.FightDemo
             {
                 if(!entry.root) continue;
                 Vector3 position=entry.origin;
+                float size=Mathf.Clamp(s.doorBossScale,.05f,1f);
                 if(time>=jumpAt)
                 {
                     Phase="Jump entrance";
@@ -114,9 +115,11 @@ namespace RhythmHunter.FightDemo
                     float split=Mathf.Clamp(s.ascentFraction,.05f,.95f);
                     // Rise vertically at the door, relocate above the destination while offscreen, then descend vertically.
                     if(t<split) { position=entry.origin;position.y=Mathf.Lerp(entry.origin.y,entry.topY,Mathf.SmoothStep(0,1,t/split)); }
-                    else { position=entry.destination;position.y=Mathf.Lerp(entry.topY,entry.destination.y,Mathf.SmoothStep(0,1,(t-split)/(1-split))); }
+                    else { size=1;position=entry.destination;position.y=Mathf.Lerp(entry.topY,entry.destination.y,Mathf.SmoothStep(0,1,(t-split)/(1-split))); }
                 }
-                entry.root.position=position;
+                entry.root.localScale=entry.restScale*size;
+                // Scale about the feet, preserving the authored door anchor and grounding.
+                entry.root.position=position+entry.footOffset*(1-size);
                 ApplySilhouette(entry, s.blackSilhouette && time < jumpAt);
                 if(time>=jumpAt && !entryIdleRestored.Contains(entry))
                 {
@@ -151,7 +154,8 @@ namespace RhythmHunter.FightDemo
             ClearPresentation();
             foreach(var entry in entries)
             {
-                if(entry.root) entry.root.localPosition=entry.restLocal;
+                if(entry == null) continue;
+                if(entry.root) { entry.root.localPosition=entry.restLocal; entry.root.localScale=entry.restScale; }
                 if(entry.slot && entry.slot.ActorInstance)
                     foreach(var renderer in entry.slot.ActorInstance.GetComponentsInChildren<Renderer>()) renderer.forceRenderingOff=false;
             }

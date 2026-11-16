@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using RhythmHunter.FightDemo.Art2;
+using UnityEngine.Rendering.Universal;
 
 namespace RhythmHunter.FightDemo
 {
@@ -18,6 +19,33 @@ namespace RhythmHunter.FightDemo
         private double shakeStartBeat = -1;
         private Art2CameraController cameraController;
         private Vector3 fanDimensions = new Vector3(-1,-1,-1);
+        private const uint DoorRenderingLayer = 1u << 7;
+        private readonly Dictionary<Renderer,uint> doorRendererMasks = new();
+        private int doorLayerActorCount = -1;
+
+        private void ConfigureDoorLayers(bool active)
+        {
+            if(!active)
+            {
+                foreach(var pair in doorRendererMasks)
+                    if(pair.Key) pair.Key.renderingLayerMask=pair.Value;
+                doorRendererMasks.Clear();
+                doorLayerActorCount=-1;
+                return;
+            }
+            int count=roster.ActiveHeroes.Count+roster.ActiveEnemies.Count;
+            if(doorLayerActorCount==count) return;
+            doorLayerActorCount=count;
+            foreach(var sceneRoot in gameObject.scene.GetRootGameObjects())
+                foreach(var renderer in sceneRoot.GetComponentsInChildren<Renderer>(true))
+                {
+                    if(!doorRendererMasks.ContainsKey(renderer)) doorRendererMasks.Add(renderer,renderer.renderingLayerMask);
+                    bool hero=false;
+                    foreach(var slot in roster.ActiveHeroes)
+                        if(slot && renderer.transform.IsChildOf(slot.transform)) { hero=true;break; }
+                    renderer.renderingLayerMask=hero ? doorRendererMasks[renderer]&~DoorRenderingLayer : doorRendererMasks[renderer]|DoorRenderingLayer;
+                }
+        }
 
         private void ApplySilhouette(Entry entry, bool black)
         {
@@ -73,18 +101,32 @@ namespace RhythmHunter.FightDemo
                 entranceSpot.range=s.doorLightRange;
                 entranceSpot.spotAngle=s.doorLightAngle;
                 entranceSpot.innerSpotAngle=s.doorLightAngle*.75f;
+                entranceSpot.shadows=s.doorLightCastShadows ? LightShadows.Soft : LightShadows.None;
+                entranceSpot.shadowStrength=s.doorLightShadowStrength;
+                entranceSpot.shadowBias=s.doorLightShadowBias;
+                entranceSpot.shadowNormalBias=s.doorLightShadowNormalBias;
+                var lightData=entranceSpot.GetUniversalAdditionalLightData();
+                lightData.customShadowLayers=false;
+                lightData.renderingLayers=s.doorLightExcludeHeroes ? DoorRenderingLayer : 1u;
+                ConfigureDoorLayers(lightWeight>0 && s.doorLightExcludeHeroes);
                 if(entranceFan)
                 {
-                    entranceFan.transform.SetPositionAndRotation(new Vector3(origin.x,s.fanGroundY,origin.z),Quaternion.Euler(0,s.fanYaw,0));
+                    Vector3 fanOrigin=s.fanFollowsDoorLight ? entranceSpot.transform.position : origin;
+                    entranceFan.transform.SetPositionAndRotation(new Vector3(fanOrigin.x,s.fanGroundY,fanOrigin.z),Quaternion.Euler(0,s.fanFollowsDoorLight ? 0 : s.fanYaw,0));
                     entranceFan.transform.localScale=Vector3.one;
-                    var dimensions=new Vector3(s.fanStartWidth,s.fanEndWidth,s.fanLength);
+                    var dimensions=s.fanFollowsDoorLight ? new Vector3(s.doorLightRange*2,s.doorLightRange*2,-s.doorLightRange) : new Vector3(s.fanStartWidth,s.fanEndWidth,s.fanLength);
                     if(fanDimensions!=dimensions)
                     {
                         fanDimensions=dimensions;
-                        fanMesh.vertices=new[] {new Vector3(-s.fanStartWidth*.5f,0,0),new Vector3(s.fanStartWidth*.5f,0,0),new Vector3(-s.fanEndWidth*.5f,0,s.fanLength),new Vector3(s.fanEndWidth*.5f,0,s.fanLength)};
+                        float near=s.fanFollowsDoorLight ? -s.doorLightRange : 0;
+                        float far=s.fanFollowsDoorLight ? s.doorLightRange : s.fanLength;
+                        fanMesh.vertices=new[] {new Vector3(-dimensions.x*.5f,0,near),new Vector3(dimensions.x*.5f,0,near),new Vector3(-dimensions.y*.5f,0,far),new Vector3(dimensions.y*.5f,0,far)};
                         fanMesh.RecalculateBounds();
                     }
                     fanMaterial.SetColor("_Color",s.doorLightColor*(s.fanBrightness*lightWeight));
+                    fanMaterial.SetVector("_DoorLightPosition",entranceSpot.transform.position);
+                    fanMaterial.SetVector("_DoorLightForward",entranceSpot.transform.forward);
+                    fanMaterial.SetVector("_DoorCone",new Vector4(s.doorLightRange,Mathf.Cos(s.doorLightAngle*.5f*Mathf.Deg2Rad),Mathf.Cos(entranceSpot.innerSpotAngle*.5f*Mathf.Deg2Rad),s.fanFollowsDoorLight ? 1 : 0));
                 }
             }
             if(!cameraController && view) cameraController=view.GetComponent<Art2CameraController>();
@@ -102,6 +144,7 @@ namespace RhythmHunter.FightDemo
 
         private void ClearPresentation()
         {
+            ConfigureDoorLayers(false);
             foreach(var entry in entries) ApplySilhouette(entry,false);
             if(cameraController) cameraController.SetBossEntranceShake(Vector2.zero);
             if(doorLightingRoot) Destroy(doorLightingRoot);

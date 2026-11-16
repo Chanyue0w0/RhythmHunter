@@ -50,6 +50,7 @@ namespace RhythmHunter.FightDemoEditor
                     if(roster.ActiveEnemies.Count==0)sawHidden=true;
                     if(intro.Phase=="OpenIdle")
                     {
+                        if(!sawDoor) ScreenCapture.CaptureScreenshot("Temp/BossDoorLightingPreview.png");
                         sawDoor=true;
                         Check(!UnityEngine.Object.FindObjectsByType<UnityEngine.UI.Image>(FindObjectsSortMode.None).Any(i=>i.name.StartsWith("BeatPoint_")&&i.enabled),"Intro beat points visible");
                         foreach(var slot in roster.ActiveEnemies)Check(slot.CombatAnimator.ActiveAnimation==slot.CombatAnimator.FindSequence("OpenIdle").Animation,"Wrong opening animation");
@@ -57,6 +58,17 @@ namespace RhythmHunter.FightDemoEditor
                         roster.ActiveEnemies[0].CombatAnimator.TargetRenderer.GetPropertyBlock(block);
                         Check(block.GetFloat("_EntranceSilhouette")==1,"Opening silhouette missing");
                         Check(UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None).Any(l=>l.name=="DoorSpotLight"&&l.intensity>0),"Door light missing");
+                        var doorLight=UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None).First(l=>l.name=="DoorSpotLight");
+                        Check(doorLight.shadows!=LightShadows.None,"Door shadows disabled");
+                        foreach(var hero in roster.ActiveHeroes)
+                            foreach(var renderer in hero.GetComponentsInChildren<Renderer>(true))
+                            {
+                                Check((renderer.renderingLayerMask & (1u<<7))==0,"Hero included in door light");
+                                Check((renderer.renderingLayerMask & 1u)!=0,"Hero lost ordinary scene lighting");
+                            }
+                        Check((roster.ActiveEnemies[0].CombatAnimator.TargetRenderer.renderingLayerMask&(1u<<7))!=0,"Boss excluded from door shadows");
+                        var pipeline=UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+                        Check(pipeline && pipeline.supportsAdditionalLightShadows,"Pipeline additional shadows disabled");
                     }
                     if(intro.Phase=="Jump entrance")
                     {
@@ -89,6 +101,8 @@ namespace RhythmHunter.FightDemoEditor
                 if(completedAt==0)completedAt=EditorApplication.timeSinceStartup;
                 if(EditorApplication.timeSinceStartup-completedAt<3)return;
                 Check(sawShake,"Landing shake missing");
+                foreach(string shaderName in new[]{"RhythmHunter/Art2/BossDoorFan","RhythmHunter/Art2/SpriteCardLit"})
+                    Check(!ShaderUtil.ShaderHasError(Shader.Find(shaderName)),"Shader compile error: "+shaderName);
                 var cameraAfter=UnityEngine.Object.FindFirstObjectByType<RhythmHunter.FightDemo.Art2.Art2CameraController>();
                 var offsetAfter=(Vector2)typeof(RhythmHunter.FightDemo.Art2.Art2CameraController).GetField("bossEntranceShake",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(cameraAfter);
                 Check(offsetAfter==Vector2.zero,"Shake did not finish");

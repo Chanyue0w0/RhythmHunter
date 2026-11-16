@@ -7,6 +7,7 @@ half3 Art2Light(half3 normalWS, float3 positionWS, half3 vertexLight, float2 scr
 {
     half3 lighting = _AmbientTint.rgb * _AmbientStrength;
     Light main = GetMainLight(TransformWorldToShadowCoord(positionWS));
+    if (IsMatchingLightLayer(main.layerMask, GetMeshRenderingLayer()))
     lighting += main.color * main.distanceAttenuation * main.shadowAttenuation *
         lerp(diffuseFloor, 1.0h, saturate(dot(normalWS, main.direction))) * _LightInfluence;
     #if defined(_ADDITIONAL_LIGHTS)
@@ -16,15 +17,17 @@ half3 Art2Light(half3 normalWS, float3 positionWS, half3 vertexLight, float2 scr
     #if USE_CLUSTER_LIGHT_LOOP
     UNITY_LOOP for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, MAX_VISIBLE_LIGHTS); lightIndex++)
     {
-        Light light = GetAdditionalLight(lightIndex, positionWS);
-        lighting += light.color * light.distanceAttenuation *
+        Light light = GetAdditionalLight(lightIndex, positionWS, half4(1,1,1,1));
+        if (IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+        lighting += light.color * light.distanceAttenuation * light.shadowAttenuation *
             lerp(diffuseFloor, 1.0h, saturate(dot(normalWS, light.direction))) * _LightInfluence;
     }
     #endif
     uint count = GetAdditionalLightsCount();
     LIGHT_LOOP_BEGIN(count)
-        Light light = GetAdditionalLight(lightIndex, positionWS);
-        lighting += light.color * light.distanceAttenuation *
+        Light light = GetAdditionalLight(lightIndex, positionWS, half4(1,1,1,1));
+        if (IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+        lighting += light.color * light.distanceAttenuation * light.shadowAttenuation *
             lerp(diffuseFloor, 1.0h, saturate(dot(normalWS, light.direction))) * _LightInfluence;
     LIGHT_LOOP_END
     #elif defined(_ADDITIONAL_LIGHTS_VERTEX)

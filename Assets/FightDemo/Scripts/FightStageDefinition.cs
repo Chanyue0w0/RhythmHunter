@@ -33,6 +33,8 @@ namespace RhythmHunter.FightDemo
             [Min(.01f)] public float doorOpenBeats = 1;
             public string openingAnimationName = "OpenIdle";
             [Min(0)] public float openingIdleBeats = 2;
+            [Tooltip("Size multiplier at the distant door. Restores the original battle scale above the landing point while offscreen.")]
+            [Range(.05f, 1f)] public float doorBossScale = .6f;
             [Min(.05f)] public float jumpBeats = 4;
             [Range(.05f,.95f)] public float ascentFraction = .4f;
             [Min(0)] public float extraJumpHeight = 2;
@@ -46,9 +48,17 @@ namespace RhythmHunter.FightDemo
             [Min(0)] public float doorLightIntensity = 12;
             [Min(1)] public float doorLightRange = 25;
             [Range(1, 170)] public float doorLightAngle = 65;
-            public Vector3 doorLightOffset = new Vector3(0, 2, 0);
+            public Vector3 doorLightOffset = new Vector3(0, 2, 3);
             public Vector3 doorLightEuler = new Vector3(25, 180, 0);
             [Min(.01f)] public float doorLightFadeOutBeats = 1;
+            public bool doorLightCastShadows = true;
+            [Tooltip("Exclude player heroes from both door lighting and door-light shadows. Other lights remain unchanged.")]
+            public bool doorLightExcludeHeroes = true;
+            [Range(0, 1)] public float doorLightShadowStrength = 1;
+            [Range(0, 2)] public float doorLightShadowBias = .05f;
+            [Range(0, 2)] public float doorLightShadowNormalBias = .05f;
+            [Tooltip("Range, Angle, Offset and Euler control both the spotlight and its visible ground footprint. Disable to use manual Fan dimensions.")]
+            public bool fanFollowsDoorLight = true;
             [Min(0)] public float fanBrightness = 1.5f;
             [Min(.1f)] public float fanLength = 12;
             [Min(.1f)] public float fanEndWidth = 10;
