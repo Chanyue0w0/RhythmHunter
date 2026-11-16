@@ -28,7 +28,7 @@ namespace RhythmHunter.FightDemo
             RefreshPressureCadence();
             foreach (var enemy in fightScene2Enemies)
             {
-                if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || enemy.IsStunned ||
+                if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || enemy.IsStunned || enemy.BossPhaseOneTired ||
                     enemy.CharacterDefinition == null ||
                     (BossActive && enemy == bossActor) ||
                     !EnemyCadenceReady(enemy, globalBeat) || EnemyActionBusy(enemy)) continue;
@@ -43,6 +43,7 @@ namespace RhythmHunter.FightDemo
         // Their timing choice must never restrict them to the front formation slot.
         private void StartIndependentEnemyAttack(FightUnitSlot source)
         {
+            if(source==null || source.BossPhaseOneTired)return;
             var definition = source.CharacterDefinition;
             RecordEnemyActionCadence(source);
             enemyHits.Add(new ScheduledEnemyHit { source = source,
@@ -62,7 +63,7 @@ namespace RhythmHunter.FightDemo
             bool interruptible = true, bool launchedProjectile = false)
         {
             if (PressureRestActive || battleEnded || AwaitingBattleStart || AwaitingNextWave || EnemyActionsPaused || IsPaused || TimingCalibrationActive ||
-                source == null || source.CurrentHp <= 0 || source.IsStunned || !fightScene2Enemies.Contains(source) ||
+                source == null || source.CurrentHp <= 0 || source.IsStunned || source.BossPhaseOneTired || !fightScene2Enemies.Contains(source) ||
                 beatOffsets == null || beatOffsets.Length == 0 || damage <= 0 || float.IsNaN(damage) || float.IsInfinity(damage)) return false;
             foreach (int offset in beatOffsets) if (offset < 1) return false;
             foreach (int offset in beatOffsets)
@@ -76,7 +77,7 @@ namespace RhythmHunter.FightDemo
         private bool TryStartAuthoredEnemyAttack(FightUnitSlot source)
         {
             var definition = source != null ? source.CharacterDefinition : null;
-            if (definition == null || source.IsStunned || !definition.EnemyAttackUsesEffectFrames) return false;
+            if (definition == null || source.IsStunned || source.BossPhaseOneTired || !definition.EnemyAttackUsesEffectFrames) return false;
             var animation = FightCharacterCombatAnimator.CombatAnimation.NormalAttack;
             float damage = source.AttackPower;
             float healing = 0;

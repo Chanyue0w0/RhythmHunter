@@ -47,6 +47,7 @@ namespace RhythmHunter.FightDemo
         private FightEnemyPressureSettings[] stagePressure;
         private FightStageDefinition.WaveKind[] stageWaveKinds;
         public bool UsesStageDeadline { get; private set; }
+        public bool IsBossStage { get; private set; }
         public bool OvertimeOnlyOnFinalCombatWave { get; private set; }
         public int LastCombatWaveIndex { get; private set; } = -1;
         public int OvertimeAccelerationIntervalBeats { get; private set; } = 20;
@@ -86,6 +87,7 @@ namespace RhythmHunter.FightDemo
             stageWaves = snapshot; // Do not mutate shared assets or re-read edits mid-battle.
             stagePressure = pressureSnapshot;
             stageWaveKinds = kindSnapshot;
+            IsBossStage = stage.BossStage;
             UsesStageDeadline = stage.UseNormalEndDeadline;
             OvertimeOnlyOnFinalCombatWave = stage.OvertimeOnlyOnFinalCombatWave;
             LastCombatWaveIndex = Array.FindLastIndex(kindSnapshot, kind => kind == FightStageDefinition.WaveKind.Combat);

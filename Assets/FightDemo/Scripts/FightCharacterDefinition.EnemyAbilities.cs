@@ -28,6 +28,12 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Optional frame-authored abilities. Choose by relative weight per action; repeats allowed. Damage 0 permits non-damaging animations. Empty preserves the existing Normal attack.")]
         [SerializeField] private List<EnemyAbility> enemyAbilities = new();
         public IReadOnlyList<EnemyAbility> EnemyAbilities => enemyAbilities;
+        [Header("Boss Stage Phase One")]
+        [Tooltip("Only in a BossStage: retain 1 HP, stop actions/healing on completion and wait for the phase transition.")]
+        [SerializeField] private bool protectBossPhaseOne;
+        [SerializeField] private string tiredIdleAnimationName = "Idle_Tired";
+        public bool ProtectBossPhaseOne => protectBossPhaseOne;
+        public string TiredIdleAnimationName => tiredIdleAnimationName;
         public EnemyAbility SelectEnemyAbility(float normalizedRoll, bool pressureActive = false)
         {
             double total = 0;

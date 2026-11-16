@@ -268,6 +268,13 @@ namespace RhythmHunter.FightDemo
         private bool playbackPaused;
         private bool openingIdle;
         private bool chargedIdle;
+        private string idleOverrideName;
+        public void SetIdleOverride(string name)
+        {
+            if(idleOverrideName==name)return;
+            idleOverrideName=name;shownFrame=-1;
+            if(activeSequence==null && !playbackPaused)UpdateIdle();
+        }
         public bool UsesChargedIdle => chargedIdle;
         public void SetChargedIdle(bool enabled)
         {
@@ -488,6 +495,11 @@ namespace RhythmHunter.FightDemo
             {
                 var charged = FindSequence(CombatAnimation.ChargedIdle);
                 if (charged != null && charged.Frames.Count > 0) entry = charged;
+            }
+            if(!openingIdle && !string.IsNullOrEmpty(idleOverrideName))
+            {
+                var replacement=FindSequence(idleOverrideName);
+                if(replacement!=null && replacement.Frames.Count>0)entry=replacement;
             }
             if (entry != null && entry.Frames.Count > 0 && targetRenderer != null)
             {

@@ -106,6 +106,13 @@ namespace RhythmHunter.FightDemo
             enemyHits.RemoveAll(hit => hit.source == enemy && !hit.launched);
             InterruptEnemyAttack(enemy);
         }
+        public void CancelEnemyActionForPhaseOneCompletion(FightUnitSlot enemy)
+        {
+            if(enemy==null)return;
+            // Preserve already launched projectiles, following the existing interruption rule.
+            enemyHits.RemoveAll(hit=>hit.source==enemy && !hit.launched);
+            InterruptEnemyAttack(enemy);
+        }
 
         public void CancelEnemyActionForStun(FightUnitSlot enemy)
         {
