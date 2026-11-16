@@ -25,6 +25,13 @@ namespace RhythmHunter.FightDemo.Art2
         [SerializeField] private Vector2 guideSize = new(24, 10);
         private readonly Dictionary<Renderer, MaterialPropertyBlock> originals = new();
         private MaterialPropertyBlock block;
+        private float cinematicBlurMultiplier = 1, cinematicFogMultiplier = 1;
+        public void SetCinematicMultipliers(float blur, float fog)
+        {
+            cinematicBlurMultiplier=Mathf.Clamp01(blur);
+            cinematicFogMultiplier=Mathf.Clamp01(fog);
+            if(isActiveAndEnabled) Apply();
+        }
 
         private void OnEnable() => Apply();
         private void LateUpdate() => Apply();
@@ -49,15 +56,15 @@ namespace RhythmHunter.FightDemo.Art2
                 }
                 target.GetPropertyBlock(block);
                 block.SetVector("_FocusWallPlane", plane);
-                block.SetVector("_FocusWallSettings", new Vector4(1, Mathf.Max(.01f, transitionDepth), blurPixels, fogDensity));
+                block.SetVector("_FocusWallSettings", new Vector4(1, Mathf.Max(.01f, transitionDepth), blurPixels*cinematicBlurMultiplier, fogDensity*cinematicFogMultiplier));
                 block.SetColor("_FocusWallColor", fogColor);
                 bool emphasized = false;
                 if (emphasizedRoots != null)
                     foreach (var root in emphasizedRoots)
                         if (root && target.transform.IsChildOf(root)) { emphasized = true; break; }
                 block.SetVector("_FocusWallBlurProfile", emphasized
-                    ? new Vector4(detailBlurMultiplier, detailBlurTransitionScale, 0, 0)
-                    : new Vector4(1, 1, 0, 0));
+                    ? new Vector4(detailBlurMultiplier, detailBlurTransitionScale, 1-cinematicBlurMultiplier, 0)
+                    : new Vector4(1, 1, 1-cinematicBlurMultiplier, 0));
                 target.SetPropertyBlock(block);
             }
         }

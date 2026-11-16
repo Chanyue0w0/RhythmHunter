@@ -20,6 +20,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         [PerRendererData] _CharacterRimColor ("Character Edge Color / Intensity", Color) = (0,0,0,0)
         [PerRendererData] _CharacterRimParams ("Character Edge Direction / Width", Vector) = (-1,1,1,0)
         _BlurRadius ("Distant Blur (Source Pixels)", Range(0,2)) = 0
+        [PerRendererData] _CinematicBlur ("Cinematic Foreground Blur", Range(0,2)) = 0
         _FocusSaturation ("Focus Saturation", Range(0,1)) = 1
         _FocusContrast ("Focus Contrast", Range(0,1)) = 1
         _AtmosphereTint ("Distant Atmosphere", Color) = (0.09,0.16,0.2,1)
@@ -43,6 +44,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 half _FocusSaturation, _FocusContrast;
                 half _EntranceSilhouette;
                 half _EntranceReveal;
+                half _CinematicBlur;
             CBUFFER_END
         ENDHLSL
         Pass

@@ -23,16 +23,25 @@ MonoBehaviour:
     openingIdleBeats: 4
     doorBossScale: 0.6
     jumpBeats: 1
+    jumpAnimationName: Jump
+    flyingAnimationName: Flying
+    landingAnimationName: Landing
+    flyingHoldBeats: 0.5
+    doorCloseBeats: 1
     ascentFraction: 0.5
     extraJumpHeight: 2
     landingWaitBeats: 4
     landingEffect: {fileID: 2110487180908037544, guid: 8660c1059a97e4542b513bc35d681349, type: 3}
     landingEffectOffset: {x: 0, y: 0, z: 0}
     doorExplosion: {fileID: 5292981524694603679, guid: a3dd949486459684a818f410e0242b9b, type: 3}
+    doorExplosionEnabled: 0
     doorExplosionBeats: 2
     bossRevealBeats: 1
     doorExplosionOffset: {x: 0, y: 1.2, z: 0}
     doorExplosionScale: 1.2
+    landingExplosionEnabled: 1
+    landingExplosionOffset: {x: 0, y: 0, z: 0}
+    landingExplosionScale: 1
     doorFocusEnabled: 1
     doorFocusLeadBeats: 2
     doorFocusWeight: 0.25

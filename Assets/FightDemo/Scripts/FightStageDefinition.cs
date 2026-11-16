@@ -36,6 +36,11 @@ namespace RhythmHunter.FightDemo
             [Tooltip("Size multiplier at the distant door. Restores the original battle scale above the landing point while offscreen.")]
             [Range(.05f, 1f)] public float doorBossScale = .6f;
             [Min(.05f)] public float jumpBeats = 4;
+            public string jumpAnimationName = "Jump";
+            public string flyingAnimationName = "Flying";
+            public string landingAnimationName = "Landing";
+            [Min(0)] public float flyingHoldBeats = .5f;
+            [Min(.01f)] public float doorCloseBeats = 1;
             [Range(.05f,.95f)] public float ascentFraction = .4f;
             [Min(0)] public float extraJumpHeight = 2;
             [Min(0)] public float landingWaitBeats = 4;
@@ -43,6 +48,7 @@ namespace RhythmHunter.FightDemo
             public Vector3 landingEffectOffset;
             [Header("Door reveal and camera")]
             public GameObject doorExplosion;
+            public bool doorExplosionEnabled;
             [Min(.1f)] public float doorExplosionBeats = 2;
             [Tooltip("Fade from transparent to fully visible immediately after spawning, independently of smoke duration.")]
             [Min(.01f)] public float bossRevealBeats = 1;

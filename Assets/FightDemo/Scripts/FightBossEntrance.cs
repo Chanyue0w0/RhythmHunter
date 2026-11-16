@@ -22,14 +22,14 @@ namespace RhythmHunter.FightDemo
         public bool BlocksBattle => isActiveAndEnabled && Stage != null && Stage.BossStage && Settings != null && Settings.enabled && !complete;
         public string Phase { get; private set; } = "Waiting for player entry";
         private bool started, complete, opened, spawned, landed, placed;
-        private double startBeat;
+        private double startBeat; private double descentAt=double.PositiveInfinity; private bool tookOff;
         [Serializable]
         private sealed class Entry
         {
             public FightUnitSlot slot;
             public Transform root;
             public Vector3 restLocal, restScale, destination, origin, footOffset;
-            public float topY;
+            public float topY; public bool jumpPlaying, landingStarted, hasLanding, exitedView;
         }
         private readonly List<Entry> entries = new();
         public bool TryBegin()
@@ -60,7 +60,7 @@ namespace RhythmHunter.FightDemo
             var s=Settings;
             double time=Math.Max(0,beat-startBeat);
             double openAt=Math.Max(0,s.waitBeforeDoorBeats), spawnAt=openAt+Math.Max(.01f,s.doorOpenBeats);
-            double jumpAt=spawnAt+DoorHoldBeats, landAt=jumpAt+Math.Max(.05f,s.jumpBeats);
+            double jumpAt=spawnAt+DoorHoldBeats; double riseBeats=Math.Max(.05f,s.jumpBeats)*Mathf.Clamp(s.ascentFraction,.05f,.95f); double fallBeats=Math.Max(.05f,s.jumpBeats)-riseBeats;
             Phase="Waiting to open door";
             if(time<openAt) return;
             Phase="Opening door";
@@ -104,28 +104,49 @@ namespace RhythmHunter.FightDemo
                 }
             }
             Phase="OpenIdle";
+            if(time>=jumpAt && !tookOff)
+            {
+                tookOff=true; door?.Close(fight,s.doorCloseBeats);
+                foreach(var entry in entries) entry.jumpPlaying=PlayEntrance(entry,s.jumpAnimationName,false);
+            }
+            if(tookOff && double.IsPositiveInfinity(descentAt) && time>=jumpAt+riseBeats)
+            {
+                bool ready=true;
+                foreach(var entry in entries)
+                    if(entry.jumpPlaying && !entry.slot.CombatAnimator.VisualSequenceComplete) ready=false;
+                if(ready)
+                {
+                    foreach(var entry in entries) PlayEntrance(entry,s.flyingAnimationName,true);
+                    descentAt=time+Math.Max(0,s.flyingHoldBeats);
+                }
+            }
+            double landAt=descentAt+fallBeats;
             foreach(var entry in entries)
             {
-                if(!entry.root) continue;
                 Vector3 position=entry.origin;
                 float size=Mathf.Clamp(s.doorBossScale,.05f,1f);
-                if(time>=jumpAt)
+                if(tookOff)
                 {
                     Phase="Jump entrance";
-                    float t=Mathf.Clamp01((float)((time-jumpAt)/Math.Max(.05f,s.jumpBeats)));
-                    float split=Mathf.Clamp(s.ascentFraction,.05f,.95f);
-                    // Rise vertically at the door, relocate above the destination while offscreen, then descend vertically.
-                    if(t<split) { position=entry.origin;position.y=Mathf.Lerp(entry.origin.y,entry.topY,Mathf.SmoothStep(0,1,t/split)); }
-                    else { size=1;position=entry.destination;position.y=Mathf.Lerp(entry.topY,entry.destination.y,Mathf.SmoothStep(0,1,(t-split)/(1-split))); }
+                    if(time<jumpAt+riseBeats)
+                        position.y=Mathf.Lerp(entry.origin.y,entry.topY,Mathf.SmoothStep(0,1,(float)((time-jumpAt)/riseBeats)));
+                    else
+                    {
+                        size=1;position=entry.destination;
+                        position.y=Mathf.Lerp(entry.topY,entry.destination.y,Mathf.SmoothStep(0,1,(float)((time-descentAt)/fallBeats)));
+                        Phase=time<descentAt ? "Flying" : "Descending";
+                    }
                 }
                 entry.root.localScale=entry.restScale*size;
-                // Scale about the feet, preserving the authored door anchor and grounding.
                 entry.root.position=position+entry.footOffset*(1-size);
-                ApplySilhouette(entry, s.blackSilhouette && time < jumpAt);
-                if(time>=jumpAt && !entryIdleRestored.Contains(entry))
+                // Latch only after the entire visible sprite has left the game camera.
+                // Returning to view during descent must not turn the silhouette back on.
+                if(tookOff && !entry.exitedView && !InGameView(entry)) entry.exitedView=true;
+                ApplySilhouette(entry,s.blackSilhouette && !entry.exitedView);
+                if(time>=descentAt && !entry.landingStarted && (InGameView(entry) || time>=landAt))
                 {
-                    entryIdleRestored.Add(entry);
-                    entry.slot.CombatAnimator?.InterruptPlayback();
+                    entry.landingStarted=true;
+                    entry.hasLanding=PlayEntrance(entry,s.landingAnimationName,false);
                 }
             }
             if(time<landAt) return;
@@ -147,9 +168,37 @@ namespace RhythmHunter.FightDemo
                     }
                 }
             }
-            if(time<landAt+Math.Max(0,s.landingWaitBeats)) return;
+            foreach(var entry in entries)
+            {
+                if(entry.hasLanding) { if(!entry.slot.CombatAnimator.VisualSequenceComplete) return; }
+                else if(time<landAt+Math.Max(0,s.landingWaitBeats)) return;
+            }
             foreach(var entry in entries) { entry.root.localPosition=entry.restLocal; entry.slot.CombatAnimator?.InterruptPlayback(); }
             complete=true;Phase="Complete";
+        }
+        private bool PlayEntrance(Entry entry,string name,bool loop)
+        {
+            var animator=entry.slot.CombatAnimator;
+            var sequence=animator?.FindSequence(name);
+            if(sequence==null || sequence.Frames.Count==0) return false;
+            animator.PlayVisualSequence(animator.TargetRenderer,sequence,loop); return true;
+        }
+        private bool InGameView(Entry entry)
+        {
+            var renderer=entry.slot.CombatAnimator?.TargetRenderer;
+            if(!view || !renderer) return true;
+            var bounds=renderer.bounds;
+            var min=new Vector2(float.PositiveInfinity,float.PositiveInfinity);
+            var max=new Vector2(float.NegativeInfinity,float.NegativeInfinity);
+            bool inFront=false;
+            for(int i=0;i<8;i++)
+            {
+                var point=view.WorldToViewportPoint(bounds.center+Vector3.Scale(bounds.extents,
+                    new Vector3((i&1)==0?-1:1,(i&2)==0?-1:1,(i&4)==0?-1:1)));
+                if(point.z<=0) continue;
+                inFront=true;min=Vector2.Min(min,point);max=Vector2.Max(max,point);
+            }
+            return inFront && max.x>=0 && min.x<=1 && max.y>=0 && min.y<=1;
         }
         private void OnDisable()
         {

@@ -10,14 +10,15 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Shader doorFanShader;
         [SerializeField] private Transform doorExplosionAnchor;
         [SerializeField] private Transform doorFocusAnchor;
+        [SerializeField] private Art2CinematicFocus cinematicFocus;
         private GameObject entranceSmoke;
         private ParticleSystem[] smokeParticles;
         private float smokeDuration, smokeSimulated;
         private double smokeStartBeat=-1;
         private double lastPresentationBeat;
         private float bossReveal=1;
-        private double DoorHoldBeats => System.Math.Max(Settings.bossRevealBeats,System.Math.Max(Settings.openingIdleBeats,Settings.doorExplosion ? Settings.doorExplosionBeats : 0));
-        private readonly HashSet<Entry> entryIdleRestored = new();
+        private double DoorHoldBeats => System.Math.Max(Settings.bossRevealBeats,System.Math.Max(Settings.openingIdleBeats,Settings.doorExplosionEnabled && Settings.doorExplosion ? Settings.doorExplosionBeats : 0));
+
         private MaterialPropertyBlock silhouetteBlock;
         private static readonly int SilhouetteId = Shader.PropertyToID("_EntranceSilhouette");
         private GameObject doorLightingRoot;
@@ -146,6 +147,7 @@ namespace RhythmHunter.FightDemo
             float focusProgress=Mathf.SmoothStep(0,1,Mathf.Clamp01((float)((elapsed-s.waitBeforeDoorBeats+s.doorFocusLeadBeats)/Mathf.Max(.01f,s.doorFocusLeadBeats))));
             if(elapsed>=jumpAt)focusProgress*=1-Mathf.SmoothStep(0,1,Mathf.Clamp01((float)((elapsed-jumpAt)/Mathf.Max(.01f,s.doorFocusReturnBeats))));
             if(!s.doorFocusEnabled)focusProgress=0;
+            if(cinematicFocus)cinematicFocus.SetEntranceWeight(focusProgress);
             var focusTarget=doorFocusAnchor ? doorFocusAnchor.position : doorSpawnAnchor ? doorSpawnAnchor.position : transform.position;
             cameraController.SetBossEntranceFocus(focusTarget+s.doorFocusOffset,s.doorFocusWeight*focusProgress,s.doorFocusZoom*focusProgress);
             double shakeElapsed=beat-shakeStartBeat;
@@ -168,6 +170,7 @@ namespace RhythmHunter.FightDemo
 
         private void ClearPresentation()
         {
+            if(cinematicFocus)cinematicFocus.SetEntranceWeight(0);
             bossReveal=1;
             if(entranceSmoke) Destroy(entranceSmoke);
             ConfigureDoorLayers(false);
@@ -182,7 +185,7 @@ namespace RhythmHunter.FightDemo
         {
             var s=Settings;
             smokeStartBeat=beat;bossReveal=0;
-            if(!s.doorExplosion) return;
+            if(!s.doorExplosionEnabled || !s.doorExplosion) return;
             var anchor=doorExplosionAnchor ? doorExplosionAnchor : doorSpawnAnchor;
             entranceSmoke=Instantiate(s.doorExplosion,(anchor ? anchor.position : transform.position)+s.doorExplosionOffset,s.doorExplosion.transform.rotation);
             entranceSmoke.name="BossDoorSmoke_Runtime";

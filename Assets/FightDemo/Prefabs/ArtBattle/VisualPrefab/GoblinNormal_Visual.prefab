@@ -140,6 +140,7 @@ MonoBehaviour:
   beatSource: {fileID: 0}
   fallbackBpm: 120
   useDrunkIdle: 0
+  idleAnimationName: Idle
   frames:
   - {fileID: 21300000, guid: 5df00a6b7582dc64392ca9af2af4a39e, type: 3}
   - {fileID: 21300000, guid: 0e3999aedd01dae4e9783c25805744b2, type: 3}
@@ -158,6 +159,8 @@ MonoBehaviour:
   phaseOffset: 0
   sequences:
   - animation: 0
+    animationName: 
+    customSourceId: 0
     frames:
     - {fileID: 21300000, guid: 20b884669a8bd924fb1fc26bbd6e4166, type: 3}
     - {fileID: 21300000, guid: 238b49c0824a5044482c2bb559a6c709, type: 3}
@@ -207,12 +210,14 @@ MonoBehaviour:
     attackEffectFrame: 2
     damageFrame: -1
   - animation: 5
+    animationName: 
+    customSourceId: 0
     frames:
     - {fileID: 21300000, guid: 1e68121e14b9c434ba672e9c6a20d3db, type: 3}
     - {fileID: 21300000, guid: 7c12fc7dc5158fb42bc5ca79946b73e4, type: 3}
     attachmentFrameIds:
-    - bc56f3f13f9a4c70b976ca8b41ae9edc
-    - 7837142f0b7d4159a1f089477d62f9d2
+    - 4d0e6bd6d03e499d853d78de79c02c45
+    - c7a2bb0d26a74fcab2855fa4d552c1ee
     frameEffects: []
     warningEffect:
       prefab: {fileID: 0}
@@ -233,3 +238,4 @@ MonoBehaviour:
     warningFrame: -1
     attackEffectFrame: -1
     damageFrame: -1
+  nextCustomSourceId: 1000

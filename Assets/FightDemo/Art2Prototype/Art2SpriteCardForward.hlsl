@@ -40,7 +40,7 @@
                 half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 // Material-uniform branch: sharp actors/foreground pay for one texture sample.
                 half focusWeight = FocusWallWeight(input.positionWS);
-                half blurRadius = max(_BlurRadius, FocusWallBlurAmount(input.positionWS));
+                half blurRadius = max(_CinematicBlur, max(_BlurRadius * (1-saturate(_FocusWallBlurProfile.z)), FocusWallBlurAmount(input.positionWS)));
                 if (blurRadius > 0.001h)
                 {
                     float2 stepUV = _MainTex_TexelSize.xy * blurRadius;

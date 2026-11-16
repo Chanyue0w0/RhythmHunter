@@ -79,6 +79,12 @@ namespace RhythmHunter.FightDemo
             if (entry.followAnchor) effect.transform.SetParent(anchor, true);
             effect.SetActive(true);
             PlayFrameSound(entry, effect.transform.position);
+            var spriteEffect=effect.GetComponent<FightBeatSpriteEffect>();
+            if(spriteEffect != null)
+            {
+                var slot=GetComponent<FightUnitSlot>() ?? GetComponentInParent<FightUnitSlot>();
+                spriteEffect.BindCaster(slot != null ? slot.CombatAnimator?.TargetRenderer : null);
+            }
             float lifetime = entry.limitLifetime
                 ? (float.IsNaN(entry.lifetimeSeconds) || float.IsInfinity(entry.lifetimeSeconds)
                     ? 1.5f : Mathf.Max(0.01f, entry.lifetimeSeconds))

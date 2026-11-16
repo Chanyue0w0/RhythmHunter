@@ -373,6 +373,7 @@ namespace RhythmHunter.FightDemo
         public int DamageEventCount { get; private set; }
 
         public bool IsPlaying => activeSequence != null;
+        public bool VisualSequenceComplete => visualSequence && visualSequenceComplete;
         public float ActiveSequenceElapsedBeats
         {
             get
