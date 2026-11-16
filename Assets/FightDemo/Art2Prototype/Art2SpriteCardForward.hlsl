@@ -86,5 +86,5 @@
                 }
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 rgb = FocusWallFog(rgb, focusWeight);
-                return half4(rgb, color.a);
+                return half4(rgb * (1 - saturate(_EntranceSilhouette)), color.a);
             }

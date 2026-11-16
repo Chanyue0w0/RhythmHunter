@@ -74,7 +74,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!HasTimelineArt) return;
             timelineTrack.sprite = timelineBarSprite;
-            timelineTrack.enabled = showTimelineBar;
+            timelineTrack.enabled = showTimelineBar && (fight == null || !fight.BossEntranceRunning);
             timelineTrack.color = Color.white;
             timelineTrack.rectTransform.sizeDelta = new Vector2(timelineWidth,
                 timelineWidth * timelineBarSprite.rect.height / timelineBarSprite.rect.width);
@@ -139,7 +139,7 @@ namespace RhythmHunter.FightDemo
                 stoneLockImage.enabled = stoneLockSprite != null && fight.TeamSkillActivationBlocked;
             }
             timelineRoot.anchoredPosition = new Vector2(0, timelineBottomOffset);
-            timelineTrack.enabled = showTimelineBar;
+            timelineTrack.enabled = showTimelineBar && (fight == null || !fight.BossEntranceRunning);
             timelineRoot.localScale = Vector3.one * Mathf.Max(.1f, timelineScale);
             timelineRoot.sizeDelta = new Vector2(timelineWidth, 64);
             timelineTrack.rectTransform.sizeDelta = new Vector2(timelineWidth, timelineBarHeight > 0 ? timelineBarHeight :

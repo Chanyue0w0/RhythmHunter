@@ -21,6 +21,8 @@ namespace RhythmHunter.FightDemo.Art2
         private Vector3 initialFocus;
         private float initialPitch, initialHeight, initialFov;
         private bool initialPerspective;
+        private Vector2 bossEntranceShake;
+        public void SetBossEntranceShake(Vector2 offset) => bossEntranceShake = offset;
 
         private void Awake()
         {
@@ -88,6 +90,7 @@ namespace RhythmHunter.FightDemo.Art2
             // Equal vertical framing at the focus plane in either projection.
             float distance = framingHalfHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
             transform.position = focus - transform.forward * distance;
+            transform.position += transform.right * bossEntranceShake.x + transform.up * bossEntranceShake.y;
             view.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
             view.transparencySortAxis = transform.forward;
         }

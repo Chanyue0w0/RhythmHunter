@@ -178,11 +178,15 @@ MonoBehaviour:
     animationSourceId: -1
     damagePerHit: 1
     selectionWeight: 40
+    healOnEffectFrame: 0
+    healingEffectPrefab: {fileID: 0}
   - name: HeavyStrike
     animation: 2
     animationSourceId: -1
     damagePerHit: 2
     selectionWeight: 40
+    healOnEffectFrame: 0
+    healingEffectPrefab: {fileID: 0}
   - name: EatFruit
     animation: 0
     animationSourceId: 1000
@@ -334,14 +338,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: nextCustomSourceId
-      value: 1001
+      value: 1003
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].damageFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].damageFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].damageFrame
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
@@ -349,15 +361,47 @@ PrefabInstance:
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].warningFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].warningFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].animationName
       value: EatFruit
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].animationName
+      value: Jump
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].animationName
+      value: OpenIdle
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].customSourceId
       value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].customSourceId
+      value: 1001
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].customSourceId
+      value: 1002
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].framesPerSecond
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].framesPerSecond
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].framesPerSecond
       value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
@@ -367,6 +411,22 @@ PrefabInstance:
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].frames.Array.size
       value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].attackEffectFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].frames.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].attackEffectFrame
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].frames.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[3].frames.Array.data[0]'
@@ -409,6 +469,38 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 51b9d461b3de5ce4bab85bd3f8ebd856, type: 3}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[0]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 20c56f717425d6341adac9633d2181b6, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[1]'
+      value: 
+      objectReference: {fileID: 21300000, guid: b6624db4c36427d459ef80519c906454, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[2]'
+      value: 
+      objectReference: {fileID: 21300000, guid: d849f23ba5b6ed84ea43115ccd1d2463, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[3]'
+      value: 
+      objectReference: {fileID: 21300000, guid: c1551a9ada5b0a3468736cb06cbee1f7, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[4]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 76137b7ffb318124b9c5568015f1fb99, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[5]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 79bda31447dcbc34784a8d7a39d67bd6, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frames.Array.data[6]'
+      value: 
+      objectReference: {fileID: 21300000, guid: eb7776da1295f0644b4a33d8d916cb3c, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[5].frames.Array.data[0]'
+      value: 
+      objectReference: {fileID: 21300000, guid: c9a49997adf8cb345adc09710f6e8303, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[3].frames.Array.data[10]'
       value: 
       objectReference: {fileID: 21300000, guid: 1e88e8aa69510f443823715e9fd77313, type: 3}
@@ -445,11 +537,35 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].useFrameBeatDurations
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].useFrameBeatDurations
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].frameEffects.Array.size
       value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].frameEffects.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].frameEffects.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].warningEffect.soundVolume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].warningEffect.soundVolume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].warningEffect.soundVolume
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
@@ -458,6 +574,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].warningEffect.lifetimeSeconds
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].frameBeatDurations.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[4].warningEffect.lifetimeSeconds
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].frameBeatDurations.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[5].warningEffect.lifetimeSeconds
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
@@ -559,6 +691,38 @@ PrefabInstance:
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[3].frameBeatDurations.Array.data[9]'
       value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[0]'
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[1]'
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[2]'
+      value: 0.34
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[3]'
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[4]'
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[5]'
+      value: 0.34
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[4].frameBeatDurations.Array.data[6]'
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[5].frameBeatDurations.Array.data[0]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[3].frameBeatDurations.Array.data[10]'
@@ -700,6 +864,10 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8576884855007983579, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c02f8d032f05c5e47965bc7238c28198, type: 3}
     - target: {fileID: 8946446362606103679, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.2

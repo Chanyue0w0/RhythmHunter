@@ -93,7 +93,19 @@ namespace RhythmHunter.FightDemo
             OvertimeRecoveryReductionBeats = stage.OvertimeRecoveryReductionBeats;
             OvertimeMinimumRecoveryBeats = stage.OvertimeMinimumRecoveryBeats;
             enemyPrefabs = (FightCharacterDefinition[])snapshot[0].Clone();
+            deferOpeningEnemies = stage.BossStage && stage.BossEntrance != null && stage.BossEntrance.enabled && GetComponent<FightBossEntrance>() is FightBossEntrance intro && intro.enabled && intro.gameObject.activeInHierarchy;
             error = null; return true;
+        }
+
+        private bool deferOpeningEnemies;
+        public bool OpeningEnemiesDeferred => deferOpeningEnemies;
+        public void SpawnBossOpeningEnemies()
+        {
+            if (!deferOpeningEnemies) return;
+            deferOpeningEnemies = false;
+            activeEnemies.Clear();
+            SpawnSide(enemySpawnSlots, enemyPrefabs, FightUnitSlot.UnitTeam.Enemy, activeEnemies);
+            RosterChanged?.Invoke();
         }
 
         internal bool SpawnNextEnemyWave(int waveIndex)
@@ -168,7 +180,8 @@ namespace RhythmHunter.FightDemo
             activeHeroes.Clear();
             activeEnemies.Clear();
             SpawnSide(heroSpawnSlots, heroPrefabs, FightUnitSlot.UnitTeam.Hero, activeHeroes);
-            SpawnSide(enemySpawnSlots, enemyPrefabs, FightUnitSlot.UnitTeam.Enemy, activeEnemies);
+            if (!deferOpeningEnemies) SpawnSide(enemySpawnSlots, enemyPrefabs, FightUnitSlot.UnitTeam.Enemy, activeEnemies);
+            else foreach (var slot in enemySpawnSlots) if (slot != null) slot.ClearCharacter();
             RosterChanged?.Invoke();
         }
 

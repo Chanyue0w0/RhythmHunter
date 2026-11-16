@@ -631,6 +631,12 @@ namespace RhythmHunter.FightDemo
             if (!EqualBeats || timelineRoot == null)
                 return;
 
+            if (fight != null && fight.BossEntranceRunning)
+            {
+                foreach (Image point in approachingPoints) point.enabled = false;
+                return;
+            }
+
             bool ready = beatClock != null && beatClock.IsPlaying && beatClock.HasTimingAnchor
                 && beatClock.MillisecondsPerBeat > 0;
             int timelineMs = 0;

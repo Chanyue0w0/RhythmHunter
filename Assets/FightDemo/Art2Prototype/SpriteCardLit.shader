@@ -3,6 +3,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
     Properties
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
+        [PerRendererData] _EntranceSilhouette ("Boss Entrance Silhouette", Range(0,1)) = 0
         _ShadowCutoff ("Shadow Alpha Cutoff", Range(0.001,1)) = 0.1
         [Toggle] _UseNormalMap ("Use Surface Normal Map", Float) = 0
         [Normal] _NormalMap ("Surface Normal Map (same canvas as sprite)", 2D) = "bump" {}
@@ -39,6 +40,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 half _AmbientStrength, _LightInfluence, _EmissionStrength, _BlurRadius, _AtmosphereMix, _ShadowCutoff;
                 half _UseNormalMap, _NormalStrength, _DiffuseFloor, _SurfaceDebugMode;
                 half _FocusSaturation, _FocusContrast;
+                half _EntranceSilhouette;
             CBUFFER_END
         ENDHLSL
         Pass

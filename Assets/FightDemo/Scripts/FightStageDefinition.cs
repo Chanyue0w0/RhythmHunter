@@ -22,6 +22,47 @@ namespace RhythmHunter.FightDemo
         }
         [SerializeField] private string stageId = "Stage01";
         [SerializeField] private string displayName = "Stage 1";
+        [Header("Boss Entrance")]
+        [SerializeField] private bool bossStage;
+        public bool BossStage => bossStage;
+        [Serializable]
+        public sealed class BossEntranceSettings
+        {
+            public bool enabled = true;
+            [Min(0)] public float waitBeforeDoorBeats = 6;
+            [Min(.01f)] public float doorOpenBeats = 1;
+            public string openingAnimationName = "OpenIdle";
+            [Min(0)] public float openingIdleBeats = 2;
+            [Min(.05f)] public float jumpBeats = 4;
+            [Range(.05f,.95f)] public float ascentFraction = .4f;
+            [Min(0)] public float extraJumpHeight = 2;
+            [Min(0)] public float landingWaitBeats = 4;
+            public GameObject landingEffect;
+            public Vector3 landingEffectOffset;
+            [Header("Entrance presentation")]
+            public bool blackSilhouette = true;
+            public bool doorLightEnabled = true;
+            [ColorUsage(false, true)] public Color doorLightColor = new Color(1f, .78f, .42f, 1f);
+            [Min(0)] public float doorLightIntensity = 12;
+            [Min(1)] public float doorLightRange = 25;
+            [Range(1, 170)] public float doorLightAngle = 65;
+            public Vector3 doorLightOffset = new Vector3(0, 2, 0);
+            public Vector3 doorLightEuler = new Vector3(25, 180, 0);
+            [Min(.01f)] public float doorLightFadeOutBeats = 1;
+            [Min(0)] public float fanBrightness = 1.5f;
+            [Min(.1f)] public float fanLength = 12;
+            [Min(.1f)] public float fanEndWidth = 10;
+            [Min(0)] public float fanStartWidth = 1;
+            public float fanYaw = 180;
+            public float fanGroundY = .04f;
+            public bool landingShakeEnabled = true;
+            [Min(0)] public float landingShakeBeats = 6;
+            public Vector2 landingShakeAmplitude = new Vector2(.16f, .12f);
+            [Min(.1f)] public float landingShakeCyclesPerBeat = 5;
+            [Min(.1f)] public float landingShakeDecay = 2;
+        }
+        [SerializeField] private BossEntranceSettings bossEntrance = new();
+        public BossEntranceSettings BossEntrance => bossEntrance;
         [Tooltip("Existing FMOD song event. A Stage plays one song across all waves.")]
         [SerializeField] private string musicEventPath;
         [Tooltip("Non-Boss stages only. Normal_End ends regular time; overtime clears only the current combat Wave.")]

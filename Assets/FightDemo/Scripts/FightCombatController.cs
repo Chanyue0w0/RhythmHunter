@@ -152,9 +152,11 @@ namespace RhythmHunter.FightDemo
         private bool entranceMusicStarted, entranceDrinking;
         private double entranceIdleDuration;
         private FightWaveEntrance waveEntrance;
+        private FightBossEntrance bossEntrance;
+        public bool BossEntranceRunning => bossEntrance != null && bossEntrance.BlocksBattle;
         public bool WaveEntranceRunning => waveEntrance != null && waveEntrance.IsRunning;
         public bool WaveTransitionActive => AwaitingNextWave || WaveEntranceRunning;
-        public bool BattleEntranceRunning => entrancePending || WaveEntranceRunning;
+        public bool BattleEntranceRunning => entrancePending || WaveEntranceRunning || BossEntranceRunning;
 
         private void BeginBattleEntrance()
         {
@@ -209,6 +211,7 @@ namespace RhythmHunter.FightDemo
         private void CompleteBattleEntrance()
         {
             if (IsPaused || TimingCalibrationActive || WaveEntranceRunning) return;
+            if (bossEntrance != null && bossEntrance.TryBegin()) return;
             entrancePending = false;
             if (TryBeginBattle())
             {
@@ -418,6 +421,7 @@ namespace RhythmHunter.FightDemo
         private void Awake()
         {
             waveEntrance = GetComponent<FightWaveEntrance>();
+            bossEntrance = GetComponent<FightBossEntrance>();
             EnsureStatusIconPool();
             EnsureDamageNumberPool();
             if (autoPlayBattleEntrance) beatClock?.SetAutomaticPlayback(false);
@@ -516,6 +520,15 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
+            if (BossEntranceRunning)
+            {
+                if (!battleEnded && !IsPaused && !TimingCalibrationActive && rhythmJudge != null && beatClock != null && beatClock.IsPlaying)
+                {
+                    if(inputRouter!=null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
+                    ApplyTransitionRhythmJudgement(rhythmJudge.JudgeInput(inputRouter != null ? inputRouter.CurrentInputAgeMs : 0));
+                }
+                return;
+            }
             if (DefeatSlowMotionActive && (!DefeatInputGraceActive || command == FightInputRouter.HeroCommand.TeamSkill || command == FightInputRouter.HeroCommand.Ultimate)) return;
             if (battleEnded || AwaitingBattleStart || TimingCalibrationActive || IsPaused ||
                 (UsesEqualBeats && latestCombatBeat <= resumeAfterCalibrationBeat))

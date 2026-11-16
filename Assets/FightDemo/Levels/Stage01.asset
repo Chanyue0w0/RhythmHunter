@@ -14,6 +14,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
   stageId: Stage01
   displayName: Stage 1
+  bossStage: 1
+  bossEntrance:
+    enabled: 1
+    waitBeforeDoorBeats: 6
+    doorOpenBeats: 1
+    openingAnimationName: OpenIdle
+    openingIdleBeats: 2
+    jumpBeats: 1
+    ascentFraction: 0.5
+    extraJumpHeight: 2
+    landingWaitBeats: 4
+    landingEffect: {fileID: 2110487180908037544, guid: 8660c1059a97e4542b513bc35d681349, type: 3}
+    landingEffectOffset: {x: 0, y: 0, z: 0}
+    blackSilhouette: 1
+    doorLightEnabled: 1
+    doorLightColor: {r: 0.09095693, g: 0.087839924, b: 0.13397168, a: 1}
+    doorLightIntensity: 12
+    doorLightRange: 25
+    doorLightAngle: 65
+    doorLightOffset: {x: 0, y: 2, z: 0}
+    doorLightEuler: {x: 25, y: 180, z: 0}
+    doorLightFadeOutBeats: 1
+    fanBrightness: 1.5
+    fanLength: 12
+    fanEndWidth: 10
+    fanStartWidth: 1
+    fanYaw: 180
+    fanGroundY: 0.04
+    landingShakeEnabled: 1
+    landingShakeBeats: 6
+    landingShakeAmplitude: {x: 0.16, y: 0.12}
+    landingShakeCyclesPerBeat: 5
+    landingShakeDecay: 2
   musicEventPath: event:/Ritual Slam _120_3
   useNormalEndDeadline: 1
   overtimeOnlyOnFinalCombatWave: 1
