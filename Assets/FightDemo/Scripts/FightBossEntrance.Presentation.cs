@@ -8,6 +8,15 @@ namespace RhythmHunter.FightDemo
     public sealed partial class FightBossEntrance
     {
         [SerializeField] private Shader doorFanShader;
+        [SerializeField] private Transform doorExplosionAnchor;
+        [SerializeField] private Transform doorFocusAnchor;
+        private GameObject entranceSmoke;
+        private ParticleSystem[] smokeParticles;
+        private float smokeDuration, smokeSimulated;
+        private double smokeStartBeat=-1;
+        private double lastPresentationBeat;
+        private float bossReveal=1;
+        private double DoorHoldBeats => System.Math.Max(Settings.bossRevealBeats,System.Math.Max(Settings.openingIdleBeats,Settings.doorExplosion ? Settings.doorExplosionBeats : 0));
         private readonly HashSet<Entry> entryIdleRestored = new();
         private MaterialPropertyBlock silhouetteBlock;
         private static readonly int SilhouetteId = Shader.PropertyToID("_EntranceSilhouette");
@@ -55,6 +64,7 @@ namespace RhythmHunter.FightDemo
             silhouetteBlock ??= new MaterialPropertyBlock();
             renderer.GetPropertyBlock(silhouetteBlock);
             silhouetteBlock.SetFloat(SilhouetteId, black ? 1 : 0);
+            silhouetteBlock.SetFloat("_EntranceReveal", bossReveal);
             renderer.SetPropertyBlock(silhouetteBlock);
         }
 
@@ -85,9 +95,11 @@ namespace RhythmHunter.FightDemo
 
         private void UpdatePresentation(double beat)
         {
+            lastPresentationBeat=beat;
             var s = Settings;
             double elapsed = beat-startBeat;
-            double jumpAt = s.waitBeforeDoorBeats+s.doorOpenBeats+s.openingIdleBeats;
+            double jumpAt = s.waitBeforeDoorBeats+s.doorOpenBeats+DoorHoldBeats;
+            UpdateDoorExplosion(beat);
             float lightWeight = s.doorLightEnabled ? Mathf.Clamp01((float)((elapsed-s.waitBeforeDoorBeats)/Mathf.Max(.01f,s.doorOpenBeats))) : 0;
             if(elapsed>=jumpAt) lightWeight *= 1-Mathf.Clamp01((float)((elapsed-jumpAt)/Mathf.Max(.01f,s.doorLightFadeOutBeats)));
             if(lightWeight>0 && !doorLightingRoot) CreateDoorLighting();
@@ -131,25 +143,92 @@ namespace RhythmHunter.FightDemo
             }
             if(!cameraController && view) cameraController=view.GetComponent<Art2CameraController>();
             if(!cameraController) return;
+            float focusProgress=Mathf.SmoothStep(0,1,Mathf.Clamp01((float)((elapsed-s.waitBeforeDoorBeats+s.doorFocusLeadBeats)/Mathf.Max(.01f,s.doorFocusLeadBeats))));
+            if(elapsed>=jumpAt)focusProgress*=1-Mathf.SmoothStep(0,1,Mathf.Clamp01((float)((elapsed-jumpAt)/Mathf.Max(.01f,s.doorFocusReturnBeats))));
+            if(!s.doorFocusEnabled)focusProgress=0;
+            var focusTarget=doorFocusAnchor ? doorFocusAnchor.position : doorSpawnAnchor ? doorSpawnAnchor.position : transform.position;
+            cameraController.SetBossEntranceFocus(focusTarget+s.doorFocusOffset,s.doorFocusWeight*focusProgress,s.doorFocusZoom*focusProgress);
             double shakeElapsed=beat-shakeStartBeat;
             Vector2 offset=Vector2.zero;
+            double doorShakeTime=elapsed-s.waitBeforeDoorBeats;
+            if(s.doorShakeEnabled && doorShakeTime>=0 && doorShakeTime<s.doorShakeBeats)
+            {
+                float weight=Mathf.Pow(1-(float)doorShakeTime/Mathf.Max(.01f,s.doorShakeBeats),s.doorShakeDecay);
+                float phase=(float)doorShakeTime*Mathf.PI*2*s.doorShakeCyclesPerBeat;
+                offset=Vector2.Scale(s.doorShakeAmplitude,new Vector2(Mathf.Sin(phase),Mathf.Cos(phase*1.23f)))*weight;
+            }
             if(s.landingShakeEnabled && shakeStartBeat>=0 && shakeElapsed>=0 && shakeElapsed<s.landingShakeBeats)
             {
                 float weight=Mathf.Pow(1-(float)shakeElapsed/Mathf.Max(.01f,s.landingShakeBeats),s.landingShakeDecay);
                 float phase=(float)shakeElapsed*Mathf.PI*2*s.landingShakeCyclesPerBeat;
-                offset=Vector2.Scale(s.landingShakeAmplitude,new Vector2(Mathf.Sin(phase),Mathf.Cos(phase*1.23f)))*weight;
+                offset+=Vector2.Scale(s.landingShakeAmplitude,new Vector2(Mathf.Sin(phase),Mathf.Cos(phase*1.23f)))*weight;
             }
             cameraController.SetBossEntranceShake(offset);
         }
 
         private void ClearPresentation()
         {
+            bossReveal=1;
+            if(entranceSmoke) Destroy(entranceSmoke);
             ConfigureDoorLayers(false);
             foreach(var entry in entries) ApplySilhouette(entry,false);
-            if(cameraController) cameraController.SetBossEntranceShake(Vector2.zero);
+            if(cameraController) { cameraController.SetBossEntranceShake(Vector2.zero); cameraController.SetBossEntranceFocus(Vector3.zero,0,0); }
             if(doorLightingRoot) Destroy(doorLightingRoot);
             if(fanMesh) Destroy(fanMesh);
             if(fanMaterial) Destroy(fanMaterial);
+        }
+
+        private void SpawnDoorExplosion(double beat)
+        {
+            var s=Settings;
+            smokeStartBeat=beat;bossReveal=0;
+            if(!s.doorExplosion) return;
+            var anchor=doorExplosionAnchor ? doorExplosionAnchor : doorSpawnAnchor;
+            entranceSmoke=Instantiate(s.doorExplosion,(anchor ? anchor.position : transform.position)+s.doorExplosionOffset,s.doorExplosion.transform.rotation);
+            entranceSmoke.name="BossDoorSmoke_Runtime";
+            entranceSmoke.transform.localScale*=s.doorExplosionScale;
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(entranceSmoke,gameObject.scene);
+            var effectSettings=entranceSmoke.GetComponent<FightEffectSettings>();
+            if(effectSettings) effectSettings.destroyAfterParticles=false; // This entrance owns the beat-driven completion.
+            var owner=entranceSmoke.GetComponent<FightBattleEffect>() ?? entranceSmoke.AddComponent<FightBattleEffect>();
+            owner.Configure(fight,false,0);
+            smokeParticles=entranceSmoke.GetComponentsInChildren<ParticleSystem>(true);
+            smokeDuration=.01f;
+            foreach(var particle in smokeParticles)
+            {
+                var main=particle.main;
+                main.loop=false;main.stopAction=ParticleSystemStopAction.None;main.cullingMode=ParticleSystemCullingMode.AlwaysSimulate;
+                smokeDuration=Mathf.Max(smokeDuration,main.startDelay.constantMax+main.duration+main.startLifetime.constantMax);
+                particle.Stop(false,ParticleSystemStopBehavior.StopEmittingAndClear);
+                particle.Simulate(0,false,true,false);
+            }
+            smokeStartBeat=beat;smokeSimulated=0;bossReveal=0;
+            UpdateDoorExplosion(beat);
+        }
+
+        private void UpdateDoorExplosion(double beat)
+        {
+            if(smokeStartBeat<0) return;
+            float progress=Mathf.Clamp01((float)((beat-smokeStartBeat)/Mathf.Max(.1f,Settings.doorExplosionBeats)));
+            bossReveal=Mathf.Clamp01((float)((beat-smokeStartBeat)/Mathf.Max(.01f,Settings.bossRevealBeats)));
+            if(!entranceSmoke) return;
+            float target=Mathf.Max(.01f,progress*smokeDuration);
+            foreach(var particle in smokeParticles)
+                if(particle) particle.Simulate(Mathf.Max(0,target-smokeSimulated),false,false,false);
+            smokeSimulated=target;
+            if(progress>=1) { entranceSmoke.GetComponent<FightBattleEffect>().Cancel(); entranceSmoke=null; }
+        }
+
+        private void SpawnLandingExplosion(Entry entry)
+        {
+            var s=Settings;
+            if(!s.landingExplosionEnabled || !s.doorExplosion) return;
+            var effect=Instantiate(s.doorExplosion,entry.destination+entry.footOffset+s.landingExplosionOffset,s.doorExplosion.transform.rotation);
+            effect.name="BossLandingSmoke_Runtime";
+            effect.transform.localScale*=s.landingExplosionScale;
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(effect,gameObject.scene);
+            var owner=effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>();
+            owner.Configure(fight,false,5);
         }
     }
 }

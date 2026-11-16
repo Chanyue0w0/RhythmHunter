@@ -28,6 +28,22 @@ MonoBehaviour:
     landingWaitBeats: 4
     landingEffect: {fileID: 2110487180908037544, guid: 8660c1059a97e4542b513bc35d681349, type: 3}
     landingEffectOffset: {x: 0, y: 0, z: 0}
+    doorExplosion: {fileID: 5292981524694603679, guid: a3dd949486459684a818f410e0242b9b, type: 3}
+    doorExplosionBeats: 2
+    bossRevealBeats: 1
+    doorExplosionOffset: {x: 0, y: 1.2, z: 0}
+    doorExplosionScale: 1.2
+    doorFocusEnabled: 1
+    doorFocusLeadBeats: 2
+    doorFocusWeight: 0.25
+    doorFocusZoom: 0.1
+    doorFocusOffset: {x: 0, y: 1, z: 0}
+    doorFocusReturnBeats: 1
+    doorShakeEnabled: 1
+    doorShakeBeats: 2
+    doorShakeAmplitude: {x: 0.08, y: 0.06}
+    doorShakeCyclesPerBeat: 5
+    doorShakeDecay: 2
     blackSilhouette: 1
     doorLightEnabled: 1
     doorLightColor: {r: 0.09095693, g: 0.087839924, b: 0.13397168, a: 1}

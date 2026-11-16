@@ -41,6 +41,27 @@ namespace RhythmHunter.FightDemo
             [Min(0)] public float landingWaitBeats = 4;
             public GameObject landingEffect;
             public Vector3 landingEffectOffset;
+            [Header("Door reveal and camera")]
+            public GameObject doorExplosion;
+            [Min(.1f)] public float doorExplosionBeats = 2;
+            [Tooltip("Fade from transparent to fully visible immediately after spawning, independently of smoke duration.")]
+            [Min(.01f)] public float bossRevealBeats = 1;
+            public Vector3 doorExplosionOffset;
+            [Min(.01f)] public float doorExplosionScale = 1;
+            public bool landingExplosionEnabled = true;
+            public Vector3 landingExplosionOffset;
+            [Min(.01f)] public float landingExplosionScale = 1;
+            public bool doorFocusEnabled = true;
+            [Min(.01f)] public float doorFocusLeadBeats = 2;
+            [Range(0,1)] public float doorFocusWeight = .25f;
+            [Range(0,.5f)] public float doorFocusZoom = .1f;
+            public Vector3 doorFocusOffset = new Vector3(0,1,0);
+            [Min(.01f)] public float doorFocusReturnBeats = 1;
+            public bool doorShakeEnabled = true;
+            [Min(.01f)] public float doorShakeBeats = 2;
+            public Vector2 doorShakeAmplitude = new Vector2(.08f,.06f);
+            [Min(.1f)] public float doorShakeCyclesPerBeat = 5;
+            [Min(.1f)] public float doorShakeDecay = 2;
             [Header("Entrance presentation")]
             public bool blackSilhouette = true;
             public bool doorLightEnabled = true;

@@ -19,6 +19,8 @@ namespace RhythmHunter.FightDemoEditor
         static Vector3 pausedPosition;
         static double completedAt;
         static bool sawShake;
+        static bool sawSmoke, sawReveal, sawFocus, sawSmokeParticles;
+        static bool sawPartialReveal, sawLandingExplosion;
         static readonly Dictionary<FightUnitSlot,Vector3> positions=new();
         static FightBossEntranceValidation()=>EditorApplication.update+=Tick;
         static void Check(bool value,string message){if(!value)throw new Exception(message);}
@@ -56,7 +58,30 @@ namespace RhythmHunter.FightDemoEditor
                         foreach(var slot in roster.ActiveEnemies)Check(slot.CombatAnimator.ActiveAnimation==slot.CombatAnimator.FindSequence("OpenIdle").Animation,"Wrong opening animation");
                         var block=new MaterialPropertyBlock();
                         roster.ActiveEnemies[0].CombatAnimator.TargetRenderer.GetPropertyBlock(block);
+                        float reveal=block.GetFloat("_EntranceReveal");
+                        if(reveal>.1f && reveal<.9f)sawPartialReveal=true;
+                        const System.Reflection.BindingFlags instanceFlags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+                        {
+                            double revealStart=(double)typeof(FightBossEntrance).GetField("smokeStartBeat",instanceFlags).GetValue(intro);
+                            double renderedBeat=(double)typeof(FightBossEntrance).GetField("lastPresentationBeat",instanceFlags).GetValue(intro);
+                            float expectedReveal=Mathf.Clamp01((float)(renderedBeat-revealStart));
+                            Check(Mathf.Abs(reveal-expectedReveal)<.001f,$"Reveal does not follow one beat fade: actual={reveal}, expected={expectedReveal}");
+                        }
                         Check(block.GetFloat("_EntranceSilhouette")==1,"Opening silhouette missing");
+                        var smoke=GameObject.Find("BossDoorSmoke_Runtime");
+                        if(smoke && !sawSmokeParticles && smoke.GetComponentsInChildren<ParticleSystem>().Any(p=>p.particleCount>0 && p.time>.3f))
+                        { sawSmokeParticles=true;ScreenCapture.CaptureScreenshot("Temp/BossDoorSmokePreview.png"); }
+                        if(!sawDoor || !sawSmoke)
+                        {
+                            Check(smoke,"Boss appeared without simultaneous smoke");
+                            Check(block.GetFloat("_EntranceReveal")<1,"Boss flashed before smoke reveal");
+                            sawSmoke=true;
+                        }
+                        if(block.GetFloat("_EntranceReveal")>=.99f && !sawReveal)
+                        { sawReveal=true; ScreenCapture.CaptureScreenshot("Temp/BossDoorRevealedPreview.png"); }
+                        var focusCamera=UnityEngine.Object.FindFirstObjectByType<RhythmHunter.FightDemo.Art2.Art2CameraController>();
+                        float focusWeight=(float)typeof(RhythmHunter.FightDemo.Art2.Art2CameraController).GetField("bossFocusWeight",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(focusCamera);
+                        if(focusWeight>0)sawFocus=true;
                         Check(UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None).Any(l=>l.name=="DoorSpotLight"&&l.intensity>0),"Door light missing");
                         var doorLight=UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None).First(l=>l.name=="DoorSpotLight");
                         Check(doorLight.shadows!=LightShadows.None,"Door shadows disabled");
@@ -84,6 +109,11 @@ namespace RhythmHunter.FightDemoEditor
                     }
                     if(intro.Phase=="Landing recovery")
                     {
+                        if(!sawLand)
+                        {
+                            Check(GameObject.Find("BossLandingSmoke_Runtime"),"Landing explosion missing");
+                            sawLandingExplosion=true;
+                        }
                         if(!sawLand)Check(UnityEngine.Object.FindObjectsByType<FightBattleEffect>(FindObjectsSortMode.None).Any(e=>e.name.StartsWith("GroundSmoke")),"Landing smoke missing");
                         sawLand=true;
                         var camera=UnityEngine.Object.FindFirstObjectByType<RhythmHunter.FightDemo.Art2.Art2CameraController>();
@@ -101,21 +131,25 @@ namespace RhythmHunter.FightDemoEditor
                 if(completedAt==0)completedAt=EditorApplication.timeSinceStartup;
                 if(EditorApplication.timeSinceStartup-completedAt<3)return;
                 Check(sawShake,"Landing shake missing");
+                Check(sawSmoke && sawReveal && sawFocus && sawSmokeParticles,"Smoke particles, reveal or focus missing");
+                Check(sawPartialReveal && sawLandingExplosion,"One-beat fade or landing explosion missing");
                 foreach(string shaderName in new[]{"RhythmHunter/Art2/BossDoorFan","RhythmHunter/Art2/SpriteCardLit"})
                     Check(!ShaderUtil.ShaderHasError(Shader.Find(shaderName)),"Shader compile error: "+shaderName);
                 var cameraAfter=UnityEngine.Object.FindFirstObjectByType<RhythmHunter.FightDemo.Art2.Art2CameraController>();
                 var offsetAfter=(Vector2)typeof(RhythmHunter.FightDemo.Art2.Art2CameraController).GetField("bossEntranceShake",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(cameraAfter);
                 Check(offsetAfter==Vector2.zero,"Shake did not finish");
+                Check((float)typeof(RhythmHunter.FightDemo.Art2.Art2CameraController).GetField("bossFocusWeight",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(cameraAfter)==0,"Camera focus not restored");
+                Check(!GameObject.Find("BossDoorSmoke_Runtime"),"Door smoke not cleaned up");
                 Check(sawHidden&&sawDoor&&sawJump&&sawLand,$"Missing intro phases hidden={sawHidden} door={sawDoor} jump={sawJump} land={sawLand}");
                 Check(pauseStep==3,"Pause was not tested");
                 Check(roster.ActiveEnemies.Count>0,"Boss never spawned");
                 foreach(var slot in roster.ActiveEnemies)
                     if(positions.TryGetValue(slot,out var expected))Check(Vector3.Distance(slot.ActorRoot.localPosition,expected)<.001f,"Landing changed slot position");
-                File.WriteAllText(Result,"PASS: black silhouette and door light; takeoff restores ordinary Idle and color; landing shake starts and returns to zero; deferred spawn, pause/resume, beat UI, smoke, MP/input locks and battle unlock.");
+                File.WriteAllText(Result,"PASS: simultaneous Boss/smoke, immediate linear one-beat opacity fade, second smoke on landing; camera restore, smoke cleanup, silhouette/door shadows/hero exclusion, takeoff Idle, landing shake and input locks.");
                 Finish();
             }
             catch(Exception e){File.WriteAllText(Result,"FAIL: "+e);Finish();}
         }
-        static void Finish(){File.Delete(Request);EditorApplication.isPlaying=false;deadline=completedAt=0;positions.Clear();pauseStep=0;sawShake=sawHidden=sawDoor=sawJump=sawLand=false;}
+        static void Finish(){File.Delete(Request);EditorApplication.isPlaying=false;deadline=completedAt=0;positions.Clear();pauseStep=0;sawPartialReveal=sawLandingExplosion=sawSmokeParticles=sawSmoke=sawReveal=sawFocus=sawShake=sawHidden=sawDoor=sawJump=sawLand=false;}
     }
 }

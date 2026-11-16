@@ -22,6 +22,10 @@ namespace RhythmHunter.FightDemo.Art2
         private float initialPitch, initialHeight, initialFov;
         private bool initialPerspective;
         private Vector2 bossEntranceShake;
+        private Vector3 bossFocusTarget;
+        private float bossFocusWeight, bossZoom;
+        public void SetBossEntranceFocus(Vector3 target, float weight, float zoom)
+        { bossFocusTarget=target; bossFocusWeight=Mathf.Clamp01(weight); bossZoom=Mathf.Clamp(zoom,0,.5f); }
         public void SetBossEntranceShake(Vector2 offset) => bossEntranceShake = offset;
 
         private void Awake()
@@ -84,12 +88,13 @@ namespace RhythmHunter.FightDemo.Art2
         {
             if (!view) view = GetComponent<Camera>();
             view.orthographic = !perspective;
-            view.orthographicSize = framingHalfHeight;
+            float effectiveHeight=framingHalfHeight*(1-bossZoom);
+            view.orthographicSize = effectiveHeight;
             view.fieldOfView = fieldOfView;
             transform.rotation = Quaternion.Euler(pitch, 0, 0);
             // Equal vertical framing at the focus plane in either projection.
-            float distance = framingHalfHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
-            transform.position = focus - transform.forward * distance;
+            float distance = effectiveHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
+            transform.position = Vector3.Lerp(focus,bossFocusTarget,bossFocusWeight) - transform.forward * distance;
             transform.position += transform.right * bossEntranceShake.x + transform.up * bossEntranceShake.y;
             view.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
             view.transparencySortAxis = transform.forward;

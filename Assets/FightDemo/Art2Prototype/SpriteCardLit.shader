@@ -4,6 +4,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         [PerRendererData] _EntranceSilhouette ("Boss Entrance Silhouette", Range(0,1)) = 0
+        [PerRendererData] _EntranceReveal ("Boss Entrance Reveal", Range(0,1)) = 1
         _ShadowCutoff ("Shadow Alpha Cutoff", Range(0.001,1)) = 0.1
         [Toggle] _UseNormalMap ("Use Surface Normal Map", Float) = 0
         [Normal] _NormalMap ("Surface Normal Map (same canvas as sprite)", 2D) = "bump" {}
@@ -41,6 +42,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 half _UseNormalMap, _NormalStrength, _DiffuseFloor, _SurfaceDebugMode;
                 half _FocusSaturation, _FocusContrast;
                 half _EntranceSilhouette;
+                half _EntranceReveal;
             CBUFFER_END
         ENDHLSL
         Pass
@@ -154,7 +156,7 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 output.positionCS = ApplyShadowClamping(TransformWorldToHClip(
                     ApplyShadowBias(positionWS, normalWS, lightDirectionWS)));
                 output.uv = input.uv;
-                output.alpha = input.color.a * unity_SpriteColor.a;
+                output.alpha = input.color.a * unity_SpriteColor.a * saturate(_EntranceReveal);
                 return output;
             }
             half4 ShadowFrag(ShadowVaryings input) : SV_Target

@@ -56,6 +56,7 @@
                     color = half4(sum.rgb / max(sum.a, 0.0001h), sum.a / 16);
                 }
                 color *= input.color;
+                color.a *= saturate(_EntranceReveal);
                 half luminance = dot(color.rgb, half3(0.2126h, 0.7152h, 0.0722h));
                 color.rgb = lerp(luminance.xxx, color.rgb, _FocusSaturation);
                 color.rgb = lerp(half3(0.18h, 0.18h, 0.18h), color.rgb, _FocusContrast);

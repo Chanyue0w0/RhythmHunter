@@ -60,7 +60,7 @@ namespace RhythmHunter.FightDemo
             var s=Settings;
             double time=Math.Max(0,beat-startBeat);
             double openAt=Math.Max(0,s.waitBeforeDoorBeats), spawnAt=openAt+Math.Max(.01f,s.doorOpenBeats);
-            double jumpAt=spawnAt+Math.Max(0,s.openingIdleBeats), landAt=jumpAt+Math.Max(.05f,s.jumpBeats);
+            double jumpAt=spawnAt+DoorHoldBeats, landAt=jumpAt+Math.Max(.05f,s.jumpBeats);
             Phase="Waiting to open door";
             if(time<openAt) return;
             Phase="Opening door";
@@ -69,6 +69,7 @@ namespace RhythmHunter.FightDemo
             if(!spawned)
             {
                 spawned=true; roster.SpawnBossOpeningEnemies();
+                SpawnDoorExplosion(beat);
                 foreach(var slot in roster.ActiveEnemies)
                 {
                     if(slot==null || slot.ActorInstance==null || slot.ActorRoot==null) continue;
@@ -136,6 +137,7 @@ namespace RhythmHunter.FightDemo
                 foreach(var entry in entries)
                 {
                     entry.root.localPosition=entry.restLocal;
+                    SpawnLandingExplosion(entry);
                     if(s.landingEffect)
                     {
                         var effect=Instantiate(s.landingEffect,entry.destination+entry.footOffset+s.landingEffectOffset,s.landingEffect.transform.rotation);
