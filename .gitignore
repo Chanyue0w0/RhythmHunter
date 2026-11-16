@@ -108,3 +108,8 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# FMOD regenerable editor indexes and Studio audio/build caches (keep locally).
+/Assets/Plugins/FMOD/Cache/
+/Assets/Plugins/FMOD/Cache.meta
+/ProjectFMOD/FightSceneTest/.cache/
