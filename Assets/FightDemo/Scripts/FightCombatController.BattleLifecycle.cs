@@ -30,6 +30,7 @@ namespace RhythmHunter.FightDemo
 
         private void CheckWaveCompletion()
         {
+            if (BossPhaseTwoActive) return;
             if (DefeatSlowMotionActive) return;
             if (!UsesBattlePreparation || AwaitingBattleStart || battleEnded || AwaitingNextWave || !HealthSystemEnabled) return;
             if (endBattleOnZeroHp && partyHp <= 0) { FinishBattle(false); return; }
@@ -140,7 +141,7 @@ namespace RhythmHunter.FightDemo
             CancelEnemyCombatWork();
             foreach (var hero in new[] { frontHero.UnitSlot, secondHero.UnitSlot, thirdHero.UnitSlot })
                 if (hero != null) hero.CombatAnimator?.InterruptPlayback();
-            if (StageDeadlineEnabled) beatClock?.FadeOutAndStop();
+            if (StageDeadlineEnabled || IsBossMusicStage) beatClock?.FadeOutAndStop();
             if (won) BattleVictory?.Invoke(); else BattleLost?.Invoke();
         }
     }

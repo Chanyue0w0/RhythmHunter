@@ -61,7 +61,7 @@ namespace RhythmHunter.FightDemo
         public float PressureRemovedBeats { get; private set; }
         public int PressureDurationBeats => Math.Max(1, wavePressure.durationBeats);
         public long PressureLastBreakSongBeat { get; private set; }
-        private bool PressureBattleAvailable => !battleEnded && !AwaitingBattleStart && !WaveTransitionActive;
+        private bool PressureBattleAvailable => !BossPhaseTwoActive && !battleEnded && !AwaitingBattleStart && !WaveTransitionActive;
         public bool PressurePhaseActive => PressureBattleAvailable && (StageOvertimeActive || pressureRemaining > 0);
         public bool PressureRestActive => PressureBattleAvailable && !StageOvertimeActive && WaveCombatBeatCount < pressureRestUntil;
         public bool PressureWarningActive => PressureBattleAvailable && !PressurePhaseActive && !PressureRestActive &&

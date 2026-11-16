@@ -3233,6 +3233,37 @@ Transform:
   - {fileID: 2147400301}
   m_Father: {fileID: 1879600866}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &526461799
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 526461800}
+  m_Layer: 0
+  m_Name: Hero_Left_Front
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &526461800
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526461799}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.4140246, y: 0.00000008248276, z: -3.2005758}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1550244417}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &538625505
 GameObject:
   m_ObjectHideFlags: 0
@@ -6567,6 +6598,37 @@ MeshRenderer:
   m_SortingOrder: 40
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &1166879275
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1166879276}
+  m_Layer: 0
+  m_Name: Hero_Right_Rear
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1166879276
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166879275}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.4140239, y: 0.00000008248276, z: -3.2005758}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1550244417}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1167096195
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8250,6 +8312,41 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 2322, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1550244416
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1550244417}
+  m_Layer: 0
+  m_Name: BossPhaseTwoPositions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1550244417
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550244416}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1975473682}
+  - {fileID: 526461800}
+  - {fileID: 1751426622}
+  - {fileID: 1166879276}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1562105380
 GameObject:
   m_ObjectHideFlags: 0
@@ -9209,6 +9306,37 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 2142, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
   m_PrefabInstance: {fileID: 2147100100}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1751426621
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1751426622}
+  m_Layer: 0
+  m_Name: Hero_Middle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1751426622
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1751426621}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.0000002682716, z: -3.2005756}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1550244417}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1756861567
 GameObject:
   m_ObjectHideFlags: 0
@@ -10129,6 +10257,37 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1975473681
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1975473682}
+  m_Layer: 0
+  m_Name: Boss_Door
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1975473682
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1975473681}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.08699599, z: 4.4601083}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1550244417}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1979151611 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
@@ -10316,6 +10475,7 @@ GameObject:
   - component: {fileID: 2021200338}
   - component: {fileID: 2021200339}
   - component: {fileID: 2021200340}
+  - component: {fileID: 2021200341}
   m_Layer: 0
   m_Name: FightDemoController
   m_TagString: Untagged
@@ -10474,6 +10634,8 @@ MonoBehaviour:
   waveTransitionWaitBeats: 2
   waveArmorRecoveryEffect: {fileID: 0}
   waveArmorRecoveryEffectLifetime: 0
+  bossMusicPhase: 0
+  bossPhaseTwoSecondsRemaining: 0
   showEnemyDamageNumbers: 0
   damageNumberCamera: {fileID: 2147100302}
   damageDigitPrefabs:
@@ -10619,6 +10781,7 @@ MonoBehaviour:
   - name: Boss_End
     positionMs: 119713
   markerEventPath: event:/Ritual Slam _120_3
+  bossSectionJumpFadeSeconds: 0.08
   musicEventPath: event:/Ritual Slam _120_3
   musicStartDelaySeconds: 1
   musicVolume: 0.673
@@ -10827,8 +10990,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossStageDebug
   fight: {fileID: 2021200326}
-  completePhaseOneOnStart: 1
-  skipToPhaseTwoOnStart: 0
+  completePhaseOneOnStart: 0
+  skipToPhaseTwoOnStart: 1
+--- !u!114 &2021200341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021200323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 600fc9731811cd6488c7aa78e2ac511c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossPhaseTwoTransition
+  fight: {fileID: 2021200326}
+  bossDestination: {fileID: 1975473682}
+  heroDestinations:
+  - {fileID: 526461800}
+  - {fileID: 1751426622}
+  - {fileID: 1166879276}
+  bossJumpBeats: 4
+  bossJumpHeight: 5
+  heroesJumpBeats: 2
+  heroesJumpHeight: 1.5
+  bossDestinationScale: 0.6
+  bossJumpAnimation: Jump
+  bossIdleAnimation: IdlePh2
+  heroIdleAnimation: Idle_back
 --- !u!1 &2037638509
 GameObject:
   m_ObjectHideFlags: 0
@@ -12423,7 +12612,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 2.9767295e+29, y: 2.2232326e-10, z: 7.397723e+31, w: 1.7247698e+25}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: -2.075901e+29}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12587,7 +12776,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 3.59e-43, z: NaN, w: -751.61523}
+  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -13083,7 +13272,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 7.0364795e+28, y: 1.8969988e+28, z: 5.6719438e-11, w: 1.14333e+27}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 2.75568e-40}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -13247,7 +13436,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0.00000016707195, y: 1.5441074e+25, z: 1.4562662e+22, w: 4.7428895e+30}
+  m_BoundingSphereOverride: {x: 2.7241e-41, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -53062,3 +53251,4 @@ SceneRoots:
   - {fileID: 9106824275806925246}
   - {fileID: 223820176}
   - {fileID: 1812662581}
+  - {fileID: 1550244417}

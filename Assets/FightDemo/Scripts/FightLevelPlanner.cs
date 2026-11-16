@@ -27,7 +27,7 @@ namespace RhythmHunter.FightDemo
             if (beatClock.IsReady) { Fail("Stage must be selected before the song clock initializes."); return; }
             if (!roster.TryConfigureStage(stage, out string error)) { Fail(error); return; }
             beatClock.Configure(stage.MusicEventPath, beatClock.MusicStartDelaySeconds, false, beatClock.MusicVolume);
-            beatClock.ConfigureStageSections(stage.UseNormalEndDeadline);
+            beatClock.ConfigureStageSections(stage.UseNormalEndDeadline || stage.BossStage);
             ActiveStage = stage;
         }
         private void Fail(string message)

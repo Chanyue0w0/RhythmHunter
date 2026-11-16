@@ -44,6 +44,7 @@ namespace RhythmHunter.FightDemoEditor
                     Set(results.BeatClock, "openingTempo", 120f);
                     foreach (var sound in all.OfType<FightAudioPlayer>()) Set(sound, "soundEnabled", false);
                     stage = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<FightStageDefinition>("Assets/FightDemo/Levels/Stage01.asset"));
+                    Set(stage, "bossStage", false); // This regression fixture tests ordinary stages, regardless of the user's selected Boss setup.
                     Set(stage, "useNormalEndDeadline", true);
                     Set(stage, "overtimeOnlyOnFinalCombatWave", scenario.StartsWith("restricted_"));
                     if (scenario == "restricted_last")

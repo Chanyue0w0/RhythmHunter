@@ -32,14 +32,14 @@ namespace RhythmHunter.FightDemo
             ? hero.UnitSlot.CharacterDefinition?.TeamSkillManaCost ?? 0 : 0;
         public bool TeamSkillRunning => nextTeamSkillBeat != long.MaxValue;
         // Shared by activation and the gem lock. Insufficient MP alone is not a lock.
-        public bool TeamSkillActivationBlocked => suspendFeverActivation || FeverBlockedByPressure || StageTimeExpired ||
+        public bool TeamSkillActivationBlocked => BossPhaseTwoActive || suspendFeverActivation || FeverBlockedByPressure || StageTimeExpired ||
             !UsesEqualBeats || battleEnded || AwaitingBattleStart || WaveTransitionActive ||
             TeamSkillRunning || TeamUltimateRunning || IsPaused || TimingCalibrationActive ||
             latestCombatBeat < 0 || latestCombatBeat <= resumeAfterCalibrationBeat || TeamSkillGaugeMax <= 0 ||
             frontHero?.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable ||
             secondHero?.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable ||
             thirdHero?.UnitSlot?.SkillBehavior == FightCharacterDefinition.AbilityBehavior.Unavailable;
-        public bool TeamSkillReady => !FeverBlockedByPressure && UsesEqualBeats && !battleEnded && !AwaitingNextWave && !AwaitingBattleStart && !TeamSkillRunning && !TeamUltimateRunning && TeamSkillGaugeMax > 0 && teamSkillGauge >= TeamSkillGaugeMax;
+        public bool TeamSkillReady => !BossPhaseTwoActive && !FeverBlockedByPressure && UsesEqualBeats && !battleEnded && !AwaitingNextWave && !AwaitingBattleStart && !TeamSkillRunning && !TeamUltimateRunning && TeamSkillGaugeMax > 0 && teamSkillGauge >= TeamSkillGaugeMax;
         public string TeamSkillStatus { get; private set; } = "Build charge with Basic abilities";
         public event System.Action<FightUnitSlot> TeamSkillStepResolved;
 

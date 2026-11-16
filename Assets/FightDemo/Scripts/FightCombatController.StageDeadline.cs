@@ -11,7 +11,7 @@ namespace RhythmHunter.FightDemo
         private bool stageDeadlineErrorReported;
         private int stageDeadlineMs;
         private double stageMusicSeconds;
-        public bool StageDeadlineEnabled => rosterManager != null && rosterManager.UsesStageDeadline;
+        public bool StageDeadlineEnabled => rosterManager != null && rosterManager.UsesStageDeadline && !rosterManager.IsBossStage;
         public bool StageTimeExpired => stageTimeExpired;
         public bool StageOvertimeActive => stageOvertimeActive;
         public double StageMusicSeconds => stageMusicSeconds;
@@ -20,6 +20,7 @@ namespace RhythmHunter.FightDemo
 
         private void ResetStageDeadline()
         {
+            ResetBossMusicStage();
             stageTimeExpired = stageOvertimeActive = stageDeadlineErrorReported = false;
             stageDeadlineMs = 0; stageMusicSeconds = 0; stageSecondsRemaining = 0;
         }

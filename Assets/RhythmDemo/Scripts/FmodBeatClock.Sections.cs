@@ -14,7 +14,7 @@ namespace RhythmHunter.RhythmDemo
             public int positionMs;
         }
         public enum SectionPreview { Off, StopAtNormalEnd, LoopOvertime }
-        [Header("Music Sections (non-Boss)")]
+        [Header("Music Sections")]
         [Tooltip("Testing only. Off leaves battle music unchanged until stage integration.")]
         [SerializeField] private SectionPreview sectionPreview;
         [Tooltip("Fade duration when stopping music. Native overtime loops keep full volume.")]
@@ -39,6 +39,50 @@ namespace RhythmHunter.RhythmDemo
         private int fadeStopStart;
         private float fadeStopDuration, sectionGain = 1, fadeStopGain;
         private bool stageManagedSections, stageSectionsConfigured;
+        [Tooltip("Song seconds for each side of a Boss overtime/debug jump. Natural continuation and overtime loops never fade.")]
+        [SerializeField, Min(0)] private float bossSectionJumpFadeSeconds = .08f;
+        private int bossJumpTarget = -1, bossJumpFadeStart;
+        private bool bossJumpFadingIn;
+        private bool bossJumpAwaitingNative;
+        public bool BossSectionJumpInProgress => bossJumpTarget >= 0 || bossJumpFadingIn || bossJumpAwaitingNative;
+
+        public bool DisableOvertimeMusic()
+        {
+            if (!musicInstance.isValid()) return false;
+            var result = musicInstance.setParameterByName(overtimeParameter, 0, true);
+            if (result != RESULT.OK) { ReportError("Cannot leave Overtime: " + result); return false; }
+            OvertimeMusicEnabled = false;
+            return true;
+        }
+
+        // Called outside Beat callbacks. Raw FMOD position changes; gameplay time remains monotonic.
+        public bool JumpToBossSection()
+        {
+            if (!IsPlaying || paused || fadeStopping || BossSectionJumpInProgress ||
+                !TryGetMarkerPosition("Normal_End", out int start) ||
+                !TryGetMarkerPosition("Boss_End", out int end) || end <= start ||
+                !TryGetTimelinePositionMs(out bossJumpFadeStart)) return false;
+            bossJumpTarget = start;
+            return true;
+        }
+
+        private bool ExecuteBossSectionJump()
+        {
+            // Flush once at the explicit seek, not every frame. Drain old callbacks before remapping time.
+            if (musicInstance.getSystem(out var system) != RESULT.OK) return false;
+            system.flushCommands();
+            if (!TryGetTimelinePositionMs(out int before)) return false;
+            if (!DisableOvertimeMusic() || musicInstance.setTimelinePosition(bossJumpTarget) != RESULT.OK) return false;
+            system.flushCommands();
+            while (pendingBeats.TryDequeue(out _)) { }
+            while (pendingMarkers.TryDequeue(out _)) { }
+            loopOffsetMs = before - bossJumpTarget;
+            hasAnchor = false;
+            normalEndSent = true;
+            bossJumpFadeStart = before;
+            bossJumpAwaitingNative = true;
+            return true;
+        }
         public void ConfigureStageSections(bool enabled)
         {
             stageSectionsConfigured = true;
@@ -79,6 +123,7 @@ namespace RhythmHunter.RhythmDemo
         // The FMOD timeline wraps; gameplay time does not. No second beat timer is introduced.
         private int ContinuousPosition(int raw)
         {
+            if (bossJumpAwaitingNative) return bossJumpFadeStart;
             double offset = loopOffsetMs;
             if (OvertimeMusicEnabled && lastRawBeat >= 0 && raw < lastRawBeat - 2 && LoopLengthMs > 0)
                 offset += LoopLengthMs; // audio thread wrapped before its next beat callback was drained
@@ -129,12 +174,39 @@ namespace RhythmHunter.RhythmDemo
         private void UpdateMusicSections()
         {
             if (!IsPlaying || paused || !TryGetRawTimelinePositionMs(out int raw)) return;
+            if (bossJumpAwaitingNative)
+            {
+                // flushCommands acknowledges command submission, not the mixer timeline snapshot.
+                if (raw < bossJumpTarget) { musicInstance.setVolume(0); return; }
+                while (pendingBeats.TryDequeue(out _)) { }
+                while (pendingMarkers.TryDequeue(out _)) { }
+                lastRawBeat = bossJumpTarget;
+                bossJumpTarget = -1;
+                bossJumpAwaitingNative = false;
+                bossJumpFadingIn = true;
+            }
             while (pendingMarkers.TryDequeue(out var marker)) MarkerReached?.Invoke(marker);
             if (!normalEndSent && TryGetMarkerPosition("Normal_End", out int normalEnd) &&
                 (raw >= normalEnd || CompletedMusicLoops > 0))
             { normalEndSent = true; NormalEndReached?.Invoke(); }
             if (!IsPlaying) return;
             float gain = 1;
+            if (BossSectionJumpInProgress && !fadeStopping)
+            {
+                float elapsed = Mathf.Max(0, ContinuousPosition(raw) - bossJumpFadeStart);
+                float t = bossSectionJumpFadeSeconds <= 0 ? 1 : Mathf.Clamp01(elapsed / (bossSectionJumpFadeSeconds * 1000));
+                if (bossJumpTarget >= 0)
+                {
+                    gain = 1 - t;
+                    if (t >= 1 && !ExecuteBossSectionJump())
+                    { bossJumpTarget = -1; ReportError("Boss music seek failed. Check FMOD section markers and parameter."); }
+                }
+                else
+                {
+                    gain = t;
+                    if (t >= 1) bossJumpFadingIn = false;
+                }
+            }
             if (fadeStopping)
             {
                 gain = fadeStopGain * (1 - Mathf.Clamp01((ContinuousPosition(raw) - fadeStopStart) / Mathf.Max(1, fadeStopDuration)));
@@ -153,6 +225,7 @@ namespace RhythmHunter.RhythmDemo
         private void ResetMusicSections()
         {
             OvertimeMusicEnabled = false; CompletedMusicLoops = 0;
+            bossJumpTarget = -1; bossJumpFadingIn = bossJumpAwaitingNative = false;
             loopOffsetMs = 0; lastRawBeat = -1; normalEndSent = false; fadeStopping = false; sectionGain = 1;
             while (pendingMarkers.TryDequeue(out _)) { }
         }

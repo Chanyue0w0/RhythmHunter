@@ -18,6 +18,8 @@ namespace RhythmHunter.FightDemoEditor
         static GameObject root;
         static double started, pauseAt, pauseRequestedAt;
         static int phase, pausedPosition, lastPosition, beats, markers;
+        static bool testBossJump;
+        static int bossJumpRawStart;
         static long lastBeat;
         static EVENT_CALLBACK callback;
         const string resultFile = "Temp/MusicSectionValidation.result";
@@ -41,6 +43,7 @@ namespace RhythmHunter.FightDemoEditor
                 if (root == null)
                 {
                     if (!File.Exists("Temp/MusicSectionValidation.request")) return;
+                    testBossJump = File.ReadAllText("Temp/MusicSectionValidation.request").Trim() == "boss";
                     try { File.Delete("Temp/MusicSectionValidation.request"); }
                     catch (IOException) { return; } // Request writer may still hold the file for this editor tick.
                     Begin();
@@ -52,7 +55,7 @@ namespace RhythmHunter.FightDemoEditor
                 Call("Update");
                 if (phase == 2 && !clock.IsPlaying)
                 {
-                    File.WriteAllText(resultFile, $"PASS: native FMOD loop twice, {beats} unique beats, {markers} markers, continuous timeline, pause/resume, fade stop; marker metadata and parameter verified.");
+                    File.WriteAllText(resultFile, $"PASS: native FMOD loop twice, {beats} unique beats, {markers} markers, continuous timeline, pause/resume, fade stop; marker metadata and parameter verified. Boss jump tested: {testBossJump}.");
                     Cleanup(); return;
                 }
                 Check(clock.TryGetTimelinePositionMs(out int now), "Clock missing position");
@@ -85,7 +88,24 @@ namespace RhythmHunter.FightDemoEditor
                 else if (phase == 3 && clock.CompletedMusicLoops >= 2)
                 {
                     Check(beats >= 32 && markers > 0, "Missing FMOD beat/marker callbacks");
-                    clock.FadeOutAndStop(); phase = 2;
+                    if (testBossJump)
+                    { Check(clock.JumpToBossSection(), "Boss seek request rejected"); phase = 5; }
+                    else { clock.FadeOutAndStop(); phase = 2; }
+                }
+                else if (phase == 5 && !clock.BossSectionJumpInProgress)
+                {
+                    Check(!clock.OvertimeMusicEnabled, "Native loop still armed after Boss jump");
+                    clock.TryGetMarkerPosition("Normal_End", out int normalEnd);
+                    clock.TryGetRawTimelinePositionMs(out bossJumpRawStart);
+                    Check(bossJumpRawStart >= normalEnd && bossJumpRawStart < normalEnd + 2000, "Seek missed Boss section");
+                    phase = 6;
+                }
+                else if (phase == 6)
+                {
+                    clock.TryGetRawTimelinePositionMs(out int raw);
+                    Check(raw >= bossJumpRawStart, "Boss section looped backward");
+                    if (raw >= bossJumpRawStart + 1500)
+                    { Check(clock.HasTimingAnchor, "No beat anchor after seek"); clock.FadeOutAndStop(); phase = 2; }
                 }
             }
             catch (Exception e) { File.WriteAllText(resultFile, "FAIL: " + e); Cleanup(); UnityEngine.Debug.LogException(e); }

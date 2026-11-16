@@ -42,6 +42,7 @@ namespace RhythmHunter.FightDemoEditor
                     var fight = all.OfType<FightCombatController>().Single();
                     foreach (var sound in all.OfType<FightAudioPlayer>()) Set(sound, "soundEnabled", false);
                     stage = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<FightStageDefinition>("Assets/FightDemo/Levels/Stage01.asset"));
+                    Set(stage, "bossStage", false); // Keep ordinary-stage coverage independent of the authored Boss stage.
                     Set(stage, "useNormalEndDeadline", true); Set(stage, "overtimeOnlyOnFinalCombatWave", true);
                     Set(stage, "overtimeAccelerationIntervalBeats", 20); Set(stage, "overtimeRecoveryReductionBeats", 1); Set(stage, "overtimeMinimumRecoveryBeats", 0);
                     var enemyPrefab = AssetDatabase.LoadAssetAtPath<FightCharacterDefinition>("Assets/FightDemo/Prefabs/ArtBattle/Goblin_" + kind + ".prefab");

@@ -22,7 +22,7 @@ namespace RhythmHunter.FightDemo
         public int TeamUltimateRequiredCharges => Mathf.Clamp(teamUltimateRequiredCharges, 1, 8);
         public bool TeamUltimateRunning => ultimateStartBeat != long.MaxValue;
         public bool TeamUltimatePerforming => TeamUltimateRunning && ultimateStarted;
-        public bool TeamUltimateReady => !FeverBlockedByPressure && UsesEqualBeats && !TeamSkillRunning && !TeamUltimateRunning &&
+        public bool TeamUltimateReady => !BossPhaseTwoActive && !FeverBlockedByPressure && UsesEqualBeats && !TeamSkillRunning && !TeamUltimateRunning &&
             teamUltimateCharge >= TeamUltimateRequiredCharges && TeamSkillGaugeMax > 0;
         public int TeamUltimateBeatsRemaining => !TeamUltimateRunning ? 0 : (int)System.Math.Max(0,
             (ultimateStarted ? ultimateEndBeat : ultimateStartBeat) - latestCombatBeat);

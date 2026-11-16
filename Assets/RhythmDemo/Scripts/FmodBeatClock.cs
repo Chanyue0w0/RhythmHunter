@@ -397,6 +397,7 @@ namespace RhythmHunter.RhythmDemo
 
         private void ProcessPendingBeats()
         {
+            if (bossJumpAwaitingNative) return;
             bool receivedBeat = false;
             while (pendingBeats.TryDequeue(out CallbackBeatData data))
             {

@@ -465,7 +465,9 @@ namespace RhythmHunter.FightDemo
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
             UpdateStageDeadline();
+            UpdateBossMusicStage();
             if (battleEnded) return;
+            if (BossPhaseTwoActive) return;
 
             UpdateTeamSkillBurst();
             AdvanceSkillVisualLifetimes(Time.deltaTime);
@@ -520,6 +522,7 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
+            if (BossPhaseTwoActive) return; // Phase-two lane input is supplied by the next development stage.
             if (BossEntranceRunning)
             {
                 if (!battleEnded && !IsPaused && !TimingCalibrationActive && rhythmJudge != null && beatClock != null && beatClock.IsPlaying)
@@ -857,6 +860,7 @@ namespace RhythmHunter.FightDemo
             latestCombatBeat = beat.GlobalBeat;
             if (DefeatSlowMotionActive) return;
             if (TimingCalibrationActive || battleEnded) return;
+            if (BossPhaseTwoActive) { FightBeat?.Invoke(beat); return; }
             UpdateStageDeadline();
             if (battleEnded) return;
             waveEntrance?.RefreshProgress();
