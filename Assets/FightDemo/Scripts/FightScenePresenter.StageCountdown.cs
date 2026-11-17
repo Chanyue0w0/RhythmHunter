@@ -18,7 +18,8 @@ namespace RhythmHunter.FightDemo
         private void UpdateStageCountdownLine()
         {
             bool visible = showStageCountdownLine && fight != null && fight.isActiveAndEnabled &&
-                fight.StageDeadlineEnabled && !fight.AwaitingBattleStart && !fight.BattleEnded && fight.StageTimeLimitSeconds > 0;
+                (fight.StageDeadlineEnabled || fight.BossPhaseTwoActive) && !fight.AwaitingBattleStart && !fight.BattleEnded &&
+                (fight.BossPhaseTwoActive ? fight.BossPhaseTwoDurationSeconds : fight.StageTimeLimitSeconds) > 0;
             if (!visible)
             {
                 if (stageCountdownRoot != null) stageCountdownRoot.gameObject.SetActive(false);
@@ -44,13 +45,15 @@ namespace RhythmHunter.FightDemo
             stageCountdownRoot.anchoredPosition = new Vector2(0, Mathf.Max(0, stageCountdownBottomOffset));
             stageCountdownRoot.sizeDelta = new Vector2(0, Mathf.Max(1, stageCountdownHeight));
             stageCountdownTrack.color = stageCountdownTrackColor;
-            float remaining = fight.StageTimeExpired ? 0 : Mathf.Clamp01(fight.StageSecondsRemaining / fight.StageTimeLimitSeconds);
+            float remaining = fight.BossPhaseTwoActive
+                ? Mathf.Clamp01(fight.BossPhaseTwoSecondsRemaining / Mathf.Max(.01f, fight.BossPhaseTwoDurationSeconds))
+                : fight.StageTimeExpired ? 0 : Mathf.Clamp01(fight.StageSecondsRemaining / fight.StageTimeLimitSeconds);
             float inset = (1 - remaining) * .5f;
             var fill = stageCountdownFill.rectTransform;
             fill.anchorMin = new Vector2(inset, 0);
             fill.anchorMax = new Vector2(1 - inset, 1);
             fill.offsetMin = fill.offsetMax = Vector2.zero;
-            stageCountdownFill.color = stageCountdownColor;
+            stageCountdownFill.color = fight.BossPhaseTwoActive ? new Color(1, .15f, .1f, 1) : stageCountdownColor;
             stageCountdownFill.enabled = remaining > 0;
         }
     }

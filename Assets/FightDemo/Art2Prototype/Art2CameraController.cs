@@ -22,6 +22,8 @@ namespace RhythmHunter.FightDemo.Art2
         private float initialPitch, initialHeight, initialFov;
         private bool initialPerspective;
         private Vector2 bossEntranceShake;
+        private Vector2 bossPhaseTwoShake;
+        public void SetBossPhaseTwoShake(Vector2 offset) => bossPhaseTwoShake = offset;
         private Vector3 bossFocusTarget;
         private float bossFocusWeight, bossZoom;
         public void SetBossEntranceFocus(Vector3 target, float weight, float zoom)
@@ -95,7 +97,8 @@ namespace RhythmHunter.FightDemo.Art2
             // Equal vertical framing at the focus plane in either projection.
             float distance = effectiveHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
             transform.position = Vector3.Lerp(focus,bossFocusTarget,bossFocusWeight) - transform.forward * distance;
-            transform.position += transform.right * bossEntranceShake.x + transform.up * bossEntranceShake.y;
+            var shake = bossEntranceShake + bossPhaseTwoShake;
+            transform.position += transform.right * shake.x + transform.up * shake.y;
             view.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
             view.transparencySortAxis = transform.forward;
         }

@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef22078439a3d43458351827fda70d3e, type: 3}
+  m_Name: GoblinKing_PhaseTwo_Chart
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossRhythmChart
+  notes:
+  - arrivalBeat: 16
+    lane: 0
+  - arrivalBeat: 20
+    lane: 2
+  - arrivalBeat: 24
+    lane: 1
+  - arrivalBeat: 28
+    lane: 0
+  - arrivalBeat: 32
+    lane: 1
+  - arrivalBeat: 34
+    lane: 2
+  - arrivalBeat: 36
+    lane: 0
+  - arrivalBeat: 38
+    lane: 2
+  - arrivalBeat: 40
+    lane: 1
+  - arrivalBeat: 42
+    lane: 2
+  - arrivalBeat: 44
+    lane: 0
+  - arrivalBeat: 46
+    lane: 1
+  - arrivalBeat: 48
+    lane: 0
+  - arrivalBeat: 50
+    lane: 2
+  - arrivalBeat: 52
+    lane: 1
+  - arrivalBeat: 54
+    lane: 0
+  - arrivalBeat: 56
+    lane: 1
+  - arrivalBeat: 58
+    lane: 2
+  - arrivalBeat: 60
+    lane: 0
+  - arrivalBeat: 62
+    lane: 2
+  - arrivalBeat: 68
+    lane: 1
+  - arrivalBeat: 69
+    lane: 2
+  - arrivalBeat: 70
+    lane: 0
+  - arrivalBeat: 71
+    lane: 1
+  - arrivalBeat: 72
+    lane: 0
+  - arrivalBeat: 73
+    lane: 2
+  - arrivalBeat: 74
+    lane: 1
+  - arrivalBeat: 75
+    lane: 0
+  - arrivalBeat: 76
+    lane: 1
+  - arrivalBeat: 77
+    lane: 2
+  - arrivalBeat: 78
+    lane: 0
+  - arrivalBeat: 79
+    lane: 2
+  - arrivalBeat: 80
+    lane: 1
+  - arrivalBeat: 81
+    lane: 2
+  - arrivalBeat: 82
+    lane: 0
+  - arrivalBeat: 83
+    lane: 1
+  - arrivalBeat: 84
+    lane: 0
+  - arrivalBeat: 85
+    lane: 2
+  - arrivalBeat: 86
+    lane: 1
+  - arrivalBeat: 87
+    lane: 0
+  - arrivalBeat: 88
+    lane: 1
+  - arrivalBeat: 89
+    lane: 2
+  - arrivalBeat: 90
+    lane: 0
+  - arrivalBeat: 91
+    lane: 2
+  - arrivalBeat: 92
+    lane: 1
+  - arrivalBeat: 93
+    lane: 2
+  - arrivalBeat: 94
+    lane: 0
+  - arrivalBeat: 95
+    lane: 1
+  - arrivalBeat: 100
+    lane: 0
+  - arrivalBeat: 101
+    lane: 2
+  - arrivalBeat: 102
+    lane: 1
+  - arrivalBeat: 103
+    lane: 0
+  - arrivalBeat: 104
+    lane: 1
+  - arrivalBeat: 105
+    lane: 2
+  - arrivalBeat: 106
+    lane: 0
+  - arrivalBeat: 107
+    lane: 2
+  - arrivalBeat: 108
+    lane: 1
+  - arrivalBeat: 109
+    lane: 2
+  - arrivalBeat: 110
+    lane: 0
+  travelBeats: 2
+  animationBeats: 1

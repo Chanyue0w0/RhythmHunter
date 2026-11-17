@@ -55,7 +55,7 @@ namespace RhythmHunter.FightDemo
                 if (!beatClock.BossSectionJumpInProgress && raw >= bossEnd && bossMusicPhase == BossMusicPhase.PhaseTwo)
                 {
                     bossMusicPhase = BossMusicPhase.PhaseTwoMusicEnded;
-                    BossPhaseTwoMusicEnded?.Invoke(); // Settlement/outro comes with phase-two gameplay.
+                    BossPhaseTwoMusicEnded?.Invoke();
                     beatClock.FadeOutAndStop();
                 }
                 return;

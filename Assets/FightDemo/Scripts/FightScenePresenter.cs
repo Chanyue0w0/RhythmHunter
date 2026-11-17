@@ -227,6 +227,8 @@ namespace RhythmHunter.FightDemo
             UpdateTeamSkillHud();
             UpdateBossHud();
             UpdateTimelineArtwork();
+            if (timelineRoot != null) timelineRoot.gameObject.SetActive(fight == null || !fight.BossPhaseTwoActive);
+            UpdateBossSurvivalHud();
             UpdatePressureBar();
             UpdateStageCountdownLine();
             if (fight != null && fight.IsPaused) return;

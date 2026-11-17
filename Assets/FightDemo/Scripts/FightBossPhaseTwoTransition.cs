@@ -15,15 +15,21 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Left / middle / right correspond to the current front / middle / rear party members.")]
         [SerializeField] private Transform[] heroDestinations = new Transform[3];
         [Header("Beat movement")]
-        [SerializeField, Min(.05f)] private float bossJumpBeats = 4;
-        [SerializeField, Min(0)] private float bossJumpHeight = 5;
-        [SerializeField, Min(.05f)] private float heroesJumpBeats = 2;
+        [SerializeField, Min(.05f)] private float bossJumpBeats = 1;
+        [SerializeField, Min(0)] private float bossJumpHeight = 14;
+        [SerializeField, Min(.05f)] private float heroesJumpBeats = 1;
         [SerializeField, Min(0)] private float heroesJumpHeight = 1.5f;
         [SerializeField, Min(.05f)] private float bossDestinationScale = .6f;
         [Header("Existing beat animation names")]
         [SerializeField] private string bossJumpAnimation = "Jump";
-        [SerializeField] private string bossIdleAnimation = "IdlePh2";
+        [SerializeField] private string bossIdleAnimation = "Chop_Idle";
         [SerializeField] private string heroIdleAnimation = "Idle_back";
+        [Header("Landing presentation")]
+        [SerializeField] private GameObject landingExplosion;
+        [SerializeField] private Art2.Art2CameraController cameraController;
+        [SerializeField, Min(0)] private float landingShakeBeats = 3;
+        [SerializeField] private Vector2 landingShakeAmplitude = new(.22f, .16f);
+        private double shakeElapsed = double.PositiveInfinity;
         public enum TransitionPhase { Inactive, WaitingForMusic, BossAnimation, BossJump, HeroesJump, Ready }
         public TransitionPhase Phase { get; private set; }
         public bool Ready => Phase == TransitionPhase.Ready;
@@ -72,12 +78,17 @@ namespace RhythmHunter.FightDemo
             if (Phase == TransitionPhase.Inactive) return;
             if (!fight || !fight.BossPhaseTwoActive) { Restore(); return; }
             var clock = fight.BeatClock;
-            bool paused = fight.IsPaused || fight.TimingCalibrationActive || !clock || !clock.IsPlaying || clock.BossSectionJumpInProgress;
+            bool paused = fight.IsPaused || fight.TimingCalibrationActive || !clock || clock.BossSectionJumpInProgress;
             SetPaused(bosses, paused); SetPaused(heroes, paused);
+            if (!clock || !clock.IsPlaying) return;
             if (!clock || !clock.TryGetTimelinePositionMs(out int now)) return;
             double delta = hasTime ? Math.Max(0, now - previousMs) / Math.Max(1d, clock.MillisecondsPerBeat) : 0;
             previousMs = now; hasTime = true;
             if (paused) return;
+            shakeElapsed += delta;
+            float weight = landingShakeBeats > 0 ? Mathf.Pow(1 - Mathf.Clamp01((float)shakeElapsed / landingShakeBeats), 2) : 0;
+            float phase = (float)shakeElapsed * Mathf.PI * 10;
+            cameraController?.SetBossPhaseTwoShake(weight > 0 ? Vector2.Scale(landingShakeAmplitude, new Vector2(Mathf.Sin(phase), Mathf.Cos(phase * 1.23f))) * weight : Vector2.zero);
             if (Phase == TransitionPhase.WaitingForMusic)
             {
                 foreach (var actor in bosses)
@@ -105,8 +116,15 @@ namespace RhythmHunter.FightDemo
             if (Phase == TransitionPhase.BossJump)
             {
                 float t = Mathf.Clamp01((float)(elapsed / Math.Max(.05f, bossJumpBeats)));
-                Move(bosses, t, bossJumpHeight);
+                MoveBoss(t);
                 if (t < 1) return;
+                shakeElapsed = 0;
+                if (landingExplosion)
+                {
+                    var effect = Instantiate(landingExplosion, bossDestination.position, landingExplosion.transform.rotation);
+                    (effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>()).Configure(fight, false, 5);
+                }
+                foreach (var actor in bosses) Idle(actor, bossIdleAnimation);
                 elapsed = 0; Phase = TransitionPhase.HeroesJump;
             }
             if (Phase == TransitionPhase.HeroesJump)
@@ -126,6 +144,30 @@ namespace RhythmHunter.FightDemo
             var animator = actor.slot.CombatAnimator;
             if (!animator) return;
             animator.InterruptPlayback(); animator.EndOpeningPresentation(); animator.SetIdleOverride(name);
+        }
+        private void MoveBoss(float t)
+        {
+            // Two fast vertical strokes: switch depth while fully outside the viewport.
+            foreach (var actor in bosses)
+            {
+                if (!actor.root || !actor.target) continue;
+                var destination = actor.target.position - actor.footOffset * actor.scale;
+                float apex = Mathf.Max(actor.from.y, destination.y) + bossJumpHeight;
+                Vector3 position;
+                if (t < .5f)
+                {
+                    float rise = 1 - Mathf.Pow(1 - t * 2, 3);
+                    position = actor.from; position.y = Mathf.Lerp(actor.from.y, apex, rise);
+                    actor.root.localScale = actor.originalScale;
+                }
+                else
+                {
+                    float fall = Mathf.Pow((t - .5f) * 2, 2);
+                    position = destination; position.y = Mathf.Lerp(apex, destination.y, fall);
+                    actor.root.localScale = actor.originalScale * actor.scale;
+                }
+                actor.root.position = position;
+            }
         }
         private static void SetPaused(List<Actor> actors, bool paused)
         { foreach (var actor in actors) if (actor.slot) actor.slot.CombatAnimator?.SetPlaybackPaused(paused); }
@@ -153,6 +195,8 @@ namespace RhythmHunter.FightDemo
                 list.Clear();
             }
             Phase = TransitionPhase.Inactive; hasTime = false; elapsed = 0;
+            shakeElapsed = double.PositiveInfinity;
+            cameraController?.SetBossPhaseTwoShake(Vector2.zero);
         }
         private void OnDisable()
         { if (fight) fight.BossPhaseTwoStarted -= Begin; Restore(); }

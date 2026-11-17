@@ -45,5 +45,13 @@ namespace RhythmHunter.FightDemo
         {
             bossPhaseOneProtectionReleased=true;combatAnimator?.SetIdleOverride(null);
         }
+        // Phase two is survival: its health display follows song progress, without damage/reward events.
+        public void SetBossSurvivalHealth(float progress)
+        {
+            if (!BossPhaseOneProtected || CombatController == null || !CombatController.BossPhaseTwoActive) return;
+            float value = Mathf.Lerp(maxHp, 1, Mathf.Clamp01(progress));
+            if (Mathf.Abs(currentHp - value) < .001f) return;
+            currentHp = value; RefreshHealthVisuals(); HealthChanged?.Invoke(this, currentHp, maxHp);
+        }
     }
 }

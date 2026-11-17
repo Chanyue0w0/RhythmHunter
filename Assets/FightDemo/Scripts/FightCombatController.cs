@@ -522,7 +522,13 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
-            if (BossPhaseTwoActive) return; // Phase-two lane input is supplied by the next development stage.
+            if (BossPhaseTwoActive)
+            {
+                if (!battleEnded && !IsPaused && !TimingCalibrationActive && !DefeatSlowMotionActive)
+                    BossRhythm?.Submit(command, inputRouter != null ? inputRouter.CurrentInputAgeMs : 0,
+                        inputRouter != null ? inputRouter.CurrentInputProfile : "Keyboard");
+                return;
+            }
             if (BossEntranceRunning)
             {
                 if (!battleEnded && !IsPaused && !TimingCalibrationActive && rhythmJudge != null && beatClock != null && beatClock.IsPlaying)
