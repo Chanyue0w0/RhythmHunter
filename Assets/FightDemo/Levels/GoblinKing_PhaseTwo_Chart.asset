@@ -13,123 +13,390 @@ MonoBehaviour:
   m_Name: GoblinKing_PhaseTwo_Chart
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossRhythmChart
   notes:
-  - arrivalBeat: 16
-    lane: 0
-  - arrivalBeat: 20
-    lane: 2
-  - arrivalBeat: 24
-    lane: 1
-  - arrivalBeat: 28
-    lane: 0
   - arrivalBeat: 32
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 34
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 36
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 38
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 40
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 42
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 44
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 46
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 48
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 50
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 52
     lane: 1
-  - arrivalBeat: 54
-    lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 56
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 58
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 60
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 62
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 68
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 69
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 70
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 71
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 72
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 73
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 74
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 75
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 76
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 77
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 78
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 79
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 80
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 81
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 82
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 83
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 84
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 85
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 86
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 87
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 88
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 89
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 90
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 91
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 92
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 93
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 94
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 95
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 100
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 101
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 102
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 103
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 104
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 105
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 106
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 107
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 108
     lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 109
     lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
   - arrivalBeat: 110
     lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 0
+  - arrivalBeat: 18
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 8.964187159682764
+  - arrivalBeat: 22
+    lane: 2
+    offsetMs: -240
+    useFreeTime: 0
+    timeSeconds: 10.815427165386104
+  - arrivalBeat: 25
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 12.38016512111527
+  - arrivalBeat: 33
+    lane: 0
+    offsetMs: 20
+    useFreeTime: 0
+    timeSeconds: 16.402204529313018
+  - arrivalBeat: 35
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 17.327823691460054
+  - arrivalBeat: 37
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 18.341597459861397
+  - arrivalBeat: 39
+    lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 19.300276490939222
+  - arrivalBeat: 41
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 20.300276154657368
+  - arrivalBeat: 43
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 21.32506987936897
+  - arrivalBeat: 45
+    lane: 2
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 22.316805416559056
+  - arrivalBeat: 47
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 23.341597459861397
+  - arrivalBeat: 49
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 0
+    timeSeconds: 24.297520661157026
+  - arrivalBeat: 51
+    lane: 2
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 25.046832292204716
+  - arrivalBeat: 51
+    lane: 2
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 25.289256198347108
+  - arrivalBeat: 53
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 26.25895350432593
+  - arrivalBeat: 52
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 26.027549554493802
+  - arrivalBeat: 55
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 27.04132164148588
+  - arrivalBeat: 55
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 27.283747229037534
+  - arrivalBeat: 54
+    lane: 0
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 26.78787946044249
+  - arrivalBeat: 56
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 28.000000672563704
+  - arrivalBeat: 57
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 28.24242289729683
+  - arrivalBeat: 59
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 29.2451817536157
+  - arrivalBeat: 61
+    lane: 1
+    offsetMs: 0
+    useFreeTime: 1
+    timeSeconds: 30.25895384060778
   travelBeats: 2
   animationBeats: 1

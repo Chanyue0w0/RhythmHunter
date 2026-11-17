@@ -49,6 +49,19 @@ namespace RhythmHunter.FightDemoEditor
                     Check(chart.notes.Select(n => n.arrivalBeat).Distinct().Count() == chart.notes.Count, "Simultaneous notes");
                     var duplicate = UnityEngine.Object.Instantiate(chart); duplicate.notes.Add(duplicate.notes[0]);
                     Check(!duplicate.Validate(out _), "Duplicate beat allowed"); UnityEngine.Object.Destroy(duplicate);
+                    if (mode == "offset")
+                    {
+                        chart = UnityEngine.Object.Instantiate(chart); // Never modify the user's asset.
+                        double ms = fight.BeatClock.MillisecondsPerBeat;
+                        for (int i = 0; i < chart.notes.Count; i++)
+                        {
+                            var n = chart.notes[i]; n.offsetMs = i < 4 ? (i % 2 == 0 ? 180 : -180) : (i % 2 == 0 ? 50 : -50);
+                            if (i % 3 == 0) { n.useFreeTime = true; n.timeSeconds = n.arrivalBeat * ms / 1000; }
+                            chart.notes[i] = n;
+                        }
+                        Check(chart.ValidateTiming(ms, 0, 0, fight.BossRhythmJudge.PerfectWindowMs, out _), "Offset/free chart invalid");
+                        Set(battle, "chart", chart);
+                    }
                     Set(fight, "endBattleOnZeroHp", true);
                     fight.GetComponent<FightBossStageDebug>().RequestPhaseTwoSkip();
                     step = 1;
@@ -80,9 +93,14 @@ namespace RhythmHunter.FightDemoEditor
                     if (mode != "lose" && battle.Running)
                     {
                         // First note deliberately missed; every later note uses the production command/judge route.
+                        fight.BeatClock.TryGetRawTimelinePositionMs(out int raw);
+                        fight.BeatClock.TryGetMarkerPosition("Normal_End", out int start);
                         foreach (var note in chart.notes.Skip(1))
-                            if (!submitted.Contains(note.arrivalBeat) && battle.CurrentBeat >= note.arrivalBeat - .14 && battle.CurrentBeat < note.arrivalBeat + .15)
+                        {
+                            double target = note.EffectiveBeat(fight.BeatClock.MillisecondsPerBeat, battle.CurrentBeat, raw - start);
+                            if (!submitted.Contains(note.arrivalBeat) && battle.CurrentBeat >= target - .14 && battle.CurrentBeat < target + .15)
                             { submitted.Add(note.arrivalBeat); fight.SubmitHeroCommand((FightInputRouter.HeroCommand)note.lane); }
+                        }
                         if (battle.CurrentBeat >= 14 && battle.CurrentBeat < 14.2 && !submitted.Contains(-1))
                         {
                             submitted.Add(-1); fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Middle);
@@ -116,6 +134,132 @@ namespace RhythmHunter.FightDemoEditor
         {
             File.Delete(Request); step = 0; deadline = pauseUntil = 0; captured = pauseChecked = false; submitted.Clear();
             EditorApplication.isPlaying = false;
+        }
+    }
+}
+
+namespace RhythmHunter.FightDemoEditor
+{
+    [InitializeOnLoad]
+    internal static class FightBossChartAuthoringValidation
+    {
+        const string Request = "Temp/BossChartAuthoring.request";
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        static FightBossRhythmChartWindow window;
+        static FightBossRhythmChart scratch;
+        static int step;
+        static double next, before, previewDeadline;
+        static object Get(string name) => typeof(FightBossRhythmChartWindow).GetField(name, Flags).GetValue(window);
+        static void Set(string name, object value) => typeof(FightBossRhythmChartWindow).GetField(name, Flags).SetValue(window, value);
+        static void Call(string name, params object[] args) => typeof(FightBossRhythmChartWindow).GetMethod(name, Flags).Invoke(window, args);
+        static void Check(bool value, string message) { if (!value) throw new Exception(message); }
+        static FightBossChartAuthoringValidation() => EditorApplication.update += Tick;
+        static void Tick()
+        {
+            if (!File.Exists(Request) || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.timeSinceStartup < next) return;
+            try
+            {
+                if (step == 0)
+                {
+                    scratch = ScriptableObject.CreateInstance<FightBossRhythmChart>();
+                    scratch.GeneratePrototype();
+                    Check(scratch.ValidateTiming(60000d/121, 0, 0, 120, out _), "Legacy chart invalid");
+                    scratch.notes.Clear();
+                    scratch.notes.Add(new FightBossRhythmChart.Note { arrivalBeat=20, offsetMs=100 });
+                    scratch.notes.Add(new FightBossRhythmChart.Note { useFreeTime=true, timeSeconds=20*60d/121+.1 });
+                    Check(!scratch.ValidateTiming(60000d/121, 0, 0, 120, out _), "Mixed-mode collision not detected");
+                    scratch.notes.Clear();
+                    window = EditorWindow.GetWindow<FightBossRhythmChartWindow>();
+                    Set("chart", scratch); Call("LoadSong");
+                    Check((double)Get("tempo") > 0, "No FMOD tempo");
+                    Set("cursor", 10d); Set("snap", false); Call("Play"); next = EditorApplication.timeSinceStartup + 1; previewDeadline = next + 10; step++;
+                }
+                else if (step == 1)
+                {
+                    Call("Tick");
+                    var previewDebug=(FMOD.Studio.EventInstance)Get("preview");
+                    previewDebug.getTimelinePosition(out int rawDebug); previewDebug.getPlaybackState(out var stateDebug);
+                    if ((double)Get("cursor") <= 10 && EditorApplication.timeSinceStartup < previewDeadline) return;
+                    Check((double)Get("cursor") > 10, $"Native preview did not advance: cursor={Get("cursor")}, raw={rawDebug}, state={stateDebug}, valid={previewDebug.isValid()}, start={Get("startMs")}");
+                    Call("Record", 0); Check(scratch.notes.Count == 1 && scratch.notes[0].useFreeTime, "Free recording failed");
+                    Call("Play"); next = EditorApplication.timeSinceStartup + .4; step++;
+                }
+                else if (step == 2)
+                { Call("Tick"); before = (double)Get("cursor"); next = EditorApplication.timeSinceStartup + .4; step++; }
+                else if (step == 3)
+                {
+                    Call("Tick"); Check(Math.Abs((double)Get("cursor") - before) < .01, "Preview pause advanced");
+                    var instance=(FMOD.Studio.EventInstance)Get("preview");
+                    instance.setTimelinePosition((int)Get("startMs") + 15000); next=EditorApplication.timeSinceStartup+.3; step++;
+                }
+                else if (step == 4)
+                {
+                    Call("Tick"); Check(Math.Abs((double)Get("cursor") - 15) < .02, "Preview seek failed");
+                    Set("snap", true); Call("Play"); next = EditorApplication.timeSinceStartup + .3; step++;
+                }
+                else
+                {
+                    Call("Tick"); Call("Record", 2);
+                    Check(scratch.notes.Count == 2 && !scratch.notes[1].useFreeTime, "Snapped recording failed");
+                    Call("Stop"); Check(!((FMOD.Studio.EventInstance)Get("preview")).isValid(), "Preview handle leaked");
+                    File.WriteAllText("Temp/BossChartAuthoring.result", "PASS: legacy timing; mixed-mode overlap rejection; native FMOD preview/play/pause/seek; free and snapped recording; stop/release.");
+                    Finish();
+                }
+            }
+            catch(Exception e) { File.WriteAllText("Temp/BossChartAuthoring.result", "FAIL: " + e); Finish(); }
+        }
+        static void Finish()
+        {
+            if(window) { Call("Stop"); window.Close(); }
+            if(scratch) UnityEngine.Object.DestroyImmediate(scratch);
+            step=0; next=0; File.Delete(Request);
+        }
+    }
+}
+
+namespace RhythmHunter.FightDemoEditor
+{
+    [InitializeOnLoad]
+    internal static class FightBossDenseJudgementValidation
+    {
+        static FightBossDenseJudgementValidation() => EditorApplication.update += Tick;
+        static void Check(bool pass, string message) { if (!pass) throw new Exception(message); }
+        static void Tick()
+        {
+            const string request="Temp/BossDenseJudgement.request";
+            if(!File.Exists(request) || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+            GameObject go=null; FightBossRhythmChart chart=null;
+            try
+            {
+                chart=ScriptableObject.CreateInstance<FightBossRhythmChart>();
+                chart.notes.Add(new FightBossRhythmChart.Note { useFreeTime=true,timeSeconds=10,lane=FightBossRhythmChart.Lane.Left });
+                chart.notes.Add(new FightBossRhythmChart.Note { useFreeTime=true,timeSeconds=10.1,lane=FightBossRhythmChart.Lane.Left });
+                chart.notes.Add(new FightBossRhythmChart.Note { useFreeTime=true,timeSeconds=10.15,lane=FightBossRhythmChart.Lane.Right });
+                Check(chart.ValidateTiming(500,0,0,120,out _),"Dense chart rejected");
+                var user=AssetDatabase.LoadAssetAtPath<FightBossRhythmChart>("Assets/FightDemo/Levels/GoblinKing_PhaseTwo_Chart.asset");
+                Check(user.Validate(out _),"Current user chart rejected");
+                go=new GameObject("DenseJudgeValidation"); var battle=go.AddComponent<FightBossRhythmBattle>();
+                var type=typeof(FightBossRhythmBattle);
+                const BindingFlags flags=BindingFlags.NonPublic|BindingFlags.Instance;
+                var noteType=type.GetNestedType("Note",BindingFlags.NonPublic);
+                var list=(System.Collections.IList)type.GetField("notes",flags).GetValue(battle);
+                object Make(double beat,int lane)
+                { var n=Activator.CreateInstance(noteType); noteType.GetField("beat").SetValue(n,beat); noteType.GetField("lane").SetValue(n,lane); list.Add(n); return n; }
+                var first=Make(20,0); var second=Make(20.2,0); var right=Make(20.3,2);
+                object Pick(int lane,double beat)=>type.GetMethod("FindNearestNote",flags).Invoke(battle,new object[]{lane,beat,.24d});
+                Check(ReferenceEquals(Pick(0,20.18),second),"Nearest later note not selected");
+                Check(ReferenceEquals(Pick(0,20.1),first),"Tie did not prefer earlier note");
+                Check(ReferenceEquals(Pick(2,20.18),right),"Wrong lane selection");
+                Check(Pick(1,20.18)==null,"Other lane consumed note");
+                noteType.GetField("accepted").SetValue(second,true);
+                Check(ReferenceEquals(Pick(0,20.18),first),"Accepted note consumed twice");
+                noteType.GetField("resolved").SetValue(first,true);
+                Check(Pick(0,20.18)==null,"Missed/resolved note was rescued");
+                Check((float)type.GetField("missLockMilliseconds",flags).GetValue(battle)==80,"Wrong lock default");
+                File.WriteAllText("Temp/BossDenseJudgement.result","PASS: user chart valid; 100ms/50ms overlaps allowed; nearest same-lane selection; earlier tie; no cross-lane/double consumption; missed notes excluded; 80ms default.");
+            }
+            catch(Exception e){File.WriteAllText("Temp/BossDenseJudgement.result","FAIL: "+e);}
+            finally {if(go) UnityEngine.Object.DestroyImmediate(go); if(chart) UnityEngine.Object.DestroyImmediate(chart); File.Delete(request);}
         }
     }
 }

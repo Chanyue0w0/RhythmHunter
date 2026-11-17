@@ -20,7 +20,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightBossRhythmVisual guardPrefab;
         [SerializeField] private Vector3 targetOffset = new(0, .75f, 0);
         [SerializeField, Min(.1f)] private float guardDurationBeats = .5f;
-        [SerializeField, Min(0)] private float missLockBeats = .5f;
+        [Tooltip("Song milliseconds after an incorrect press. 0 disables input lock; does not change arrival times.")]
+        [SerializeField, Min(0)] private float missLockMilliseconds = 80;
         [SerializeField, Min(.5f)] private float missDamage = 1;
         [Header("Victory presentation")]
         [SerializeField] private GameObject victoryExplosion;
@@ -37,7 +38,9 @@ namespace RhythmHunter.FightDemo
         public event Action<int, bool, double> NoteResolved;
         private sealed class Note
         {
-            public int beat, lane;
+            public double beat;
+            public int lane;
+            public FightBossRhythmChart.Note source;
             public bool animationStarted, accepted, resolved, skipped;
             public FightBossRhythmVisual visual;
         }
@@ -69,7 +72,7 @@ namespace RhythmHunter.FightDemo
             boss = fight.RosterManager.ActiveEnemies.FirstOrDefault(x => x && x.BossPhaseOneProtected);
             if (!boss) { ChartError = "Protected Boss missing."; Debug.LogError(ChartError, this); return; }
             heroes[0] = fight.FrontHero.UnitSlot; heroes[1] = fight.SecondHero.UnitSlot; heroes[2] = fight.ThirdHero.UnitSlot;
-            foreach (var entry in chart.notes.OrderBy(n => n.arrivalBeat)) notes.Add(new Note { beat = entry.arrivalBeat, lane = (int)entry.lane });
+            foreach (var entry in chart.notes) notes.Add(new Note { source = entry, beat = entry.arrivalBeat, lane = (int)entry.lane });
             for (int lane = 0; lane < 3; lane++)
             {
                 var source = boss.CombatAnimator.FindSequence(chopAnimations[lane]);
@@ -99,7 +102,11 @@ namespace RhythmHunter.FightDemo
                 if (Math.Abs(originBeat - Math.Round(originBeat)) < .02) originBeat = Math.Round(originBeat);
                 originKnown = true;
             }
-            beat = global - originBeat; return true;
+            beat = global - originBeat;
+            foreach (var note in notes)
+                note.beat = note.source.EffectiveBeat(clock.MillisecondsPerBeat, beat, raw - start);
+            notes.Sort((a, b) => a.beat.CompareTo(b.beat));
+            return true;
         }
         private void Update()
         {
@@ -119,6 +126,9 @@ namespace RhythmHunter.FightDemo
             if (!readySeen)
             {
                 readySeen = true;
+                if (fight.BeatClock.TryGetRawTimelinePositionMs(out int raw) && fight.BeatClock.TryGetMarkerPosition("Normal_End", out int start) &&
+                    !chart.ValidateTiming(fight.BeatClock.MillisecondsPerBeat, beat, raw - start, fight.BossRhythmJudge.PerfectWindowMs, out string timingError))
+                { Debug.LogWarning("[Boss chart] " + timingError, this); }
                 foreach (var note in notes) if (note.beat - chart.travelBeats - chart.animationBeats < beat)
                 { note.resolved = note.skipped = true; SkippedTransitionNotes++; }
             }
@@ -167,6 +177,8 @@ namespace RhythmHunter.FightDemo
             int lane = (int)command;
             if (!Running || !transition.Ready || lane < 0 || lane > 2 || fight.IsPaused || fight.TimingCalibrationActive || !originKnown) return;
             var judge = fight.BossRhythmJudge; judge.SetInputProfile(profile);
+            if (!ReadBeat(out double now)) return;
+            CurrentBeat = now;
             if (!judge.TryGetEvaluatedBeat(inputAgeMs, out double global)) return;
             JudgeLane(lane, global - originBeat);
         }
@@ -174,15 +186,30 @@ namespace RhythmHunter.FightDemo
         {
             if (beat < lockedUntil) return;
             double window = fight.BossRhythmJudge.PerfectWindowMs / fight.BeatClock.MillisecondsPerBeat;
-            var note = notes.FirstOrDefault(n => !n.resolved && !n.accepted && n.lane == lane && Math.Abs(n.beat - beat) <= window + 1e-6);
+            var note = FindNearestNote(lane, beat, window);
             var guard = Rent(true);
             guards.Add((guard, lane, Math.Max(CurrentBeat, note != null ? note.beat : CurrentBeat) + guardDurationBeats, note != null));
             guard.Present(Target(lane), view.transform.rotation, 1, note != null ? Color.cyan : Color.red);
             if (note == null)
-            { BadInputs++; LastJudgement = "MISS"; lockedUntil = beat + missLockBeats; heroes[lane]?.PlayInputFeedback(false); return; }
+            { BadInputs++; LastJudgement = "MISS"; lockedUntil = beat + missLockMilliseconds / fight.BeatClock.MillisecondsPerBeat; heroes[lane]?.PlayInputFeedback(false); return; }
             note.accepted = true; LastJudgement = "BLOCK";
             // The early press raises a guard immediately; the slash and block sound resolve on its authored arrival.
             if (CurrentBeat >= note.beat) Resolve(note, true);
+        }
+        private Note FindNearestNote(int lane, double beat, double window)
+        {
+            Note best = null;
+            double bestDistance = double.PositiveInfinity;
+            foreach (var candidate in notes)
+            {
+                if (candidate.resolved || candidate.accepted || candidate.lane != lane) continue;
+                double distance = Math.Abs(candidate.beat - beat);
+                if (distance > window + 1e-6) continue;
+                if (best == null || distance < bestDistance - 1e-9 ||
+                    (Math.Abs(distance - bestDistance) <= 1e-9 && candidate.beat < best.beat))
+                { best = candidate; bestDistance = distance; }
+            }
+            return best;
         }
         private void Resolve(Note note, bool blocked)
         {
