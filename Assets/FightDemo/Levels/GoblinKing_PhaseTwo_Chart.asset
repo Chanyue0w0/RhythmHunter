@@ -60,17 +60,17 @@ MonoBehaviour:
     timeSeconds: 0
   - arrivalBeat: 50
     lane: 2
-    offsetMs: 0
+    offsetMs: -52.310472763
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 52
     lane: 1
-    offsetMs: 0
+    offsetMs: -54.852461566
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 56
     lane: 1
-    offsetMs: 0
+    offsetMs: -59.936439172
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 58
@@ -285,17 +285,17 @@ MonoBehaviour:
     timeSeconds: 0
   - arrivalBeat: 18
     lane: 0
-    offsetMs: 0
+    offsetMs: -10.953168044
     useFreeTime: 0
     timeSeconds: 8.964187159682764
   - arrivalBeat: 22
     lane: 2
-    offsetMs: -240
+    offsetMs: -278.424242424
     useFreeTime: 0
     timeSeconds: 10.815427165386104
   - arrivalBeat: 25
     lane: 1
-    offsetMs: 0
+    offsetMs: -22.027548209
     useFreeTime: 0
     timeSeconds: 12.38016512111527
   - arrivalBeat: 33
@@ -347,47 +347,47 @@ MonoBehaviour:
     lane: 2
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 25.046832292204716
+    timeSeconds: 24.988376344
   - arrivalBeat: 51
     lane: 2
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 25.289256198347108
+    timeSeconds: 25.235674731
   - arrivalBeat: 53
     lane: 1
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 26.25895350432593
+    timeSeconds: 26.22486828
   - arrivalBeat: 52
     lane: 1
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 26.027549554493802
+    timeSeconds: 25.977569892
   - arrivalBeat: 55
     lane: 0
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 27.04132164148588
+    timeSeconds: 26.966763441
   - arrivalBeat: 55
     lane: 0
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 27.283747229037534
+    timeSeconds: 27.214061828
   - arrivalBeat: 54
     lane: 0
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 26.78787946044249
+    timeSeconds: 26.719465054
   - arrivalBeat: 56
     lane: 1
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 28.000000672563704
+    timeSeconds: 27.955956989
   - arrivalBeat: 57
     lane: 1
     offsetMs: 0
     useFreeTime: 1
-    timeSeconds: 28.24242289729683
+    timeSeconds: 28.203255376
   - arrivalBeat: 59
     lane: 1
     offsetMs: 0

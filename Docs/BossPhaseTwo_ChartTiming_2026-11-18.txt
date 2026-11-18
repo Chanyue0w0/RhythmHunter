@@ -1,0 +1,28 @@
+Boss phase-two chart timing adjustment — 2026-11-18
+Baseline pushed: 82ac2b47. Analysis uses FMOD-decoded original MP3, 48 kHz stereo.
+Timing conversion follows existing chart editor: source seconds = Normal_End 63.471 + section seconds + timelockedOffset 0.0452708333.
+FMOD tempo 121 BPM. Existing scene sound offset -50 ms is unchanged; it is not subtracted from chart timings.
+Positive log spectral flux, 1024-sample window / 96-sample hop (2ms), compared across low/mid/high bands.
+Four three-hit groups around beats 50-57 match half-beat pulses, not three subdivisions per beat.
+Fitted interval: 247.298387 ms. Maximum residual to selected local transient peaks: 2.009 ms.
+This residual describes the selected audio features, not guaranteed human perception or physical output latency.
+Opening notes use nearby transient candidates: first two are weaker/less definite and require listening confirmation.
+No notes added/removed, lanes unchanged, all notes outside the 15 listed below unchanged, including beat 68 onward.
+Original list index | Beat label | Lane 0/1/2 | Old section seconds | New section seconds | Delta ms
+54 | 18 | 0 | 8.925619835 | 8.914666667 | -10.953
+55 | 22 | 2 | 10.669090909 | 10.630666667 | -38.424
+56 | 25 | 1 | 12.396694215 | 12.374666667 | -22.028
+9 | 50 | 2 | 24.793388430 | 24.741077957 | -52.310
+66 | 51 | 2 | 25.046832292 | 24.988376344 | -58.456
+67 | 51 | 2 | 25.289256198 | 25.235674731 | -53.581
+10 | 52 | 1 | 25.785123967 | 25.730271505 | -54.852
+69 | 52 | 1 | 26.027549554 | 25.977569892 | -49.980
+68 | 53 | 1 | 26.258953504 | 26.224868280 | -34.085
+72 | 54 | 0 | 26.787879460 | 26.719465054 | -68.414
+70 | 55 | 0 | 27.041321641 | 26.966763441 | -74.558
+71 | 55 | 0 | 27.283747229 | 27.214061828 | -69.685
+11 | 56 | 1 | 27.768595041 | 27.708658602 | -59.936
+73 | 56 | 1 | 28.000000673 | 27.955956989 | -44.044
+74 | 57 | 1 | 28.242422897 | 28.203255376 | -39.168
+Validation: 77 notes retained; 15 timestamps changed; no duplicate arrivals; all inside Boss section; each three-hit group equal spacing within 0.00001 ms.
+Listen using automatic audition (sound offset -50ms) around beats 16-27 and 49-58. Do not add another global calibration to compensate this local chart adjustment.
