@@ -199,6 +199,7 @@ MonoBehaviour:
     healOnEffectFrame: 60
     healingEffectPrefab: {fileID: 6288310626294540278, guid: 41bc7262402cda04cb52c6a2ba6a5e2b, type: 3}
   disableNormalHitReaction: 1
+  hitReactionCooldownBeats: 2
   protectBossPhaseOne: 1
   tiredIdleAnimationName: Idle_Tired
   teamQteMode: 0
@@ -321,6 +322,37 @@ MonoBehaviour:
   targets:
   - {fileID: 5838164951133039637}
   viewCamera: {fileID: 0}
+--- !u!1 &7905661772710323056
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8571600261923728720}
+  m_Layer: 0
+  m_Name: RoarOrigin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8571600261923728720
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7905661772710323056}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.36445, y: -1.86269, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6708979518259821821}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8252524555248054281
 GameObject:
   m_ObjectHideFlags: 0
@@ -349,7 +381,8 @@ Transform:
   m_LocalPosition: {x: -0.38, y: 3.42, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8571600261923728720}
   m_Father: {fileID: 7806950159752532399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2738860658551823310
@@ -1511,17 +1544,25 @@ PrefabInstance:
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[6].frameEffects.Array.data[3].effects.Array.data[0].prefab
       value: 
-      objectReference: {fileID: 8374941854733954404, guid: 5097ceeb0e9c51e41b8babf08eb3c4b9, type: 3}
+      objectReference: {fileID: 231831045534983801, guid: c0956f0d21e189443937714f8cfd719e, type: 3}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].frameEffects.Array.data[12].effects.Array.data[0].prefab
       value: 
       objectReference: {fileID: 6288310626294540278, guid: 41bc7262402cda04cb52c6a2ba6a5e2b, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[6].frameEffects.Array.data[3].effects.Array.data[0].selfAnchor
+      value:
+      objectReference: {fileID: 8571600261923728720}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].frameEffects.Array.data[7].effects.Array.data[0].soundVolume
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[3].frameEffects.Array.data[12].effects.Array.data[0].soundVolume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: sequences.Array.data[6].frameEffects.Array.data[3].effects.Array.data[0].followAnchor
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}

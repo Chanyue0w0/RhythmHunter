@@ -1,0 +1,28 @@
+Roar Distortion 第一版
+
+Prefab: Assets/FightDemo/Prefabs/VFX/RoarDistortion.prefab
+Controller: RoarDistortionController
+參數：Distortion Strength（渲染像素）、Duration（秒）、Expansion Speed（每秒螢幕高度）、Max Radius（螢幕高度）、Wave Width（螢幕高度）、Attack Time（秒）、Fade Out（秒）、Pixel Step（像素，0為不量化）、Origin、Origin Offset。
+預設：20像素、0.5秒、1.1螢幕高度/秒、半徑0.48、寬0.1、漸強0.06秒、漸弱0.15秒、像素步距1。
+強度保留Point取樣，不做模糊。半徑按螢幕高度計算，在不同長寬比仍為圓形。
+
+Goblin_King Prefab / HeadAnchor / RoarOrigin：移動此錨點調整嘴部中心。
+Goblin_King / FightCharacterCombatAnimator / Landing / 第4張 / Effects：沿用現有事件，替換howl_VFX為RoarDistortion；followAnchor開啟。
+舊howl_VFX原始Prefab保留。新版Prefab包含OptionalSpriteHowl（停用）；Show Sprite Effect可選擇疊加。
+複製RoarDistortion Prefab可給其他Boss使用不同參數，並放進其動畫影格Effects。
+
+Art2ForwardPlusRenderer：新增Roar Distortion Feature，原有Floor Occlusion Feature保留。
+插入BeforeRenderingPostProcessing，晚於透明物件與地板修正，早於ScreenSpaceOverlay UI。
+只對控制器指定的相機生效；未指定時尋找Art2CameraController的相機。不處理UI特效RT與SceneView。
+來源cameraColor與輸出Texture分離；輸出沿用相機格式與解析度，Point，無深度與MSAA。
+無有效吼叫不enqueue Pass。第一版同時多個吼叫時，以最新有效者為主，最多一個全畫面Pass。
+效果秒數跟隨Time.deltaTime，戰鬥暫停／校準時停止；不改BPM。開場敵人行為鎖定不會凍結吼叫演出。
+效果完成/物件關閉清除註冊；戰鬥特效清理機制也會清除。
+
+限制：畫面取樣會包含環帶內的Boss、角色與世界空間跳字；不是只折射Boss背後的物件。重要Overlay UI不受影響。
+本效果不修改既有後製，原本場景霧化/模糊仍會存在。Pixel Step只防止這個扭曲新增雙線性模糊，不保證整個場景原本完全無抗鋸齒。
+暫未支援XR/分割畫面/Renderer2D；正式使用的是目前Art2 Forward+與RenderGraph。
+
+驗證已完成：Shader GPU棋盤格真實折射、環外不變、Point無中間灰階、零強度與恢復後逐像素一致；Art2 Forward+相機RenderGraph實際輸出與非中央世界座標定位；Play自然Landing第四張事件、嘴部綁定、舊圖停用、暫停/恢復/自動刪除。視覺強度仍可依實際美術試玩微調。
+
+可見度修正：以Art2實際Landing張嘴畫面校準RoarOrigin，位於HeadAnchor下方（local約0.36445,-1.86269,0）；此為該姿勢的嘴部位置，不移動原HeadAnchor或光影點。強度6→20像素、環帶寬0.065→0.1。

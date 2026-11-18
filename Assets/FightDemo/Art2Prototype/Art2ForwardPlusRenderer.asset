@@ -40,6 +40,7 @@ MonoBehaviour:
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
   - {fileID: -411820797884450254}
+  - {fileID: 5654086176263574659}
   m_RendererFeatureMap: 
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -69,3 +70,17 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &5654086176263574659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9708c00e4326d5b4cbd0d7e0564d122c, type: 3}
+  m_Name: Roar Distortion (Art2 camera only)
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.RoarDistortionFeature
+  m_Active: 1
+  shader: {fileID: 4800000, guid: d069849238c79974a9e70996b5a48fdc, type: 3}

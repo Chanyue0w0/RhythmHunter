@@ -79,6 +79,12 @@ namespace RhythmHunter.FightDemo
             if (entry.followAnchor) effect.transform.SetParent(anchor, true);
             effect.SetActive(true);
             PlayFrameSound(entry, effect.transform.position);
+            var roar = effect.GetComponent<Art2.RoarDistortionController>();
+            if (roar != null)
+            {
+                var owner = GetComponent<FightUnitSlot>() ?? GetComponentInParent<FightUnitSlot>();
+                roar.Bind(owner != null ? owner.CombatController : null, anchor);
+            }
             var spriteEffect=effect.GetComponent<FightBeatSpriteEffect>();
             if(spriteEffect != null)
             {
