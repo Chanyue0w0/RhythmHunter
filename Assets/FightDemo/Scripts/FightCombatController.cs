@@ -1201,7 +1201,10 @@ namespace RhythmHunter.FightDemo
             latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
             float armorDamage = Mathf.Min(partyArmor, damage);
             partyArmor -= armorDamage;
-            float hpDamage = Mathf.Min(partyHp, damage - armorDamage);
+            // Apply the floor before damage events/defeat checks, never restore HP after death starts.
+            float damageableHp = BossPhaseTwoActive && BossRhythm && BossRhythm.PreventPlayerDeathForTesting
+                ? Mathf.Max(0f, partyHp - 1f) : partyHp;
+            float hpDamage = Mathf.Min(damageableHp, damage - armorDamage);
             partyHp -= hpDamage;
             if (armorDamage > 0 || hpDamage > 0) PartyDamageTaken?.Invoke(armorDamage, hpDamage);
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);

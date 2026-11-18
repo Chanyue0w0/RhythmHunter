@@ -10,7 +10,7 @@ namespace RhythmHunter.FightDemo
 {
     /// <summary>Scene-owned battle SFX. Music and diagnostic clicks remain owned by FmodBeatClock.</summary>
     [DisallowMultipleComponent]
-    public sealed class FightAudioPlayer : MonoBehaviour
+    public sealed partial class FightAudioPlayer : MonoBehaviour
     {
         [SerializeField] private bool soundEnabled = true;
         [SerializeField, Range(0, 1)] private float masterVolume = 1;
@@ -53,6 +53,7 @@ namespace RhythmHunter.FightDemo
         private void Update()
         {
             if (!soundEnabled || (fight != null && fight.BattleEnded)) { StopAll(); return; }
+            UpdateBeatSounds();
             for (int i = voices.Count - 1; i >= 0; i--)
             {
                 var voice = voices[i];
@@ -75,7 +76,7 @@ namespace RhythmHunter.FightDemo
             instance.stop(STOP_MODE.IMMEDIATE);
             instance.release();
         }
-        public void StopAll() { while (voices.Count > 0) ReleaseAt(voices.Count - 1); }
+        public void StopAll() { StopBeatSounds(); while (voices.Count > 0) ReleaseAt(voices.Count - 1); }
         private void OnDisable() => StopAll();
         private void OnDestroy() => StopAll();
     }

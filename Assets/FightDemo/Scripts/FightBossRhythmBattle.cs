@@ -23,6 +23,23 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Song milliseconds after an incorrect press. 0 disables input lock; does not change arrival times.")]
         [SerializeField, Min(0)] private float missLockMilliseconds = 80;
         [SerializeField, Min(.5f)] private float missDamage = 1;
+        [Header("Phase Two Playtesting")]
+        [Tooltip("測試用：僅 Boss 二階段保留至少 1 HP，護甲與 Miss 照常結算。正式測試死亡流程前請取消勾選。目前依測試需求預設開啟。")]
+        [SerializeField] private bool preventPlayerDeathForTesting = true;
+        public bool PreventPlayerDeathForTesting => preventPlayerDeathForTesting;
+        public enum HitSoundMode { Immediate, AlignToArrival }
+        [Header("Phase Two Hit Audio (existing successful-input event)")]
+        [SerializeField] private HitSoundMode hitSoundMode = HitSoundMode.AlignToArrival;
+        [Tooltip("Song milliseconds. Positive plays later, negative earlier. Does not move notes or judgement.")]
+        [SerializeField] private float hitSoundOffsetMs;
+        [Tooltip("Minimum real-time lead for music timeline scheduling; shorter lead uses immediate feedback.")]
+        [SerializeField, Min(0)] private float minimumSoundLeadMs = 25;
+        public double LastInputErrorMs { get; private set; }
+        public double MeanInputErrorMs => errorCount > 0 ? errorSum / errorCount : 0;
+        public double InputDeviationMs => errorCount > 0 ? Math.Sqrt(Math.Max(0,errorSquareSum/errorCount-MeanInputErrorMs*MeanInputErrorMs)) : 0;
+        public int InputSampleCount => errorCount;
+        private int errorCount;
+        private double errorSum, errorSquareSum;
         [Header("Victory presentation")]
         [SerializeField] private GameObject victoryExplosion;
         [SerializeField, Min(.1f)] private float victoryWaitSeconds = 1.2f;
@@ -64,6 +81,8 @@ namespace RhythmHunter.FightDemo
         {
             Clear(); Hits = MissedNotes = BadInputs = SkippedTransitionNotes = 0; LastJudgement = "";
             ChartError = null;
+            errorCount=0;errorSum=errorSquareSum=LastInputErrorMs=0;
+            fight.AudioPlayer.PrepareBeatSounds(fight.BossHitSoundPath);
             string error = null;
             if (!chart || !chart.Validate(out error))
             { ChartError = chart ? error : "Assign a Boss rhythm chart."; Debug.LogError(ChartError, this); return; }
@@ -193,7 +212,13 @@ namespace RhythmHunter.FightDemo
             if (note == null)
             { BadInputs++; LastJudgement = "MISS"; lockedUntil = beat + missLockMilliseconds / fight.BeatClock.MillisecondsPerBeat; heroes[lane]?.PlayInputFeedback(false); return; }
             note.accepted = true; LastJudgement = "BLOCK";
-            // The early press raises a guard immediately; the slash and block sound resolve on its authored arrival.
+            LastInputErrorMs=(beat-note.beat)*fight.BeatClock.MillisecondsPerBeat;
+            errorCount++;errorSum+=LastInputErrorMs;errorSquareSum+=LastInputErrorMs*LastInputErrorMs;
+            if(fight.BeatClock.TryGetTimelinePositionMs(out int nowMs))
+                fight.AudioPlayer.PlayBeatSound(fight.BossHitSoundPath,fight.BossHitSoundVolume,
+                    nowMs+(note.beat-CurrentBeat)*fight.BeatClock.MillisecondsPerBeat+hitSoundOffsetMs,
+                    hitSoundMode==HitSoundMode.AlignToArrival,minimumSoundLeadMs);
+            // Successful input owns audio; impact resolves at arrival without replaying the sound.
             if (CurrentBeat >= note.beat) Resolve(note, true);
         }
         private Note FindNearestNote(int lane, double beat, double window)
@@ -272,6 +297,7 @@ namespace RhythmHunter.FightDemo
         }
         private void Clear()
         {
+            if(fight)fight.AudioPlayer.StopBeatSounds();
             ClearVisuals(); notes.Clear(); started = originKnown = readySeen = outro = animationPlaying = false;
             lockedUntil = double.NegativeInfinity; CurrentBeat = 0;
         }

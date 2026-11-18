@@ -11049,8 +11049,12 @@ MonoBehaviour:
   guardPrefab: {fileID: 5556139408328923791, guid: b55fa4361dda25345b505ff46b774861, type: 3}
   targetOffset: {x: 0, y: 0.75, z: 0}
   guardDurationBeats: 0.5
-  missLockBeats: 0.5
+  missLockMilliseconds: 80
   missDamage: 1
+  preventPlayerDeathForTesting: 1
+  hitSoundMode: 1
+  hitSoundOffsetMs: -50
+  minimumSoundLeadMs: 25
   victoryExplosion: {fileID: 5292981524694603679, guid: a3dd949486459684a818f410e0242b9b, type: 3}
   victoryWaitSeconds: 1.2
 --- !u!1 &2037638509
@@ -12647,7 +12651,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 250253.58, y: 14681.103, z: 1.8331856e+31, w: 8.480153e-33}
+  m_BoundingSphereOverride: {x: 9.687176, y: 0, z: 2.7105054e-20, w: 9.1846e-40}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -12811,7 +12815,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: -2.6769516e+29, z: 6.36e-43, w: -2.7500493e+29}
+  m_BoundingSphereOverride: {x: 0, y: 3.67378e-40, z: 1.0469e-41, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -13307,7 +13311,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.8062698e+28, y: 2.4845996e+27, z: 4.1931302e+21, w: 1.8395218e+25}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 5.51075e-40}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -13471,7 +13475,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.8470472e+25, y: 0.00092851266, z: 3.097271e+27, w: 6.8398014e+25}
+  m_BoundingSphereOverride: {x: 0, y: 1.010252e-39, z: 7.124e-42, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

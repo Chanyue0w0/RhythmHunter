@@ -44,7 +44,10 @@ namespace RhythmHunter.FightDemoEditor
                 File.WriteAllText("Temp/BossRhythmValidation.progress", progress);
                 if (step == 0)
                 {
+                    // Automated damage/defeat assertions explicitly use production damage rules.
+                    Set(battle, "preventPlayerDeathForTesting", false);
                     chart = AssetDatabase.LoadAssetAtPath<FightBossRhythmChart>("Assets/FightDemo/Levels/GoblinKing_PhaseTwo_Chart.asset");
+                    if (mode == "audio") { chart = ScriptableObject.CreateInstance<FightBossRhythmChart>(); chart.GeneratePrototype(); Set(battle, "chart", chart); }
                     Check(chart && chart.Validate(out _), "Chart invalid");
                     Check(chart.notes.Select(n => n.arrivalBeat).Distinct().Count() == chart.notes.Count, "Simultaneous notes");
                     var duplicate = UnityEngine.Object.Instantiate(chart); duplicate.notes.Add(duplicate.notes[0]);
@@ -111,6 +114,14 @@ namespace RhythmHunter.FightDemoEditor
                     }
                     if (!captured && battle.CurrentBeat > 22 && battle.CurrentBeat < 23)
                     { ScreenCapture.CaptureScreenshot("Temp/BossRhythmGameplay.png"); captured = true; }
+                    if (mode == "audio" && battle.Hits >= 3)
+                    {
+                        Check(battle.InputSampleCount >= 3, "Successful input diagnostics missing");
+                        Check(fight.AudioPlayer.ScheduledBeatSounds + fight.AudioPlayer.ImmediateBeatSounds >= 3, "Hit sound route missing");
+                        Check(fight.BossHitSoundPath == "event:/SoundEffects/BeatTapping", "Wrong successful-input sound");
+                        File.WriteAllText("Temp/BossRhythmValidation_audio.result", "PASS: production input route, successful-hit sound, diagnostics, pause/resume; scratch chart only. " + progress);
+                        Finish(); return;
+                    }
                     if (!fight.BattleEnded) return;
                     var results = UnityEngine.Object.FindFirstObjectByType<FightStageResults>();
                     Check(results.Completed, "Results did not complete");

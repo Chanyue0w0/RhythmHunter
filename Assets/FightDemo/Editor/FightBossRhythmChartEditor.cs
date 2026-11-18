@@ -65,11 +65,12 @@ namespace RhythmHunter.FightDemoEditor
             }
             if (preview.getTimelinePosition(out int raw) == FMOD.RESULT.OK) cursor = Math.Max(0, (raw - startMs) / 1000d);
             preview.getPaused(out paused);
+            UpdateAutoAudition();
             if (cursor >= duration || state == FMOD.Studio.PLAYBACK_STATE.STOPPED) Stop();
             Repaint();
         }
         private void Stop()
-        { if (preview.isValid()) EditorUtils.PreviewStop(preview); preview.clearHandle(); recording = paused = previewStarted = false; heldKeys.Clear(); }
+        { ClearAuditionSounds(); if (preview.isValid()) EditorUtils.PreviewStop(preview); preview.clearHandle(); recording = paused = previewStarted = false; heldKeys.Clear(); }
         private void OnLostFocus() => heldKeys.Clear();
         private void LoadSong()
         {
@@ -92,6 +93,8 @@ namespace RhythmHunter.FightDemoEditor
         {
             if (EditorApplication.isPlaying || tempo <= 0) return;
             if (preview.isValid()) { EditorUtils.PreviewPause(preview); return; }
+            // Decode the reference waveform before starting music; decoding can block the editor for seconds.
+            PollWaveform();
             EditorUtils.LoadPreviewBanks();
             var evt = EventManager.EventFromPath(eventPath);
             if (!evt) { message = "FMOD Event 不存在，請檢查 Bank／Event 路徑。"; return; }
@@ -109,7 +112,7 @@ namespace RhythmHunter.FightDemoEditor
         private void Record(int lane)
         {
             // Read native playback position at the actual key event, not the last GUI repaint.
-            if (!preview.isValid() || paused || preview.getTimelinePosition(out int raw) != FMOD.RESULT.OK) return;
+            if (autoAudition || !preview.isValid() || paused || preview.getTimelinePosition(out int raw) != FMOD.RESULT.OK) return;
             Add(lane, (raw - startMs + recordingOffsetMs) / 1000d);
         }
         private Vector2 windowScroll;
@@ -139,7 +142,7 @@ namespace RhythmHunter.FightDemoEditor
                     EditorGUILayout.EndHorizontal();
                     double nextCursor = EditorGUILayout.Slider("試聽位置（秒）", (float)cursor, 0, (float)duration);
                     if (Math.Abs(nextCursor - cursor) > .001)
-                    { cursor = nextCursor; if (preview.isValid()) preview.setTimelinePosition(startMs + (int)Math.Round(cursor * 1000)); }
+                    { SeekPreview(nextCursor); }
                 }
             }
             if (EditorApplication.isPlaying) EditorGUILayout.HelpBox("試聽錄點請在非 Play 模式使用，避免與戰鬥音樂重疊。修改後下次進入二階段套用。", MessageType.Info);
@@ -156,7 +159,7 @@ namespace RhythmHunter.FightDemoEditor
                 if (lane >= 0) { if (heldKeys.Add(e.keyCode)) Record(lane); e.Use(); }
             }
             selection.RemoveWhere(i => i < 0 || i >= chart.notes.Count);
-            DrawAdvancedTools(); DrawTimeline(); DrawSelected();
+            DrawAudioCalibration(); DrawAdvancedTools(); DrawTimeline(); DrawSelected();
             double window = 120;
             var fight = FindFirstObjectByType<FightCombatController>();
             if (fight && fight.BossRhythmJudge) window = fight.BossRhythmJudge.PerfectWindowMs;
@@ -220,7 +223,7 @@ namespace RhythmHunter.FightDemoEditor
             {
                 double seconds = Math.Clamp(PxToSeconds(e.mousePosition.x - area.x - 50),0,duration);
                 if (e.mousePosition.y < area.y + 120)
-                { cursor = seconds; if (preview.isValid()) preview.setTimelinePosition(startMs + (int)Math.Round(cursor*1000)); e.Use(); }
+                { SeekPreview(seconds); e.Use(); }
                 else if (e.clickCount == 2)
                 { int lane = Mathf.Clamp((int)((e.mousePosition.y-area.y-124)/36),0,2); Add(lane,seconds); selection.Clear(); selection.Add(selected); e.Use(); }
             }

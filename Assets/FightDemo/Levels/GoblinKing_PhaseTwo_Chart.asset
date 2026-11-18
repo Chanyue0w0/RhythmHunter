@@ -90,197 +90,197 @@ MonoBehaviour:
     timeSeconds: 0
   - arrivalBeat: 68
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 69
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 70
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 71
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 72
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 73
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 74
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 75
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 76
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 77
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 78
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 79
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 80
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 81
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 82
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 83
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 84
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 85
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 86
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 87
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 88
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 89
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 90
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 91
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 92
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 93
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 94
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 95
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 100
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 101
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 102
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 103
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 104
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 105
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 106
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 107
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 108
     lane: 1
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 109
     lane: 2
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 110
     lane: 0
-    offsetMs: 0
+    offsetMs: -50
     useFreeTime: 0
     timeSeconds: 0
   - arrivalBeat: 18
