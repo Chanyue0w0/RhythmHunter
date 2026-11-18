@@ -20,7 +20,7 @@ namespace RhythmHunter.FightDemoEditor
             EditorGUILayout.HelpBox("Arrival Beat + Offset Ms：基準拍加正負毫秒。Use Free Time：改用從 Normal_End 起算的 Time Seconds，再加 Offset Ms。舊資料偏移預設 0。", MessageType.Info);
         }
     }
-    public sealed class FightBossRhythmChartWindow : EditorWindow
+    public sealed partial class FightBossRhythmChartWindow : EditorWindow
     {
         [SerializeField] private FightBossRhythmChart chart;
         [SerializeField] private string eventPath;
@@ -47,7 +47,7 @@ namespace RhythmHunter.FightDemoEditor
         }
         private void OnDisable()
         {
-            Stop(); EditorApplication.update -= Tick;
+            Stop(); DisposeWaveform(); EditorApplication.update -= Tick;
             AssemblyReloadEvents.beforeAssemblyReload -= Stop;
             EditorApplication.playModeStateChanged -= PlayModeChanged;
             Undo.undoRedoPerformed -= Repaint;
@@ -55,6 +55,7 @@ namespace RhythmHunter.FightDemoEditor
         private void PlayModeChanged(PlayModeStateChange _) => Stop();
         private void Tick()
         {
+            PollWaveform();
             if (!preview.isValid()) return;
             preview.getPlaybackState(out var state);
             if (!previewStarted)
@@ -83,6 +84,7 @@ namespace RhythmHunter.FightDemoEditor
                 tempo = FightOpeningTempoImporter.ReadTempo(eventPath);
                 if (tempo <= 0 || end.positionMs <= start.positionMs) throw new Exception("Invalid tempo or section markers.");
                 startMs = start.positionMs; duration = (end.positionMs - startMs) / 1000d; cursor = 0;
+                LoadWaveform();
             }
             catch (Exception e) { tempo = 0; message = "讀取音樂失敗：" + e.Message; }
         }
@@ -110,10 +112,17 @@ namespace RhythmHunter.FightDemoEditor
             if (!preview.isValid() || paused || preview.getTimelinePosition(out int raw) != FMOD.RESULT.OK) return;
             Add(lane, (raw - startMs + recordingOffsetMs) / 1000d);
         }
+        private Vector2 windowScroll;
         private void OnGUI()
         {
+            windowScroll = EditorGUILayout.BeginScrollView(windowScroll);
+            try { DrawContents(); }
+            finally { EditorGUILayout.EndScrollView(); }
+        }
+        private void DrawContents()
+        {
             var next = (FightBossRhythmChart)EditorGUILayout.ObjectField("譜面", chart, typeof(FightBossRhythmChart), false);
-            if (next != chart) { Stop(); chart = next; selected = -1; }
+            if (next != chart) { Stop(); chart = next; selected = -1; selection.Clear(); }
             if (!chart) return;
             using (new EditorGUI.DisabledScope(EditorApplication.isPlaying))
             {
@@ -146,7 +155,8 @@ namespace RhythmHunter.FightDemoEditor
                 int lane = e.keyCode == KeyCode.X ? 0 : e.keyCode == KeyCode.Y ? 1 : e.keyCode == KeyCode.B ? 2 : -1;
                 if (lane >= 0) { if (heldKeys.Add(e.keyCode)) Record(lane); e.Use(); }
             }
-            DrawTimeline(); DrawSelected();
+            selection.RemoveWhere(i => i < 0 || i >= chart.notes.Count);
+            DrawAdvancedTools(); DrawTimeline(); DrawSelected();
             double window = 120;
             var fight = FindFirstObjectByType<FightCombatController>();
             if (fight && fight.BossRhythmJudge) window = fight.BossRhythmJudge.PerfectWindowMs;
@@ -160,28 +170,60 @@ namespace RhythmHunter.FightDemoEditor
         }
         private void DrawTimeline()
         {
-            scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Height(180));
-            float width = (float)(duration * 1000 / MsPerBeat * 36 + 60);
-            var area = GUILayoutUtility.GetRect(width, 140, GUILayout.ExpandWidth(false));
+            scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Height(260));
+            float width = SecondsToPx(duration) + 60;
+            var area = GUILayoutUtility.GetRect(width, 230, GUILayout.ExpandWidth(false));
+            DrawWaveform(area);
             for (int beat = 0; beat * MsPerBeat / 1000 <= duration; beat++)
             {
-                float x = area.x + 50 + beat * 36;
-                GUI.Label(new Rect(x, area.y, 36, 20), beat.ToString());
-                EditorGUI.DrawRect(new Rect(x, area.y + 24, 1, 108), beat % 4 == 0 ? Color.gray : new Color(.25f,.25f,.25f));
+                float x = area.x + 50 + beat * pixelsPerBeat;
+                GUI.Label(new Rect(x, area.y, pixelsPerBeat, 20), $"{beat}");
+                if (pixelsPerBeat >= 60) GUI.Label(new Rect(x, area.y + 100, pixelsPerBeat, 20), $"{beat*MsPerBeat/1000:F2}s", EditorStyles.miniLabel);
+                EditorGUI.DrawRect(new Rect(x, area.y + 24, 1, 204), beat % 4 == 0 ? Color.gray : new Color(.25f,.25f,.25f,.4f));
             }
             string[] labels = { "左 X", "中 Y", "右 B" };
-            for (int i = 0; i < 3; i++) GUI.Label(new Rect(area.x, area.y + 30 + i * 36, 48, 30), labels[i]);
+            for (int i = 0; i < 3; i++) GUI.Label(new Rect(area.x, area.y + 124 + i * 36, 48, 30), labels[i]);
+            var e = Event.current;
+            int control = GUIUtility.GetControlID(FocusType.Passive);
             for (int i = 0; i < chart.notes.Count; i++)
             {
-                var n = chart.notes[i]; float x = area.x + 50 + (float)(Seconds(n) * 1000 / MsPerBeat * 36);
-                var rect = new Rect(x - 7, area.y + 28 + (int)n.lane * 36, 14, 26);
-                EditorGUI.DrawRect(rect, i == selected ? Color.yellow : n.useFreeTime ? Color.cyan : new Color(.95f,.3f,.15f));
-                if (GUI.Button(rect, new GUIContent("", $"{Seconds(n):F3}s / offset {n.offsetMs:+0.0;-0.0;0}ms"), GUIStyle.none)) selected = i;
+                var n = chart.notes[i]; float x = area.x + 50 + SecondsToPx(Seconds(n));
+                var rect = new Rect(x - 7, area.y + 124 + (int)n.lane * 36, 14, 26);
+                EditorGUI.DrawRect(rect, selection.Contains(i) || i == selected ? Color.yellow : n.useFreeTime ? Color.cyan : new Color(.95f,.3f,.15f));
+                GUI.Label(rect,new GUIContent("",$"#{i+1} · {Seconds(n):F3}s · {Seconds(n)*1000/MsPerBeat:F3}拍 · {n.offsetMs:+0.0;-0.0;0}ms"));
+                if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
+                {
+                    if (e.control || e.shift) { if (!selection.Add(i)) selection.Remove(i); selected = selection.Contains(i) ? i : -1; e.Use(); break; }
+                    if (!selection.Contains(i)) { selection.Clear(); selection.Add(i); }
+                    selected = i;
+                    dragStart = selection.ToDictionary(k => k, k => Seconds(chart.notes[k])); dragX = e.mousePosition.x;
+                    Undo.IncrementCurrentGroup(); dragUndo = Undo.GetCurrentGroup(); Undo.RegisterCompleteObjectUndo(chart,"Drag rhythm notes");
+                    GUIUtility.hotControl = dragControl = control; e.Use(); break;
+                }
             }
-            EditorGUI.DrawRect(new Rect(area.x + 50 + (float)(cursor * 1000 / MsPerBeat * 36), area.y + 22, 2, 110), Color.green);
-            var e = Event.current;
-            if (e.type == EventType.MouseDown && e.clickCount == 2 && area.Contains(e.mousePosition) && e.mousePosition.x >= area.x + 50)
-            { int lane = Mathf.Clamp((int)((e.mousePosition.y - area.y - 24) / 36), 0, 2); Add(lane, (e.mousePosition.x - area.x - 50) / 36 * MsPerBeat / 1000); e.Use(); }
+            if (dragStart != null && GUIUtility.hotControl == dragControl)
+            {
+                if (e.type == EventType.MouseDrag)
+                {
+                    double delta = PxToSeconds(e.mousePosition.x - dragX);
+                    if (snap && selected >= 0)
+                    { double target = dragStart[selected] + delta; delta = Math.Round(target * 1000 / MsPerBeat) * MsPerBeat / 1000 - dragStart[selected]; }
+                    TranslateSelection(dragStart, delta); e.Use(); Repaint();
+                }
+                else if (e.type == EventType.MouseUp)
+                { GUIUtility.hotControl = 0; dragStart = null; Undo.CollapseUndoOperations(dragUndo); e.Use(); }
+                else if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+                { TranslateSelection(dragStart,0); GUIUtility.hotControl=0; dragStart=null; e.Use(); }
+            }
+            EditorGUI.DrawRect(new Rect(area.x + 50 + SecondsToPx(cursor), area.y + 22, 2, 206), Color.green);
+            if (e.type == EventType.MouseDown && e.button == 0 && area.Contains(e.mousePosition) && e.mousePosition.x >= area.x + 50)
+            {
+                double seconds = Math.Clamp(PxToSeconds(e.mousePosition.x - area.x - 50),0,duration);
+                if (e.mousePosition.y < area.y + 120)
+                { cursor = seconds; if (preview.isValid()) preview.setTimelinePosition(startMs + (int)Math.Round(cursor*1000)); e.Use(); }
+                else if (e.clickCount == 2)
+                { int lane = Mathf.Clamp((int)((e.mousePosition.y-area.y-124)/36),0,2); Add(lane,seconds); selection.Clear(); selection.Add(selected); e.Use(); }
+            }
             EditorGUILayout.EndScrollView();
         }
         private void DrawSelected()
@@ -205,7 +247,7 @@ namespace RhythmHunter.FightDemoEditor
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("提前 10ms")) Shift(-10);
             if (GUILayout.Button("延後 10ms")) Shift(10);
-            if (GUILayout.Button("刪除此點")) { Undo.RecordObject(chart, "Remove note"); chart.notes.RemoveAt(selected); selected = -1; EditorUtility.SetDirty(chart); }
+            if (GUILayout.Button("刪除此點")) { Undo.RecordObject(chart, "Remove note"); chart.notes.RemoveAt(selected); selected = -1; selection.Clear(); EditorUtility.SetDirty(chart); }
             EditorGUILayout.EndHorizontal();
         }
         private void Shift(float ms)
