@@ -62,7 +62,7 @@ namespace RhythmHunter.FightDemoEditor
                     Check(Math.Abs(boss.TakeDamage(10000)- (initial-1))<.001f,"HP-loss return should stop at one");
                     Check(boss.CurrentHp==1 && boss.BossPhaseOneTired && deaths==0 && completions==1,"Lethal clamp/success failed");
                     Check(fight.ScheduledEnemyHitCount==0,"Unlaunched hits survived success");
-                    Check(boss.CombatAnimator.ActiveAnimation==FightCharacterCombatAnimator.CombatAnimation.Hit,"Completion hit reaction missing");
+                    Check(!boss.CombatAnimator.IsPlaying,"Locked boss should not start a hit reaction");
                     Check(boss.Heal(30)==0 && boss.CurrentHp==1,"Tired Boss healed");
                     Check(!(bool)start.Invoke(fight,new object[]{boss}),"Tired Boss selected another action");
                     Check(!fight.ScheduleEnemyHits(boss,new[]{1},2),"Tired Boss accepted scheduled attack");
@@ -80,14 +80,14 @@ namespace RhythmHunter.FightDemoEditor
                 if(phase==1 && EditorApplication.timeSinceStartup>=waitUntil)
                 {
                     Check(boss && boss.ActorInstance && boss.CurrentHp==1 && !boss.DeathPresentationPending && deaths==0,"Boss removed or killed");
-                    Check(!boss.CombatAnimator.IsPlaying && boss.CombatAnimator.DisplayedFrame.Source==(int)boss.CombatAnimator.FindSequence("Idle_Tired").Animation,"Hit did not return to tired idle");
+                    Check(!boss.CombatAnimator.IsPlaying && boss.CombatAnimator.DisplayedFrame.Source==(int)boss.CombatAnimator.FindSequence("Idle_Tired").Animation,"Locked boss did not hold tired idle");
                     Check(fight.ScheduledEnemyHitCount==0,"New actions while tired");
                     boss.RestoreFullHealth();Check(!boss.BossPhaseOneTired && boss.BossPhaseOneExtraDamage==0 && boss.CurrentHp==boss.MaxHp,"Reset did not clear success");
                     var debug=fight.GetComponent<FightBossStageDebug>();
                     debug.RequestPhaseTwoSkip();Check(boss.CurrentHp==1 && debug.PhaseTwoSkipRequested,"Debug request failed");
                     Check(debug.ConsumePhaseTwoSkipRequest() && !debug.PhaseTwoSkipRequested,"Debug request not consumable");
                     boss.ReleaseBossPhaseOneProtection();Check(!boss.BossPhaseOneTired && !boss.BossPhaseOneProtected,"Phase-two release failed");
-                    File.WriteAllText(Result,"PASS: one-HP floor, one success/no deaths, attack cancellation, no new attacks/heal, direct/DoT/secondary damage floor, extra-damage event, fragile, Hit->Idle_Tired, full reset and debug skip request. Runtime placeholder only; prefab artwork unchanged.");
+                    File.WriteAllText(Result,"PASS: one-HP floor, one success/no deaths, attack cancellation, no new attacks/heal, direct/DoT/secondary damage floor, extra-damage event, fragile, no hit reaction/Idle_Tired, full reset and debug skip request. Runtime placeholder only; prefab artwork unchanged.");
                     Finish();
                 }
             }

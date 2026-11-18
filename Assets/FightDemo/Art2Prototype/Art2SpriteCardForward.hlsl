@@ -87,5 +87,15 @@
                 }
                 rgb = lerp(rgb, _AtmosphereTint.rgb, _AtmosphereMix);
                 rgb = FocusWallFog(rgb, focusWeight);
-                return half4(rgb * (1 - saturate(_EntranceSilhouette)), color.a);
+                rgb *= 1 - saturate(_EntranceSilhouette);
+                // After lighting: even black eyes/shadows become white. Never change the sprite alpha.
+                half flash = saturate(_FlashAmount);
+                if (_FlashSweep.w > 0)
+                {
+                    float x = (dot(input.positionWS, _FlashAxis.xyz) - _FlashSweep.x) /
+                        max(_FlashSweep.y - _FlashSweep.x, 0.0001);
+                    flash *= step(abs(x - (1 - _FlashSweep.z)), _FlashSweep.w * 0.5);
+                }
+                rgb = lerp(rgb, _FlashColor.rgb, flash);
+                return half4(rgb, color.a);
             }

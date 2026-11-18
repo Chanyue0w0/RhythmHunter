@@ -28,8 +28,12 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Optional frame-authored abilities. Choose by relative weight per action; repeats allowed. Damage 0 permits non-damaging animations. Empty preserves the existing Normal attack.")]
         [SerializeField] private List<EnemyAbility> enemyAbilities = new();
         public IReadOnlyList<EnemyAbility> EnemyAbilities => enemyAbilities;
+        [Header("Enemy Hit Reaction")]
+        [Tooltip("Normal combat beats to wait after GetHurt finishes before it can play again. Damage is unaffected; death presentation bypasses this cooldown.")]
+        [SerializeField, Min(0)] private float hitReactionCooldownBeats = 2f;
+        public float HitReactionCooldownBeats => Mathf.Max(0, hitReactionCooldownBeats);
         [Header("Boss Stage Phase One")]
-        [Tooltip("Only in a BossStage: retain 1 HP, stop actions/healing on completion and wait for the phase transition.")]
+        [Tooltip("Only in a BossStage: retain 1 HP and block healing; finish an active finite Pressure before stopping actions. Overtime success transitions immediately.")]
         [SerializeField] private bool protectBossPhaseOne;
         [SerializeField] private string tiredIdleAnimationName = "Idle_Tired";
         public bool ProtectBossPhaseOne => protectBossPhaseOne;

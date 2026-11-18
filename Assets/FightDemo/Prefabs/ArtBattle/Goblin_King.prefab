@@ -104,6 +104,7 @@ GameObject:
   - component: {fileID: 7806950159752532399}
   - component: {fileID: 1049329208925010419}
   - component: {fileID: 8764391177152671445}
+  - component: {fileID: 5828732820220092138}
   m_Layer: 0
   m_Name: Goblin_King
   m_TagString: Untagged
@@ -224,7 +225,7 @@ MonoBehaviour:
   displayName: GOBLIN KING
   team: 0
   role: 0
-  maxHp: 200
+  maxHp: 150
   defense: 0
   frontlineDefenseBonus: 0
   basicAbilityName: Strike
@@ -298,6 +299,27 @@ MonoBehaviour:
   followsLight: 1
   projectionHeight: 0.25
   maxLightOffset: 0.45
+--- !u!114 &5828732820220092138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6489656208228852419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dea60921a790784ab0beb6559968f73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightHitFlashController
+  flashEnabled: 0
+  durationSeconds: 0.1
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashStrength: 0.35
+  mode: 1
+  sweepWidth: 0.35
+  targets:
+  - {fileID: 5838164951133039637}
+  viewCamera: {fileID: 0}
 --- !u!1 &8252524555248054281
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,7 +637,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[8].frames.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[9].attackEffectFrame
@@ -768,11 +790,15 @@ PrefabInstance:
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[8].frames.Array.data[0]'
       value: 
-      objectReference: {fileID: 21300000, guid: 2c7df227f50917d4a8be4d9a8c5b90ca, type: 3}
+      objectReference: {fileID: 21300000, guid: 86aaf3e441d65d8478af7cee97f4e764, type: 3}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[8].frames.Array.data[1]'
       value: 
-      objectReference: {fileID: 21300000, guid: c7da2f8db8504af4c8887508584e9da3, type: 3}
+      objectReference: {fileID: 21300000, guid: 74ea9bbdf97884249a8621cb509121a0, type: 3}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[8].frames.Array.data[2]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 8c72b81f4ca02094587d0c6c1ec4d801, type: 3}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[9].frames.Array.data[0]'
       value: 
@@ -947,7 +973,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[8].frameEffects.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[10].frameEffects.Array.size
@@ -1051,7 +1077,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[8].frameBeatDurations.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: sequences.Array.data[8].warningEffect.lifetimeSeconds
@@ -1271,11 +1297,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[8].frameBeatDurations.Array.data[0]'
-      value: 0.5
+      value: 0.33
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[8].frameBeatDurations.Array.data[1]'
-      value: 0.5
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+      propertyPath: 'sequences.Array.data[8].frameBeatDurations.Array.data[2]'
+      value: 0.34
       objectReference: {fileID: 0}
     - target: {fileID: 298298661553404314, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
       propertyPath: 'sequences.Array.data[9].attachmentFrameIds.Array.data[0]'
@@ -1574,6 +1604,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+--- !u!212 &5838164951133039637 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 8576884855007983579, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}
+  m_PrefabInstance: {fileID: 2738860658551823310}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6497087682659678129 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8946446362606103679, guid: 04377abca5f3be54aafedf4f40d9376b, type: 3}

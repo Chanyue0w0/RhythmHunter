@@ -104,7 +104,7 @@ namespace RhythmHunter.FightDemo
             if (enemy == null) return;
             // Death ignores interrupt immunity. Launched projectiles retain their existing independent lifetime.
             enemyHits.RemoveAll(hit => hit.source == enemy && !hit.launched);
-            InterruptEnemyAttack(enemy);
+            InterruptEnemyAttack(enemy, preserveHitReaction: true);
         }
         public void CancelEnemyActionForPhaseOneCompletion(FightUnitSlot enemy)
         {
@@ -126,11 +126,13 @@ namespace RhythmHunter.FightDemo
         }
 
         /// <summary>Unconditional cancellation for death, Break and teardown; not evidence of a successful player interrupt.</summary>
-        public void InterruptEnemyAttack(FightUnitSlot enemy)
+        public void InterruptEnemyAttack(FightUnitSlot enemy, bool preserveHitReaction = false)
         {
             if (enemy == null || !fightScene2Enemies.Contains(enemy)) return;
             EndEnemyCadenceEarly(enemy);
-            enemy.CombatAnimator?.InterruptPlayback();
+            if (!preserveHitReaction || enemy.CombatAnimator == null ||
+                enemy.CombatAnimator.ActiveAnimation != FightCharacterCombatAnimator.CombatAnimation.Hit)
+                enemy.CombatAnimator?.InterruptPlayback();
             InterruptScheduledEnemyAction(enemy);
             if (pendingEnemyAttacker != enemy) return;
             pendingEnemyAttack = false; pendingEnemyAnimationDriven = false;

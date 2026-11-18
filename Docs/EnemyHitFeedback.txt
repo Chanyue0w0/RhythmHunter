@@ -1,0 +1,55 @@
+敵人受擊完整性與 Hit Flash — 2026-11-18
+
+調整位置
+Assets/FightDemo/Prefabs/ArtBattle/Goblin_Normal.prefab
+Assets/FightDemo/Prefabs/ArtBattle/Goblin_Killer.prefab
+Assets/FightDemo/Prefabs/ArtBattle/Goblin_Giant.prefab
+Assets/FightDemo/Prefabs/ArtBattle/Goblin_King.prefab
+以上 Prefab 根物件新增 Fight Hit Flash Controller。
+
+Inspector
+Flash Enabled：開關反白。
+Duration Seconds：持續秒數，預設 0.08；一般暫停與校準時暫停計時。
+Flash Color：預設白色，只用 RGB，Alpha 仍來自原 Sprite。
+Mode：Whole Sprite 整隻瞬間變白／恢復（預設）；Right To Left 右到左掃過。
+Sweep Width：掃過寬度，預設 0.35，邊緣為硬切，不做模糊。
+Targets：一起反白的 SpriteRenderer。現在只選角色本體；需要其他部件時自行加入。不要加入腳底陰影、粒子或頭頂圖示。
+View Camera：掃過方向使用的鏡頭，未填時使用 Camera.main；鏡像翻面不會反轉畫面上的掃過方向。
+
+行為
+受擊動畫播放中，新的受擊動畫請求直接忽略、不排隊；完成後下一次有效請求才能再次播放。
+保持既有觸發條件：虛弱／Boss 疲憊等情境才播放受擊動畫。攻擊動畫不被受擊動畫中斷。
+HP、DEF、傷害、DoT、脆弱等計算不變。額外命中仍結算傷害並刷新反白計時。
+死亡仍取消敵人攻擊；如果正在播受擊動畫，就播完目前這次再消失，不重新播放第一張。
+反白由 TakeDamage 結算後的 DamageConfirmed 通知觸發，包含有效的 DoT；零傷害與無敵拒絕的攻擊不觸發。
+Boss 第一階段保留 1 HP 時的有效額外攻擊仍有反白。死亡與物件停用時清除反白。
+
+渲染
+Art2 實際使用 URP 3D Forward+ 與既有 RhythmHunter/Art2/SpriteCardLit，而非標準 Renderer2D。
+此次擴充既有 Shader，沒有替換材質、建立每敵人 Material，也沒有改動整個 URP 設定。
+使用每 Renderer 的 MaterialPropertyBlock，只改反白專用欄位，保留補光、入場剪影、透明度與動畫貼圖等參數。
+反白在 Shader 光照之後混合，黑色眼睛也會變白；原有全畫面後製仍會作用於最後畫面。
+Forward 與 FloorRecovery 共用同一段反白程式，陰影投射 pass 不改動。
+若把此元件用於其他不含 _FlashAmount 的 Shader，會提示並跳過，絕不自動換掉素材包材質。
+Prefab 的 Art2 材質由 Art2ActorPresentation 在場景生成時套用；檢驗完整受光請在 Art2 場景中進行。
+
+驗證
+編譯 0 警告／0 錯誤。
+四種 Prefab 受傷事件、零傷害、重複受擊動畫拒絕、攻擊保護、既有受擊銜接死亡皆通過。
+GPU：黑色像素反白、Alpha 保留、獨立材質狀態、右到左及翻面、連續刷新、結束／停用還原通過。
+實際場景的閃爍強度與 80ms 視感仍交由使用者確認。
+
+舒適度調整：四種哥布林的 Flash Strength 預設改為 0.35（35% 混合），保留原圖細節；設為 1 才是完全純白，設為 0 則不改顏色。每隻敵人既有 Duration Seconds 保留。
+
+2026-11-18 Boss 鎖血與 Pressure 調整
+- 四種哥布林 Flash Enabled 皆關閉，新 Hit Flash Controller 的預設也關閉；強度、顏色等設定保留供日後開啟。
+- Boss 在一般有限 Pressure 中到達最低 HP 時，保留目前的攻擊與該輪 Pressure，仍可繼續選攻擊；HP 維持 1、禁止回血。
+- 鎖血後的命中不再觸發 Hit/GetHurt 或受擊小跳；傷害顯示、狀態與額外傷害紀錄沿用原規則。
+- Pressure 正常倒數或削減到結束後，停止攻擊並在暈眩期間播角色資料的 Tired Idle Animation Name（Goblin King 為 Idle_Tired）。
+- 未鎖血 Boss 也在 Pressure 休息期間用 Tired；休息結束後回原 Idle。鎖血 Boss 則持續 Tired，不再排下一輪 Pressure。
+- 一般有限 Pressure 尚未完成時，音樂到達 Normal_End 仍保留原生循環，待這一輪完成才接續二階段，避免狀態被音樂邊界截斷。
+- 加時為無限 Pressure，依確認仍在鎖血後立即跳轉二階段，不等待 Pressure 自行結束。Debug 跳二階段功能仍可強制跳過。
+- 前述「Boss 疲憊時仍播放受擊動畫」說明由本次規則取代。一般哥布林虛弱期間的受擊動畫完整性保持不變。
+驗證：已通過實際 Play 測試，包含鎖血不中斷攻擊／Pressure、音樂跨 Normal_End、不再觸發 Hit、鎖血前後休息皆 Tired、加時立即轉二階段。
+
+受擊動畫冷卻：播完 GetHurt 後再等待 2 個普通戰鬥拍才可再次觸發，受擊傷害不受影響。Prefab 根物件 FightCharacterDefinition → Enemy Hit Reaction → Hit Reaction Cooldown Beats 可調整，0 為取消冷卻。沿用歌曲 BPM、音樂速度與既有動畫時間倍率；暫停／敵人暫停時凍結。死亡演出不受此冷卻限制，重新生成、恢復生命或停用時清除冷卻。

@@ -63,6 +63,11 @@ namespace RhythmHunter.FightDemo
             var debug = GetComponent<FightBossStageDebug>();
             bool skip = debug != null && debug.PhaseTwoSkipRequested;
             bool succeeded = BossPhaseOneSucceeded();
+            // Finish the already active finite Pressure before transitioning, even if the native loop wraps.
+            // Overtime is intentionally excluded: a successful overtime clear still jumps immediately.
+            if (!skip && succeeded && !stageOvertimeActive)
+                foreach (var enemy in rosterManager.ActiveEnemies)
+                    if (enemy != null && enemy.BossFinishingCurrentPressure) return;
             bool endpointPassed = raw >= normalEnd || beatClock.CompletedMusicLoops > 0 ||
                 beatClock.TryGetTimelinePositionMs(out int continuous) && continuous >= normalEnd;
             if (skip || succeeded && (endpointPassed || stageOvertimeActive))

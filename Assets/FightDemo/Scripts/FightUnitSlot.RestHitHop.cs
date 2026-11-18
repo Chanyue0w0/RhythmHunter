@@ -13,6 +13,30 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private float restHitShakeDistance = .015f;
         private bool restHitHopActive;
         private bool deathPresentationStarted;
+        private float hitReactionCooldownRemaining;
+        private int hitReactionCooldownStartedFrame = -1;
+        public float HitReactionCooldownRemaining => hitReactionCooldownRemaining;
+        private void BeginHitReactionCooldown()
+        {
+            hitReactionCooldownRemaining = characterDefinition != null ? characterDefinition.HitReactionCooldownBeats : 2f;
+            hitReactionCooldownStartedFrame = Time.frameCount;
+        }
+        private void ResetHitReactionCooldown()
+        { hitReactionCooldownRemaining = 0; hitReactionCooldownStartedFrame = -1; }
+        private void AdvanceHitReactionCooldown(float seconds)
+        {
+            if (hitReactionCooldownRemaining <= 0 || combatAnimator != null && combatAnimator.PlaybackPaused) return;
+            var fight = CombatController;
+            if (fight != null && (fight.IsPaused || fight.TimingCalibrationActive || fight.EnemyActionsPaused)) return;
+            var clock = fight != null ? fight.BeatClock : null;
+            if (clock != null && clock.IsPaused) return;
+            // Match the existing beat animator's tempo, pitch and presentation-time scaling.
+            float beatSeconds = clock != null ? (float)(clock.MillisecondsPerBeat / 1000d) : .5f;
+            float pitch = clock != null ? clock.MusicPitch : 1f;
+            float scale = fight != null ? fight.BeatPresentationDeltaScale : 1f;
+            hitReactionCooldownRemaining = Mathf.Max(0, hitReactionCooldownRemaining -
+                Mathf.Max(0, seconds) * pitch * scale / Mathf.Max(.001f, beatSeconds));
+        }
         public bool DeathPresentationPending => team == UnitTeam.Enemy && currentHp <= 0 && actorInstance != null && !RetainedForBurst &&
             (!deathPresentationStarted || combatAnimator != null && combatAnimator.IsPlaying &&
             combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit);
@@ -21,6 +45,13 @@ namespace RhythmHunter.FightDemo
         {
             if (deathPresentationStarted || actorInstance == null) return;
             deathPresentationStarted = true;
+            // A lethal hit still cancels the enemy action, but an existing hit reaction finishes once.
+            if (combatAnimator != null && combatAnimator.IsPlaying &&
+                combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit)
+            {
+                combatAnimator.SetPlaybackPaused(false);
+                return;
+            }
             ResetInputFeedback();
             combatAnimator?.InterruptPlayback();
             if (combatAnimator == null) return;

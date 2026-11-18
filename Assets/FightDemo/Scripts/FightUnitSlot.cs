@@ -115,6 +115,8 @@ namespace RhythmHunter.FightDemo
         private Transform runtimeImpactEffectAnchor;
 
         public event Action<FightUnitSlot, float, float> HealthChanged;
+        // Presentation only: emitted after confirmed damage, never from an attack input.
+        public event Action<FightUnitSlot, DamageKind> DamageConfirmed;
         // One notification per lethal transition. Future death VFX can use this world position.
         public event Action<FightUnitSlot, Vector3> EnemyDefeated;
 
@@ -277,6 +279,7 @@ namespace RhythmHunter.FightDemo
 
         private void OnDisable()
         {
+            ResetHitReactionCooldown();
             ClearTimedStatuses();
             ClearFragile();
             ResetInputFeedback();
@@ -284,7 +287,9 @@ namespace RhythmHunter.FightDemo
 
         private void LateUpdate()
         {
+            RefreshBossRestPresentation();
             UpdateRestHitHop();
+            if (Time.frameCount != hitReactionCooldownStartedFrame) AdvanceHitReactionCooldown(Time.deltaTime);
             RemoveDefeatedEnemyPresentation();
         }
 
@@ -307,6 +312,7 @@ namespace RhythmHunter.FightDemo
         {
             ResetBossPhaseOne();
             deathPresentationStarted = false;
+            ResetHitReactionCooldown();
             ResetInputFeedback();
             ClearTimedStatuses();
             ClearFragile();
@@ -351,7 +357,7 @@ namespace RhythmHunter.FightDemo
             if(resolvedDamage>0)CompleteBossPhaseOneIfNeeded();
             if (wasAlive && currentHp <= 0 && team == UnitTeam.Enemy)
                 CombatController?.CancelEnemyActionForDeath(this);
-            if ((restHit || BossPhaseOneTired) && resolvedDamage > 0 && currentHp > 0 && kind != DamageKind.DamageOverTime &&
+            if (restHit && !BossPhaseOneTired && resolvedDamage > 0 && currentHp > 0 && kind != DamageKind.DamageOverTime &&
                 PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.Hit, null, null, null) &&
                 combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit && !combatAnimator.PlaybackPaused)
                 BeginRestHitHop();
@@ -374,6 +380,8 @@ namespace RhythmHunter.FightDemo
                 EnemyDefeated?.Invoke(this, ImpactEffectAnchor != null ? ImpactEffectAnchor.position : transform.position);
             }
             if (wasAlive) HealthChanged?.Invoke(this, currentHp, maxHp);
+            if (resolvedDamage > 0 && (applied > 0 || retained || BossPhaseOneTired))
+                DamageConfirmed?.Invoke(this, kind);
             if(wasTired)RecordBossExtraDamage(resolvedDamage,kind);
             return applied;
         }
@@ -406,16 +414,17 @@ namespace RhythmHunter.FightDemo
             Action<FightCharacterCombatAnimator.FrameEffect> onFrameEffect = null)
         {
             // A hit reaction must never flush attack events or replace an enemy action.
-            if(BossPhaseOneTired && animation != FightCharacterCombatAnimator.CombatAnimation.Hit)return false;
+            if (BossPhaseOneTired && (animation == FightCharacterCombatAnimator.CombatAnimation.Hit || BossPhaseOneActionsStopped)) return false;
             if (team == UnitTeam.Enemy && animation == FightCharacterCombatAnimator.CombatAnimation.Hit &&
-                combatAnimator != null && combatAnimator.IsPlaying &&
-                combatAnimator.ActiveAnimation != FightCharacterCombatAnimator.CombatAnimation.Hit)
+                (hitReactionCooldownRemaining > 0 || combatAnimator != null && combatAnimator.IsPlaying))
                 return false;
             return combatAnimator != null && combatAnimator.Play(
                 animation,
                 onWarning,
                 onAttackEffect,
                 onDamage,
+                onCompleted: team == UnitTeam.Enemy && animation == FightCharacterCombatAnimator.CombatAnimation.Hit
+                    ? BeginHitReactionCooldown : null,
                 onFrameEffect: onFrameEffect);
         }
 
@@ -844,6 +853,7 @@ namespace RhythmHunter.FightDemo
         {
             ResetBossPhaseOne();
             deathPresentationStarted = false;
+            ResetHitReactionCooldown();
             ResetInputFeedback();
             if (actorInstance == null)
                 return;

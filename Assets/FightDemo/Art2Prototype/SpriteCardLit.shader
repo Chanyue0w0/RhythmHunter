@@ -5,6 +5,10 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         [PerRendererData] _EntranceSilhouette ("Boss Entrance Silhouette", Range(0,1)) = 0
         [PerRendererData] _EntranceReveal ("Boss Entrance Reveal", Range(0,1)) = 1
+        [PerRendererData] _FlashAmount ("Hit Flash Amount", Range(0,1)) = 0
+        [PerRendererData] _FlashColor ("Hit Flash Color", Color) = (1,1,1,1)
+        [PerRendererData] _FlashSweep ("Hit Flash: Min X / Max X / Progress / Width (0 = whole)", Vector) = (0,1,0,0)
+        [PerRendererData] _FlashAxis ("Hit Flash Camera Right", Vector) = (1,0,0,0)
         _ShadowCutoff ("Shadow Alpha Cutoff", Range(0.001,1)) = 0.1
         [Toggle] _UseNormalMap ("Use Surface Normal Map", Float) = 0
         [Normal] _NormalMap ("Surface Normal Map (same canvas as sprite)", 2D) = "bump" {}
@@ -45,6 +49,9 @@ Shader "RhythmHunter/Art2/SpriteCardLit"
                 half _EntranceSilhouette;
                 half _EntranceReveal;
                 half _CinematicBlur;
+                half _FlashAmount;
+                half4 _FlashColor;
+                float4 _FlashSweep, _FlashAxis;
             CBUFFER_END
         ENDHLSL
         Pass

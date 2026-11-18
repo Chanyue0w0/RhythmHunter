@@ -101,6 +101,7 @@ namespace RhythmHunter.FightDemo
         private void AdvanceWavePressureBeat()
         {
             WaveCombatBeatCount++;
+            if (IsBossMusicStage && BossPhaseOneSucceeded()) pressureNextStart = -1;
             if (StageOvertimeActive) { AdvanceOvertimePressureBeat(); return; }
             if (pressureRemaining > 0)
             {
@@ -154,7 +155,8 @@ namespace RhythmHunter.FightDemo
             pressureDamageProgress = 0;
             pressureBlockProgress = 0;
             pressureRestUntil = WaveCombatBeatCount + Math.Max(0, pressureRestBeats);
-            pressureNextStart = wavePressure.repeat ? pressureRestUntil + Math.Max(1, wavePressure.startBeat) : -1;
+            pressureNextStart = wavePressure.repeat && !(IsBossMusicStage && BossPhaseOneSucceeded())
+                ? pressureRestUntil + Math.Max(1, wavePressure.startBeat) : -1;
             // Cancel unexecuted attacks; launched projectiles retain their normal resolution.
             enemyHits.RemoveAll(hit => !hit.launched);
             pendingEnemyAttack = pendingEnemyAnimationDriven = pendingEnemyWindup = false;
@@ -163,6 +165,7 @@ namespace RhythmHunter.FightDemo
             {
                 if (enemy == null) continue;
                 enemy.CombatAnimator?.InterruptPlayback();
+                enemy.RefreshBossRestPresentation();
                 CadenceFor(enemy).normalReady = NormalBattleBeatCount + Math.Max(0, pressureRestBeats);
             }
             pressureCadenceActive = false;

@@ -6,11 +6,15 @@ namespace RhythmHunter.FightDemo
     public sealed partial class FightUnitSlot
     {
         private bool bossPhaseOneCleared;
+        private bool finishCurrentBossPressure;
         private bool bossPhaseOneProtectionReleased;
         public bool BossPhaseOneProtected => !bossPhaseOneProtectionReleased && team==UnitTeam.Enemy &&
             characterDefinition != null && characterDefinition.ProtectBossPhaseOne &&
             CombatController != null && CombatController.RosterManager != null && CombatController.RosterManager.IsBossStage;
         public bool BossPhaseOneTired => BossPhaseOneProtected && bossPhaseOneCleared;
+        public bool BossFinishingCurrentPressure => BossPhaseOneTired && finishCurrentBossPressure &&
+            CombatController != null && !CombatController.StageOvertimeActive && CombatController.PressurePhaseActive;
+        public bool BossPhaseOneActionsStopped => BossPhaseOneTired && !BossFinishingCurrentPressure;
         public double BossPhaseOneExtraDamage { get; private set; }
         public event Action<FightUnitSlot> BossPhaseOneCompleted;
         // Future coin rewards subscribe here. This is resolved damage, NOT additional HP loss.
@@ -18,15 +22,29 @@ namespace RhythmHunter.FightDemo
         private void ResetBossPhaseOne()
         {
             bossPhaseOneCleared=false;bossPhaseOneProtectionReleased=false;BossPhaseOneExtraDamage=0;
+            finishCurrentBossPressure=false;
             combatAnimator?.SetIdleOverride(null);
         }
         private void CompleteBossPhaseOneIfNeeded()
         {
             if(!BossPhaseOneProtected || bossPhaseOneCleared || currentHp>1)return;
             bossPhaseOneCleared=true;
-            combatAnimator?.SetIdleOverride(characterDefinition.TiredIdleAnimationName);
-            CombatController?.CancelEnemyActionForPhaseOneCompletion(this);
+            finishCurrentBossPressure = CombatController != null && CombatController.PressurePhaseActive && !CombatController.StageOvertimeActive;
+            if (!finishCurrentBossPressure) CombatController?.CancelEnemyActionForPhaseOneCompletion(this);
+            RefreshBossRestPresentation();
             BossPhaseOneCompleted?.Invoke(this);
+        }
+        internal void RefreshBossRestPresentation()
+        {
+            if (characterDefinition == null || !characterDefinition.ProtectBossPhaseOne ||
+                team != UnitTeam.Enemy || CombatController == null || CombatController.BossPhaseTwoActive) return;
+            if (finishCurrentBossPressure && !BossFinishingCurrentPressure)
+            {
+                finishCurrentBossPressure = false;
+                CombatController.CancelEnemyActionForPhaseOneCompletion(this);
+            }
+            bool tired = BossPhaseOneActionsStopped || CombatController.PressureRestActive;
+            combatAnimator?.SetIdleOverride(tired ? characterDefinition.TiredIdleAnimationName : null);
         }
         private void RecordBossExtraDamage(float resolvedDamage,DamageKind kind)
         {
