@@ -9,7 +9,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(1)] private int teamUltimatePerformanceBeats = 4;
         [Tooltip("One-based impact beat within the performance; clamped to its length.")]
         [SerializeField, Min(1)] private int teamUltimateImpactBeat = 4;
-        [SerializeField, Min(.5f)] private float teamUltimateDamage = 3;
+        [SerializeField, Min(1f)] private float teamUltimateDamage = 6;
 
         private int teamUltimateCharge;
         private long ultimateStartBeat = long.MaxValue, ultimateEndBeat = long.MaxValue, ultimateImpactBeat;
@@ -44,7 +44,7 @@ namespace RhythmHunter.FightDemo
             ultimateActors[0] = frontHero.UnitSlot; ultimateActors[1] = secondHero.UnitSlot; ultimateActors[2] = thirdHero.UnitSlot;
             ultimateDuration = Mathf.Max(1, teamUltimatePerformanceBeats);
             ultimateImpactOffset = Mathf.Clamp(teamUltimateImpactBeat, 1, ultimateDuration) - 1;
-            ultimateDamage = QuantizeCombatValue(Mathf.Max(.5f, teamUltimateDamage));
+            ultimateDamage = QuantizeCombatValue(Mathf.Max(1f, teamUltimateDamage));
             teamUltimateCharge = 0;
             ultimateStarted = ultimateImpacted = false;
             ultimateStartBeat = latestCombatBeat + 1;

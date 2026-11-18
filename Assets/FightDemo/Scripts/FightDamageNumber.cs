@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace RhythmHunter.FightDemo
 {
@@ -15,12 +16,23 @@ namespace RhythmHunter.FightDemo
             internal ParticleSystemRenderer[] renderers;
             internal SpriteRenderer point;
             internal Vector3 scale;
+            internal SpriteRenderer[] sprites;
+            internal Color[] spriteColors;
         }
 
         private FightCombatController controller;
+        private SortingGroup sortingGroup;
+        internal void SetSortingOrder(int order)
+        {
+            if (sortingGroup == null) sortingGroup = gameObject.GetComponent<SortingGroup>();
+            if (sortingGroup == null) sortingGroup = gameObject.AddComponent<SortingGroup>();
+            sortingGroup.sortingOrder = order;
+        }
         private readonly List<Glyph> glyphs = new(8);
         private Vector3 origin;
         private float elapsed, lifetime, rise;
+        private float horizontalTravel, jumpHeight;
+        internal void SetMotion(float horizontal, float height) { horizontalTravel = horizontal; jumpHeight = height; }
         private bool paused;
         private Camera viewCamera;
         internal bool Leased { get; private set; }
@@ -36,6 +48,7 @@ namespace RhythmHunter.FightDemo
             lifetime = seconds;
             rise = riseDistance;
             paused = false;
+            horizontalTravel = 0; jumpHeight = .15f;
             Leased = true;
             gameObject.SetActive(true);
         }
@@ -49,8 +62,13 @@ namespace RhythmHunter.FightDemo
             glyph.root.transform.localScale = glyph.scale;
             if (glyph.point != null)
             {
-                glyph.point.color = Color.white;
+                glyph.point.color = glyph.spriteColors[0];
                 glyph.point.sortingOrder = sortingOrder;
+            }
+            for (int i = 0; i < glyph.sprites.Length; i++)
+            {
+                glyph.sprites[i].color = glyph.spriteColors[i];
+                glyph.sprites[i].sortingOrder = sortingOrder;
             }
             glyph.root.SetActive(true);
             for (int i = 0; i < glyph.particles.Length; i++)
@@ -91,7 +109,8 @@ namespace RhythmHunter.FightDemo
         {
             float t = Mathf.Clamp01(elapsed / lifetime);
             Vector3 up = viewCamera != null ? viewCamera.transform.up : Vector3.up;
-            transform.position = origin + up * (rise * t + Mathf.Sin(t * Mathf.PI) * .15f);
+            Vector3 right = viewCamera != null ? viewCamera.transform.right : Vector3.right;
+            transform.position = origin + right * (horizontalTravel * t) + up * (rise * t + Mathf.Sin(t * Mathf.PI) * jumpHeight);
         }
 
         // Also permits deterministic editor validation without waiting for real frames.
@@ -111,9 +130,14 @@ namespace RhythmHunter.FightDemo
             if (elapsed >= lifetime) { controller.ReturnDamageNumber(this); return; }
             float t = Mathf.Clamp01(elapsed / lifetime);
             UpdatePosition();
+            float alpha = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.55f, 1, t));
             foreach (var glyph in glyphs)
-                if (glyph.point != null)
-                    glyph.point.color = new Color(1, 1, 1, 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.55f, 1, t)));
+                for (int i = 0; i < glyph.sprites.Length; i++)
+                {
+                    Color color = glyph.spriteColors[i];
+                    color.a *= alpha;
+                    glyph.sprites[i].color = color;
+                }
         }
     }
 }

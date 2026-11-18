@@ -8,8 +8,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private bool enableSwordCharge;
         [SerializeField, Min(1)] private int swordHitsPerStage = 1;
         [SerializeField, Min(1)] private int swordFullChargeBeats = 5;
-        [SerializeField, Min(.5f)] private float swordChargedDamage = 2;
-        [SerializeField, Min(.5f)] private float swordDelayedDamage = 1;
+        [SerializeField, Min(1f)] private float swordChargedDamage = 4;
+        [SerializeField, Min(1f)] private float swordDelayedDamage = 2;
         [SerializeField, Min(.01f)] private float swordDelayedHitBeats = .5f;
         [Tooltip("Optional enhanced slash VFX. Empty uses the ordinary slash until artwork is ready.")]
         [SerializeField] private GameObject swordChargedSlashEffect;
@@ -118,8 +118,8 @@ namespace RhythmHunter.FightDemo
         public bool EnableSwordCharge => enableSwordCharge;
         public int SwordHitsPerStage => Mathf.Max(1, swordHitsPerStage);
         public int SwordFullChargeBeats => Mathf.Max(1, swordFullChargeBeats);
-        public float SwordChargedDamage => Mathf.Max(.5f, swordChargedDamage);
-        public float SwordDelayedDamage => Mathf.Max(.5f, swordDelayedDamage);
+        public float SwordChargedDamage => Mathf.Max(1f, swordChargedDamage);
+        public float SwordDelayedDamage => Mathf.Max(1f, swordDelayedDamage);
         public float SwordDelayedHitBeats => Mathf.Max(.01f, swordDelayedHitBeats);
         public GameObject SwordChargedSlashEffect => swordChargedSlashEffect;
         public GameObject SwordChargedOnHitEffect => swordChargedOnHitEffect;

@@ -1,0 +1,31 @@
+戰鬥整數點數（2026-11-18）
+
+1 顆心 / 1 格護甲 = 2 點；半顆 / 半格 = 1 點。
+既有 HP、DEF、固定傷害、固定回血/補甲、傷害門檻已乘二。
+MP、倍率、攻擊次數、節拍、機率和動畫時間不變。
+float 欄位保留相容，但結算經 FightCombatUnits 量化為整數：正數四捨五入（0.5 向上）、最小 1，0 保持 0。
+Boss 鎖血及二階段測試保命下限 = 2。Boss 二階段血量演示也量化。
+
+目前資源：戰士 4HP / 4DEF、法師 2HP / 2DEF、射手 2HP / 2DEF。
+全隊 8HP；戰士前衛 4DEF（被動仍未啟用）。HUD 仍顯示四心兩甲。
+敵人：Normal 60HP/2攻、Killer 60HP/每段2攻、Giant 80HP/4攻、King 300HP。
+King Strike 每段2、HeavyStrike 4、吃水果回60。
+Pressure 穿透1；Art2傷害削減門檻由2改4，格擋仍5次。
+二階段 Miss 傷害2、低血量提醒2。
+
+跳字：Art2 Damage Number Scale = 2。
+FightCombatController / Enemy Damage Numbers：
+Show Enemy Damage Numbers：敵方受傷跳字。
+Show Party Damage Numbers：玩家受傷跳字（HP+護甲實際損失合計，只在前衛顯示一次）。
+Damage Number Horizontal Travel：敵方向左、玩家向右的距離，預設0.65。
+Damage Number Jump Height：額外拋物線高度，預設0.35。
+Damage Number Stagger：每組生成時的畫面座標錯位範圍，預設X0.18/Y0.12，與 Random Spread 相加形成隨機生成範圍。
+Damage Number Random Spread：額外隨機範圍，預設X0.25/Y0.06。
+Damage Number Minimum Separation：與仍存活數字當前位置的最小畫面平面距離，預設0.45。擁擠時選擇範圍內最不重疊的位置，絕不向上累加位移；間距為偏好而非強制。這是中心距離，不是文字邊界；大型多位數仍可調高間距。
+每組使用獨立SortingGroup；新數字在上層，回收重用時重新安排排序。只控制數字彼此，不改場景背景遮擋。
+顏色皆沿用number_red，物件池不變。
+
+驗證：四套字體各1000次回收、左右跳躍、透明度重設、整數顯示、8HP四心/7HP三心半、扣甲/溢出扣HP、同拍穿透一次、角色Prefab數值。
+舊Editor診斷工具中仍可能存在舊單位的固定預期值；執行時需依本文件換算，勿用舊預期反改遊戲資料。
+
+回血跳字：Show Healing Numbers 獨立開關；Healing Digit Prefabs 指定 number_green 0～9。只顯示實際 HP 回復（受上限限制），滿血或禁止回血不顯示。不包含補甲與重置滿血。紅綠字元分池、共用跳字容量與動態排序。

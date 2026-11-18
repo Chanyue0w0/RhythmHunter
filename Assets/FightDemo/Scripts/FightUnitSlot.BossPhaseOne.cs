@@ -27,7 +27,7 @@ namespace RhythmHunter.FightDemo
         }
         private void CompleteBossPhaseOneIfNeeded()
         {
-            if(!BossPhaseOneProtected || bossPhaseOneCleared || currentHp>1)return;
+            if(!BossPhaseOneProtected || bossPhaseOneCleared || currentHp>FightCombatUnits.BossHpFloor)return;
             bossPhaseOneCleared=true;
             finishCurrentBossPressure = CombatController != null && CombatController.PressurePhaseActive && !CombatController.StageOvertimeActive;
             if (!finishCurrentBossPressure) CombatController?.CancelEnemyActionForPhaseOneCompletion(this);
@@ -55,7 +55,7 @@ namespace RhythmHunter.FightDemo
         public bool DebugCompleteBossPhaseOne()
         {
             if(!BossPhaseOneProtected || IsTransitionInvulnerable)return false;
-            currentHp=1;CompleteBossPhaseOneIfNeeded();RefreshHealthVisuals();
+            currentHp=FightCombatUnits.BossHpFloor;CompleteBossPhaseOneIfNeeded();RefreshHealthVisuals();
             HealthChanged?.Invoke(this,currentHp,maxHp);return true;
         }
         // Called by the future phase-two controller; ordinary healing must never clear success.
@@ -67,7 +67,7 @@ namespace RhythmHunter.FightDemo
         public void SetBossSurvivalHealth(float progress)
         {
             if (!BossPhaseOneProtected || CombatController == null || !CombatController.BossPhaseTwoActive) return;
-            float value = Mathf.Lerp(maxHp, 1, Mathf.Clamp01(progress));
+            float value = FightCombatUnits.Positive(Mathf.Lerp(maxHp, FightCombatUnits.BossHpFloor, Mathf.Clamp01(progress)));
             if (Mathf.Abs(currentHp - value) < .001f) return;
             currentHp = value; RefreshHealthVisuals(); HealthChanged?.Invoke(this, currentHp, maxHp);
         }

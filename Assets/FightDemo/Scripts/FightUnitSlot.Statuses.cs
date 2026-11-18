@@ -35,7 +35,7 @@ namespace RhythmHunter.FightDemo
         public bool AttachSlime(float damage, int beats, FightUnitSlot caster = null)
         {
             if (!CanHaveStatus) return false;
-            slimeDamage = Mathf.Max(.5f, damage);
+            slimeDamage = FightCombatUnits.Positive(damage);
             slimeCaster = caster;
             slimeDuration = Mathf.Max(1, beats);
             slimeUntil = StatusBeat + slimeDuration;
@@ -103,7 +103,7 @@ namespace RhythmHunter.FightDemo
         public bool ApplyBleeding(float damage, int beats)
         {
             if (!CanHaveStatus) return false;
-            bleedingDamage = Mathf.Max(.5f, damage);
+            bleedingDamage = FightCombatUnits.Positive(damage);
             bleedRemaining = Mathf.Max(1, beats);
             lastBleedBeat = StatusBeat;
             if (CombatController != null) CombatController.RefreshStatusIcons(this);

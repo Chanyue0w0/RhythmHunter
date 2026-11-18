@@ -18,10 +18,10 @@ namespace RhythmHunter.FightDemo
         [Min(1)] public int rageAttackInterval = 2;
         [Min(1)] public int breakBeats = 4;
         [Min(1)] public int breakThreshold = 3;
-        [Min(0)] public float armorReduction = .5f;
-        [Min(0)] public float vulnerableBonus = .5f;
-        [Min(.5f)] public float chargeDamage = 2;
-        [Min(.5f)] public float rageFinisherDamage = 3;
+        [Min(0)] public float armorReduction = 1f;
+        [Min(0)] public float vulnerableBonus = 1f;
+        [Min(1f)] public float chargeDamage = 4;
+        [Min(1f)] public float rageFinisherDamage = 6;
         [Min(0)] public int successfulGuardBreakPower = 1;
     }
 

@@ -109,15 +109,15 @@ MonoBehaviour:
   displayName: GOBLIN MERCENARY
   team: 0
   role: 0
-  maxHp: 20
+  maxHp: 40
   defense: 0
   basicAbilityName: Basic Ability
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 1
+  normalAbilityPower: 2
+  attackPower: 2
   skillName: Mercenary Cleave
   skillBehavior: 0
-  skillPower: 1
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 2574835647068987013, guid: 49cb9df558623204ca97c8b6d74b7639, type: 3}
   abilityEffectLifetime: 1.5

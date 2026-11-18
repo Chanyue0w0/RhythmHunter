@@ -109,13 +109,13 @@ MonoBehaviour:
   displayName: GOBLIN MAGE
   team: 0
   role: 0
-  maxHp: 20
+  maxHp: 40
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 1
+  normalAbilityPower: 2
+  attackPower: 2
   skillName: Goblin Hex
   skillBehavior: 0
-  skillPower: 1
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 8107342880664547989, guid: 7d26a3d9b838713459ca2ff3fbd5bae0, type: 3}
   abilityEffectLifetime: 1.5

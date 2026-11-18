@@ -14,7 +14,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Color lowHealthColor = new(1f, .38f, .4f, .18f);
         [SerializeField, Min(.05f)] private float hitFlashSeconds = .45f;
         [SerializeField, Range(.01f, .45f)] private float edgeWidth = .16f;
-        [SerializeField, Min(.5f)] private float lowHealthThreshold = 1;
+        [SerializeField, Min(1f)] private float lowHealthThreshold = 2;
         [Tooltip("Low-health pulse period uses the existing song beat clock.")]
         [SerializeField, Min(.25f)] private float lowHealthPulseBeats = 2;
         private FightScreenEdgeGraphic graphic;

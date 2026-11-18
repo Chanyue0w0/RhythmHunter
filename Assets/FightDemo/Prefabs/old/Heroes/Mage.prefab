@@ -109,15 +109,15 @@ MonoBehaviour:
   displayName: MAGE
   team: 1
   role: 3
-  maxHp: 1
-  defense: 1
+  maxHp: 2
+  defense: 2
   basicAbilityName: Arcane Bolt
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 1
+  normalAbilityPower: 2
+  attackPower: 2
   skillName: Arcane Burst
   skillBehavior: 3
-  skillPower: 1
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 1533513433225352677, guid: 4b90ddde63a4da7469b9e61591b39fea, type: 3}
   abilityEffectLifetime: 1.5

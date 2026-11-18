@@ -14,7 +14,7 @@ namespace RhythmHunter.FightDemo
             [SerializeField, HideInInspector] private int animationSourceId = -1;
             public FightCharacterCombatAnimator.CombatAnimation Animation => animationSourceId >= 0
                 ? (FightCharacterCombatAnimator.CombatAnimation)animationSourceId : animation;
-            [Min(0)] public float damagePerHit = 1;
+            [Min(0)] public float damagePerHit = 2;
             [Min(0), Tooltip("Relative selection weight. Zero disables selection. 45 / 45 / 10 gives 45% / 45% / 10%.")]
             public float selectionWeight = 1;
             [Tooltip("Exclude from new action rolls during active Pressure (including overtime); warning alone does not exclude it.")]
@@ -29,11 +29,14 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private List<EnemyAbility> enemyAbilities = new();
         public IReadOnlyList<EnemyAbility> EnemyAbilities => enemyAbilities;
         [Header("Enemy Hit Reaction")]
+        [Tooltip("Disable ordinary damage hit animations. Does not change damage or death presentation; Fever-specific reactions are not wired yet.")]
+        [SerializeField] private bool disableNormalHitReaction;
+        public bool DisableNormalHitReaction => disableNormalHitReaction;
         [Tooltip("Normal combat beats to wait after GetHurt finishes before it can play again. Damage is unaffected; death presentation bypasses this cooldown.")]
         [SerializeField, Min(0)] private float hitReactionCooldownBeats = 2f;
         public float HitReactionCooldownBeats => Mathf.Max(0, hitReactionCooldownBeats);
         [Header("Boss Stage Phase One")]
-        [Tooltip("Only in a BossStage: retain 1 HP and block healing; finish an active finite Pressure before stopping actions. Overtime success transitions immediately.")]
+        [Tooltip("Only in a BossStage: retain 2 HP and block healing; finish an active finite Pressure before stopping actions. Overtime success transitions immediately.")]
         [SerializeField] private bool protectBossPhaseOne;
         [SerializeField] private string tiredIdleAnimationName = "Idle_Tired";
         public bool ProtectBossPhaseOne => protectBossPhaseOne;

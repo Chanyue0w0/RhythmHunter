@@ -36,15 +36,15 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightUnitSlot.UnitRole role;
 
         [Header("Base Combat Information")]
-        [SerializeField, Min(0.5f)] private float maxHp = 4f;
-        [SerializeField, Range(0, 10)] private int defense;
+        [SerializeField, Min(1f)] private float maxHp = 8f;
+        [SerializeField, Range(0, 20)] private int defense;
         [Tooltip("Added to shared armor capacity only while this character occupies the front position.")]
         [SerializeField, Min(0)] private int frontlineDefenseBonus;
         [Header("Basic Ability")]
         [SerializeField] private string basicAbilityName = "Basic Ability";
         [Tooltip("Character-owned Basic behavior on every beat, independent of party position. In EqualBeat mode Guard protects only the successfully judged beat, never a later attack.")]
         [SerializeField] private AbilityBehavior normalAbilityBehavior;
-        [SerializeField, Min(0)] private float normalAbilityPower = 1f;
+        [SerializeField, Min(0)] private float normalAbilityPower = 2f;
         [Tooltip("Consecutive judged beats needed for Aimed Shot. Repeated inputs on one beat never advance it.")]
         [SerializeField, Min(1)] private int consecutiveInputBeats = 3;
         [Tooltip("Guard covers these judged beats, including every eligible hit on each beat.")]
@@ -75,7 +75,7 @@ namespace RhythmHunter.FightDemo
         public Vector3 GuardProjectileTargetOffset => guardProjectileTargetOffset;
         [SerializeField] private bool basicInterruptsEnemy;
         [SerializeField, Min(0)] private float successfulInterruptDamageBonus;
-        [SerializeField, Min(0.5f)] private float attackPower = 1f;
+        [SerializeField, Min(1f)] private float attackPower = 2f;
         [Header("Team Skill / Legacy Fourth-Beat Skill")]
         [SerializeField, Min(1)] private int teamSkillManaCost = 10;
         [Tooltip("Beats reserved for this character's Team Skill performance before the next character starts.")]
@@ -86,25 +86,25 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Used by the EqualBeat Team Skill chain in formation order, and by legacy fourth-beat skills.")]
         [SerializeField] private AbilityBehavior skillBehavior;
         [FormerlySerializedAs("skillDamage")]
-        [SerializeField, Min(0)] private float skillPower = 1f;
+        [SerializeField, Min(0)] private float skillPower = 2f;
         [Tooltip("Energy Surge focused damage or Formation Breaker piercing damage, before Fragile.")]
-        [SerializeField, Min(0)] private float conditionalSkillPower = 4f;
+        [SerializeField, Min(0)] private float conditionalSkillPower = 8f;
         [Header("Triggered Shared Armor Recovery")]
         [Tooltip("After a successful Basic input; never passive regeneration.")]
         [SerializeField] private ArmorRestoreMode basicArmorRecovery;
-        [SerializeField, Min(0)] private float basicArmorRecoveryAmount = 1f;
+        [SerializeField, Min(0)] private float basicArmorRecoveryAmount = 2f;
         [Tooltip("After this character's Team Skill resolves, not after every party member.")]
         [SerializeField] private ArmorRestoreMode teamSkillArmorRecovery;
-        [SerializeField, Min(0)] private float teamSkillArmorRecoveryAmount = 1f;
+        [SerializeField, Min(0)] private float teamSkillArmorRecoveryAmount = 2f;
         public ArmorRestoreMode BasicArmorRecovery => basicArmorRecovery;
         public ArmorRestoreMode TeamSkillArmorRecovery => teamSkillArmorRecovery;
         public float BasicArmorRecoveryAmount => basicArmorRecoveryAmount;
         public float TeamSkillArmorRecoveryAmount => teamSkillArmorRecoveryAmount;
         [Header("On-hit Status Parameters")]
         [SerializeField] private bool basicAppliesBleeding;
-        [SerializeField, Min(0.5f)] private float bleedDamage = .5f;
+        [SerializeField, Min(1f)] private float bleedDamage = 1f;
         [SerializeField, Min(1)] private int bleedBeats = 4;
-        [SerializeField, Min(0.5f)] private float fragmentDamage = 1f;
+        [SerializeField, Min(1f)] private float fragmentDamage = 2f;
         [SerializeField, Min(1)] private int fragmentBeats = 4;
         [SerializeField, Min(0)] private float fragmentDetonationDelayBeats = .5f;
         [Tooltip("Explosion VFX at the victim after the beat delay. Empty uses the caster's existing skill effect.")]
@@ -116,9 +116,9 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Immune to interruption and stun. Does not prevent incoming damage.")]
         [SerializeField] private bool crowdControlImmune;
         public bool BasicAppliesBleeding => basicAppliesBleeding;
-        public float BleedDamage => Mathf.Max(.5f, bleedDamage);
+        public float BleedDamage => Mathf.Max(1f, bleedDamage);
         public int BleedBeats => Mathf.Max(1, bleedBeats);
-        public float FragmentDamage => Mathf.Max(.5f, fragmentDamage);
+        public float FragmentDamage => Mathf.Max(1f, fragmentDamage);
         public int FragmentBeats => Mathf.Max(1, fragmentBeats);
         public float FragmentDetonationDelayBeats => Mathf.Max(0, fragmentDetonationDelayBeats);
         public GameObject FragmentExplosionEffectPrefab => fragmentExplosionEffectPrefab;
@@ -166,7 +166,7 @@ namespace RhythmHunter.FightDemo
         public FightUnitSlot.UnitTeam Team => team;
         public FightUnitSlot.UnitRole Role => role;
         public float MaxHp => maxHp;
-        public int Defense => Mathf.Clamp(defense, 0, 10);
+        public int Defense => Mathf.Clamp(defense, 0, 20);
         public int FrontlineDefenseBonus => Mathf.Max(0, frontlineDefenseBonus);
         public string BasicAbilityName => string.IsNullOrWhiteSpace(basicAbilityName) ? "Basic Ability" : basicAbilityName;
         public AbilityBehavior BasicAbilityType => normalAbilityBehavior;
@@ -221,7 +221,7 @@ namespace RhythmHunter.FightDemo
             team = unitTeam;
             role = unitRole;
             maxHp = QuantizePositive(hp);
-            defense = Mathf.Clamp(configuredDefense, 0, 10);
+            defense = Mathf.Clamp(configuredDefense, 0, 20);
             normalAbilityBehavior = normalBehavior;
             normalAbilityPower = normalBehavior == AbilityBehavior.Guard
                 ? 0f
@@ -256,7 +256,7 @@ namespace RhythmHunter.FightDemo
         private void OnValidate()
         {
             maxHp = QuantizePositive(maxHp);
-            defense = Mathf.Clamp(defense, 0, 10);
+            defense = Mathf.Clamp(defense, 0, 20);
             normalAbilityPower = normalAbilityBehavior == AbilityBehavior.Guard
                 ? 0f
                 : QuantizePositive(normalAbilityPower);
@@ -272,7 +272,7 @@ namespace RhythmHunter.FightDemo
 
         private static float QuantizePositive(float value)
         {
-            return Mathf.Max(0.5f, Mathf.Round(value * 2f) * 0.5f);
+            return FightCombatUnits.Positive(value);
         }
     }
 }

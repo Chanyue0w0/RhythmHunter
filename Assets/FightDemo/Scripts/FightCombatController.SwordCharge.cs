@@ -151,7 +151,7 @@ namespace RhythmHunter.FightDemo
             bool animated = actor.PlayCombatAnimation(animation, () => PlayHeroAttackWarning(version, actor), visual, null,
                 effect => { if (IsCurrentHeroAction(version, actor, target)) actor.PlayFrameEffect(effect, target.ImpactEffectAnchor); });
             if (!animated) visual();
-            return charged ? "Resonance slash: 2 + delayed damage" : $"Sword charge {state.stage}: {state.hits}/{data.SwordHitsPerStage}";
+            return charged ? "Resonance slash: 4 + 2 delayed damage" : $"Sword charge {state.stage}: {state.hits}/{data.SwordHitsPerStage}";
         }
     }
 }

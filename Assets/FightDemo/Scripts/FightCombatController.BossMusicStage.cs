@@ -110,7 +110,7 @@ namespace RhythmHunter.FightDemo
             CancelEnemyCombatWork();
             foreach (var hero in rosterManager.ActiveHeroes) hero?.CombatAnimator?.InterruptPlayback();
             BossPhaseTwoStarted?.Invoke();
-            // Keep the 1HP safety floor until the later phase-two/outro implementation owns Boss defeat.
+            // Keep the 2HP safety floor until the later phase-two/outro implementation owns Boss defeat.
         }
     }
 }

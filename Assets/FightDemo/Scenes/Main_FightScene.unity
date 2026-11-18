@@ -176,11 +176,11 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 2
-  maxHp: 90
+  maxHp: 180
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 14
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 28
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -1414,11 +1414,11 @@ MonoBehaviour:
   team: 1
   role: 2
   slotIndex: 1
-  maxHp: 85
+  maxHp: 170
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 8
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 16
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -2822,11 +2822,11 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 0
-  maxHp: 80
+  maxHp: 160
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 12
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 24
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -2947,11 +2947,11 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 1
-  maxHp: 120
+  maxHp: 240
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 18
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 36
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -3779,11 +3779,11 @@ MonoBehaviour:
   team: 1
   role: 3
   slotIndex: 2
-  maxHp: 75
+  maxHp: 150
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 24
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 48
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -8474,6 +8474,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
   showEnemyDamageNumbers: 1
+  showHealingNumbers: 1
+  healingDigitPrefabs:
+  - {fileID: 7902413864646141794, guid: 003f4e65edc050548b7bb856e52a9c48, type: 3}
+  - {fileID: 5583346975420621158, guid: 169d6d057a127e842a18da6e17b0d557, type: 3}
+  - {fileID: 4099521317448667014, guid: 6edda1eae5801ee4983a5e9ef56d27a2, type: 3}
+  - {fileID: 666284174397689030, guid: 3a12fbacb2de6444d96c69bba8c525e2, type: 3}
+  - {fileID: 2887648186098977684, guid: 01784ae92628920448cfc46fd16d0ed8, type: 3}
+  - {fileID: 91404840064732794, guid: f27d6e880ab694b4ca65b088b5ca81bd, type: 3}
+  - {fileID: 93665455259581255, guid: cab6da365ace5b64183c98d46578f14d, type: 3}
+  - {fileID: 1565683612126238766, guid: b5541eb4885f40d43b1d886e73b95d17, type: 3}
+  - {fileID: 1831849604501973080, guid: d2395797a479ddb4c8397386c4bb629d, type: 3}
+  - {fileID: 3633780400660510950, guid: bf841eb5ab2d81d499d763ab7bee57ee, type: 3}
   damageDigitPrefabs:
   - {fileID: 8059646611630442008, guid: 65e346b2be0cd6f4e98a21f618c84252, type: 3}
   - {fileID: 821659882305050408, guid: 33830a29953a8a94db86312d69a514e5, type: 3}
@@ -8511,15 +8523,15 @@ MonoBehaviour:
   teamUltimateRequiredCharges: 3
   teamUltimatePerformanceBeats: 4
   teamUltimateImpactBeat: 4
-  teamUltimateDamage: 3
+  teamUltimateDamage: 6
   beatClock: {fileID: 2021200329}
   rhythmJudge: {fileID: 2021200328}
   inputRouter: {fileID: 2021200327}
   rosterManager: {fileID: 2021200331}
   tankSlot: {fileID: 2037638511}
   activeEnemySlot: {fileID: 0}
-  maxPartyHp: 4
-  enemyAttackDamage: 1
+  maxPartyHp: 8
+  enemyAttackDamage: 2
   resolutionSafetyMs: 12
   endBattleOnZeroHp: 0
   autoPlayBattleEntrance: 1
@@ -8698,11 +8710,11 @@ MonoBehaviour:
   team: 1
   role: 1
   slotIndex: 0
-  maxHp: 120
+  maxHp: 240
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 12
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 24
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4

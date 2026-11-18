@@ -148,7 +148,7 @@ MonoBehaviour:
   aimedActivation: 0
   aimedGreenBeats: 4
   aimedGoldBeats: 8
-  aimedFollowUpDamage: 1
+  aimedFollowUpDamage: 2
   aimedPreparationEffect: {fileID: 1517168813687633172, guid: 11a528c9decfd7c4dba726f40ed8462c, type: 3}
   aimedPreparationEffectLifetime: 0.5
   aimedGoldProjectile: {fileID: 4474199922380967310, guid: 8737dba6d958ac24987ac65d7fbc908b, type: 3}
@@ -167,10 +167,10 @@ MonoBehaviour:
     rageAttackInterval: 2
     breakBeats: 4
     breakThreshold: 3
-    armorReduction: 0.5
-    vulnerableBonus: 0.5
-    chargeDamage: 2
-    rageFinisherDamage: 3
+    armorReduction: 1
+    vulnerableBonus: 1
+    chargeDamage: 4
+    rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   enemyAbilities: []
   protectBossPhaseOne: 0
@@ -189,8 +189,8 @@ MonoBehaviour:
   enableSwordCharge: 0
   swordHitsPerStage: 1
   swordFullChargeBeats: 5
-  swordChargedDamage: 2
-  swordDelayedDamage: 1
+  swordChargedDamage: 4
+  swordDelayedDamage: 2
   swordDelayedHitBeats: 0.5
   swordChargedSlashEffect: {fileID: 0}
   swordChargedOnHitEffect: {fileID: 0}
@@ -200,12 +200,12 @@ MonoBehaviour:
   displayName: SKELETON GUNNER
   team: 1
   role: 2
-  maxHp: 1
-  defense: 1
+  maxHp: 2
+  defense: 2
   frontlineDefenseBonus: 0
   basicAbilityName: Aimed Shot
   normalAbilityBehavior: 6
-  normalAbilityPower: 1
+  normalAbilityPower: 2
   consecutiveInputBeats: 2
   basicGuardBeats: 1
   guardProjectilePrefab: {fileID: 0}
@@ -219,22 +219,22 @@ MonoBehaviour:
   guardProjectileTargetOffset: {x: 0, y: 0, z: 0}
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
-  attackPower: 1
+  attackPower: 2
   teamSkillManaCost: 30
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1
   skillName: Small Bombs
   skillBehavior: 12
-  skillPower: 1
-  conditionalSkillPower: 2
+  skillPower: 2
+  conditionalSkillPower: 4
   basicArmorRecovery: 0
-  basicArmorRecoveryAmount: 1
+  basicArmorRecoveryAmount: 2
   teamSkillArmorRecovery: 0
-  teamSkillArmorRecoveryAmount: 1
+  teamSkillArmorRecoveryAmount: 2
   basicAppliesBleeding: 0
-  bleedDamage: 0.5
+  bleedDamage: 1
   bleedBeats: 4
-  fragmentDamage: 1
+  fragmentDamage: 2
   fragmentBeats: 4
   fragmentDetonationDelayBeats: 0.5
   fragmentExplosionEffectPrefab: {fileID: 0}

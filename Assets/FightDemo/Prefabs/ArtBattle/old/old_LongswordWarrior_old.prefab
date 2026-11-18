@@ -95,10 +95,10 @@ MonoBehaviour:
     rageAttackInterval: 2
     breakBeats: 4
     breakThreshold: 3
-    armorReduction: 0.5
-    vulnerableBonus: 0.5
-    chargeDamage: 2
-    rageFinisherDamage: 3
+    armorReduction: 1
+    vulnerableBonus: 1
+    chargeDamage: 4
+    rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   teamQteMode: 1
   qteFailureDamageMultiplier: 0.5
@@ -115,32 +115,32 @@ MonoBehaviour:
   displayName: LONGSWORD WARRIOR
   team: 1
   role: 1
-  maxHp: 2
-  defense: 2
-  frontlineDefenseBonus: 1
+  maxHp: 4
+  defense: 4
+  frontlineDefenseBonus: 2
   basicAbilityName: Slash
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
+  normalAbilityPower: 2
   consecutiveInputBeats: 3
   basicGuardBeats: 1
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
-  attackPower: 1
+  attackPower: 2
   teamSkillManaCost: 20
   teamSkillPerformanceBeats: 2
   teamSkillEffectBeatOffset: 1
   skillName: Breaking Slash
   skillBehavior: 7
-  skillPower: 2
-  conditionalSkillPower: 4
+  skillPower: 4
+  conditionalSkillPower: 8
   basicArmorRecovery: 0
-  basicArmorRecoveryAmount: 1
+  basicArmorRecoveryAmount: 2
   teamSkillArmorRecovery: 0
-  teamSkillArmorRecoveryAmount: 1
+  teamSkillArmorRecoveryAmount: 2
   basicAppliesBleeding: 0
-  bleedDamage: 0.5
+  bleedDamage: 1
   bleedBeats: 4
-  fragmentDamage: 1
+  fragmentDamage: 2
   fragmentBeats: 4
   fragmentDetonationDelayBeats: 0.5
   fragmentExplosionEffectPrefab: {fileID: 0}

@@ -180,7 +180,7 @@ MonoBehaviour:
   aimedActivation: 0
   aimedGreenBeats: 4
   aimedGoldBeats: 8
-  aimedFollowUpDamage: 1
+  aimedFollowUpDamage: 2
   aimedPreparationEffect: {fileID: 0}
   aimedPreparationEffectLifetime: 0.5
   aimedGoldProjectile: {fileID: 0}
@@ -199,10 +199,10 @@ MonoBehaviour:
     rageAttackInterval: 2
     breakBeats: 4
     breakThreshold: 3
-    armorReduction: 0.5
-    vulnerableBonus: 0.5
-    chargeDamage: 2
-    rageFinisherDamage: 3
+    armorReduction: 1
+    vulnerableBonus: 1
+    chargeDamage: 4
+    rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   enemyAbilities: []
   protectBossPhaseOne: 0
@@ -221,8 +221,8 @@ MonoBehaviour:
   enableSwordCharge: 0
   swordHitsPerStage: 1
   swordFullChargeBeats: 5
-  swordChargedDamage: 2
-  swordDelayedDamage: 1
+  swordChargedDamage: 4
+  swordDelayedDamage: 2
   swordDelayedHitBeats: 0.5
   swordChargedSlashEffect: {fileID: 0}
   swordChargedOnHitEffect: {fileID: 0}
@@ -232,12 +232,12 @@ MonoBehaviour:
   displayName: NORMAL GOBLIN
   team: 0
   role: 0
-  maxHp: 30
+  maxHp: 60
   defense: 0
   frontlineDefenseBonus: 0
   basicAbilityName: Basic Ability
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
+  normalAbilityPower: 2
   consecutiveInputBeats: 3
   basicGuardBeats: 1
   guardProjectilePrefab: {fileID: 0}
@@ -251,22 +251,22 @@ MonoBehaviour:
   guardProjectileTargetOffset: {x: 0, y: 0, z: 0}
   basicInterruptsEnemy: 0
   successfulInterruptDamageBonus: 0
-  attackPower: 1
+  attackPower: 2
   teamSkillManaCost: 10
   teamSkillPerformanceBeats: 4
   teamSkillEffectBeatOffset: 0
   skillName: None
   skillBehavior: 0
-  skillPower: 1
-  conditionalSkillPower: 4
+  skillPower: 2
+  conditionalSkillPower: 8
   basicArmorRecovery: 0
-  basicArmorRecoveryAmount: 1
+  basicArmorRecoveryAmount: 2
   teamSkillArmorRecovery: 0
-  teamSkillArmorRecoveryAmount: 1
+  teamSkillArmorRecoveryAmount: 2
   basicAppliesBleeding: 0
-  bleedDamage: 0.5
+  bleedDamage: 1
   bleedBeats: 4
-  fragmentDamage: 1
+  fragmentDamage: 2
   fragmentBeats: 4
   fragmentDetonationDelayBeats: 0.5
   fragmentExplosionEffectPrefab: {fileID: 0}

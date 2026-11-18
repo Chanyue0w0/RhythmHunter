@@ -113,7 +113,7 @@ MonoBehaviour:
   displayName: TEST BOSS
   team: 0
   role: 0
-  maxHp: 60
+  maxHp: 120
   defense: 0
   bossPattern:
     enabled: 1
@@ -126,18 +126,18 @@ MonoBehaviour:
     rageAttackInterval: 2
     breakBeats: 4
     breakThreshold: 3
-    armorReduction: 0.5
-    vulnerableBonus: 0.5
-    chargeDamage: 2
-    rageFinisherDamage: 3
+    armorReduction: 1
+    vulnerableBonus: 1
+    chargeDamage: 4
+    rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   basicAbilityName: Basic Ability
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 1
+  normalAbilityPower: 2
+  attackPower: 2
   skillName: Mercenary Cleave
   skillBehavior: 0
-  skillPower: 1
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 2574835647068987013, guid: 49cb9df558623204ca97c8b6d74b7639, type: 3}
   abilityEffectLifetime: 1.5

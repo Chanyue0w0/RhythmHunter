@@ -1,0 +1,27 @@
+新版傷害數字（Art2）
+
+Prefab：Assets/FightDemo/Prefabs/VFX/DamageNumbers/
+  number_red、number_blue、number_green、number_white
+  每套含 0～9.prefab 與 DecimalPoint.prefab。
+  舊版根目錄粒子數字保留，不影響其他舊場景。
+
+Art2_FightScene / FightCombatController / Enemy Damage Numbers：
+  Show Enemy Damage Numbers：顯示開關，目前保留原本關閉設定。
+  Damage Digit Prefabs：依序 0～9；目前使用 number_red。
+  Damage Decimal Prefab：同色 DecimalPoint。
+  Damage Number Scale：整組大小。
+  Damage Digit Spacing：字距。
+  Damage Number Offset：相對鏡頭的頭頂偏移。
+  Damage Number Lifetime / Rise：顯示秒數與上飄距離。
+  Damage Number Camera：Art2 相機，數字隨其朝向。
+  Damage Number Sorting Order：排序。
+
+更換顏色需同時替換 10 個數字與小數點，於非 Play 模式設定。
+Prefab 的 Sprite 子物件可獨立調整大小；初始 Scale 0.6。
+原圖保留 PPU，僅改 Point、無壓縮、關閉 Mipmap。
+小數點為新增簡單方形像素，可自行替換圖片。
+number_green_0(1).png 保留未使用，0 使用標準 number_green_0.png。
+
+沿用物件池、容量上限、淡出與暫停流程，支援舊粒子與新 Sprite。
+驗證：四套配色、0.5/12.5、透明度恢復、鏡頭朝向、各 1000 次回收重用、容量上限與清理。
+實際戰鬥視覺大小尚待人工試玩確認。

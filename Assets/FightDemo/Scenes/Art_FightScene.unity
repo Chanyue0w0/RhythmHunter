@@ -176,8 +176,8 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 2
-  maxHp: 90
-  attackPower: 14
+  maxHp: 180
+  attackPower: 28
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 986243845}
@@ -1493,8 +1493,8 @@ MonoBehaviour:
   team: 1
   role: 2
   slotIndex: 1
-  maxHp: 85
-  attackPower: 8
+  maxHp: 170
+  attackPower: 16
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 213200706}
@@ -3906,8 +3906,8 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 0
-  maxHp: 80
-  attackPower: 12
+  maxHp: 160
+  attackPower: 24
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 221509334}
@@ -4015,8 +4015,8 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 1
-  maxHp: 120
-  attackPower: 18
+  maxHp: 240
+  attackPower: 36
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 2124323439}
@@ -5058,8 +5058,8 @@ MonoBehaviour:
   team: 1
   role: 3
   slotIndex: 2
-  maxHp: 75
-  attackPower: 24
+  maxHp: 150
+  attackPower: 48
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 1756861568}
@@ -10535,8 +10535,8 @@ MonoBehaviour:
   inputRouter: {fileID: 2021200327}
   tankSlot: {fileID: 2037638511}
   activeEnemySlot: {fileID: 616141045}
-  maxPartyHp: 120
-  enemyAttackDamage: 18
+  maxPartyHp: 240
+  enemyAttackDamage: 36
   resolutionSafetyMs: 12
   enableFrontHeroModeInFightScene2: 1
   enableHealthSystemInFightScene2: 0
@@ -10790,8 +10790,8 @@ MonoBehaviour:
   team: 1
   role: 1
   slotIndex: 0
-  maxHp: 120
-  attackPower: 12
+  maxHp: 240
+  attackPower: 24
   actorPrefab: {fileID: 0}
   normalAttackEffectPrefab: {fileID: 0}
   actorRoot: {fileID: 178498080}

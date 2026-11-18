@@ -33,12 +33,12 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private int slotIndex;
 
         [Header("Combat Data")]
-        [SerializeField, Min(0.5f)] private float maxHp = 4f;
+        [SerializeField, Min(1f)] private float maxHp = 8f;
         [SerializeField] private FightCharacterDefinition.AbilityBehavior normalAbilityBehavior;
-        [SerializeField, Min(0)] private float normalAbilityPower = 1f;
-        [SerializeField, Min(0.5f)] private float attackPower = 1f;
+        [SerializeField, Min(0)] private float normalAbilityPower = 2f;
+        [SerializeField, Min(1f)] private float attackPower = 2f;
         [FormerlySerializedAs("skillDamage")]
-        [SerializeField, Min(0)] private float skillPower = 1f;
+        [SerializeField, Min(0)] private float skillPower = 2f;
         [SerializeField] private FightCharacterDefinition.AbilityBehavior skillBehavior;
         [SerializeField, Min(1)] private int attackIntervalBeats = 4;
         [SerializeField, Min(1)] private int maxMana = 4;
@@ -344,7 +344,7 @@ namespace RhythmHunter.FightDemo
             bool consumeFragile = IsFragile && damage > 0;
             float resolvedDamage = consumeFragile ? damage * 2f : damage;
             bool wasTired=BossPhaseOneTired;
-            float hpFloor=BossPhaseOneProtected ? Mathf.Min(1,currentHp) : 0;
+            float hpFloor=BossPhaseOneProtected ? Mathf.Min(FightCombatUnits.BossHpFloor,currentHp) : 0;
             float applied = Mathf.Clamp(resolvedDamage, 0f, currentHp-hpFloor);
             // Clear before notifications: reentrant damage must not reuse the status.
             if (consumeFragile && resolvedDamage > 0)
@@ -391,6 +391,7 @@ namespace RhythmHunter.FightDemo
             if(BossPhaseOneTired)return 0;
             float applied = Mathf.Clamp(QuantizeNonNegative(amount), 0f, maxHp - currentHp);
             currentHp += applied;
+            if (applied > 0) CombatController?.ShowHealingNumber(this, applied);
             RefreshHealthVisuals();
             HealthChanged?.Invoke(this, currentHp, maxHp);
             return applied;
@@ -414,6 +415,8 @@ namespace RhythmHunter.FightDemo
             Action<FightCharacterCombatAnimator.FrameEffect> onFrameEffect = null)
         {
             // A hit reaction must never flush attack events or replace an enemy action.
+            if (team == UnitTeam.Enemy && animation == FightCharacterCombatAnimator.CombatAnimation.Hit &&
+                characterDefinition != null && characterDefinition.DisableNormalHitReaction) return false;
             if (BossPhaseOneTired && (animation == FightCharacterCombatAnimator.CombatAnimation.Hit || BossPhaseOneActionsStopped)) return false;
             if (team == UnitTeam.Enemy && animation == FightCharacterCombatAnimator.CombatAnimation.Hit &&
                 (hitReactionCooldownRemaining > 0 || combatAnimator != null && combatAnimator.IsPlaying))
@@ -921,7 +924,7 @@ namespace RhythmHunter.FightDemo
 
         private static float QuantizePositive(float value)
         {
-            return Mathf.Max(0.5f, Mathf.Round(value * 2f) * 0.5f);
+            return FightCombatUnits.Positive(value);
         }
 
         private static float QuantizeNonNegative(float value)

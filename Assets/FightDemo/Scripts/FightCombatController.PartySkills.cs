@@ -25,7 +25,7 @@ namespace RhythmHunter.FightDemo
                 (float.IsNaN(amount) || float.IsInfinity(amount) || amount <= 0)) return 0;
             float previous = partyArmor;
             partyArmor = mode == FightCharacterDefinition.ArmorRestoreMode.Full ? maxPartyArmor
-                : Mathf.Min(maxPartyArmor, partyArmor + Mathf.Max(0, Mathf.Round(amount * 2f) * .5f));
+                : Mathf.Min(maxPartyArmor, partyArmor + Mathf.Max(0, FightCombatUnits.Amount(amount)));
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             return partyArmor - previous;
         }

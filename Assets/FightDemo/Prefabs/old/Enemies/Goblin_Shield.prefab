@@ -109,13 +109,13 @@ MonoBehaviour:
   displayName: GOBLIN SHIELD
   team: 0
   role: 0
-  maxHp: 20
+  maxHp: 40
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 1
+  normalAbilityPower: 2
+  attackPower: 2
   skillName: Shield Crash
   skillBehavior: 0
-  skillPower: 1
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 600739970279121489, guid: 3c9546731e5164a4993216f743e300a6, type: 3}
   abilityEffectLifetime: 1.5

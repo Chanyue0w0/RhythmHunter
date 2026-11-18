@@ -60,14 +60,14 @@ namespace RhythmHunter.FightDemoEditor
                     Check(fight.ScheduledEnemyHitCount>0,"Attack had no queued hits");
                     float initial=boss.CurrentHp;
                     Check(Math.Abs(boss.TakeDamage(10000)- (initial-1))<.001f,"HP-loss return should stop at one");
-                    Check(boss.CurrentHp==1 && boss.BossPhaseOneTired && deaths==0 && completions==1,"Lethal clamp/success failed");
+                    Check(boss.CurrentHp==FightCombatUnits.BossHpFloor && boss.BossPhaseOneTired && deaths==0 && completions==1,"Lethal clamp/success failed");
                     Check(fight.ScheduledEnemyHitCount==0,"Unlaunched hits survived success");
                     Check(!boss.CombatAnimator.IsPlaying,"Locked boss should not start a hit reaction");
-                    Check(boss.Heal(30)==0 && boss.CurrentHp==1,"Tired Boss healed");
+                    Check(boss.Heal(30)==0 && boss.CurrentHp==FightCombatUnits.BossHpFloor,"Tired Boss healed");
                     Check(!(bool)start.Invoke(fight,new object[]{boss}),"Tired Boss selected another action");
                     Check(!fight.ScheduleEnemyHits(boss,new[]{1},2),"Tired Boss accepted scheduled attack");
                     foreach(FightUnitSlot.DamageKind kind in Enum.GetValues(typeof(FightUnitSlot.DamageKind)))
-                    {Check(boss.TakeDamage(2,kind)==0,"Extra damage reduced HP");Check(boss.CurrentHp==1,"Floor failed");}
+                    {Check(boss.TakeDamage(2,kind)==0,"Extra damage reduced HP");Check(boss.CurrentHp==FightCombatUnits.BossHpFloor,"Floor failed");}
                     Check(extraEvents==3 && boss.BossPhaseOneExtraDamage==6 && completions==1,"Reward hook or success repeated incorrectly");
                     boss.ApplyFragile();boss.TakeDamage(1);
                     Check(!boss.IsFragile && boss.BossPhaseOneExtraDamage==8,"Fragile at HP floor failed");
@@ -79,12 +79,12 @@ namespace RhythmHunter.FightDemoEditor
                 }
                 if(phase==1 && EditorApplication.timeSinceStartup>=waitUntil)
                 {
-                    Check(boss && boss.ActorInstance && boss.CurrentHp==1 && !boss.DeathPresentationPending && deaths==0,"Boss removed or killed");
+                    Check(boss && boss.ActorInstance && boss.CurrentHp==FightCombatUnits.BossHpFloor && !boss.DeathPresentationPending && deaths==0,"Boss removed or killed");
                     Check(!boss.CombatAnimator.IsPlaying && boss.CombatAnimator.DisplayedFrame.Source==(int)boss.CombatAnimator.FindSequence("Idle_Tired").Animation,"Locked boss did not hold tired idle");
                     Check(fight.ScheduledEnemyHitCount==0,"New actions while tired");
                     boss.RestoreFullHealth();Check(!boss.BossPhaseOneTired && boss.BossPhaseOneExtraDamage==0 && boss.CurrentHp==boss.MaxHp,"Reset did not clear success");
                     var debug=fight.GetComponent<FightBossStageDebug>();
-                    debug.RequestPhaseTwoSkip();Check(boss.CurrentHp==1 && debug.PhaseTwoSkipRequested,"Debug request failed");
+                    debug.RequestPhaseTwoSkip();Check(boss.CurrentHp==FightCombatUnits.BossHpFloor && debug.PhaseTwoSkipRequested,"Debug request failed");
                     Check(debug.ConsumePhaseTwoSkipRequest() && !debug.PhaseTwoSkipRequested,"Debug request not consumable");
                     boss.ReleaseBossPhaseOneProtection();Check(!boss.BossPhaseOneTired && !boss.BossPhaseOneProtected,"Phase-two release failed");
                     File.WriteAllText(Result,"PASS: one-HP floor, one success/no deaths, attack cancellation, no new attacks/heal, direct/DoT/secondary damage floor, extra-damage event, fragile, no hit reaction/Idle_Tired, full reset and debug skip request. Runtime placeholder only; prefab artwork unchanged.");

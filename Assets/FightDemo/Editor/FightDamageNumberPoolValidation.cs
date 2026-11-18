@@ -30,16 +30,20 @@ namespace RhythmHunter.FightDemoEditor
                 var target = fight.ActiveEnemySlot;
                 Check(target != null, "Missing enemy target.");
                 Set(fight, "damageNumberMaxActive", 2);
+                Set(fight, "damageNumberStagger", Vector2.zero);
+                Set(fight, "damageNumberRandomSpread", Vector2.zero);
+                Set(fight, "damageNumberMinimumSeparation", 0f);
+                Set(fight, "damageNumberHorizontalTravel", 0f);
                 Call(fight, "EnsureDamageNumberPool");
                 var active = (IList)fight.GetType().GetField("activeDamageNumbers", Flags).GetValue(fight);
                 void Show(float damage) => Call(fight, "ShowEnemyDamageNumber", target, damage);
                 void Expire() { while (active.Count > 0) Call(active[0], "Advance", 10f); }
-                Show(12.5f);
+                Show(25f);
                 var first = (FightDamageNumber)active[0];
                 Expire();
                 Check(!first.gameObject.activeSelf, "Expired popup was not deactivated.");
                 int roots = fight.CreatedDamageNumberCount, glyphs = fight.CreatedDamageGlyphCount;
-                for (int i = 0; i < 1000; i++) { Show(12.5f); Expire(); }
+                for (int i = 0; i < 1000; i++) { Show(25f); Expire(); }
                 Check(roots == fight.CreatedDamageNumberCount && glyphs == fight.CreatedDamageGlyphCount,
                     "Repeated warmed-up damage grew the pool.");
                 Show(0); Show(float.NaN); Show(float.PositiveInfinity);
@@ -51,7 +55,7 @@ namespace RhythmHunter.FightDemoEditor
                 Check(fight.ActiveDamageNumberCount == 2, "Wave effect cleanup prematurely removed damage feedback.");
                 Call(fight, "ClearBattleEffects");
                 Check(fight.ActiveDamageNumberCount == 0, "Full reset did not return active popups.");
-                Show(.5f);
+                Show(1f);
                 Call(fight, "OnDisable");
                 Check(fight.ActiveDamageNumberCount == 0, "Disabling combat left active numbers.");
                 Show(1);
@@ -69,7 +73,7 @@ namespace RhythmHunter.FightDemoEditor
                         camera.orthographic = orthographic;
                         camera.transform.rotation = Quaternion.Euler(45, 15, 0);
                         Check(target.HeadAnchor != null, "3D character must have an authored head anchor.");
-                        Show(12.5f);
+                        Show(25f);
                         var popup = (FightDamageNumber)active[0];
                         Vector3 offset = (Vector3)fight.GetType().GetField("damageNumberOffset", Flags).GetValue(fight);
                         Vector3 expected = target.HeadAnchor.position + camera.transform.TransformDirection(offset);

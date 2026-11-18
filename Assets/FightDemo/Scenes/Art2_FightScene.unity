@@ -181,11 +181,11 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 2
-  maxHp: 90
+  maxHp: 180
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 14
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 28
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -6741,11 +6741,11 @@ MonoBehaviour:
   team: 1
   role: 2
   slotIndex: 1
-  maxHp: 85
+  maxHp: 170
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 8
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 16
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -8376,11 +8376,11 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 0
-  maxHp: 80
+  maxHp: 160
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 12
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 24
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -8506,11 +8506,11 @@ MonoBehaviour:
   team: 0
   role: 0
   slotIndex: 1
-  maxHp: 120
+  maxHp: 240
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 18
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 36
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -9833,11 +9833,11 @@ MonoBehaviour:
   team: 1
   role: 3
   slotIndex: 2
-  maxHp: 75
+  maxHp: 150
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 24
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 48
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -20381,25 +20381,40 @@ MonoBehaviour:
   waveArmorRecoveryEffectLifetime: 0
   bossMusicPhase: 0
   bossPhaseTwoSecondsRemaining: 0
-  showEnemyDamageNumbers: 0
+  showEnemyDamageNumbers: 1
   damageNumberCamera: {fileID: 2147100302}
+  showHealingNumbers: 1
+  healingDigitPrefabs:
+  - {fileID: 7902413864646141794, guid: 003f4e65edc050548b7bb856e52a9c48, type: 3}
+  - {fileID: 5583346975420621158, guid: 169d6d057a127e842a18da6e17b0d557, type: 3}
+  - {fileID: 4099521317448667014, guid: 6edda1eae5801ee4983a5e9ef56d27a2, type: 3}
+  - {fileID: 666284174397689030, guid: 3a12fbacb2de6444d96c69bba8c525e2, type: 3}
+  - {fileID: 2887648186098977684, guid: 01784ae92628920448cfc46fd16d0ed8, type: 3}
+  - {fileID: 91404840064732794, guid: f27d6e880ab694b4ca65b088b5ca81bd, type: 3}
+  - {fileID: 93665455259581255, guid: cab6da365ace5b64183c98d46578f14d, type: 3}
+  - {fileID: 1565683612126238766, guid: b5541eb4885f40d43b1d886e73b95d17, type: 3}
+  - {fileID: 1831849604501973080, guid: d2395797a479ddb4c8397386c4bb629d, type: 3}
+  - {fileID: 3633780400660510950, guid: bf841eb5ab2d81d499d763ab7bee57ee, type: 3}
   damageDigitPrefabs:
-  - {fileID: 8059646611630442008, guid: 65e346b2be0cd6f4e98a21f618c84252, type: 3}
-  - {fileID: 821659882305050408, guid: 33830a29953a8a94db86312d69a514e5, type: 3}
-  - {fileID: 3387627009911684426, guid: 433ee73351e8a6244803ba28bccc3bdf, type: 3}
-  - {fileID: 3346009242134115890, guid: 1701385fd0b8a6b438db3b0e8caf8923, type: 3}
-  - {fileID: 7816833423727273069, guid: bed62489476db6a45b171d2ae7dae00d, type: 3}
-  - {fileID: 8133363191223406634, guid: a15113e8d46c0c845bc7e18ffdc3b8cf, type: 3}
-  - {fileID: 2482282291809049268, guid: 8419c973d1928824f93b421394e9ea49, type: 3}
-  - {fileID: 173090391683368173, guid: e168d4ee2dc573643b98e2af87b750c5, type: 3}
-  - {fileID: 5612388837414510471, guid: d7cd6bc43cadc7c4daa7f5c349e2c045, type: 3}
-  - {fileID: 5543003937174842591, guid: f7c8ce6b5d3a91240b7ecdedbd76e6b8, type: 3}
+  - {fileID: 8640296911240723031, guid: b485d70c145510a4482a6f90cc058d77, type: 3}
+  - {fileID: 1076729572605911976, guid: 4a7360cae2e32ad409140428f2d94384, type: 3}
+  - {fileID: 6050639255517018592, guid: 1960ac5bb41258c46be9a47112e1c900, type: 3}
+  - {fileID: 1019678210352964670, guid: 434821015b4bb1e4b8f0956c04d51827, type: 3}
+  - {fileID: 827721746625431840, guid: f6e0ba05a15603a439ab3bdac6736bd1, type: 3}
+  - {fileID: 7503687497678645150, guid: fe421cb37b4c09447a89bdb5cc0d6398, type: 3}
+  - {fileID: 4554934114519785189, guid: 9dd5573b791e02b47b8e094455cad55b, type: 3}
+  - {fileID: 5311632212144441568, guid: 0b8af06fd2dc5954e91dbc6854624282, type: 3}
+  - {fileID: 729148603105689248, guid: 1e3601df57aafbd4dadeadbbdfd52fa5, type: 3}
+  - {fileID: 4501983799372608664, guid: 811e59ae0862ecd4fa385e8f7f9867bc, type: 3}
+  damageDecimalPrefab: {fileID: 7620468757384773704, guid: 977acbe2a569d2d40b66d08fa78af256, type: 3}
   damageNumberOffset: {x: 0.5, y: 0, z: 0}
   damageNumberLifetime: 0.8
-  damageNumberScale: 1
+  damageNumberScale: 2
   damageDigitSpacing: 0.3
   damageNumberRise: 0.6
   damageNumberSortingOrder: 100
+  damageNumberMinimumSeparation: 0.45
+  damageNumberRandomSpread: {x: 0.25, y: 0.06}
   damageNumberPrewarm: 8
   damageGlyphPrewarmPerDigit: 4
   damageNumberMaxActive: 64
@@ -20410,12 +20425,12 @@ MonoBehaviour:
   defeatInputGraceBeats: 1
   enableCharacterPassives: 0
   pressureWarningBeats: 1
-  pressureDamagePerPair: 2
+  pressureDamagePerPair: 4
   pressureBlocksPerPair: 5
   pressureReductionSegments: 20
   pressureRestBeats: 20
   pressureManaMultiplier: 2
-  pressureGuardChipDamage: 0.5
+  pressureGuardChipDamage: 1
   refillManaAfterPressure: 1
   blockFeverDuringPressure: 1
   stageTimeExpired: 0
@@ -20440,15 +20455,15 @@ MonoBehaviour:
   teamUltimateRequiredCharges: 3
   teamUltimatePerformanceBeats: 4
   teamUltimateImpactBeat: 4
-  teamUltimateDamage: 3
+  teamUltimateDamage: 6
   beatClock: {fileID: 2021200329}
   rhythmJudge: {fileID: 2021200328}
   inputRouter: {fileID: 2021200327}
   rosterManager: {fileID: 2021200331}
   tankSlot: {fileID: 2037638511}
   activeEnemySlot: {fileID: 0}
-  maxPartyHp: 4
-  enemyAttackDamage: 1
+  maxPartyHp: 8
+  enemyAttackDamage: 2
   resolutionSafetyMs: 12
   endBattleOnZeroHp: 1
   autoPlayBattleEntrance: 1
@@ -20697,7 +20712,7 @@ MonoBehaviour:
   lowHealthColor: {r: 1, g: 0.38, b: 0.4, a: 0.18}
   hitFlashSeconds: 0.45
   edgeWidth: 0.051
-  lowHealthThreshold: 1
+  lowHealthThreshold: 2
   lowHealthPulseBeats: 2
 --- !u!114 &2021200339
 MonoBehaviour:
@@ -20793,7 +20808,7 @@ MonoBehaviour:
   targetOffset: {x: 0, y: 0.75, z: 0}
   guardDurationBeats: 0.5
   missLockMilliseconds: 80
-  missDamage: 1
+  missDamage: 2
   preventPlayerDeathForTesting: 1
   hitSoundMode: 1
   hitSoundOffsetMs: -50
@@ -20863,11 +20878,11 @@ MonoBehaviour:
   team: 1
   role: 1
   slotIndex: 0
-  maxHp: 120
+  maxHp: 240
   normalAbilityBehavior: 0
-  normalAbilityPower: 1
-  attackPower: 12
-  skillPower: 30
+  normalAbilityPower: 2
+  attackPower: 24
+  skillPower: 60
   skillBehavior: 0
   attackIntervalBeats: 4
   maxMana: 4
@@ -22446,7 +22461,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5916e-41, y: 0, z: 0, w: -2528.045}
+  m_BoundingSphereOverride: {x: 7.03e-43, y: 0, z: 0, w: 1e-45}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -22610,7 +22625,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.068e-42, y: 2.4619929e+25, z: 1.068e-42, w: -3.1484221e+29}
+  m_BoundingSphereOverride: {x: -6.1064324e+21, y: -1.338032e-36, z: -0.0000009826524, w: -6.733622e+21}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23106,7 +23121,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: -0.000000059604645, y: 1, z: 0, w: 6.4380007}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23270,7 +23285,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: -2.6133863e+29, z: 1.068e-42, w: -1.494786e+30}
+  m_BoundingSphereOverride: {x: 8.332e-42, y: 1.7219e-41, z: 0, w: 1.0842088e-19}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

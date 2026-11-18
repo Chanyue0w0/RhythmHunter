@@ -48,8 +48,8 @@ namespace RhythmHunter.FightDemo
             if (fight == null) return;
             // Rows are right-aligned: advance one shared column per beat, with
             // shorter rows joining only when the sweep reaches their columns.
-            bounceCycleLength = Mathf.Max(Mathf.CeilToInt(Mathf.Max(0, fight.MaxPartyHp)),
-                Mathf.CeilToInt(Mathf.Max(0, fight.MaxPartyArmor)));
+            bounceCycleLength = Mathf.Max(Mathf.CeilToInt(Mathf.Max(0, fight.MaxPartyHp) / FightCombatUnits.PointsPerIcon),
+                Mathf.CeilToInt(Mathf.Max(0, fight.MaxPartyArmor) / FightCombatUnits.PointsPerIcon));
             var clock = fight.BeatClock;
             hasBounceTiming = beatBounceEnabled && clock != null && clock.isActiveAndEnabled && clock.IsPlaying &&
                 clock.HasTimingAnchor && clock.MillisecondsPerBeat > 0;
@@ -65,11 +65,11 @@ namespace RhythmHunter.FightDemo
         }
 
         public static float UnitFill(float value, int indexFromRight) =>
-            Mathf.Clamp01(Mathf.Round(Mathf.Max(0, value) * 2f) * .5f - indexFromRight);
+            Mathf.Clamp01(FightCombatUnits.Amount(value) / FightCombatUnits.PointsPerIcon - indexFromRight);
 
         private void DrawRow(List<Image[]> row, string label, Sprite empty, Sprite full, float current, float maximum, float y)
         {
-            int count = Mathf.CeilToInt(Mathf.Max(0, maximum));
+            int count = Mathf.CeilToInt(Mathf.Max(0, maximum) / FightCombatUnits.PointsPerIcon);
             while (row.Count < count)
             {
                 var background = CreateImage(label + "_" + row.Count + "_Empty", transform);

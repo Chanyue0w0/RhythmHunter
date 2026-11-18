@@ -50,12 +50,12 @@ namespace RhythmHunter.FightDemoEditor
                     Set(fight, "pressureRestUntil", 0L); Call(boss, "RefreshBossRestPresentation");
                     Check(boss.CombatAnimator.DisplayedFrame.Source != (int)tired.Animation, "Uncleared Boss did not leave Tired after rest");
                     Set(fight, "pressureRemaining", 12d); Set(fight, "pressureDamageProgress", 0f);
-                    Set(boss, "currentHp", 2f);
+                    Set(boss, "currentHp", FightCombatUnits.BossHpFloor + 1);
                     foreach (var ability in boss.CharacterDefinition.EnemyAbilities) ability.selectionWeight = ability.name == "Strike" ? 1 : 0;
                     Check((bool)Call(fight, "TryStartAuthoredEnemyAttack", boss), "Could not start Pressure attack");
                     int hits = fight.ScheduledEnemyHitCount;
                     var animation = boss.CombatAnimator.ActiveAnimation;
-                    Check(boss.TakeDamage(1) == 1 && boss.CurrentHp == 1 && boss.BossPhaseOneTired, "HP floor not reached");
+                    Check(boss.TakeDamage(1) == 1 && boss.CurrentHp == FightCombatUnits.BossHpFloor && boss.BossPhaseOneTired, "HP floor not reached");
                     Check(boss.BossFinishingCurrentPressure && !boss.BossPhaseOneActionsStopped && fight.PressureRemainingExact == 12, "Lock interrupted Pressure");
                     Check(boss.CombatAnimator.IsPlaying && boss.CombatAnimator.ActiveAnimation == animation && fight.ScheduledEnemyHitCount == hits, "Lock interrupted active attack");
                     boss.TakeDamage(1);
@@ -80,7 +80,7 @@ namespace RhythmHunter.FightDemoEditor
                     boss.TakeDamage(1);
                     Check(!boss.CombatAnimator.IsPlaying && !(bool)Call(fight, "TryStartAuthoredEnemyAttack", boss), "Locked rest restarted Hit or attack");
                     Check(fight.PressureNextStartBeat == -1, "Locked boss scheduled another Pressure");
-                    boss.RestoreFullHealth(); Set(fight, "stageOvertimeActive", true); Set(boss, "currentHp", 2f);
+                    boss.RestoreFullHealth(); Set(fight, "stageOvertimeActive", true); Set(boss, "currentHp", FightCombatUnits.BossHpFloor + 1);
                     boss.TakeDamage(1);
                     Check(!boss.BossFinishingCurrentPressure && boss.BossPhaseOneActionsStopped, "Overtime incorrectly waits for endless Pressure");
                     Call(fight, "UpdateBossMusicStage"); step = 2;

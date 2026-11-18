@@ -109,15 +109,15 @@ MonoBehaviour:
   displayName: PALADIN
   team: 1
   role: 1
-  maxHp: 3
-  defense: 3
+  maxHp: 6
+  defense: 6
   basicAbilityName: Guard
   normalAbilityBehavior: 1
   normalAbilityPower: 0
-  attackPower: 1
+  attackPower: 2
   skillName: Aegis Counter
   skillBehavior: 4
-  skillPower: 1
+  skillPower: 2
   normalAbilityEffectPrefab: {fileID: 0}
   skillEffectPrefab: {fileID: 5273961539278508256, guid: 6251f2ae3febbff47ba2d5ed0c7fd63f, type: 3}
   abilityEffectLifetime: 1.5

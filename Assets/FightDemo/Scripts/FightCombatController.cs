@@ -130,8 +130,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightUnitSlot activeEnemySlot;
 
         [Header("Prototype Rules")]
-        [SerializeField, Min(0.5f)] private float maxPartyHp = 4f;
-        [SerializeField, Min(0.5f)] private float enemyAttackDamage = 1f;
+        [SerializeField, Min(1f)] private float maxPartyHp = 8f;
+        [SerializeField, Min(1f)] private float enemyAttackDamage = 2f;
         [SerializeField, Min(0f)] private float resolutionSafetyMs = 12f;
         [Header("Battle Testing")]
         [Tooltip("In prepared party battles, end combat when shared HP reaches zero. Disable to keep testing at 0 HP. Does not restart an already ended battle.")]
@@ -358,10 +358,10 @@ namespace RhythmHunter.FightDemo
             inputRouter = router;
             tankSlot = tank;
             activeEnemySlot = enemy;
-            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(0.5f, partyHealth);
+            maxPartyHp = tankSlot != null ? tankSlot.MaxHp : Mathf.Max(1f, partyHealth);
             enemyAttackDamage = activeEnemySlot != null
-                ? Mathf.Max(0.5f, activeEnemySlot.AttackPower)
-                : Mathf.Max(0.5f, attackDamage);
+                ? Mathf.Max(1f, activeEnemySlot.AttackPower)
+                : Mathf.Max(1f, attackDamage);
             partyHp = maxPartyHp;
             SubscribeDependencies();
         }
@@ -1011,7 +1011,7 @@ namespace RhythmHunter.FightDemo
 
             FightUnitSlot attacker = pendingEnemyAttacker != null ? pendingEnemyAttacker : activeEnemySlot;
             float configuredDamage = UsesFrontHeroControls && attacker != null
-                ? Mathf.Max(0.5f, attacker.AttackPower)
+                ? Mathf.Max(1f, attacker.AttackPower)
                 : enemyAttackDamage;
             if (pendingBossDamage > 0) configuredDamage = pendingBossDamage;
             float damage = ResolveEnemyHitDamage(configuredDamage, blocked, pendingEnemyGuardChip);
@@ -1175,7 +1175,7 @@ namespace RhythmHunter.FightDemo
                 ? (frontHero.UnitSlot != null ? frontHero.UnitSlot.MaxHp : 0f)
                   + (secondHero.UnitSlot != null ? secondHero.UnitSlot.MaxHp : 0f)
                   + (thirdHero.UnitSlot != null ? thirdHero.UnitSlot.MaxHp : 0f)
-                : tankSlot != null ? tankSlot.MaxHp : Mathf.Max(0.5f, maxPartyHp);
+                : tankSlot != null ? tankSlot.MaxHp : Mathf.Max(1f, maxPartyHp);
             maxPartyArmor = UsesEqualBeats && tankSlot != null && tankSlot.CharacterDefinition != null
                 ? ArmorForDefense(tankSlot.CharacterDefinition.Defense) + (enableCharacterPassives ? tankSlot.CharacterDefinition.FrontlineDefenseBonus : 0) : 0f;
             partyArmor = maxPartyArmor;
@@ -1195,7 +1195,7 @@ namespace RhythmHunter.FightDemo
             if (DefeatSlowMotionActive) return 0;
             if (!UsesEqualBeats || !HealthSystemEnabled || battleEnded || AwaitingBattleStart || amount <= 0f)
                 return 0f;
-            float damage = Mathf.Max(0f, Mathf.Round(amount * 2f) * 0.5f);
+            float damage = Mathf.Max(0f, FightCombatUnits.Amount(amount));
             if (damage <= 0f)
                 return 0f;
             latestCombatBeat = Math.Max(latestCombatBeat, globalBeat);
@@ -1203,10 +1203,14 @@ namespace RhythmHunter.FightDemo
             partyArmor -= armorDamage;
             // Apply the floor before damage events/defeat checks, never restore HP after death starts.
             float damageableHp = BossPhaseTwoActive && BossRhythm && BossRhythm.PreventPlayerDeathForTesting
-                ? Mathf.Max(0f, partyHp - 1f) : partyHp;
+                ? Mathf.Max(0f, partyHp - FightCombatUnits.PointsPerIcon) : partyHp;
             float hpDamage = Mathf.Min(damageableHp, damage - armorDamage);
             partyHp -= hpDamage;
-            if (armorDamage > 0 || hpDamage > 0) PartyDamageTaken?.Invoke(armorDamage, hpDamage);
+            if (armorDamage > 0 || hpDamage > 0)
+            {
+                ShowDamageNumber(tankSlot, armorDamage + hpDamage, true);
+                PartyDamageTaken?.Invoke(armorDamage, hpDamage);
+            }
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             if (UsesBattlePreparation && endBattleOnZeroHp && partyHp <= 0) FinishBattle(false);
             return armorDamage + hpDamage;
@@ -1535,6 +1539,7 @@ namespace RhythmHunter.FightDemo
             float previous = partyHp;
             partyHp = Mathf.Min(maxPartyHp, partyHp + QuantizeCombatValue(amount));
             totalHealingReceived += partyHp - previous;
+            if (partyHp > previous) ShowHealingNumber(tankSlot, partyHp - previous);
             PartyHealthChanged?.Invoke(partyHp, maxPartyHp);
             Debug.Log($"[FightParty] {healer.DisplayName} healed {partyHp - previous:0.#} HP.", this);
         }
@@ -1600,7 +1605,7 @@ namespace RhythmHunter.FightDemo
 
         private static float QuantizeCombatValue(float value)
         {
-            return value <= 0f ? 0f : Mathf.Max(0.5f, Mathf.Round(value * 2f) * 0.5f);
+            return value <= 0f ? 0f : FightCombatUnits.Positive(value);
         }
 
         private static FightUnitSlot SlotAt(IReadOnlyList<FightUnitSlot> slots, int index)
