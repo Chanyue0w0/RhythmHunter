@@ -51,6 +51,8 @@ namespace RhythmHunter.FightDemo
         public string ChartError { get; private set; }
         public double CurrentBeat { get; private set; }
         public int CreatedVisuals { get; private set; }
+        public int LaunchedNotes { get; private set; }
+        public float LaunchProgress => Mathf.Clamp01((LaunchedNotes - 1f) / Mathf.Max(1, notes.Count - SkippedTransitionNotes - 1));
         public bool Running => started && !outro && fight && fight.BossPhaseTwoActive && !fight.BattleEnded && !fight.DefeatSlowMotionActive;
         public event Action<int, bool, double> NoteResolved;
         private sealed class Note
@@ -66,6 +68,8 @@ namespace RhythmHunter.FightDemo
         private readonly List<(FightBossRhythmVisual visual, int lane, double end, bool success)> guards = new();
         private readonly List<FightBossRhythmVisual> allVisuals = new();
         private readonly FightCharacterCombatAnimator.Sequence[] animations = new FightCharacterCombatAnimator.Sequence[3];
+        private readonly double[] animationLeadBeats = new double[3];
+        private Note displayedAttack;
         private readonly FightUnitSlot[] heroes = new FightUnitSlot[3];
         private FightUnitSlot boss;
         private bool started, originKnown, readySeen, outro, animationPlaying;
@@ -102,6 +106,9 @@ namespace RhythmHunter.FightDemo
                 float total = Enumerable.Range(0, source.Frames.Count).Sum(i => source.GetFrameBeats(i));
                 copy.ConfigureFrameBeats(Enumerable.Range(0, source.Frames.Count).Select(i => source.GetFrameBeats(i) / Mathf.Max(.01f, total) * chart.animationBeats));
                 animations[lane] = copy;
+                // First marked frame is the release point; unmarked legacy sequences release at the end.
+                int releaseFrame = Enumerable.Range(0, source.Frames.Count).Where(source.PlaysAttackEffectAt).DefaultIfEmpty(source.Frames.Count).First();
+                animationLeadBeats[lane] = Enumerable.Range(0, releaseFrame).Sum(i => (double)copy.GetFrameBeats(i));
             }
             if (ChartError != null) { Debug.LogError(ChartError, this); notes.Clear(); return; }
             started = true;
@@ -148,12 +155,14 @@ namespace RhythmHunter.FightDemo
                 if (fight.BeatClock.TryGetRawTimelinePositionMs(out int raw) && fight.BeatClock.TryGetMarkerPosition("Normal_End", out int start) &&
                     !chart.ValidateTiming(fight.BeatClock.MillisecondsPerBeat, beat, raw - start, fight.BossRhythmJudge.PerfectWindowMs, out string timingError))
                 { Debug.LogWarning("[Boss chart] " + timingError, this); }
-                foreach (var note in notes) if (note.beat - chart.travelBeats - chart.animationBeats < beat)
+                foreach (var note in notes) if (note.beat - chart.travelBeats - animationLeadBeats[note.lane] < beat)
                 { note.resolved = note.skipped = true; SkippedTransitionNotes++; }
             }
             if (animationPlaying && boss.CombatAnimator.VisualSequenceComplete)
             { boss.CombatAnimator.InterruptPlayback(); boss.CombatAnimator.SetIdleOverride(chopIdle); animationPlaying = false; }
             AdvanceNotes(beat);
+            if (animationPlaying && displayedAttack != null)
+                boss.CombatAnimator.SampleVisualSequenceBeats(beat - (displayedAttack.beat - chart.travelBeats - animationLeadBeats[displayedAttack.lane]));
             for (int i = guards.Count - 1; i >= 0; i--)
             {
                 var guard = guards[i]; float remaining = (float)(guard.end - beat);
@@ -169,14 +178,15 @@ namespace RhythmHunter.FightDemo
             foreach (var note in notes)
             {
                 if (note.resolved) continue;
-                if (note.beat - chart.travelBeats - chart.animationBeats > beat) break;
+                if (note.beat - chart.travelBeats - animationLeadBeats[note.lane] > beat) continue;
                 if (!note.animationStarted)
                 {
                     note.animationStarted = true;
                     if (beat < note.beat - chart.travelBeats + .01)
-                    { boss.CombatAnimator.PlayVisualSequence(boss.CombatAnimator.TargetRenderer, animations[note.lane], false); animationPlaying = true; }
+                    { boss.CombatAnimator.PlayVisualSequence(boss.CombatAnimator.TargetRenderer, animations[note.lane], false, true); displayedAttack = note; animationPlaying = true; }
                 }
-                if (beat >= note.beat - chart.travelBeats && note.visual == null) note.visual = Rent(false);
+                if (beat >= note.beat - chart.travelBeats && note.visual == null)
+                { note.visual = Rent(false); LaunchedNotes++; }
                 if (note.visual)
                 {
                     var origin = boss.CastEffectAnchor ? boss.CastEffectAnchor.position : boss.ActorRoot.position;
@@ -299,7 +309,7 @@ namespace RhythmHunter.FightDemo
         {
             if(fight)fight.AudioPlayer.StopBeatSounds();
             ClearVisuals(); notes.Clear(); started = originKnown = readySeen = outro = animationPlaying = false;
-            lockedUntil = double.NegativeInfinity; CurrentBeat = 0;
+            lockedUntil = double.NegativeInfinity; CurrentBeat = 0; LaunchedNotes = 0; displayedAttack = null;
         }
         private void OnDisable()
         {

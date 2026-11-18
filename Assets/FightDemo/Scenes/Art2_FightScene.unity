@@ -20220,6 +20220,7 @@ GameObject:
   - component: {fileID: 2021200340}
   - component: {fileID: 2021200341}
   - component: {fileID: 2021200342}
+  - component: {fileID: 2021200343}
   m_Layer: 0
   m_Name: FightDemoController
   m_TagString: Untagged
@@ -20383,6 +20384,17 @@ MonoBehaviour:
   bossPhaseTwoSecondsRemaining: 0
   showEnemyDamageNumbers: 1
   damageNumberCamera: {fileID: 2147100302}
+  damageDigitPrefabs:
+  - {fileID: 8640296911240723031, guid: b485d70c145510a4482a6f90cc058d77, type: 3}
+  - {fileID: 1076729572605911976, guid: 4a7360cae2e32ad409140428f2d94384, type: 3}
+  - {fileID: 6050639255517018592, guid: 1960ac5bb41258c46be9a47112e1c900, type: 3}
+  - {fileID: 1019678210352964670, guid: 434821015b4bb1e4b8f0956c04d51827, type: 3}
+  - {fileID: 827721746625431840, guid: f6e0ba05a15603a439ab3bdac6736bd1, type: 3}
+  - {fileID: 7503687497678645150, guid: fe421cb37b4c09447a89bdb5cc0d6398, type: 3}
+  - {fileID: 4554934114519785189, guid: 9dd5573b791e02b47b8e094455cad55b, type: 3}
+  - {fileID: 5311632212144441568, guid: 0b8af06fd2dc5954e91dbc6854624282, type: 3}
+  - {fileID: 729148603105689248, guid: 1e3601df57aafbd4dadeadbbdfd52fa5, type: 3}
+  - {fileID: 4501983799372608664, guid: 811e59ae0862ecd4fa385e8f7f9867bc, type: 3}
   showHealingNumbers: 1
   healingDigitPrefabs:
   - {fileID: 7902413864646141794, guid: 003f4e65edc050548b7bb856e52a9c48, type: 3}
@@ -20395,17 +20407,6 @@ MonoBehaviour:
   - {fileID: 1565683612126238766, guid: b5541eb4885f40d43b1d886e73b95d17, type: 3}
   - {fileID: 1831849604501973080, guid: d2395797a479ddb4c8397386c4bb629d, type: 3}
   - {fileID: 3633780400660510950, guid: bf841eb5ab2d81d499d763ab7bee57ee, type: 3}
-  damageDigitPrefabs:
-  - {fileID: 8640296911240723031, guid: b485d70c145510a4482a6f90cc058d77, type: 3}
-  - {fileID: 1076729572605911976, guid: 4a7360cae2e32ad409140428f2d94384, type: 3}
-  - {fileID: 6050639255517018592, guid: 1960ac5bb41258c46be9a47112e1c900, type: 3}
-  - {fileID: 1019678210352964670, guid: 434821015b4bb1e4b8f0956c04d51827, type: 3}
-  - {fileID: 827721746625431840, guid: f6e0ba05a15603a439ab3bdac6736bd1, type: 3}
-  - {fileID: 7503687497678645150, guid: fe421cb37b4c09447a89bdb5cc0d6398, type: 3}
-  - {fileID: 4554934114519785189, guid: 9dd5573b791e02b47b8e094455cad55b, type: 3}
-  - {fileID: 5311632212144441568, guid: 0b8af06fd2dc5954e91dbc6854624282, type: 3}
-  - {fileID: 729148603105689248, guid: 1e3601df57aafbd4dadeadbbdfd52fa5, type: 3}
-  - {fileID: 4501983799372608664, guid: 811e59ae0862ecd4fa385e8f7f9867bc, type: 3}
   damageDecimalPrefab: {fileID: 7620468757384773704, guid: 977acbe2a569d2d40b66d08fa78af256, type: 3}
   damageNumberOffset: {x: 0.5, y: 0, z: 0}
   damageNumberLifetime: 0.8
@@ -20413,6 +20414,10 @@ MonoBehaviour:
   damageDigitSpacing: 0.3
   damageNumberRise: 0.6
   damageNumberSortingOrder: 100
+  showPartyDamageNumbers: 1
+  damageNumberHorizontalTravel: 0.65
+  damageNumberJumpHeight: 0.35
+  damageNumberStagger: {x: 0.18, y: 0.12}
   damageNumberMinimumSeparation: 0.45
   damageNumberRandomSpread: {x: 0.25, y: 0.06}
   damageNumberPrewarm: 8
@@ -20751,7 +20756,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossStageDebug
   fight: {fileID: 2021200326}
   completePhaseOneOnStart: 0
-  skipToPhaseTwoOnStart: 0
+  skipToPhaseTwoOnStart: 1
 --- !u!114 &2021200341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20815,6 +20820,99 @@ MonoBehaviour:
   minimumSoundLeadMs: 25
   victoryExplosion: {fileID: 5292981524694603679, guid: a3dd949486459684a818f410e0242b9b, type: 3}
   victoryWaitSeconds: 1.2
+--- !u!114 &2021200343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021200323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ad094fb64fc324ca0ff66002c7814f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightPhaseTwoSpeedLines
+  fight: {fileID: 2021200326}
+  rhythm: {fileID: 2021200342}
+  speedLinesEnabled: 1
+  tunnelOrigin: {fileID: 484769312}
+  tunnelCamera: {fileID: 2147100302}
+  tunnelShader: {fileID: 4800000, guid: 138072694badcf9409542c4497c17e8f, type: 3}
+  originOffset: {x: 0, y: 0, z: 0}
+  lineColor: {r: 0.5, g: 0.75, b: 1, a: 0.55}
+  sourceRadius: 0.35
+  nearRadius: 4
+  lowIntensityCount: 28
+  highIntensityCount: 96
+  speedPerBeat: {x: 0.12, y: 0.5}
+  streakLength: {x: 0.5, y: 2.2}
+  streakWidth: {x: 0.018, y: 0.045}
+  pixelSnap: 0
+  respectSceneDepth: 1
+  fadeInSeconds: 0.5
+  fadeOutSeconds: 0.25
+  centralProtectionEnabled: 1
+  protectedCenterX: 0.5
+  protectedWidth: 0.68
+  protectedDoorWidth: 0.1
+  protectionFeather: 0.04
+  sectionIntensityEnabled: 1
+  sectionIntensity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.15
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25
+      value: 0.3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.55
+      value: 0.55
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.8
+      value: 0.8
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  constantIntensity: 0.35
+  guardBoostEnabled: 1
+  guardBoostAmount: 0.35
+  guardBoostDurationBeats: 0.4
+  maximumSpeedMultiplier: 1.6
 --- !u!1 &2037638509
 GameObject:
   m_ObjectHideFlags: 0

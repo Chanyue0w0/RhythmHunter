@@ -340,11 +340,11 @@ namespace RhythmHunter.FightDemo
         }
         private double idlePausedBeats, pauseBeatPosition;
         public bool PlaybackPaused => playbackPaused;
-        private bool visualSequence, loopVisualSequence, visualSequenceComplete;
+        private bool visualSequence, loopVisualSequence, visualSequenceComplete, externallyTimedVisual;
 
         // Reuses the same frame stepping, tempo, pause and sprite texture binding as characters.
         // No gameplay callbacks are registered for auxiliary visuals such as weapons.
-        public bool PlayVisualSequence(SpriteRenderer renderer, Sequence sequence, bool loop)
+        public bool PlayVisualSequence(SpriteRenderer renderer, Sequence sequence, bool loop, bool externallyTimed = false)
         {
             if (renderer == null || sequence == null || sequence.Frames.Count == 0) return false;
             FinishActiveSequence(false);
@@ -352,9 +352,24 @@ namespace RhythmHunter.FightDemo
             activeSequence = sequence;
             activeFrame = 0; frameElapsed = 0;
             visualSequence = true; loopVisualSequence = loop; visualSequenceComplete = false;
+            externallyTimedVisual = externallyTimed;
             playbackVersion++;
             EnterFrame(0);
             return true;
+        }
+
+        // Read-only presentation sampling against the caller's existing song clock.
+        // Used by rhythm attacks so frame four and projectile launch share one timeline.
+        public void SampleVisualSequenceBeats(double elapsedBeats)
+        {
+            if (!externallyTimedVisual || !visualSequence || activeSequence == null || playbackPaused) return;
+            double remaining = Math.Max(0, elapsedBeats);
+            int index = 0;
+            while (index < activeSequence.Frames.Count - 1 && remaining + 1e-7 >= activeSequence.GetFrameBeats(index))
+                remaining -= activeSequence.GetFrameBeats(index++);
+            visualSequenceComplete = index == activeSequence.Frames.Count - 1 && remaining + 1e-7 >= activeSequence.GetFrameBeats(index);
+            if (activeFrame != index) EnterFrame(index);
+            frameElapsed = (float)remaining;
         }
 
         public void SetPlaybackPaused(bool paused)
@@ -658,6 +673,7 @@ namespace RhythmHunter.FightDemo
         private void AdvancePlayback(float deltaTime)
         {
             if (playbackPaused) return;
+            if (externallyTimedVisual) return;
             RefreshSongTempo();
             if (visualSequenceComplete) return;
             if (activeSequence == null)
@@ -764,7 +780,7 @@ namespace RhythmHunter.FightDemo
             bool raiseDamage = flushGameplayEvents && !damageRaised && activeSequence.DamageFrame >= 0;
             playbackVersion++;
             activeSequence = null;
-            visualSequence = loopVisualSequence = visualSequenceComplete = false;
+            visualSequence = loopVisualSequence = visualSequenceComplete = externallyTimedVisual = false;
             warningCallback = null;
             attackEffectCallback = null;
             frameEffectCallback = null;

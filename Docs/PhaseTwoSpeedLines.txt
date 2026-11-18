@@ -1,0 +1,40 @@
+二階段 3D 隧道氣流（取代原本2D下落線）
+
+位置：Art2_FightScene → FightDemoController → Fight Phase Two Speed Lines。
+同一元件名稱保留，但畫面已改為世界空間MeshRenderer，不生成Overlay Canvas。
+原先譜面、音樂、輸入、判定、Boss動畫皆未修改。
+
+來源：Tunnel Origin 綁BossDoorSpawnAnchor，Origin Offset為來源本地偏移。
+觀察相機：Tunnel Camera 綁Art2_TestCamera。
+幾何：氣流從門口周邊沿3D錐狀通道向攝影機移動。使用攝影機真實透視投影，近大遠小；不推動攝影機本身。
+Source Radius：門口發散半徑（0.35世界單位）。Near Radius：靠近鏡頭時通道半徑（4）。
+Speed Per Beat：每拍走完通道的比例，低/高強度0.12～0.5。
+Streak Length：世界空間軌跡長度，低/高強度0.5～2.2。
+Streak Width：世界空間寬度0.018～0.045。
+Low/High Intensity Count：28～96條（上限128）。
+Line Color：預設淡藍色，Alpha 0.55；以加色融合呈現氣流，無額外燈光。
+Respect Scene Depth：預設開啟，保留場景物件的正常遮擋；關閉可讓氣流穿過場景遮擋，仍不蓋Overlay UI。
+Pixel Snap：將投影後的頂點對齊渲染像素。
+
+四個獨立開關繼續保留：
+Speed Lines Enabled：總開關。
+Central Protection Enabled：保護中央譜面軌道。
+Section Intensity Enabled：按歌曲進度套用曲線，關閉則使用Constant Intensity。
+Guard Boost Enabled：成功格擋短促加速；失誤不觸發。
+
+中央保護為梯形：門口附近較窄（Protected Door Width=0.1），朝判定區展寬（Protected Width=0.68）。
+遠端中心跟隨門口投影；近端中心Protected Center X=0.5；Protection Feather=0.04。
+使氣流可從門口周邊顯現，但下方三個判定位置保持清楚。若調整角色位置，請同步檢查保護寬度。
+
+Section Intensity曲線：X=二階段歌曲進度0～1（含轉場），Y=強度0～1。可新增Key配合段落。
+Guard Boost Amount=0.35，Duration Beats=0.4，Maximum Speed Multiplier=1.6。
+連續成功刷新時間而非無限累積；既有NoteResolved事件驅動，純視覺不回寫判定。
+移動與加速倒數使用Rhythm CurrentBeat差值；暫停與校準凍結；結束淡出；元件停用解除訂閱。
+
+效能：固定128條資料、單一動態Mesh與材質；沒有每條Instantiate，不新增RendererFeature或更換相機設定。
+正交攝影機無近大遠小：本效果針對目前Art2透視相機調整。
+
+驗證：編譯、透視擴張、1000次固定Mesh更新、Play世界空間渲染、無舊Canvas、成功格擋加速、暫停與關閉清理皆通過。實際Game畫面已擷取並檢視（Temp/PhaseTwoTunnelPreview.png）。
+
+更新：首次實際發射音符後才淡入。Increase Count With Chart 預設開啟，數量依已發射音符進度由 Low Intensity Count（28）逐漸升至 High Intensity Count（96），排除轉場跳過音符。Count Fade Beats=0.5 控制新增線條淡入。數量與成功格擋加速分開計算。
+細線預設關閉 Pixel Snap，避免獨立頂點取整導致線寬歸零閃爍；延長靠近鏡頭的柔和消退。Respect Scene Depth 保留，穿過實體場景仍會正常被遮擋。
