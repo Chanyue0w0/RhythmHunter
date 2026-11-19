@@ -20967,7 +20967,7 @@ MonoBehaviour:
   lowIntensityCount: 42
   highIntensityCount: 128
   speedPerBeat: {x: 0.12, y: 0.5}
-  streakLength: {x: 0.5, y: 2.2}
+  streakLength: {x: 1.2, y: 5.3}
   lengthResponseBeats: 0.35
   streakWidth: {x: 0.018, y: 0.045}
   pixelSnap: 0
@@ -21105,15 +21105,15 @@ MonoBehaviour:
   shader: {fileID: 4800000, guid: 9b39e48a2509463db7fb7c8b83966c8c, type: 3}
   blurEnabled: 1
   darkenOutsideEnabled: 1
-  outsideDarkness: 0.45
+  outsideDarkness: 0.6
   blurPixels: 4
   strength: 0.85
   centerX: 0.5
-  topWidth: 0.28
-  bottomWidth: 0.7
-  topY: 0.82
-  bottomY: 0.12
-  feather: 0.08
+  topWidth: 0.1
+  bottomWidth: 0.55
+  topY: 0.75
+  bottomY: 0.05
+  feather: 0.17
   fadeSeconds: 0.7
 --- !u!114 &2021200346
 MonoBehaviour:
