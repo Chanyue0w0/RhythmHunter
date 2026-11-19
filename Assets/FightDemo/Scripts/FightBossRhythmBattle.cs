@@ -22,7 +22,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(.1f)] private float guardDurationBeats = .5f;
         [Tooltip("Song milliseconds after an incorrect press. 0 disables input lock; does not change arrival times.")]
         [SerializeField, Min(0)] private float missLockMilliseconds = 80;
-        [SerializeField, Min(1f)] private float missDamage = 2;
+        [SerializeField, Min(1f)] private float missDamage = 1;
         [Header("Phase Two Playtesting")]
         [Tooltip("測試用：僅 Boss 二階段保留至少 2 HP，護甲與 Miss 照常結算。正式測試死亡流程前請取消勾選。目前依測試需求預設開啟。")]
         [SerializeField] private bool preventPlayerDeathForTesting = true;
