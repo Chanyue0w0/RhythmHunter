@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &780108231749227793
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 95008641750617262}
+  - component: {fileID: 2370146639971403551}
+  m_Layer: 0
+  m_Name: BossPhaseTwo_SlimeGuard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &95008641750617262
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 780108231749227793}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7768324428661141165}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2370146639971403551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 780108231749227793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8619e740b4e709244aafb3ecc07b97cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossRhythmVisual
+  facingOffset: {x: 0, y: 0, z: 0}
+  faceTravelDirection: 0
+  localTravelDirection: {x: 0, y: 0, z: -1}
+  localParticleSimulation: 0
+  visualScale: {x: 1, y: 1, z: 1}
+  stretchLengthMultiplier: 1
+--- !u!1001 &4989194256715359086
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 95008641750617262}
+    m_Modifications:
+    - target: {fileID: 2243853975527601220, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_Name
+      value: ShieldVFXPixel
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4573147820918552183, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: keepAboveGround
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736106596345496122, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736106596345496122, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+--- !u!4 &7768324428661141165 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3383202049513885123, guid: 8dfaec9fdaf716d4193f6fa061f46a99, type: 3}
+  m_PrefabInstance: {fileID: 4989194256715359086}
+  m_PrefabAsset: {fileID: 0}

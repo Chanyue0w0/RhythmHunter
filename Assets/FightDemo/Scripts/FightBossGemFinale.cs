@@ -46,6 +46,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField,Range(0,1)] private float chargingShellOpacity=.24f;
         [Tooltip("Offset from each hero's feet in camera right/up/forward coordinates.")]
         [SerializeField] private Vector3 chargingShellCenterOffset=new(0,1.2f,0);
+        [Tooltip("Camera-space corrections for left, middle and right charging shells. Does not move heroes.")]
+        [SerializeField] private Vector3[] chargingShellHeroOffsets=new Vector3[3];
         [SerializeField] private Shader chargingLinkShader;
         [SerializeField,Min(.001f)] private float chargingLinkWidth=.045f;
         [SerializeField] private Color chargingLinkColor=new(.2f,.7f,1,.65f);
@@ -319,7 +321,8 @@ namespace RhythmHunter.FightDemo
                 {
                     if(!heroes[i])continue;
                     Vector3 foot=heroes[i].position+heroFootFrom[i]-heroFrom[i];
-                    Vector3 center=foot+facing*chargingShellCenterOffset;
+                    Vector3 correction=chargingShellHeroOffsets!=null&&i<chargingShellHeroOffsets.Length?chargingShellHeroOffsets[i]:Vector3.zero;
+                    Vector3 center=foot+facing*(chargingShellCenterOffset+correction);
                     heroShells[i].SetPositionAndRotation(center,facing);heroShells[i].localScale=chargingShellSize;
                     var link=chargingLinks[i];if(!link)continue;
                     link.SetPosition(0,center);link.SetPosition(1,gem.transform.position);

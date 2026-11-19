@@ -15,6 +15,28 @@ namespace RhythmHunter.FightDemoEditor
         static FightBossGemFinaleSetup()=>EditorApplication.update+=Poll;
         static void Poll()
         {
+            const string shellFit="Temp/GemFinaleShellFit.request";
+            if(File.Exists(shellFit)&&!EditorApplication.isPlayingOrWillChangePlaymode&&!EditorApplication.isCompiling&&!EditorApplication.isUpdating)
+            {
+                File.Delete(shellFit);
+                try
+                {
+                    var scene=UnityEngine.SceneManagement.SceneManager.GetSceneByPath("Assets/FightDemo/Scenes/Art2_FightScene.unity");
+                    var finale=scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<FightBossGemFinale>(true)).Single();
+                    var data=new SerializedObject(finale);
+                    data.FindProperty("chargingShellSize").vector3Value=new Vector3(1.9f,2.35f,1.1f);
+                    var offsets=data.FindProperty("chargingShellHeroOffsets");offsets.arraySize=3;
+                    offsets.GetArrayElementAtIndex(0).vector3Value=new Vector3(.05f,-.25f,0);
+                    offsets.GetArrayElementAtIndex(1).vector3Value=Vector3.zero;
+                    offsets.GetArrayElementAtIndex(2).vector3Value=new Vector3(-.25f,-.25f,0);
+                    data.ApplyModifiedProperties();
+                    var speed=new SerializedObject(finale.GetComponent<FightPhaseTwoSpeedLines>());
+                    speed.FindProperty("lineColor").colorValue=new Color(1,.32f,.24f,.55f);speed.ApplyModifiedProperties();
+                    EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+                    File.WriteAllText("Temp/GemFinaleShellFit.result","PASS: warm red speed lines, equal smaller shells and camera-space side hero corrections.");
+                }catch(Exception e){File.WriteAllText("Temp/GemFinaleShellFit.result","FAIL: "+e);}
+                return;
+            }
             const string energy="Temp/GemFinaleEnergy.request";
             if(File.Exists(energy)&&!EditorApplication.isPlayingOrWillChangePlaymode&&!EditorApplication.isCompiling&&!EditorApplication.isUpdating)
             {

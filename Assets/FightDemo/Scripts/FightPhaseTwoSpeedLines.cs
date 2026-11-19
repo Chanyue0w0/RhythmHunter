@@ -15,7 +15,7 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Camera tunnelCamera;
         [SerializeField] private Shader tunnelShader;
         [SerializeField] private Vector3 originOffset;
-        [SerializeField] private Color lineColor = new(.5f, .75f, 1f, .55f);
+        [SerializeField] private Color lineColor = new(1f, .32f, .24f, .55f);
         [SerializeField, Min(0)] private float sourceRadius = .35f;
         [SerializeField, Min(.1f)] private float nearRadius = 4f;
         [SerializeField, Range(0, 128)] private int lowIntensityCount = 28;

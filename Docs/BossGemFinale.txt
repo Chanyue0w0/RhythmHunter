@@ -82,3 +82,9 @@ Boss 光束受擊：Fight Boss Gem Finale / Boss Beam Impact 可分開開關 Sha
 Charging Shell Enabled / Shader / Size=(6.5,4.5,7) / Opacity=0.24：寶石中心的3D藍色透明能量罩，蓄能顯示、發射立即隱藏，停止/重開清除，不修改角色材質或戰鬥判定。
 
 能量罩改版：取消整隊大罩，三位勇者各有同尺寸2.1×2.8×1.4的橢圓罩，朝鏡頭且跟隨各自FootAnchor，Camera-space Center Offset=(0,1.2,0)。每罩一條LineRenderer直連寶石，Charging Link Width=0.045、Color可調。三罩共用一份材質，三線共用一份材質，發射時整組關閉、停止時釋放。
+
+二階段按鍵護盾：Fight Boss Rhythm Battle / Guard Prefab 指向 BossPhaseTwo_SlimeGuard（內嵌一階段Mage目前的ShieldVFXPixel，保留Prefab連結），沿用格擋物件池與0.5拍壽命、暫停與清除。Guard At Hero Cast Anchor=true，Guard Effect Offset可微調生成位置；不改投射物抵達Target、判定或一階段能力。有效接受的X/Y/B按下就生成，MISS鎖定期間維持原有不響應。
+二階段護盾定位修正：專用巢狀Prefab覆寫內部發射器的舊位移(-0.4,-2,0)為零，原一階段Prefab不變。Guard At Hero Body Center=true時依角色Sprite實際中心定位；Guard Camera Offset為鏡頭座標共通偏移（X右、Y上、Z遠離鏡頭），Guard Lane Offsets的Element 0/1/2分別微調左/中/右勇者。Guard Effect Offset為額外世界座標偏移。
+二階段專用護盾另關閉Keep Above Ground，避免依粒子Bounds自動抬升而偏離身體；原一階段設定不變。
+水平定位另依FootAnchor的鏡頭水平軸線校正，避免Idle_back圖片非對稱留白或武器拉偏護盾；高度仍依身體中心。
+視覺微調：Fight Phase Two Speed Lines / Line Color改為(1,0.32,0.24,0.55)暖紅。Finale Charging Shell Size=(1.9,2.35,1.1)，三罩同尺寸；Charging Shell Hero Offsets為鏡頭座標左/中/右偏移，目前(0.05,-0.25,0)、(0,0,0)、(-0.25,-0.25,0)。連往寶石的線會跟隨修正後中心，不改英雄站位或二階段格擋護盾。

@@ -18,6 +18,13 @@ namespace RhythmHunter.FightDemo
         [Header("Prototype VFX (pooled)")]
         [SerializeField] private FightBossRhythmVisual slashPrefab;
         [SerializeField] private FightBossRhythmVisual guardPrefab;
+        [SerializeField] private bool guardAtHeroCastAnchor=true;
+        [SerializeField] private Vector3 guardEffectOffset;
+        [Header("Phase two shield placement")]
+        [SerializeField] private bool guardAtHeroBodyCenter=true;
+        [Tooltip("Camera right/up/forward offset. Negative Z brings the shield toward the camera.")]
+        [SerializeField] private Vector3 guardCameraOffset=new(0,0,-.08f);
+        [SerializeField] private Vector3[] guardLaneOffsets=new Vector3[3];
         [SerializeField] private Vector3 targetOffset = new(0, .75f, 0);
         [SerializeField, Min(.1f)] private float guardDurationBeats = .5f;
         [Tooltip("Song milliseconds after an incorrect press. 0 disables input lock; does not change arrival times.")]
@@ -173,7 +180,7 @@ namespace RhythmHunter.FightDemo
             {
                 var guard = guards[i]; float remaining = (float)(guard.end - beat);
                 if (remaining <= 0) { Return(guard.visual, true); guards.RemoveAt(i); continue; }
-                guard.visual.Present(Target(guard.lane), view.transform.rotation, 1 + .15f * Mathf.Sin(remaining / guardDurationBeats * Mathf.PI),
+                guard.visual.Present(GuardTarget(guard.lane), view.transform.rotation, 1,
                     guard.success ? new Color(.25f, .9f, 1, Mathf.Clamp01(remaining / guardDurationBeats))
                         : new Color(1, .2f, .12f, Mathf.Clamp01(remaining / guardDurationBeats)));
             }
@@ -230,7 +237,7 @@ namespace RhythmHunter.FightDemo
             var note = FindNearestNote(lane, beat, window);
             var guard = Rent(true);
             guards.Add((guard, lane, Math.Max(CurrentBeat, note != null ? note.beat : CurrentBeat) + guardDurationBeats, note != null));
-            guard.Present(Target(lane), view.transform.rotation, 1, note != null ? Color.cyan : Color.red);
+            guard.Present(GuardTarget(lane), view.transform.rotation, 1, note != null ? Color.cyan : Color.red);
             if (note == null)
             { BadInputs++; LastJudgement = "MISS"; lockedUntil = beat + missLockMilliseconds / fight.BeatClock.MillisecondsPerBeat; heroes[lane]?.PlayInputFeedback(false); return; }
             note.accepted = true; LastJudgement = "BLOCK";
@@ -276,6 +283,20 @@ namespace RhythmHunter.FightDemo
             var actor = heroes[lane];
             var foot = actor && actor.ActorInstance ? actor.ActorInstance.transform.Find("FootAnchor") : null;
             return (foot ? foot.position : actor ? actor.transform.position : transform.position) + targetOffset;
+        }
+        private Vector3 GuardTarget(int lane)
+        {
+            var actor=heroes[lane];
+            var sprite=actor&&actor.CombatAnimator?actor.CombatAnimator.TargetRenderer:null;
+            Vector3 position=guardAtHeroBodyCenter&&sprite?sprite.bounds.center:
+                guardAtHeroCastAnchor&&actor&&actor.CastEffectAnchor?actor.CastEffectAnchor.position:Target(lane);
+            // Back-facing frames can contain asymmetric transparent margins or weapons.
+            // Keep horizontal placement on the actor's feet rather than the sprite rectangle.
+            var foot=actor&&actor.ActorInstance?actor.ActorInstance.transform.Find("FootAnchor"):null;
+            if(guardAtHeroBodyCenter&&foot&&view)
+                position+=view.transform.right*Vector3.Dot(foot.position-position,view.transform.right);
+            Vector3 offset=guardCameraOffset+(guardLaneOffsets!=null&&lane<guardLaneOffsets.Length?guardLaneOffsets[lane]:Vector3.zero);
+            return position+guardEffectOffset+(view?view.transform.TransformDirection(offset):offset);
         }
         private FightBossRhythmVisual Rent(bool guard)
         {

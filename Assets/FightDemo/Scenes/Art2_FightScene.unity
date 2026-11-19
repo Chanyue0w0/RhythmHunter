@@ -20923,7 +20923,15 @@ MonoBehaviour:
   - Chop_Right
   chopIdle: Chop_Idle
   slashPrefab: {fileID: 8462109766123456702, guid: 6f8ae3104d60d1c4caf474de6ebd1946, type: 3}
-  guardPrefab: {fileID: 5556139408328923791, guid: b55fa4361dda25345b505ff46b774861, type: 3}
+  guardPrefab: {fileID: 2370146639971403551, guid: bbb51d8f335b38243bcdbe79c16e4b45, type: 3}
+  guardAtHeroCastAnchor: 1
+  guardEffectOffset: {x: 0, y: 0, z: 0}
+  guardAtHeroBodyCenter: 1
+  guardCameraOffset: {x: 0, y: 0, z: -0.08}
+  guardLaneOffsets:
+  - {x: 0, y: -0.5, z: 0}
+  - {x: 0, y: -0.5, z: 0}
+  - {x: -0.3, y: -0.5, z: 0}
   targetOffset: {x: 0, y: 0.75, z: 0}
   guardDurationBeats: 0.5
   missLockMilliseconds: 80
@@ -20953,7 +20961,7 @@ MonoBehaviour:
   tunnelCamera: {fileID: 2147100302}
   tunnelShader: {fileID: 4800000, guid: 138072694badcf9409542c4497c17e8f, type: 3}
   originOffset: {x: 0, y: 0, z: 0}
-  lineColor: {r: 0.5, g: 0.75, b: 1, a: 0.55}
+  lineColor: {r: 1, g: 0.32, b: 0.24, a: 0.55}
   sourceRadius: 0.35
   nearRadius: 4
   lowIntensityCount: 42
@@ -21150,9 +21158,13 @@ MonoBehaviour:
   perfectDamage: 99999
   chargingShellEnabled: 1
   chargingShellShader: {fileID: 4800000, guid: 3ccb4853149a0af449c88edbb6dcfee8, type: 3}
-  chargingShellSize: {x: 2.1, y: 2.8, z: 1.4}
+  chargingShellSize: {x: 1.9, y: 2.35, z: 1.1}
   chargingShellOpacity: 0.24
   chargingShellCenterOffset: {x: 0, y: 1.2, z: 0}
+  chargingShellHeroOffsets:
+  - {x: 0.05, y: -0.25, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: -0.25, y: -0.25, z: 0}
   chargingLinkShader: {fileID: 4800000, guid: f67242e3ec387a24096d0191a57d756b, type: 3}
   chargingLinkWidth: 0.045
   chargingLinkColor: {r: 0.2, g: 0.7, b: 1, a: 0.65}
@@ -22841,7 +22853,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
+  m_BoundingSphereOverride: {x: 0, y: -8.219445e-39, z: 5.7e-43, w: -8.219456e-39}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23005,7 +23017,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.7e-43, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 9.2553e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23501,7 +23513,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 2.7105054e-20, y: 2.571499e-39, z: 5.1247e-41, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23665,7 +23677,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.9738e-41, y: -1.2343128e+38, z: 5.69e-43, w: 4.2950854e+24}
+  m_BoundingSphereOverride: {x: 9.903e-42, y: 7.53051e-39, z: 2.7262e-41, w: -0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
