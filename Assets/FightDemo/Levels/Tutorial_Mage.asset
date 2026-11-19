@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 389a2cd22911954408b91d7bc204aefd, type: 3}
+  m_Name: Tutorial_Mage
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightTutorialLesson
+  controlEnemyAttacks: 1
+  preventPlayerDeath: 1
+  enemyAttackIntervalBeats: 4
+  steps:
+  - title: "能量法師-瑞緹絲與路克"
+    text: "對拍按下 <b><color=#FFD879>X</color></b>，施放護盾，<b><color=#FFD879>保護前衛勇者</color></b>！"
+    goal: 0
+    required: 1
+    allowSwordCharge: 0
+    allowEnemyAttacks: 0
+    suppressMageRetaliation: 1
+  - title: "練習防禦"
+    text: "觀察哥布林的警告，對拍按 <b><color=#FFD879>X</color></b>，<b><color=#FFD879>成功格擋 3 次</color></b>。"
+    goal: 5
+    required: 3
+    allowSwordCharge: 0
+    allowEnemyAttacks: 1
+    suppressMageRetaliation: 1
+  - title: "能量法師-瑞緹絲與路克"
+    text: "<b>技能：黏液反擊</b>\n\n成功格檔後吐出黏液，<b><color=#FFD879>降低首位敵人的攻擊傷害</color></b>！"
+    goal: 0
+    required: 1
+    allowSwordCharge: 0
+    allowEnemyAttacks: 0
+    suppressMageRetaliation: 0
+  - title: "練習黏液反擊"
+    text: "對拍格擋敵人的攻擊，讓<b><color=#FFD879>史萊姆命中 3 次</color></b>。"
+    goal: 6
+    required: 3
+    allowSwordCharge: 0
+    allowEnemyAttacks: 1
+    suppressMageRetaliation: 0
+  - title: "訓練完成！"
+    text: "自由練習，或按 <b><color=#FFD879>RB</color></b> 進入下一關教學。"
+    goal: 4
+    required: 1
+    allowSwordCharge: 0
+    allowEnemyAttacks: 1
+    suppressMageRetaliation: 0

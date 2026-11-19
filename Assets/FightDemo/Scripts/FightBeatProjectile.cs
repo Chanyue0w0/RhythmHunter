@@ -14,6 +14,7 @@ namespace RhythmHunter.FightDemo
         private Vector3 TargetPosition => target.position + targetOffset;
         private double progress;
         private float duration;
+        private float arcHeight;
         private int lastMs;
         private Func<bool> valid;
         private Action impact;
@@ -26,8 +27,9 @@ namespace RhythmHunter.FightDemo
 
         public void Initialize(FightCombatController controller, Transform destination, float beats,
             Func<bool> isValid, Action onImpact, float impactFadeBeats = 0, Vector3? impactScale = null,
-            Vector3 destinationOffset = default, float impactCallbackDelayBeats = 0)
+            Vector3 destinationOffset = default, float impactCallbackDelayBeats = 0, float arcHeight = 0)
         {
+            this.arcHeight = Mathf.Max(0, arcHeight);
             fight = controller; target = destination; duration = Mathf.Max(.01f, beats);
             valid = isValid; impact = onImpact; start = transform.position;
             targetOffset = destinationOffset;
@@ -60,7 +62,7 @@ namespace RhythmHunter.FightDemo
             progress += beats;
             if (arrived) { UpdateImpactFade(); return; }
             float t = Mathf.Clamp01((float)(progress / duration));
-            transform.position = Vector3.Lerp(start, TargetPosition, t);
+            transform.position = Vector3.Lerp(start, TargetPosition, t) + Vector3.up * (4 * arcHeight * t * (1 - t));
             if (t < 1) return;
             arrived = true;
             progress = Math.Max(0, progress - duration);

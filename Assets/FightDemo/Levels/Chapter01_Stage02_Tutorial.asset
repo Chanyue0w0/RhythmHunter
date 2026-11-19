@@ -15,6 +15,7 @@ MonoBehaviour:
   stageId: Chapter01_Stage02
   displayName: Chapter 1 - Stage 2 - Mage Tutorial
   tutorial: 1
+  tutorialLesson: {fileID: 11400000, guid: 9858b5b3cd35472ea958dc08d4198a73, type: 2}
   tutorialHero: {fileID: 5101759564044618693, guid: 36f448331cb44310bc10b52d1c294d8b, type: 3}
   environment: {fileID: 0}
   bossStage: 0

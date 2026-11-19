@@ -41,7 +41,7 @@ namespace RhythmHunter.FightDemo.Editor
                     if (!fight || fight.GetComponent<FightPauseController>()?.MenuReady != true) return;
                     var planner = fight.GetComponent<FightLevelPlanner>();
                     if (planner.StageIndex != 1) return;
-                    if (tutorial.Active || Time.timeScale != 1) throw new Exception("Reload retained tutorial state or pause");
+                    if (!tutorial.Active || planner.ActiveStage.TutorialLesson == null || Time.timeScale != 1) throw new Exception("Reload failed to begin the Mage lesson or retained pause");
                     Finish($"PASS: 8 steps; reading music continues; 8 rhythm-only calls/no damage; 4 ordinary hits/no charge; 8 empowered hits; free combat after completion; real RB input reloads Mage; min dummy foot Y={minimumFoot:F5}; screenshots saved."); return;
                 }
                 if (!tutorial || tutorial.StepIndex < 0) return;

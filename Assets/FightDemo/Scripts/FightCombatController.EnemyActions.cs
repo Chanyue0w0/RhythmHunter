@@ -185,7 +185,8 @@ namespace RhythmHunter.FightDemo
                 if (!blocked && timelineMs < hit.timeline + window) continue;
                 if (!enemyHits.Remove(hit) || hit.version != rosterVersion) continue;
                 if (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
-                float damage = ResolveEnemyHitDamage(hit.damage, blocked, hit.guardChip);
+                float damage = ResolveEnemyHitDamage(GetSlimeReducedDamage(hit.source, hit.damage), blocked, hit.guardChip);
+                if (blocked) RecordMageGuardBlock(hit.hitBeat);
                 if (blocked) { blockedAttackCount++; PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
                 damage = ApplyEnemyPartyDamage(damage, blocked, hit.hitBeat);
                 if (blocked) RecordPressureBlock();

@@ -135,7 +135,14 @@ MonoBehaviour:
   swordDelayedOnHitEffect: {fileID: 0}
   swordChargeAura: {fileID: 0}
   characterId: Mage
-  displayName: MAGE
+  displayName: 能量法師-瑞緹絲與路克
+  enableUnusedGuardSlime: 1
+  slimeAttackReduction: 1
+  slimeAttackReductionBeats: 8
+  slimeMinimumAttackDamage: 0
+  retaliationProjectileScale: 0.75
+  retaliationFloorOpacity: 0.5
+  retaliationFloorOffset: {x: 0, y: 0.025, z: -0.1}
   team: 1
   role: 3
   maxHp: 2

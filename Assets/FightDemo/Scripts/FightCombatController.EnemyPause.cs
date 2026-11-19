@@ -34,6 +34,7 @@ namespace RhythmHunter.FightDemo
             guardedBeats.Clear();
             foreach (long guard in retainedGuards) guardedBeats.Add(guard + elapsed);
             ShiftScheduledEnemyHits(elapsed);
+            ShiftMageGuards(elapsed);
             if (lastEnemyQueuedBeat != long.MinValue) lastEnemyQueuedBeat += elapsed;
             if (BossActive)
             {

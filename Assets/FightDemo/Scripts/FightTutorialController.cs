@@ -30,6 +30,7 @@ namespace RhythmHunter.FightDemo
         public bool Active => isActiveAndEnabled && lesson != null && !Completed;
         public bool Reading => Active && index >= 0 && Step.goal == FightTutorialLesson.Goal.Dialogue;
         public bool RhythmOnly => Active && index >= 0 && Step.goal == FightTutorialLesson.Goal.OnBeatCalls;
+        public bool SuppressMageRetaliation => Active && (index < 0 || Step.suppressMageRetaliation || Reading);
         private FightTutorialLesson.Step Step => lesson.steps[index];
 
         private void Start()
@@ -41,6 +42,9 @@ namespace RhythmHunter.FightDemo
             if (lesson == null || lesson.steps.Count == 0) { lesson = null; return; }
             fight.HeroCalled += OnHeroCalled;
             fight.SwordPrimaryHit += OnSwordHit;
+            fight.EnemyAttackResolved += OnEnemyHit;
+            fight.MageSlimeAttached += OnSlimeHit;
+            fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, false, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
             fight.BattleLost += Hide;
             fight.BattleVictory += Hide;
             fight.SetTutorialChargeSuppressed(true);
@@ -126,6 +130,7 @@ namespace RhythmHunter.FightDemo
                 BeginFreePractice("訓練完成！", "自由練習，或按 <b><color=#FFD879>RB</color></b> 進入下一關教學。"); return;
             }
             fight.SetTutorialChargeSuppressed(!Step.allowSwordCharge);
+            fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, Step.allowEnemyAttacks, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
             pause = GetComponent<FightPauseController>();
             if (Step.goal == FightTutorialLesson.Goal.FreePractice)
             { BeginFreePractice(Step.title, Step.text); return; }
@@ -135,6 +140,7 @@ namespace RhythmHunter.FightDemo
         private void BeginFreePractice(string heading, string description)
         {
             Completed = true;
+            fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, true, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
             fight.SetTutorialChargeSuppressed(false);
             modal.SetActive(false); objective.SetActive(true);
             counter.text = $"<b><color=#FFD879>{heading}</color></b>\n{description}";
@@ -171,6 +177,10 @@ namespace RhythmHunter.FightDemo
             if (!Active || !started || Reading || advancePending || issuedFrame < enteredFrame || fight.GetHeroForCommand(FightInputRouter.HeroCommand.Front)?.UnitSlot != actor) return;
             if (Step.goal == FightTutorialLesson.Goal.NormalHits && !charged || Step.goal == FightTutorialLesson.Goal.ChargedHits && charged) Count();
         }
+        private void OnEnemyHit(FightCombatController.EnemyAttackResult hit)
+        { if (Active && started && !Reading && !advancePending && Step.goal == FightTutorialLesson.Goal.SuccessfulBlocks && hit.Blocked) Count(); }
+        private void OnSlimeHit(FightUnitSlot target)
+        { if (Active && started && !Reading && !advancePending && Step.goal == FightTutorialLesson.Goal.SlimeHits) Count(); }
         private void Count()
         {
             progress++; RefreshObjective();
@@ -184,7 +194,7 @@ namespace RhythmHunter.FightDemo
         }
         private void OnDisable()
         {
-            if (fight != null) { fight.HeroCalled -= OnHeroCalled; fight.SwordPrimaryHit -= OnSwordHit; fight.BattleLost -= Hide; fight.BattleVictory -= Hide; }
+            if (fight != null) { fight.ConfigureTutorialEnemies(false, false, 4, false); fight.EnemyAttackResolved -= OnEnemyHit; fight.MageSlimeAttached -= OnSlimeHit; fight.HeroCalled -= OnHeroCalled; fight.SwordPrimaryHit -= OnSwordHit; fight.BattleLost -= Hide; fight.BattleVictory -= Hide; }
             Hide();
         }
         private void OnDestroy()

@@ -39,6 +39,9 @@ namespace RhythmHunter.FightDemo
         internal int Kind { get; private set; }
         internal bool IsPopup => Kind == 0 || Kind == 3;
         internal float Lane { get; set; }
+        internal float Row { get; set; }
+        internal float LayoutWidth { get; private set; }
+        internal float LayoutHeight { get; private set; }
 
         internal void Initialize(int kind)
         {
@@ -48,13 +51,25 @@ namespace RhythmHunter.FightDemo
             sprites = GetComponentsInChildren<SpriteRenderer>(true);
             colors = new Color[sprites.Length];
             for (int i = 0; i < sprites.Length; i++) colors[i] = sprites[i].color;
+            Bounds layout = new Bounds(Vector3.zero, Vector3.zero);
+            foreach (var sprite in sprites)
+            {
+                if (sprite.sprite == null) continue;
+                var b = sprite.sprite.bounds;
+                for (int x = -1; x <= 1; x += 2)
+                    for (int y = -1; y <= 1; y += 2)
+                        layout.Encapsulate(transform.InverseTransformPoint(sprite.transform.TransformPoint(
+                            b.center + Vector3.Scale(b.extents, new Vector3(x, y, 0)))));
+            }
+            LayoutWidth = Mathf.Abs(layout.size.x * baseScale.x) * triggerPulseScale;
+            LayoutHeight = Mathf.Abs(layout.size.y * baseScale.y) * triggerPulseScale;
         }
 
         internal void Begin(FightUnitSlot target, float lane, Camera camera = null, Vector3 offset = default)
         {
             viewCamera = camera;
             sceneOffset = offset;
-            Target = target; Lane = lane; elapsed = 0;
+            Target = target; Lane = lane; Row = 0; elapsed = 0;
             pulsing = Finishing = false;
             transform.localScale = baseScale;
             targetSprite = target.CombatAnimator != null ? target.CombatAnimator.TargetRenderer : null;
@@ -122,9 +137,9 @@ namespace RhythmHunter.FightDemo
                     // Fast expansion, followed by a shrink and fade. Gameplay state
                     // is already resolved; this pulse never delays status consumption.
                     float size = p < .3f ? Mathf.Lerp(1, triggerPulseScale, p / .3f)
-                        : Mathf.Lerp(triggerPulseScale, Kind == 4 ? 1 : .6f, (p - .3f) / .7f);
+                        : Mathf.Lerp(triggerPulseScale, Kind == 4 || Kind == 5 ? 1 : .6f, (p - .3f) / .7f);
                     transform.localScale = baseScale * size;
-                    SetAlpha(Kind == 4 && !Finishing ? 1 : 1 - Mathf.InverseLerp(.45f, 1, p));
+                    SetAlpha((Kind == 4 || Kind == 5) && !Finishing ? 1 : 1 - Mathf.InverseLerp(.45f, 1, p));
                     if (p >= 1)
                     {
                         if (Finishing) return false;
@@ -160,7 +175,7 @@ namespace RhythmHunter.FightDemo
         private void UpdatePose()
         {
             if (Target == null && !IsPopup) return;
-            Vector3 offset = headOffset + sceneOffset + Vector3.right * Lane;
+            Vector3 offset = headOffset + sceneOffset + new Vector3(Lane, Row, 0);
             if (IsPopup)
             {
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.01f, popupLifetime));

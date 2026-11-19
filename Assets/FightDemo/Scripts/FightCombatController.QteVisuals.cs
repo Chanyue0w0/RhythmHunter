@@ -9,6 +9,8 @@ namespace RhythmHunter.FightDemo
         {
             public GameObject prefab, instance;
             public ParticleSystem[] particles;
+            public SpriteRenderer[] sprites;
+            public Color[] spriteColors;
             public float remaining = -1;
         }
         private sealed class SkillFlight
@@ -60,6 +62,9 @@ namespace RhythmHunter.FightDemo
             {
                 var root = Instantiate(prefab, EnsureSkillVisualRoot());
                 item = new SkillVisual { prefab = prefab, instance = root, particles = root.GetComponentsInChildren<ParticleSystem>(true) };
+                item.sprites = root.GetComponentsInChildren<SpriteRenderer>(true);
+                item.spriteColors = new Color[item.sprites.Length];
+                for (int i = 0; i < item.sprites.Length; i++) item.spriteColors[i] = item.sprites[i].color;
                 skillVisualLookup[root] = item;
                 // Cartoon FX normally destroys completed child effects. The pool
                 // owns cleanup here so every explosion remains reusable.
@@ -71,6 +76,8 @@ namespace RhythmHunter.FightDemo
             item.instance.transform.SetParent(EnsureSkillVisualRoot(), false);
             item.instance.transform.localScale = prefab.transform.localScale;
             item.instance.transform.SetPositionAndRotation(position, prefab.transform.rotation);
+            for (int i = 0; i < item.sprites.Length; i++)
+                if (item.sprites[i] != null) item.sprites[i].color = item.spriteColors[i];
             item.instance.SetActive(true);
             foreach (var particle in item.particles) { particle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear); particle.Play(false); }
             activeSkillVisuals.Add(item);
@@ -160,6 +167,7 @@ namespace RhythmHunter.FightDemo
 
         private void ClearSkillVisuals()
         {
+            ClearMageAbility();
             skillFlights.Clear(); HideQteRings();
             while (activeSkillVisuals.Count > 0)
             {

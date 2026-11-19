@@ -213,6 +213,7 @@ namespace RhythmHunter.FightDemo
 
         private bool EnemyCadenceReady(FightUnitSlot enemy, long globalBeat)
         {
+            if (TutorialControlsEnemies) return TutorialEnemyReady(enemy);
             if (PressureRestActive) return false;
             if (PressurePhaseEnabled)
             {

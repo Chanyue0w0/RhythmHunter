@@ -111,8 +111,44 @@ Tutorial Fever / camera stability (2026-11-20):
 - Art2CameraController > Maximum Combined Shake caps combined XY camera displacement.
 - Forest Background_00 / Background_01: Art2CameraPinnedForeground keeps the black
   foreground screen-fixed at runtime, including shake and zoom; restores on disable.
-  Sky has 6% overscan; ForestRoad_WithMargin adds a boundary skirt without shifting
-  the central ground UVs. Rock/tree beat-motion settings remain unchanged.
+  Original sky scale and road mesh have been restored after visual feedback; rock/tree transforms and motion remain unchanged.
 - Play validation passed: A feedback without Fever; direct activation guards;
   Fever lesson opt-in; native effect shake interception; 200 viewport samples across
   camera shake/zoom with both foreground cards fixed. Build: 0 warnings / 0 errors.
+
+Mage ability and guided lesson (2026-11-20):
+- Mage prefab display name: 能量法師-瑞緹絲與路克.
+- FightCharacterDefinition / Mage — successful guard retaliation:
+  Enable Unused Guard Slime=true, Slime Attack Reduction=1 damage point,
+  Slime Attack Reduction Beats=8, Slime Minimum Attack Damage=0.
+- An accepted normal shield tracks all successful blocks within its protected beat(s).
+  Successful block: on the next ordinary beat play Skill animation and launch the existing
+  Fever slime projectile at the current living front enemy. No direct damage.
+  No block means no projectile. Multiple hits blocked by one cast launch only once.
+  Existing QTE projectile flight beats/arc and floor prefab are reused; retaliation has independent scale/opacity/offset.
+- Slime reduces the enemy's actual outgoing hit damage, then guard/armor/HP resolve.
+  Reapplication refreshes eight ordinary beats, never stacks; Fever freezes duration.
+  Source death, wave/battle teardown and scene disable clear the state and floor VFX.
+- Chapter01_Stage02_Tutorial now references Levels/Tutorial_Mage.asset.
+  Introduce shield -> 3 actual blocks -> introduce 黏液反擊 -> 3 slime contacts
+  -> free practice with RB to the next tutorial. Music continues throughout.
+  Pure defense practice suppresses retaliation until the skill is introduced.
+- Lesson Inspector: Control Enemy Attacks, Enemy Attack Interval Beats=4,
+  Prevent Player Death=true. Per step: Allow Enemy Attacks / Suppress Mage Retaliation.
+  Enemy attacks begin only after practice starts; reading cancels queued attacks.
+  Cadence is a four-beat launch opportunity, without interrupting an unfinished action.
+  HP/DEF still take damage; HP remains at least one heart during this lesson/practice.
+- First Play test passed the complete lesson, actual block/projectile objectives,
+  no stacking, eight-beat expiry, minimum damage and lethal-damage protection.
+
+Weaken status icon:
+- Prefabs/StatusIcons/WeakenEffect.prefab created from the authored scene sample.
+  Source sample remains in scene but disabled; the pool owns runtime icon instances.
+- FightCombatController / Pooled Status Icons: Weaken Effect Icon, Status Icons Per Row
+  (3), Status Icon Gap (.08), Status Icon Row Spacing (.6), Status Icon Spacing (.55 minimum).
+  Stable centered ordering: Fragile, Bleed, Aimed, Weaken. Extra icons wrap upwards.
+  Layout reserves each icon's full pulse width; consumed icons retain their cell until returned.
+- Weaken prefab / FightStatusIcon: Trigger Pulse Beats=.3, Trigger Pulse Scale=1.2.
+  Pulses on the existing music beat without fading. Disappears when reduction expires/death/reset.
+- Updated Play verification passed next-beat triggering, multi-hit deduplication,
+  pause shifting, pooled Weaken icon, non-overlapping rows, and the full Mage lesson.

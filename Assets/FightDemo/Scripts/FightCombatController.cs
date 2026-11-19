@@ -477,6 +477,7 @@ namespace RhythmHunter.FightDemo
             if (WaveEntranceRunning) return;
             TryResolvePendingAttack();
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int impactTime)) ResolveEnemyCombatWork(impactTime);
+            UpdateMageAbility();
         }
 
         private void OnDisable()
@@ -736,6 +737,7 @@ namespace RhythmHunter.FightDemo
                     PlayAnimatedHeroUtility(actor, animation, playEffect, null);
                     return $"{abilityName} restores shared armor according to its configured recovery";
                 case FightCharacterDefinition.AbilityBehavior.Guard:
+                    if (!skill) TrackMageGuard(actor, globalBeat);
                     ArmGuard(globalBeat, skill ? 1 : actor.CharacterDefinition?.BasicGuardBeats ?? 1);
                     PlayAnimatedHeroUtility(
                         actor,
@@ -1023,7 +1025,8 @@ namespace RhythmHunter.FightDemo
                 ? Mathf.Max(1f, attacker.AttackPower)
                 : enemyAttackDamage;
             if (pendingBossDamage > 0) configuredDamage = pendingBossDamage;
-            float damage = ResolveEnemyHitDamage(configuredDamage, blocked, pendingEnemyGuardChip);
+            float damage = ResolveEnemyHitDamage(GetSlimeReducedDamage(attacker, configuredDamage), blocked, pendingEnemyGuardChip);
+            if (blocked) RecordMageGuardBlock(pendingAttackGlobalBeat);
 
             if (blocked)
             {
@@ -1211,7 +1214,7 @@ namespace RhythmHunter.FightDemo
             float armorDamage = Mathf.Min(partyArmor, damage);
             partyArmor -= armorDamage;
             // Apply the floor before damage events/defeat checks, never restore HP after death starts.
-            float damageableHp = BossPhaseTwoActive && BossRhythm && BossRhythm.PreventPlayerDeathForTesting
+            float damageableHp = TutorialPreventsDeath || (BossPhaseTwoActive && BossRhythm && BossRhythm.PreventPlayerDeathForTesting)
                 ? Mathf.Max(0f, partyHp - FightCombatUnits.PointsPerIcon) : partyHp;
             float hpDamage = Mathf.Min(damageableHp, damage - armorDamage);
             partyHp -= hpDamage;

@@ -106,6 +106,7 @@ namespace RhythmHunter.FightDemo
 
         private void CancelEnemyCombatWork()
         {
+            ClearMageAbility();
             pendingEnemyAttack = pendingEnemyAnimationDriven = false;
             pendingEnemyAttacker = null;
             pendingEnemyActionId = long.MinValue;

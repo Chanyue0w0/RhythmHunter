@@ -12,6 +12,10 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightStatusIcon bleedEffectIcon;
         [SerializeField] private FightStatusIcon deathEffectIcon;
         [SerializeField] private FightStatusIcon aimedEffectIcon;
+        [SerializeField] private FightStatusIcon weakenEffectIcon;
+        [SerializeField, Min(1)] private int statusIconsPerRow = 3;
+        [SerializeField, Min(0)] private float statusIconGap = .08f;
+        [SerializeField, Min(0)] private float statusIconRowSpacing = .6f;
         [SerializeField, Min(0)] private int statusIconPrewarmPerType = 4;
         [SerializeField, Min(1)] private int maxBlockedEffectIcons = 32;
         [SerializeField, Min(0)] private float statusIconSpacing = .55f;
@@ -20,12 +24,14 @@ namespace RhythmHunter.FightDemo
         [Tooltip("額外圖示偏移；指定相機時 X=畫面右、Y=畫面上、Z=遠離相機。")]
         [SerializeField] private Vector3 statusIconOffset;
         private Transform statusIconRoot, statusIconStorage;
-        private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new(), new(), new() };
+        private readonly Stack<FightStatusIcon>[] idleStatusIcons = { new(), new(), new(), new(), new(), new() };
+        private readonly List<FightStatusIcon> statusLayout = new();
+        private long lastWeakenPulseBeat = long.MinValue;
         private readonly List<FightStatusIcon> activeStatusIcons = new();
         public int ActiveStatusIconCount => activeStatusIcons.Count;
         public int CreatedStatusIconCount { get; private set; }
 
-        private FightStatusIcon IconPrefab(int kind) => kind == 0 ? blockedEffectIcon : kind == 1 ? weakEffectIcon : kind == 2 ? bleedEffectIcon : kind == 3 ? deathEffectIcon : aimedEffectIcon;
+        private FightStatusIcon IconPrefab(int kind) => kind == 0 ? blockedEffectIcon : kind == 1 ? weakEffectIcon : kind == 2 ? bleedEffectIcon : kind == 3 ? deathEffectIcon : kind == 4 ? aimedEffectIcon : weakenEffectIcon;
 
         private void EnsureStatusIconPool()
         {
@@ -79,8 +85,37 @@ namespace RhythmHunter.FightDemo
             SyncStatusIcon(target, 1, weak, weak ? (lane++ - (count - 1) * .5f) * statusIconSpacing : 0);
             SyncStatusIcon(target, 2, bleed, bleed ? (lane++ - (count - 1) * .5f) * statusIconSpacing : 0);
             SyncStatusIcon(target, 4, aimed, aimed ? (lane - (count - 1) * .5f) * statusIconSpacing : 0);
+            SyncStatusIcon(target, 5, visible && HasMageWeaken(target), 0);
+            ArrangeStatusIcons(target);
             foreach (var icon in activeStatusIcons)
                 if (icon != null && icon.Target == target && icon.Kind == 4) icon.SetAimedAppearance(target.HasGoldAimed);
+        }
+
+        private void ArrangeStatusIcons(FightUnitSlot target)
+        {
+            statusLayout.Clear();
+            // Stable ordering, including a consumed icon until its final pulse has finished.
+            for (int kind = 1; kind <= 5; kind++)
+                foreach (var icon in activeStatusIcons)
+                    if (icon != null && icon.Target == target && icon.Kind == kind && !icon.IsPopup) statusLayout.Add(icon);
+            float rowY = 0;
+            int columns = Mathf.Max(1, statusIconsPerRow);
+            for (int start = 0; start < statusLayout.Count; start += columns)
+            {
+                int end = Mathf.Min(start + columns, statusLayout.Count);
+                float width = 0, height = statusIconRowSpacing;
+                for (int i = start; i < end; i++)
+                { width += Mathf.Max(statusIconSpacing, statusLayout[i].LayoutWidth + statusIconGap); height = Mathf.Max(height, statusLayout[i].LayoutHeight + statusIconGap); }
+                float x = -width * .5f;
+                for (int i = start; i < end; i++)
+                {
+                    var icon = statusLayout[i]; float cell = Mathf.Max(statusIconSpacing, icon.LayoutWidth + statusIconGap);
+                    icon.Lane = x + cell * .5f; icon.Row = rowY; x += cell;
+                }
+                rowY += height;
+            }
+            foreach (var icon in activeStatusIcons)
+                if (icon != null && icon.Target == target && icon.IsPopup) icon.Row = rowY;
         }
 
         public void PulseAimedIcon(FightUnitSlot target)
@@ -130,6 +165,12 @@ namespace RhythmHunter.FightDemo
             if (!showStatusIcons) { ClearStatusIcons(); return; }
             if (battleEnded || AwaitingNextWave) ClearStatusIconsExceptDeath(true);
             else foreach (var enemy in fightScene2Enemies) RefreshStatusIcons(enemy);
+            if (!IsPaused && !TimingCalibrationActive && beatClock != null && beatClock.HasTimingAnchor && lastWeakenPulseBeat != beatClock.LatestBeat.GlobalBeat)
+            {
+                lastWeakenPulseBeat = beatClock.LatestBeat.GlobalBeat;
+                foreach (var icon in activeStatusIcons)
+                    if (icon != null && icon.Kind == 5 && !icon.Finishing) icon.Trigger(false);
+            }
             float delta = IsPaused || TimingCalibrationActive ? 0 : Time.deltaTime;
             AdvanceStatusIconVisuals(delta);
         }
