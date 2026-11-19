@@ -28,6 +28,9 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Tutorial only: this hero occupies Front; Middle and Back stay empty. Normal stages retain the scene's default party.")]
         [SerializeField] private FightCharacterDefinition tutorialHero;
         public FightCharacterDefinition TutorialHero => tutorialHero;
+        [Tooltip("Optional guided lesson. Only used when Tutorial is checked.")]
+        [SerializeField] private FightTutorialLesson tutorialLesson;
+        public FightTutorialLesson TutorialLesson => tutorial ? tutorialLesson : null;
         [Tooltip("Overrides Chapter.DefaultEnvironment. Unassigned inherits the chapter, then falls back to Cave.")]
         [SerializeField] private FightEnvironmentDefinition environment;
         public bool Tutorial => tutorial;

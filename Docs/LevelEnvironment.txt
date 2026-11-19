@@ -7,7 +7,8 @@ Rhythm Hunter > Level Planner:
 - Chapter01 Stages 1/2/3 teach LongSwordWarrior_Weapon / Mage / Skeleton respectively.
 - Each Tutorial asset requires Tutorial Hero: only Front is populated. Formation swaps
   are disabled for tutorials. Normal stages retain the scene-authored three hero order.
-- Current tutorial waves are preview Goblin_Normal encounters, no Pressure or deadline.
+- Warrior and Skeleton tutorial waves use TrainingDummy (99999 HP, no attacks).
+- Mage retains Goblin_Normal for guard practice; no Pressure or deadline.
   Guided objectives and objective-based victory are NOT implemented in this checkpoint.
   In particular, the solo Mage cannot clear an enemy with its defensive basic ability.
 - Shared HP/DEF/MP capacities still derive from the characters actually present; no
@@ -35,6 +36,16 @@ Art2_FightScene > ForestEnvironment_2_5D:
   to retain the complete road texture composition. Reframe/rebake when redesigning the camera.
 - Background_09 is the only scrolling layer. Looping Background Scroller > Units Per
   Second defaults to 0.12; disable that component to stop clouds. All scenery is static.
+- Forest root now also has Scene Beat Motion Manager, bound to the existing battle
+  clock. Rock_Left/Right and Tree_Left/Right oscillate in place (no scrolling).
+  Per-target amplitude 0.18, duration 0.4 beats, World Up, one oscillation; all adjustable.
+  Rock sorting order is -42, ahead of the grass layers (-44/-43).
+- TrainingDummy.prefab has its own Scene Beat Motion Manager targeting Visual only;
+  it resolves the spawned slot's battle clock. Foot/HP/status anchors stay stable.
+  Enemy Can Attack is off. No character animation or independent beat timer is used.
+  Visual local Y is 0.025 and Positive Only is enabled: motion never dips below rest.
+  Ignore Floor Occlusion is off; opaque feet stay physically above the floor instead.
+  Dummy motion amplitude remains 0.06; only the forest props use the larger amplitude.
 - Forest_Background_*.asset are derived Sprite rectangles, using original textures/PPU;
   no source texture imports are changed. Near grass and outer silhouettes are enabled.
 
@@ -51,7 +62,33 @@ Skeleton, Boss and Warrior, empty Stage rejection, restart retaining selection,
 Forest/Cave activation, party counts and restored time scale. Pause UI screenshot checked.
 Scene screenshots checked separately for composition. Forest approved and pushed d4fbb957.
 
-Recommended next checkpoint (proposal, not active gameplay):
+Alex guided lesson (active on Chapter01/Stage01):
+- Stage > Tutorial Lesson references Levels/Tutorial_Alex.asset. Edit Steps titles,
+  rich-text body, Goal, Required and Allow Sword Charge here; existing assets are not
+  overwritten unless explicitly requesting a revision. Dialogue advances with A or
+  the button. All visible instructions use Xbox labels and the term 對拍.
+- Flow: Xbox/welcome; rhythm explanation; 8 rhythm-only successful calls (hop, no
+  attack/charge); Alex/slash introduction; 4 ordinary hits with charge suppressed;
+  short resonance introduction; 8 empowered primary hits; persistent free practice.
+- Tasks show an unmasked center objective. Progress accumulates across missed beats
+  and resonance cycles. Delayed damage and attacks issued in previous steps do not count.
+- Music continues during dialogue; calls are blocked until practice. Only explicit
+  ESC pause pauses music. Guided stages reuse the song's native loop without Pressure.
+- Completion does not end combat or show results. RB directly loads the next Tutorial
+  Stage in the current chapter through the existing validated scene reload path.
+- Practice/completion Objective Position defaults to (0,210), raised from (0,110).
+- Art2_FightScene > FightDemoController > Fight Tutorial Controller: Text Font,
+  Dialogue Size, Backdrop Opacity, Body Font Size, Objective Position.
+  No bundled CJK font exists yet; current Windows UI uses Microsoft JhengHei via OS
+  fallback. Assign a licensed CJK Font asset before targeting systems without that font.
+- Mage/Skeleton are still solo practice stages; no guided lesson asset assigned yet.
+- TODO (user requested): ESC pause menu should clearly explain every hero's abilities
+  and show keyboard / Xbox button mappings. Tutorial text itself remains Xbox only.
+- Revised Play validation passed: 8 rhythm-only calls/no damage, reading music advances,
+  4 ordinary hits/no charge, 8 empowered contacts, free combat and simulated Xbox RB
+  directly loading Mage. Practice/completion screenshot layout checked at Y=210.
+
+Remaining lesson proposals (not active gameplay):
 - One objective card: ability description, current task, progress, active Front key.
   Resolve key labels from the position/input profile; Mage and Skeleton are also Front.
 - Warrior: 3 successful calls; reach full charge once; land 3 empowered attacks.

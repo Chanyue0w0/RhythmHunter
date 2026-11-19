@@ -163,6 +163,8 @@ namespace RhythmHunter.FightDemo
                     gameObject.AddComponent<FightPauseController>().Configure(beatClock, playerUiCanvas, healthText.font);
                     MoveUi("PAUSE  [START / ESC]", battleMenuRoot);
                     MoveUi("PauseOverlay", battleMenuRoot);
+                    var tutorial = GetComponent<FightTutorialController>();
+                    if (tutorial != null) tutorial.ConfigureUi(playerUiRoot, healthText.font);
                 }
             }
             bool showHealth = fight == null || fight.HealthSystemEnabled;

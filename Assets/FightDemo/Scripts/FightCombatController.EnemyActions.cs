@@ -29,7 +29,7 @@ namespace RhythmHunter.FightDemo
             foreach (var enemy in fightScene2Enemies)
             {
                 if (enemy == null || !enemy.HasCharacter || enemy.CurrentHp <= 0 || enemy.IsStunned || enemy.BossPhaseOneActionsStopped ||
-                    enemy.CharacterDefinition == null ||
+                    enemy.CharacterDefinition == null || !enemy.CharacterDefinition.EnemyCanAttack ||
                     (BossActive && enemy == bossActor) ||
                     !EnemyCadenceReady(enemy, globalBeat) || EnemyActionBusy(enemy)) continue;
                 if (enemy.CharacterDefinition.EnemyAttackUsesEffectFrames)
@@ -43,7 +43,7 @@ namespace RhythmHunter.FightDemo
         // Their timing choice must never restrict them to the front formation slot.
         private void StartIndependentEnemyAttack(FightUnitSlot source)
         {
-            if(source==null || source.BossPhaseOneActionsStopped)return;
+            if(source==null || source.BossPhaseOneActionsStopped || source.CharacterDefinition == null || !source.CharacterDefinition.EnemyCanAttack)return;
             var definition = source.CharacterDefinition;
             RecordEnemyActionCadence(source);
             enemyHits.Add(new ScheduledEnemyHit { source = source,
@@ -63,7 +63,7 @@ namespace RhythmHunter.FightDemo
             bool interruptible = true, bool launchedProjectile = false)
         {
             if (PressureRestActive || battleEnded || AwaitingBattleStart || AwaitingNextWave || EnemyActionsPaused || IsPaused || TimingCalibrationActive ||
-                source == null || source.CurrentHp <= 0 || source.IsStunned || source.BossPhaseOneActionsStopped || !fightScene2Enemies.Contains(source) ||
+                source == null || source.CharacterDefinition == null || !source.CharacterDefinition.EnemyCanAttack || source.CurrentHp <= 0 || source.IsStunned || source.BossPhaseOneActionsStopped || !fightScene2Enemies.Contains(source) ||
                 beatOffsets == null || beatOffsets.Length == 0 || damage <= 0 || float.IsNaN(damage) || float.IsInfinity(damage)) return false;
             foreach (int offset in beatOffsets) if (offset < 1) return false;
             foreach (int offset in beatOffsets)
@@ -77,7 +77,7 @@ namespace RhythmHunter.FightDemo
         private bool TryStartAuthoredEnemyAttack(FightUnitSlot source)
         {
             var definition = source != null ? source.CharacterDefinition : null;
-            if (definition == null || source.IsStunned || source.BossPhaseOneActionsStopped || !definition.EnemyAttackUsesEffectFrames) return false;
+            if (definition == null || !definition.EnemyCanAttack || source.IsStunned || source.BossPhaseOneActionsStopped || !definition.EnemyAttackUsesEffectFrames) return false;
             var animation = FightCharacterCombatAnimator.CombatAnimation.NormalAttack;
             float damage = source.AttackPower;
             float healing = 0;

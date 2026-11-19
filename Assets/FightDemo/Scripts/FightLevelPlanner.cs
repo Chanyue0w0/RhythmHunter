@@ -55,7 +55,9 @@ namespace RhythmHunter.FightDemo
             if (!roster.TryConfigureStage(stage, out string error)) { Fail(error); return; }
             if (environmentSelector != null) environmentSelector.TryApply(SelectedEnvironment, out _);
             beatClock.Configure(stage.MusicEventPath, beatClock.MusicStartDelaySeconds, false, beatClock.MusicVolume);
-            beatClock.ConfigureStageSections(stage.UseNormalEndDeadline || stage.BossStage);
+            // Guided practice may continue indefinitely. Reuse the song's native loop,
+            // without enabling a stage deadline or overtime Pressure.
+            beatClock.ConfigureStageSections(stage.UseNormalEndDeadline || stage.BossStage || stage.TutorialLesson != null);
             ActiveStage = stage;
         }
         private void Fail(string message)

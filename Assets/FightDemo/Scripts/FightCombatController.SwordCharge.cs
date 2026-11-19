@@ -108,17 +108,19 @@ namespace RhythmHunter.FightDemo
                 return "Sword — no vulnerable target";
             }
             int version = rosterVersion, generation = state.generation;
+            int issuedFrame = Time.frameCount;
             bool primaryContact = false;
             ScheduleNormalImpact(actor, target, () =>
             {
                 if (WaveTransitionActive || !IsCurrentHeroAction(version, actor, target) || target.CurrentHp <= 0)
                 { if (state.generation == generation) state.BreakStreak(); return; }
                 primaryContact = true;
+                float hpBefore = target.CurrentHp;
                 ApplyHeroDamage(version, actor, target, charged ? data.SwordChargedDamage : power, false, false,
                     charged ? data.SwordChargedOnHitEffect : null,
                     charged ? data.SwordImmediateExplosionEffect : null);
                 // A killing contact counts. Follow-up/secondary damage never reaches this boundary.
-                if (!charged && !battleEnded && state.generation == generation && state.stage < 3)
+                if (!TutorialChargeSuppressed && !charged && !battleEnded && state.generation == generation && state.stage < 3)
                 {
                     state.hits++;
                     if (state.hits >= data.SwordHitsPerStage)
@@ -131,6 +133,7 @@ namespace RhythmHunter.FightDemo
                         ShowSwordStage(state);
                     }
                 }
+                if (target.CurrentHp < hpBefore) SwordPrimaryHit?.Invoke(actor, charged, issuedFrame);
             }, onCancelled: () => { if (!charged && state.generation == generation) state.BreakStreak(); });
             // Queue against the original contact time: not VFX lifetime, not a second input.
             // Dead targets and roster changes cancel this tick rather than retargeting another enemy.

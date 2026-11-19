@@ -24,6 +24,8 @@ namespace RhythmHunter.FightDemo
             [Range(.05f, 1)] public float durationInBeats = .5f;
             [Tooltip("單次震動期間往返的次數。")]
             [Range(1, 8)] public int oscillations = 1;
+            [Tooltip("Only lift away from the resting surface; never move below the authored position.")]
+            public bool positiveOnly;
         }
 
         [Tooltip("指定目前戰鬥使用的總節拍時鐘，不會建立額外 BPM 或計時器。")]
@@ -34,6 +36,11 @@ namespace RhythmHunter.FightDemo
         // Only subtract our own offset, preserving the authored pose and avoiding drift.
         // Keeping last frame's targets also restores objects removed from the Inspector list.
         private readonly Dictionary<Transform, Vector3> appliedOffsets = new Dictionary<Transform, Vector3>();
+        private void Start()
+        {
+            // Spawned character prefabs bind to their own battle clock, never a new timer.
+            if(beatClock==null)beatClock=GetComponentInParent<FightUnitSlot>()?.CombatController?.BeatClock;
+        }
 
         private void LateUpdate()
         {
@@ -51,6 +58,7 @@ namespace RhythmHunter.FightDemo
                 float progress = Mathf.Clamp01(phase / duration);
                 // Smooth endpoints and decay keep the next beat from snapping the sprite.
                 float wave = Mathf.Sin(progress * Mathf.PI * 2f * Mathf.Clamp(entry.oscillations, 1, 8));
+                if (entry.positiveOnly) wave = Mathf.Abs(wave);
                 float amount = wave * (1f - progress) * (1f - progress) * Mathf.Max(0, entry.amplitude);
                 Vector3 worldDirection = entry.directionSpace == Space.World
                     ? entry.direction.normalized : entry.target.TransformDirection(entry.direction.normalized);

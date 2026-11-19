@@ -522,6 +522,8 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
+            var tutorial = GetComponent<FightTutorialController>();
+            if (tutorial != null && tutorial.ConsumeCommand(command)) return;
             if (BossPhaseTwoActive)
             {
                 if (!battleEnded && !IsPaused && !TimingCalibrationActive && !DefeatSlowMotionActive)
@@ -612,6 +614,12 @@ namespace RhythmHunter.FightDemo
             }
 
             PlaySuccessfulInputSound(judgement);
+            if (GetComponent<FightTutorialController>()?.RhythmOnly == true)
+            {
+                // Normal judge + hop + gem feedback, without an ability, damage or charge.
+                HeroCalled?.Invoke(new HeroCallResult(command, judgement, false, false, "Tutorial rhythm practice"));
+                return;
+            }
             ActionType action = GetHeroActionForBeat(judgement.NearestBeat.Beat);
             bool heavyBeat = action == ActionType.Skill;
             PerformHeroAction(
@@ -922,6 +930,7 @@ namespace RhythmHunter.FightDemo
 
         private void QueueEnemyAttack(FmodBeatClock.BeatSnapshot beat)
         {
+            if (activeEnemySlot?.CharacterDefinition != null && !activeEnemySlot.CharacterDefinition.EnemyCanAttack) return;
             if (activeEnemySlot != null && activeEnemySlot.IsStunned) return;
             lastEnemyQueuedBeat = beat.GlobalBeat;
             if (TryStartAuthoredEnemyAttack(activeEnemySlot)) return;

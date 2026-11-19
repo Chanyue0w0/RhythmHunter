@@ -30,6 +30,9 @@ namespace RhythmHunter.FightDemo
         public enum ArmorRestoreMode { None, FixedAmount, Full }
 
         [Header("Identity")]
+        [Tooltip("Disable for passive practice targets. They remain damageable enemies but never start attacks.")]
+        [SerializeField] private bool enemyCanAttack = true;
+        public bool EnemyCanAttack => enemyCanAttack;
         [SerializeField] private string characterId = "character";
         [SerializeField] private string displayName = "CHARACTER";
         [SerializeField] private FightUnitSlot.UnitTeam team;

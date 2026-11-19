@@ -13,6 +13,7 @@ namespace RhythmHunter.FightDemo
         GameObject overlay, toggle;
         float previousTimeScale;
         bool restarting;
+        bool tutorialReading, appliedPause;
         public bool IsPaused { get; private set; }
         public bool MenuReady => overlay != null;
 
@@ -63,11 +64,24 @@ namespace RhythmHunter.FightDemo
         {
             if (value && GetComponent<FightCombatController>()?.DefeatSlowMotionActive == true) return;
             if (restarting) return;
-            if (clock == null || value == IsPaused || !clock.SetPaused(value)) return;
+            if (clock == null || value == IsPaused) return;
+            IsPaused = value;
+            ApplyPauseState();
+            if (overlay != null) { overlay.SetActive(value); if (value) overlay.transform.SetAsLastSibling(); }
+        }
+
+        public void SetTutorialReading(bool value)
+        {
+            tutorialReading = value;
+            ApplyPauseState();
+        }
+        private void ApplyPauseState()
+        {
+            bool value = IsPaused || tutorialReading;
+            if (restarting || clock == null || value == appliedPause || !clock.SetPaused(value)) return;
             if (value) { previousTimeScale = Time.timeScale; Time.timeScale = 0; }
             else Time.timeScale = previousTimeScale;
-            IsPaused = value;
-            if (overlay != null) { overlay.SetActive(value); if (value) overlay.transform.SetAsLastSibling(); }
+            appliedPause = value;
         }
 
         public void RestartBattle()
@@ -114,10 +128,11 @@ namespace RhythmHunter.FightDemo
 
         void OnDisable()
         {
-            if (!IsPaused) return;
+            if (!appliedPause) return;
             if (clock != null) clock.SetPaused(false);
             Time.timeScale = previousTimeScale;
             IsPaused = false;
+            tutorialReading = appliedPause = false;
             if (overlay != null) overlay.SetActive(false);
         }
 

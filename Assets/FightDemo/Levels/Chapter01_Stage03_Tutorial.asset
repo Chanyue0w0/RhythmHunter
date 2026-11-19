@@ -90,9 +90,9 @@ MonoBehaviour:
   overtimeMinimumRecoveryBeats: 0
   plannedSongSeconds: 0
   waves:
-  - name: Forest Preview
+  - name: Training Dummy Practice
     kind: 0
-    front: {fileID: 2418354018728722847, guid: 58027208f6f64c22a1c628b184a89f77, type: 3}
+    front: {fileID: 8354792478736558662, guid: 5e65bdb4ca2999343b0918c7eac03f00, type: 3}
     middle: {fileID: 0}
     back: {fileID: 0}
     pressure:
