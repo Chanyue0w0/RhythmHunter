@@ -20,6 +20,7 @@ namespace RhythmHunter.FightDemoEditor
             {
                 if (GUILayout.Button("New Chapter")) Create<FightChapterDefinition>("Chapter");
                 if (GUILayout.Button("New Stage")) Create<FightStageDefinition>("Stage");
+                if (GUILayout.Button("New Environment")) Create<FightEnvironmentDefinition>("Environment");
             }
             scroll = EditorGUILayout.BeginScrollView(scroll);
             if (chapter != null)
@@ -30,15 +31,21 @@ namespace RhythmHunter.FightDemoEditor
                 for (int i = 0; i < chapter.Stages.Count; i++)
                 {
                     var item = chapter.Stages[i];
-                    if (GUILayout.Button($"{i + 1}. {(item != null ? item.DisplayName : "未指定 Stage")}")) stage = item;
+                    var environment = item != null && item.Environment != null ? item.Environment : chapter.DefaultEnvironment;
+                    string tags = item != null ? $"{(item.Tutorial ? " [Tutorial]" : "")}{(item.BossStage ? " [Boss]" : "")} [{(environment != null ? environment.DisplayName : "Cave（預設）")}]" : "";
+                    if (GUILayout.Button($"{i + 1}. {(item != null ? item.DisplayName : "未指定 Stage")}{tags}")) stage = item;
                 }
             }
             stage = (FightStageDefinition)EditorGUILayout.ObjectField("Edit Stage", stage, typeof(FightStageDefinition), false);
+            if (stage == null && Selection.activeObject is FightStageDefinition selectedStage) stage = selectedStage;
             if (stage != null)
             {
                 Draw(stage);
                 if (!stage.Validate(out var error)) EditorGUILayout.HelpBox(error, MessageType.Error);
-                EditorGUILayout.HelpBox("Wave 的 Front／Middle／Back 是敵人位置，可留空但整波不能全空。拖入 ArtBattle 的敵人 Prefab。歌曲超時、登場與過場演出將於後續項目接入。", MessageType.Info);
+                EditorGUILayout.HelpBox("Tutorial 僅標記教學關。Environment 優先使用 Stage 設定，留空則繼承 Chapter 的 Default Environment，最後才回退 Cave。Art2 場景已提供 Cave 與 Forest 的 2.5D 配置；Chapter01 預設 Forest。", MessageType.Info);
+                if (stage.Tutorial && stage.BossStage)
+                    EditorGUILayout.HelpBox("此關同時標記 Tutorial 與 Boss；目前仍會執行原有 Boss 流程。", MessageType.Warning);
+                EditorGUILayout.HelpBox("Wave 的 Front／Middle／Back 是敵人位置，可留空但整波不能全空。拖入 ArtBattle 的敵人 Prefab；音樂、加時與 Pressure 依 Stage／Wave 設定。", MessageType.Info);
             }
             EditorGUILayout.EndScrollView();
             if (GUILayout.Button("Save Assets")) AssetDatabase.SaveAssets();

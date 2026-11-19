@@ -12,10 +12,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Min(0)] private int stageIndex;
         [SerializeField] private FightRosterManager roster;
         [SerializeField] private FmodBeatClock beatClock;
+        [SerializeField] private FightEnvironmentSelector environmentSelector;
         public FightChapterDefinition Chapter => chapter;
         public int StageIndex => stageIndex;
         public FightStageDefinition SelectedStage => chapter != null && stageIndex >= 0 && stageIndex < chapter.Stages.Count ? chapter.Stages[stageIndex] : null;
         public FightStageDefinition ActiveStage { get; private set; }
+        public FightEnvironmentDefinition SelectedEnvironment => SelectedStage != null && SelectedStage.Environment != null
+            ? SelectedStage.Environment : chapter != null ? chapter.DefaultEnvironment : null;
         public string ConfigurationError { get; private set; }
 
         private void Awake()
@@ -25,7 +28,10 @@ namespace RhythmHunter.FightDemo
             if (stage == null) { Fail("Selected Chapter/Stage is missing."); return; }
             if (roster == null || beatClock == null) { Fail("Roster or song clock reference is missing."); return; }
             if (beatClock.IsReady) { Fail("Stage must be selected before the song clock initializes."); return; }
+            if (environmentSelector != null && !environmentSelector.CanApply(SelectedEnvironment, out string environmentError))
+            { Fail(environmentError); return; }
             if (!roster.TryConfigureStage(stage, out string error)) { Fail(error); return; }
+            if (environmentSelector != null) environmentSelector.TryApply(SelectedEnvironment, out _);
             beatClock.Configure(stage.MusicEventPath, beatClock.MusicStartDelaySeconds, false, beatClock.MusicVolume);
             beatClock.ConfigureStageSections(stage.UseNormalEndDeadline || stage.BossStage);
             ActiveStage = stage;

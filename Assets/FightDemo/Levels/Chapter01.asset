@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightChapterDefinition
   chapterId: Chapter01
   displayName: Chapter 1
+  defaultEnvironment: {fileID: 11400000, guid: 3a23c3ca4d574e22ba4f65b2d12ae51b, type: 2}
   stages:
-  - {fileID: 11400000, guid: 9e5c540b824a317478e88587ee10ff4b, type: 2}
-  - {fileID: 11400000, guid: 8b464ab871efe5b498ae5e4f8aa9e816, type: 2}
+  - {fileID: 11400000, guid: c686747c0059dcd499442da9f2315b14, type: 2}

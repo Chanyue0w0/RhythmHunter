@@ -48,6 +48,13 @@ namespace RhythmHunter.FightDemo
         private readonly Dictionary<FightUnitSlot, Entry> stunEffects = new();
         private readonly List<FightUnitSlot> stale = new();
         public FightCombatController CombatController => combat;
+        public void SetEnvironmentLight(Light light)
+        {
+            if (mainLight == light) return;
+            if (ownsColor && mainLight) { mainLight.color = originalColor; mainLight.intensity = originalIntensity; }
+            ownsColor = active = false; PressureLightBlend = 0;
+            mainLight = light;
+        }
         public float PressureLightBlend { get; private set; }
         private float fromBlend;
         private bool active, ownsColor;

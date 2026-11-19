@@ -22,6 +22,14 @@ namespace RhythmHunter.FightDemo
         }
         [SerializeField] private string stageId = "Stage01";
         [SerializeField] private string displayName = "Stage 1";
+        [Header("Stage Classification / Environment")]
+        [Tooltip("Marks this as a tutorial Stage. Does not automatically change damage, music, Pressure or victory rules.")]
+        [SerializeField] private bool tutorial;
+        [Tooltip("Overrides Chapter.DefaultEnvironment. Unassigned inherits the chapter, then falls back to Cave.")]
+        [SerializeField] private FightEnvironmentDefinition environment;
+        public bool Tutorial => tutorial;
+        public FightEnvironmentDefinition Environment => environment;
+        public string EnvironmentId => environment != null ? environment.EnvironmentId : "Cave";
         [Header("Boss Entrance")]
         [SerializeField] private bool bossStage;
         public bool BossStage => bossStage;

@@ -1,0 +1,36 @@
+Level environments — Forest adaptation
+
+Rhythm Hunter > Level Planner:
+- Chapter.Default Environment is inherited when Stage.Environment is empty.
+- Chapter01 defaults to Forest. Chapter01_Stage01_Tutorial is selected in Art2.
+- Tutorial is a tag; guided tutorial steps are not implemented yet.
+- Stage01 Tutorial currently contains one preview Goblin_Normal, no Pressure or deadline.
+- Chapter02 defaults to Cave; third slot is Chapter02_Stage03_Boss.
+- Original Stage01/Stage02 assets and the Chapter02 Boss copy are preserved.
+
+Art2_FightScene > FightDemoController > Fight Level Planner:
+- Chapter = Chapter01; Stage Index = 0 (Stage 1).
+- Environment is applied before roster/music startup; Restart repeats initialization.
+
+Art2_FightScene > ForestEnvironment_2_5D:
+- ForestGround_XZ: road plane; Background_*: depth-separated scenery cards.
+- ForestSun_AdjustMe: independent Forest lighting.
+- Prefab: Assets/FightDemo/Prefabs/ArtBattle/ForestEnvironment_2_5D.prefab.
+- Materials: Assets/FightDemo/Art2Prototype/ForestGround.mat and ForestSpriteCard.mat.
+- Original ForestEnvironment prefab and source sprite import settings are unchanged.
+- ForestGround_XZ uses ForestRoad.asset: an XZ mesh projected from the reference camera
+  to retain the complete road texture composition. Reframe/rebake when redesigning the camera.
+- Background_09 is the only scrolling layer. Looping Background Scroller > Units Per
+  Second defaults to 0.12; disable that component to stop clouds. All scenery is static.
+- Forest_Background_*.asset are derived Sprite rectangles, using original textures/PPU;
+  no source texture imports are changed. Near grass and outer silhouettes are enabled.
+
+Fight Environment Selector controls scenery, environment lights, Cave atmosphere and
+Cave-specific lighting/focus controllers. Camera, actors and gameplay remain shared.
+Actor shadow lighting, Pressure main light and floor-occlusion recovery rebind to the
+selected environment. The floor recovery object is shared under FightDemoController.
+
+Validation: Chapter01/Stage01 Forest initialization, three hero spawns, supported
+materials, Cave disabled, forest floor recovery and Restart retaining Forest passed.
+Cloud motion and stationary rock positions also validated.
+Scene screenshots checked separately for composition. User visual approval pending.

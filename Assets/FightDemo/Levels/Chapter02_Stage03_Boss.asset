@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f994234d5791e84c817efaa02eb6a08, type: 3}
+  m_Name: Chapter02_Stage03_Boss
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
+  stageId: Chapter02_Stage03
+  displayName: Chapter 2 - Stage 3 - Goblin King
+  tutorial: 0
+  environment: {fileID: 11400000, guid: a217f90cd8674dc3a01ce68a23bacba7, type: 2}
+  bossStage: 1
+  bossEntrance:
+    enabled: 1
+    waitBeforeDoorBeats: 6
+    doorOpenBeats: 1
+    openingAnimationName: OpenIdle
+    openingIdleBeats: 4
+    doorBossScale: 0.6
+    jumpBeats: 1
+    jumpAnimationName: Jump
+    flyingAnimationName: Flying
+    landingAnimationName: Landing
+    flyingHoldBeats: 0.5
+    doorCloseBeats: 1
+    ascentFraction: 0.5
+    extraJumpHeight: 2
+    landingWaitBeats: 4
+    landingEffect: {fileID: 2110487180908037544, guid: 8660c1059a97e4542b513bc35d681349, type: 3}
+    landingEffectOffset: {x: 0, y: 0, z: 0}
+    doorExplosion: {fileID: 5292981524694603679, guid: a3dd949486459684a818f410e0242b9b, type: 3}
+    doorExplosionEnabled: 0
+    doorExplosionBeats: 2
+    bossRevealBeats: 1
+    doorExplosionOffset: {x: 0, y: 1.2, z: 0}
+    doorExplosionScale: 1.2
+    landingExplosionEnabled: 1
+    landingExplosionOffset: {x: 0, y: 0, z: 0}
+    landingExplosionScale: 1
+    doorFocusEnabled: 1
+    doorFocusLeadBeats: 2
+    doorFocusWeight: 0.25
+    doorFocusZoom: 0.1
+    doorFocusOffset: {x: 0, y: 1, z: 0}
+    doorFocusReturnBeats: 1
+    doorShakeEnabled: 1
+    doorShakeBeats: 2
+    doorShakeAmplitude: {x: 0.08, y: 0.06}
+    doorShakeCyclesPerBeat: 5
+    doorShakeDecay: 2
+    blackSilhouette: 1
+    doorLightEnabled: 1
+    doorLightColor: {r: 0.09095693, g: 0.087839924, b: 0.13397168, a: 1}
+    doorLightIntensity: 12
+    doorLightRange: 10
+    doorLightAngle: 49
+    doorLightOffset: {x: 0, y: 2, z: 3}
+    doorLightEuler: {x: 25, y: 180, z: 0}
+    doorLightFadeOutBeats: 1
+    doorLightCastShadows: 1
+    doorLightExcludeHeroes: 1
+    doorLightShadowStrength: 1
+    doorLightShadowBias: 0.05
+    doorLightShadowNormalBias: 0.05
+    fanFollowsDoorLight: 1
+    fanBrightness: 1.5
+    fanLength: 12
+    fanEndWidth: 10
+    fanStartWidth: 1
+    fanYaw: 180
+    fanGroundY: 0.04
+    landingShakeEnabled: 1
+    landingShakeBeats: 6
+    landingShakeAmplitude: {x: 0.16, y: 0.12}
+    landingShakeCyclesPerBeat: 5
+    landingShakeDecay: 2
+  musicEventPath: event:/Ritual Slam _120_3
+  useNormalEndDeadline: 1
+  overtimeOnlyOnFinalCombatWave: 1
+  overtimeAccelerationIntervalBeats: 20
+  overtimeRecoveryReductionBeats: 1
+  overtimeMinimumRecoveryBeats: 0
+  plannedSongSeconds: 0
+  waves:
+  - name: Wave 1
+    kind: 0
+    front: {fileID: 0}
+    middle: {fileID: 1049329208925010419, guid: 8351f5d2496dbd8419c121123d7f676d, type: 3}
+    back: {fileID: 0}
+    pressure:
+      enablePressurePhase: 1
+      startBeat: 20
+      durationBeats: 40
+      recoveryBeats: 4
+      repeat: 1
+      repeatEveryBeats: 60
+  - name: Wave 2
+    kind: 0
+    front: {fileID: 2418354018728722847, guid: 58027208f6f64c22a1c628b184a89f77, type: 3}
+    middle: {fileID: 2418354018728722847, guid: f6f5612f6468ef340a4e2d9422b3fbb2, type: 3}
+    back: {fileID: 1049329208925010419, guid: d1687460d02df1b47bac316481cf4276, type: 3}
+    pressure:
+      enablePressurePhase: 1
+      startBeat: 20
+      durationBeats: 40
+      recoveryBeats: 4
+      repeat: 1
+      repeatEveryBeats: 40

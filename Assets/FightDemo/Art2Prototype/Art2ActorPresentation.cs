@@ -35,6 +35,7 @@ namespace RhythmHunter.FightDemo.Art2
         private GameObject[] shadows;
         private Transform[] feet;
         private Mesh shadowMesh;
+        public void SetEnvironmentLight(Light light) => contactShadowLight = light;
         private readonly List<(SpriteRenderer renderer, int layer, int order, Material material,
             UnityEngine.Rendering.ShadowCastingMode casting, bool receiving)> originalSorting = new();
 

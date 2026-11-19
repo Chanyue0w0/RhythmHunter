@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
   stageId: Stage01
   displayName: Stage 1
+  tutorial: 0
+  environment: {fileID: 11400000, guid: a217f90cd8674dc3a01ce68a23bacba7, type: 2}
   bossStage: 1
   bossEntrance:
     enabled: 1

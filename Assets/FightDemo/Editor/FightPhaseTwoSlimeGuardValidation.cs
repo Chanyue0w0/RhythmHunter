@@ -36,8 +36,18 @@ namespace RhythmHunter.FightDemoEditor
                 var emitter=visual.GetComponentsInChildren<ParticleSystem>().First(p=>p.name=="VFX_Shield_01_Color_Loop_Static");
                 Vector3 body=slot.CombatAnimator.TargetRenderer.bounds.center;
                 var foot=slot.ActorInstance.transform.Find("FootAnchor");
-                var camera=Camera.main;
+                var settings=new SerializedObject(battle);
+                var camera=settings.FindProperty("view").objectReferenceValue as Camera;
                 if(foot&&camera)body+=camera.transform.right*Vector3.Dot(foot.position-body,camera.transform.right);
+                // Honour the user's authored per-lane adjustments rather than assuming
+                // the initial zero-offset setup is still in use.
+                var offset=settings.FindProperty("guardCameraOffset").vector3Value;
+                var laneOffsets=settings.FindProperty("guardLaneOffsets");
+                if(lane<laneOffsets.arraySize)offset+=laneOffsets.GetArrayElementAtIndex(lane).vector3Value;
+                body+=settings.FindProperty("guardEffectOffset").vector3Value+(camera?camera.transform.TransformDirection(offset):offset);
+                var environment=fight.GetComponent<FightEnvironmentSelector>();
+                if(environment&&environment.ActiveEnvironment!=fight.GetComponent<FightLevelPlanner>().SelectedEnvironment)
+                    throw new Exception("Stage environment did not apply before combat");
                 if(Vector3.Distance(emitter.transform.position,body)>.3f)throw new Exception($"Shield emitter offset from body {lane}: emitter={emitter.transform.position}, body={body}");
                 if(battle.CreatedVisuals!=created)throw new Exception("Guard did not reuse prewarmed pool");
                 ScreenCapture.CaptureScreenshot("Temp/PhaseTwoSlimeGuardLane"+lane+".png");
