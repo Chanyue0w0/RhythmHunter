@@ -138,6 +138,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!started) return;
             if (!fight || !fight.BossPhaseTwoActive || fight.BattleEnded || fight.DefeatSlowMotionActive) { Clear(); return; }
+            foreach (var visual in allVisuals) if (visual && visual.gameObject.activeSelf) visual.SetPaused(fight.IsPaused || fight.TimingCalibrationActive);
             if (fight.IsPaused || fight.TimingCalibrationActive) return;
             if (outro)
             {
@@ -191,7 +192,7 @@ namespace RhythmHunter.FightDemo
                 {
                     var origin = boss.CastEffectAnchor ? boss.CastEffectAnchor.position : boss.ActorRoot.position;
                     float t = Mathf.Clamp01((float)((beat - (note.beat - chart.travelBeats)) / chart.travelBeats));
-                    note.visual.Present(Vector3.Lerp(origin, Target(note.lane), t), view.transform.rotation, 1,
+                    note.visual.PresentFlight(Vector3.Lerp(origin, Target(note.lane), t), Target(note.lane)-origin, view.transform.rotation, 1,
                         note.accepted ? new Color(1, .85f, .25f, 1) : new Color(1, .2f, .12f, 1));
                 }
                 if (note.accepted && beat >= note.beat) Resolve(note, true);

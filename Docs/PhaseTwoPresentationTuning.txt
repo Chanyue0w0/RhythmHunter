@@ -1,0 +1,29 @@
+二階段視覺調整（2026-11-19）
+
+FightDemoController / Fight Boss Phase Two Fire
+Boss 跳到門口落地（進入 HeroesJump）才生成，不在起跳前生成。
+Fade In Seconds=3；Opacity Range=0.12~0.7；Scale Range=0.75~1.5。
+Offset 的 X 是相機左右，Y 是世界高度，Z 是相機深度。Y=0 比上一版低 0.15。
+保持世界垂直、原始 Prefab 旋轉；不要把立體火焰整體 billboard 到相機。
+
+BossRythmSlash / Fight Boss Rhythm Visual
+Face Travel Direction 開啟；Local Travel Direction=(0,0,-1)，原素材噴流沿 +Z，因此朝向 -Z 前進。
+Local Particle Simulation 開啟以維持整體形狀，保留原有 Stretch 長度與粒子美術。
+Facing Offset 可微調局部角度。非此特效的原有護盾仍使用相機朝向。
+發射、Travel Beats、抵達拍點、判定皆未修改。
+
+FightDemoController / Phase Two Focus Blur
+僅二階段完成轉場後淡入；HP/DEF 等 Overlay UI 不受影響。
+Blur Enabled=開關；Blur Pixels=4；Strength=0.85。
+Center X=0.5；Top Width=0.28；Bottom Width=0.7。
+Top Y=0.82；Bottom Y=0.12；Feather=0.08；Fade Seconds=0.7。
+寬度是畫面寬度比例。中央保留原始像素，兩側 9 點模糊，柔和過渡。
+沿用現有 RoarDistortionFeature 作為場景後處理入口，不替換 Renderer Asset。
+單次場景色彩複製至獨立 RenderGraph 輸出，避免同時讀寫同一張貼圖。
+
+BossPhaseTwoPositions 的三位勇者定位點向世界 -Z 移動 0.5，畫面較下方。
+可直接移動該三個目標點微調；不改前中後衛輸入綁定，飛行仍在指定譜面時間抵達。
+
+尺寸微調：火焰 Scale Range 改為 0.35~0.7，使用 Boss ActorInstance/FootAnchor 定位底部；Flame Base Local Point 可微調特效本地基準點。BossRythmSlash 根節點 Scale 改為 (0.5,0.5,0.5)。勇者三個二階段目標點再往 -Z 移動 0.3（local Z 約 -4.6272853）。
+
+火焰排序修正：進入二階段時在 Boss ActorRoot 建立暫時 SortingGroup，火焰在同群組內固定比 Boss 低 1；成長與動畫不再用兩個獨立透明物件的距離互換順序。結束清除自建群組，保留原有群組。世界縮放保留，不受 Boss 0.6 倍縮放二次影響。起始尺寸 0.45，最大 0.7，漸顯 1.2 秒。
