@@ -49,6 +49,9 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(0, 2)] private float guardBoostAmount = .35f;
         [SerializeField, Min(.01f)] private float guardBoostDurationBeats = .4f;
         [SerializeField, Range(1, 4)] private float maximumSpeedMultiplier = 1.6f;
+        [Header("Streak exit")]
+        [SerializeField,Min(0)] private float exitViewportMargin=.08f;
+        [SerializeField,Min(1)] private float maximumTravel=1.4f;
         private FightTunnelAirflow airflow;
         private float visibility, boostRemaining;
         private double previousBeat;
@@ -91,14 +94,14 @@ namespace RhythmHunter.FightDemo
         {
             if(!fight||!rhythm)return;
             if(fight.IsPaused||fight.TimingCalibrationActive)return;
-            bool running=speedLinesEnabled && rhythm.Running && rhythm.LaunchedNotes > 0;
+            bool running=speedLinesEnabled && rhythm.Running && !rhythm.FinaleActive && rhythm.LaunchedNotes > 0;
             if(running && !wasRunning) {boostRemaining=0;haveBeat=false;EnsureAirflow();if(airflow)airflow.ResetLines();}
-            if(!running){boostRemaining=0;haveBeat=false;}
+            if(!running){boostRemaining=0;}
             wasRunning=running;
             visibility=Mathf.MoveTowards(visibility,running?1:0,Time.unscaledDeltaTime/Mathf.Max(.01f,running?fadeInSeconds:fadeOutSeconds));
             if(visibility<=0){if(airflow)airflow.gameObject.SetActive(false);return;}
             EnsureAirflow();if(!airflow)return;airflow.gameObject.SetActive(true);
-            float deltaBeat=0;
+            float deltaBeat= !running && fight.BeatClock ? Time.unscaledDeltaTime*1000f/Mathf.Max(1,(float)fight.BeatClock.MillisecondsPerBeat):0;
             if(running)
             {
                 double beat=rhythm.CurrentBeat;
@@ -116,7 +119,7 @@ namespace RhythmHunter.FightDemo
             Color tint=lineColor;tint.a*=visibility;
             airflow.Present(tunnelCamera,tunnelOrigin.TransformPoint(originOffset),deltaBeat*speed,count,sourceRadius,nearRadius,
                 Mathf.Lerp(streakLength.x,streakLength.y,CurrentIntensity)*(1+boost*.25f),streakWidth,tint,
-                centralProtectionEnabled,protectedCenterX,protectedWidth,protectedDoorWidth,protectionFeather,pixelSnap,respectSceneDepth,deltaBeat/Mathf.Max(.01f,countFadeBeats));
+                centralProtectionEnabled,protectedCenterX,protectedWidth,protectedDoorWidth,protectionFeather,pixelSnap,respectSceneDepth,deltaBeat/Mathf.Max(.01f,countFadeBeats),running,exitViewportMargin,maximumTravel);
 
         }
     }

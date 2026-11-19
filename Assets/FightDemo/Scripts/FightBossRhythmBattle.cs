@@ -72,6 +72,9 @@ namespace RhythmHunter.FightDemo
         private Note displayedAttack;
         private readonly FightUnitSlot[] heroes = new FightUnitSlot[3];
         private FightUnitSlot boss;
+        private FightBossGemFinale finale;
+        public bool FinaleActive => finale && finale.Active;
+        public FightUnitSlot Boss => boss;
         private bool started, originKnown, readySeen, outro, animationPlaying;
         private double originBeat, lockedUntil = double.NegativeInfinity;
         private float outroElapsed;
@@ -79,6 +82,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!fight) fight = GetComponent<FightCombatController>();
             if (!transition) transition = GetComponent<FightBossPhaseTwoTransition>();
+            finale=GetComponent<FightBossGemFinale>();
             if (fight) { fight.BossPhaseTwoStarted += Begin; fight.BossPhaseTwoMusicEnded += BeginOutro; }
         }
         private void Begin()
@@ -161,6 +165,7 @@ namespace RhythmHunter.FightDemo
             }
             if (animationPlaying && boss.CombatAnimator.VisualSequenceComplete)
             { boss.CombatAnimator.InterruptPlayback(); boss.CombatAnimator.SetIdleOverride(chopIdle); animationPlaying = false; }
+            if(finale && finale.Advance(beat))return;
             AdvanceNotes(beat);
             if (animationPlaying && displayedAttack != null)
                 boss.CombatAnimator.SampleVisualSequenceBeats(beat - (displayedAttack.beat - chart.travelBeats - animationLeadBeats[displayedAttack.lane]));
@@ -178,7 +183,7 @@ namespace RhythmHunter.FightDemo
             double window = fight.BossRhythmJudge.PerfectWindowMs / fight.BeatClock.MillisecondsPerBeat;
             foreach (var note in notes)
             {
-                if (note.resolved) continue;
+                if (note.resolved || (finale && finale.WillReplaceNote(note.beat))) continue;
                 if (note.beat - chart.travelBeats - animationLeadBeats[note.lane] > beat) continue;
                 if (!note.animationStarted)
                 {
@@ -204,6 +209,12 @@ namespace RhythmHunter.FightDemo
         }
         public void Submit(FightInputRouter.HeroCommand command, double inputAgeMs, string profile)
         {
+            if(finale && ReadBeat(out double finaleBeat) && finale.Advance(finaleBeat))
+            {
+                CurrentBeat=finaleBeat;
+                if(command==FightInputRouter.HeroCommand.TeamSkill)finale.Press();
+                return;
+            }
             int lane = (int)command;
             if (!Running || !transition.Ready || lane < 0 || lane > 2 || fight.IsPaused || fight.TimingCalibrationActive || !originKnown) return;
             var judge = fight.BossRhythmJudge; judge.SetInputProfile(profile);
@@ -238,7 +249,7 @@ namespace RhythmHunter.FightDemo
             double bestDistance = double.PositiveInfinity;
             foreach (var candidate in notes)
             {
-                if (candidate.resolved || candidate.accepted || candidate.lane != lane) continue;
+                if (candidate.resolved || candidate.accepted || candidate.lane != lane || (finale && finale.WillReplaceNote(candidate.beat))) continue;
                 double distance = Math.Abs(candidate.beat - beat);
                 if (distance > window + 1e-6) continue;
                 if (best == null || distance < bestDistance - 1e-9 ||
@@ -288,7 +299,7 @@ namespace RhythmHunter.FightDemo
         private void BeginOutro()
         {
             if (!started || outro || fight.BattleEnded || fight.DefeatSlowMotionActive) return;
-            if (ReadBeat(out double beat)) { CurrentBeat = beat; AdvanceNotes(beat); }
+            if (ReadBeat(out double beat)) { CurrentBeat = beat; if(!finale || !finale.Advance(beat))AdvanceNotes(beat); }
             if (fight.DefeatSlowMotionActive || fight.BattleEnded) return;
             outro = true; outroElapsed = 0; ClearVisuals();
             if (boss)
@@ -298,8 +309,17 @@ namespace RhythmHunter.FightDemo
                     var effect = Instantiate(victoryExplosion, boss.ActorRoot.position, victoryExplosion.transform.rotation);
                     (effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>()).Configure(fight, false, 5);
                 }
-                boss.ReleaseBossPhaseOneProtection(); boss.TakeDamage(boss.CurrentHp + boss.MaxHp);
+                boss.ReleaseBossPhaseOneProtection(); boss.TakeDamage(99999, FightUnitSlot.DamageKind.Direct, true);
+                finale?.BossDied();
             }
+        }
+        public void EnterGemFinale()
+        {
+            ClearVisuals();
+            foreach(var note in notes)note.resolved=note.skipped=true;
+            fight.AudioPlayer.StopBeatSounds();
+            boss?.CombatAnimator?.InterruptPlayback();boss?.CombatAnimator?.SetIdleOverride(chopIdle);
+            displayedAttack=null;animationPlaying=false;
         }
         private void ClearVisuals()
         {

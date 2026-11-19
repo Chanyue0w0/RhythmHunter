@@ -329,7 +329,10 @@ namespace RhythmHunter.FightDemo
                 actorInstance.GetComponent<FightTransitionInvulnerabilityVisual>()?.ShowHit();
         }
 
-        public float TakeDamage(float amount, DamageKind kind)
+        public float TakeDamage(float amount, DamageKind kind) => TakeDamage(amount, kind, false);
+
+        // Execution may display its full overkill amount while HP loss still clamps at zero.
+        public float TakeDamage(float amount, DamageKind kind, bool showFullDamage)
         {
             // Reject before consuming statuses, triggering fragments or emitting damage numbers.
             if (IsTransitionInvulnerable)
@@ -363,7 +366,7 @@ namespace RhythmHunter.FightDemo
                 BeginRestHitHop();
             CombatController?.RecordPressureDamage(this, applied);
             // Burst presentation shows full resolved damage; actual HP loss remains capped at zero.
-            if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained || BossPhaseOneTired ? resolvedDamage : applied);
+            if (CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained || BossPhaseOneTired || showFullDamage ? resolvedDamage : applied);
             // Consume before callbacks; secondary damage and DoT cannot trigger fragments.
             if ((applied > 0 || (retained || BossPhaseOneTired) && resolvedDamage > 0) && kind == DamageKind.Direct && HasSlimeFragment)
             {

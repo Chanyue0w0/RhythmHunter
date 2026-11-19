@@ -1,0 +1,60 @@
+Boss 二階段：魔法寶石終結演出
+
+場景：Assets/FightDemo/Scenes/Art2_FightScene.unity
+設定：FightDemoController > FightBossGemFinale
+
+流程
+- 第 95 拍起：停止三軌輸入判定、取消剩餘音符與已排音效；勇者靠攏，生成滿能量場景寶石與 A 提示。
+- A 使用原本 Fever 輸入綁定，任意時刻按下皆計數，不需對拍；按住不連續計數。
+- 每次按下播放現有 BeatTapping 成功音效、BlueExplosion_UI 特效（場景版使用，同一來源、物件池），寶石彈跳並提高藍光。
+- 第 104 拍必定生成光束。不按 A 也勝利，但光束亮度與透明度較弱，長度保持能觸及 Boss。
+- 目前 FMOD：121 BPM，Boss_End 約為二階段 113.4214 拍；104 拍發射後約有 4.672 秒光束演出。
+- 歌曲結束仍由原本 BossRhythmBattle 處決 Boss，傷害 99999；光束不另結算傷害、不提前殺 Boss。
+- Boss 死亡後 1 拍內淡出光束、降低寶石藍光；沿用原本死亡動畫及勝利面板。
+
+Prefab
+- Assets/FightDemo/Prefabs/VFX/GemUltRay.prefab：由原場景 GemUltRay 保存。原場景示範物件保留但停用，避免戰鬥多一條常駐光束。
+- Assets/FightDemo/Prefabs/VFX/FinaleFullGem.prefab：SpriteRenderer 場景寶石，使用 UI 同款五張滿能量圖片。
+- 圖片動畫復用 SceneBeatSpriteAnimator，仍取自 FMOD 節拍。
+
+Inspector
+- Finale Enabled：整套終結演出開關。
+- Start Beat / Fire Beat：95 / 104，皆相對 Normal_End。
+- Gather Beats / Gather Fraction：靠攏時間 1 拍，向中央靠攏 35%。
+- Gem Offset / Gem Height：以中央勇者 ActorRoot 為基準的世界位置偏移與寶石世界高度。
+- Gem Loop Beats、Bounce Amount / Beats：滿能量動畫與按鍵彈跳。
+- Prompt Sprite：正式 A 提示圖欄位；未設定時僅顯示 A。
+- Full Charge Presses：32 次達視覺滿充能；之後仍計數並播放每次回饋，但亮度不無限增加。
+- Gem Light Color / Light Intensity / Light Range：藍光顏色、起始與最大亮度、範圍；不產生額外陰影。
+- Beam Offset / Rotation Offset：光束相對寶石位置偏移與方向微調；光束局部 +Z 對準 Boss。
+- Weak Beam Opacity：零次輸入時透明度 0.16；保留原始光束幾何與觸及距離。
+- Beam Fade Beats：死亡後淡出時間，預設 1 拍。
+
+待後續開發（不在此次自行新增公式）
+- 未按 A／低參與度降低獎勵。保留 PressCount、Charge 與死亡時 CompletedPressCount、CompletedCharge 供未來獎勵系統讀取。
+- Prompt Sprite 已指定使用者提供的綠色 A 按鍵圖片，可隨時替換。
+
+速度線
+- FightPhaseTwoSpeedLines：Exit Viewport Margin=0.08、Maximum Travel=1.4。
+- 不再於 70% 旅程開始淡出或 94% 強制回收；移出畫面或安全上限才回收。
+- 95 拍停止新增，已有線條仍前進，Fade Out Seconds=1 秒平順退場。
+- 譜面光與黑線於終結開始淡出，不新增陰影。
+
+注意
+- 原譜面第 95 拍（-50ms）一個音符已移除；95 拍以前資料保留。
+- 此次關掉 Finale Enabled 也不會自動補回已移除的譜面音符。
+
+處決顯示：Boss 時間處決單次呼叫傷害 99999，額外使用完整傷害數字顯示（不受剩餘 HP 數字限制），實際 HP 仍只扣至零。一般攻擊顯示規則不變。
+弱光束保留原始 Stretched Billboard 幾何，僅透過透明度與光源亮度表示強弱，避免非等比縮放改變粒子長度或樞紐。
+已驗證：32 次連打與零次輸入兩條完整 Play 流程、95 拍後停止判定／傷害、勇者靠攏、104 拍光束、歌曲結束處決與一拍內移除、暫停拒絕輸入。
+
+最後視覺確認：弱光束保留全長且較暗，實際截圖已確認。加速預覽僅修改 Play 中的 20／22 拍，不回寫場景；正式設定仍為 95／104 拍。
+
+視覺更新：Gem Offset 改為 (0,1.3,3.8)，遠離英雄顯示區。Gem Entry Offset=(0,0,7)，Gem Entry Beats=0.45，沿世界 +Z 深處往落點快速移入。
+A 提示已指定 Arts/UI/old/ChatGPT Image 2025年12月9日 上午03_47_03.png 的 Sprite，Prompt Pulse Amount / Beats 控制每拍彈跳。
+Beam Scale=1.35；Beam Volume Enabled 可切換真正的圓柱網格能量外層，Beam Volume Radius 控制半徑。Beam Sorting Order=20，覆蓋 Boss。外層隨既有光束一起淡出。
+素材檢查：原核心為 CFXR4 Spaceship Thruster (Blue)，使用 Stretched Billboard 粒子；同款變體是橘／紫換色與 Screen Distortion，並非體積光束模型。新增外層不修改素材包。
+
+覆蓋 Boss：Art2EffectPresentation 的 Draw Above Scene 僅由終結光束動態啟用。Art2FloorOcclusionFeature 在角色地板補畫後重繪此光束，避免單純 Sorting Order 被後段角色補畫蓋過。此選項預設關閉、不修改其他物件或 Renderer Asset。
+
+寶石落點修訂：Gem Offset=(0,1.3,1.4)。Gem Enter From Screen Top=true，Gem Entry Viewport Margin=0.2；以落點的相機深度從畫面頂端外垂直移入，0.45 拍完成。關閉時才使用原本世界 Gem Entry Offset。

@@ -64,7 +64,7 @@ namespace RhythmHunter.FightDemo.Art2
             result.Clear();
             foreach (var effect in Art2EffectPresentation.Active)
             {
-                if (effect == null || effect.gameObject.scene != scene || !effect.isActiveAndEnabled || !effect.IgnoreFloorOcclusion) continue;
+                if (effect == null || effect.gameObject.scene != scene || !effect.isActiveAndEnabled || (!effect.IgnoreFloorOcclusion&&!effect.DrawAboveScene)) continue;
                 foreach (var renderer in effect.FloorRenderers)
                 {
                     if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy ||
@@ -93,7 +93,7 @@ namespace RhythmHunter.FightDemo.Art2
             public Art2FloorOcclusion settings;
             public Material depthMaterial;
             readonly List<Renderer> occluders = new(), warriors = new(), floors = new();
-            readonly List<Renderer> effects = new();
+            readonly List<Renderer> effects = new(), overlays = new();
             public List<Renderer> SuppressedEffects;
             private sealed class EffectDrawData
             {
@@ -119,11 +119,17 @@ namespace RhythmHunter.FightDemo.Art2
                 foreach (var renderer in propertyBlocks.Keys) if (renderer == null) staleRenderers.Add(renderer);
                 foreach (var renderer in staleRenderers) propertyBlocks.Remove(renderer);
                 settings.Collect(occluders, warriors); floors.Clear();
-                effects.Clear();
+                effects.Clear();overlays.Clear();
                 if (SuppressedEffects != null) effects.AddRange(SuppressedEffects);
-                foreach (var effect in effects) { occluders.Remove(effect); warriors.Remove(effect); }
+                foreach (var effect in effects)
+                {
+                    occluders.Remove(effect);warriors.Remove(effect);
+                    var presentation=effect.GetComponentInParent<Art2EffectPresentation>();
+                    if(presentation&&presentation.DrawAboveScene)overlays.Add(effect);
+                }
+                foreach(var overlay in overlays)effects.Remove(overlay);
                 foreach (var floor in settings.floors) { Art2FloorOcclusion.Add(floors, floor); occluders.Remove(floor); }
-                if (effects.Count == 0 && (warriors.Count == 0 || floors.Count == 0)) return;
+                if (effects.Count == 0 && overlays.Count == 0 && (warriors.Count == 0 || floors.Count == 0)) return;
                 var desc = camera.cameraTargetDescriptor;
                 desc.msaaSamples = 1; desc.depthBufferBits = 32;
                 desc.graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None;
@@ -179,6 +185,32 @@ namespace RhythmHunter.FightDemo.Art2
                             }
                         }
                         if (d.originalDepth.IsValid()) context.cmd.SetGlobalTexture("_CameraDepthTexture", d.originalDepth);
+                    });
+                }
+                if(overlays.Count>0)
+                {
+                    // Opt-in cinematic effects render after floor-recovered actors. No depth
+                    // attachment: their own authored color passes cover the scene, never UI.
+                    using var builder=graph.AddRasterRenderPass<EffectDrawData>("Art2 cinematic VFX overlay",out var data);
+                    data.renderers=overlays.ToArray();
+                    builder.SetRenderAttachment(resources.activeColorTexture,0,AccessFlags.ReadWrite);
+                    if(resources.cameraDepthTexture.IsValid())builder.UseTexture(resources.cameraDepthTexture,AccessFlags.Read);
+                    if(resources.cameraOpaqueTexture.IsValid())builder.UseTexture(resources.cameraOpaqueTexture,AccessFlags.Read);
+                    builder.AllowPassCulling(false);
+                    builder.SetRenderFunc((EffectDrawData d,RasterGraphContext context)=>
+                    {
+                        foreach(var r in d.renderers)
+                        {
+                            if(!r||!r.enabled||!r.gameObject.activeInHierarchy)continue;
+                            var materials=r.sharedMaterials;
+                            for(int i=0;i<materials.Length;i++)
+                            {
+                                var m=materials[i];if(!m)continue;
+                                int pass=m.FindPass("ForwardLit");if(pass<0)pass=m.FindPass("ForwardUnlit");
+                                if(pass<0)pass=m.FindPass("UniversalForward");if(pass<0)pass=m.FindPass("Forward");
+                                context.cmd.DrawRenderer(r,m,i,Mathf.Max(0,pass));
+                            }
+                        }
                     });
                 }
             }

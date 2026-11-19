@@ -13,6 +13,14 @@ namespace RhythmHunter.FightDemo.Art2
         [Tooltip("Art2 cameras only: draw this effect against scenery/character depth, excluding the floor. Does not move or rotate it. Off by default.")]
         [SerializeField] private bool ignoreFloorOcclusion;
         public bool IgnoreFloorOcclusion => ignoreFloorOcclusion;
+        [SerializeField,Tooltip("Cinematic overlay only: draw after recovered characters without scene depth.")]
+        private bool drawAboveScene;
+        public bool DrawAboveScene => drawAboveScene;
+        public void ConfigureCinematicOverlay()
+        {
+            drawAboveScene=true;faceSpritesToCamera=faceBillboardParticlesToCamera=facePlanarMeshParticlesToCamera=keepAboveGround=false;
+            floorRenderers=null;
+        }
         internal static readonly System.Collections.Generic.List<Art2EffectPresentation> Active = new();
         private Renderer[] floorRenderers;
         internal Renderer[] FloorRenderers => floorRenderers ??= GetComponentsInChildren<Renderer>(true);
@@ -70,7 +78,7 @@ namespace RhythmHunter.FightDemo.Art2
             // Edit-mode registration is for the opt-in render pass only; never alter authored transforms.
             if (!Application.isPlaying) return;
             if (!initialized) Initialize();
-            UpdateFloorParticleCulling(ignoreFloorOcclusion && view && view.isActiveAndEnabled);
+            UpdateFloorParticleCulling((ignoreFloorOcclusion||drawAboveScene) && view && view.isActiveAndEnabled);
             if (!view || !view.isActiveAndEnabled) return;
             if (faceSpritesToCamera)
                 for (int i = 0; i < sprites.Length; i++)

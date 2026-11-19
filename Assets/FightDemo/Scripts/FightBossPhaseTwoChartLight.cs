@@ -78,7 +78,7 @@ namespace RhythmHunter.FightDemo
             if(!fight||!transition||!origin)return;
             if(fight.IsPaused||fight.TimingCalibrationActive)return;
             bool settled=transition.Ready;
-            bool active=lightingEnabled&&fight.BossPhaseTwoActive&&settled&&!ended&&!fight.BattleEnded&&!fight.DefeatSlowMotionActive;
+            bool active=lightingEnabled&&fight.BossPhaseTwoActive&&settled&&!(fight.BossRhythm && fight.BossRhythm.FinaleActive)&&!ended&&!fight.BattleEnded&&!fight.DefeatSlowMotionActive;
             weight=Mathf.MoveTowards(weight,active?1:0,Time.unscaledDeltaTime/Mathf.Max(.01f,fadeSeconds));
             if(active)extension=Mathf.MoveTowards(extension,1,Time.unscaledDeltaTime/Mathf.Max(.01f,extensionSeconds));
             if(weight<=0){extension=0;if(visuals)visuals.SetActive(false);return;}

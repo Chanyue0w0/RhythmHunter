@@ -101,8 +101,10 @@ namespace RhythmHunter.FightDemo
             if(renderers==null)return;
             for(int i=0;i<renderers.Length;i++)
             {
-                if(renderers[i])renderers[i].sharedMaterials=originals[i];
-                foreach(var mat in instances[i])if(mat)Destroy(mat);
+                // Unity may restore Renderer references across a domain reload without managed snapshots.
+                if(renderers[i]&&originals!=null&&i<originals.Length&&originals[i]!=null)renderers[i].sharedMaterials=originals[i];
+                if(instances!=null&&i<instances.Length&&instances[i]!=null)
+                    foreach(var mat in instances[i])if(mat)Destroy(mat);
             }
         }
     }

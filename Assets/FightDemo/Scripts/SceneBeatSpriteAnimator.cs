@@ -20,6 +20,13 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Frame[] frames = Array.Empty<Frame>();
         private SpriteRenderer spriteRenderer;
 
+        public void Configure(FmodBeatClock clock, Sprite[] sprites, float loopBeats)
+        {
+            beatClock=clock;frames=new Frame[sprites.Length];
+            for(int i=0;i<sprites.Length;i++)frames[i]=new Frame{sprite=sprites[i],durationInBeats=loopBeats/Math.Max(1,sprites.Length)};
+            spriteRenderer=GetComponent<SpriteRenderer>();ShowFirstFrame();
+        }
+
         private void OnEnable()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();

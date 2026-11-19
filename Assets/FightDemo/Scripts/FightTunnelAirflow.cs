@@ -5,7 +5,7 @@ namespace RhythmHunter.FightDemo
     /// <summary>Actual world-space ribbons moving down a cone from the door to the viewing camera.</summary>
     public sealed class FightTunnelAirflow : MonoBehaviour
     {
-        struct Streak { public float angle,t,radius,width,speed,alpha,presence; }
+        struct Streak { public float angle,t,radius,width,speed,alpha,presence;public bool retired; }
         readonly Streak[] streaks=new Streak[128];
         readonly Vector3[] vertices=new Vector3[512];
         readonly Color[] colors=new Color[512];
@@ -30,9 +30,9 @@ namespace RhythmHunter.FightDemo
             for(int i=0;i<128;i++)streaks[i]=new Streak{angle=Next()*Mathf.PI*2,t=Next()*.92f,radius=Mathf.Lerp(.65f,1.25f,Next()),width=Next(),speed=Mathf.Lerp(.8f,1.2f,Next()),alpha=Mathf.Lerp(.35f,1,Next())};
         }
         public static Vector3 Point(Vector3 origin,Vector3 camera,Vector3 radial,float t,float sourceRadius,float nearRadius)
-            =>Vector3.Lerp(origin,camera,t)+radial*Mathf.Lerp(sourceRadius,nearRadius,t);
+            =>Vector3.LerpUnclamped(origin,camera,t)+radial*Mathf.LerpUnclamped(sourceRadius,nearRadius,t);
         public void Present(Camera camera,Vector3 origin,float travel,int count,float sourceRadius,float nearRadius,float length,Vector2 widths,Color tint,
-            bool protect,float center,float protectedWidth,float doorWidth,float feather,bool snap,bool depth,float populationStep = 1)
+            bool protect,float center,float protectedWidth,float doorWidth,float feather,bool snap,bool depth,float populationStep = 1,bool emit = true,float exitMargin=.08f,float maximumTravel=1.4f)
         {
             if(!mesh||!material||!camera)return;
             count=Mathf.Clamp(count,0,128);
@@ -48,19 +48,29 @@ namespace RhythmHunter.FightDemo
             for(int i=0;i<128;i++)
             {
                 var line=streaks[i];
-                line.presence=Mathf.MoveTowards(line.presence,i<count?1:0,Mathf.Max(0,populationStep));
+                if(emit)line.presence=Mathf.MoveTowards(line.presence,i<count?1:0,Mathf.Max(0,populationStep));
                 line.t+=Mathf.Max(0,travel)*line.speed;
-                if(line.t>.94f){line.t%=.94f;line.angle=Next()*Mathf.PI*2;}
+
                 streaks[i]=line;
                 Vector3 radial=(right*Mathf.Cos(line.angle)+up*Mathf.Sin(line.angle))*line.radius;
                 Vector3 head=Point(origin,camera.transform.position,radial,line.t,sourceRadius,nearRadius);
                 Vector3 tail=Point(origin,camera.transform.position,radial,Mathf.Max(0,line.t-length/distance),sourceRadius,nearRadius);
+                Vector3 tailViewport=camera.WorldToViewportPoint(tail);
+                bool outside=tailViewport.z<=camera.nearClipPlane||tailViewport.x < -exitMargin||tailViewport.x>1+exitMargin||tailViewport.y < -exitMargin||tailViewport.y>1+exitMargin;
+                if(line.t>1 && (outside||line.t>Mathf.Max(1,maximumTravel)))
+                {
+                    if(emit){line.t=0;line.angle=Next()*Mathf.PI*2;line.presence=0;}
+                    else line.retired=true;
+                    streaks[i]=line;
+                    for(int k=0;k<4;k++)colors[i*4+k]=Color.clear;
+                    continue;
+                }
                 Vector3 side=Vector3.Cross(camera.transform.position-(head+tail)*.5f,head-tail).normalized;
                 side*=Mathf.Max(.001f,Mathf.Lerp(widths.x,widths.y,line.width))*.5f;
                 int v=i*4;
                 vertices[v]=transform.InverseTransformPoint(tail-side);vertices[v+1]=transform.InverseTransformPoint(tail+side);
                 vertices[v+2]=transform.InverseTransformPoint(head+side);vertices[v+3]=transform.InverseTransformPoint(head-side);
-                Color color=tint;color.a*=line.presence*line.alpha*Mathf.SmoothStep(0,1,Mathf.Clamp01(line.t/.1f))*Mathf.SmoothStep(0,1,Mathf.Clamp01((.94f-line.t)/.24f));
+                Color color=tint;color.a*=line.presence*line.alpha*Mathf.SmoothStep(0,1,Mathf.Clamp01(line.t/.1f))*(line.retired?0:1);
                 colors[v]=colors[v+1]=new Color(color.r,color.g,color.b,0);colors[v+2]=colors[v+3]=color;
             }
             mesh.Clear(false);mesh.SetVertices(vertices,0,512);mesh.SetColors(colors,0,512);mesh.SetIndices(indices,0,768,MeshTopology.Triangles,0);mesh.RecalculateBounds();

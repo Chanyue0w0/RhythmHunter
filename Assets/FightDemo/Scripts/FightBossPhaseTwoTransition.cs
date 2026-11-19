@@ -137,7 +137,7 @@ namespace RhythmHunter.FightDemo
                 foreach (var actor in bosses) Idle(actor, bossIdleAnimation);
                 Phase = TransitionPhase.Ready; Completed?.Invoke();
             }
-            if (Ready) { Move(bosses, 1, 0); Move(heroes, 1, 0); }
+            if (Ready) { Move(bosses, 1, 0); if(!fight.BossRhythm || !fight.BossRhythm.FinaleActive)Move(heroes, 1, 0); }
         }
         private static void Idle(Actor actor, string name)
         {
