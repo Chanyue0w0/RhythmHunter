@@ -100,6 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3195970611689555888}
   - component: {fileID: 850347742696857205}
+  - component: {fileID: 904629628326846580}
   m_Layer: 0
   m_Name: Background_00
   m_TagString: Untagged
@@ -181,6 +182,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &904629628326846580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815397196506398856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96469db113b7c944b8b902019565dc2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CameraPinnedForeground
+  targetCamera: {fileID: 0}
 --- !u!1 &1896599335456656659
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,6 +296,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2127424686392013923}
   - component: {fileID: 4357806239704478737}
+  - component: {fileID: 1254411714231273399}
   m_Layer: 0
   m_Name: Background_01
   m_TagString: Untagged
@@ -363,6 +378,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1254411714231273399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2248887118793984312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96469db113b7c944b8b902019565dc2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CameraPinnedForeground
+  targetCamera: {fileID: 0}
 --- !u!1 &2667621060702850480
 GameObject:
   m_ObjectHideFlags: 0
@@ -1567,7 +1595,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a2d4f1e9c7b8435e91f06ab2d7c4e8f3, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.LoopingBackgroundScroller
   sourceRenderer: {fileID: 1848541284699801146}
   unitsPerSecond: 0.12

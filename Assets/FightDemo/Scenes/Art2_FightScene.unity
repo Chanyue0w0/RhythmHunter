@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   enableRestHitHop: 1
   restHitHopDistance: 0.12
@@ -334,7 +334,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5870066df274f64ba9440afd1b3f6c9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2FloorOcclusion
   enableCorrection: 1
   targetCamera: {fileID: 2147100302}
@@ -695,7 +695,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1356941104645830612, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 768488f36e3be624dbe67a4ba1eb0c03, type: 2}
     - target: {fileID: 4748681987041982144, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: m_Name
@@ -972,7 +972,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: beatSource
-      value:
+      value: 
       objectReference: {fileID: 2021200326}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.size
@@ -984,7 +984,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[10].target
-      value:
+      value: 
       objectReference: {fileID: 1423671222}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[11].amount
@@ -992,7 +992,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[11].target
-      value:
+      value: 
       objectReference: {fileID: 790028219}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[12].amount
@@ -1000,7 +1000,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[12].target
-      value:
+      value: 
       objectReference: {fileID: 462921676}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[13].amount
@@ -1008,7 +1008,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[13].target
-      value:
+      value: 
       objectReference: {fileID: 1905371429}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[14].amount
@@ -1016,7 +1016,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[14].target
-      value:
+      value: 
       objectReference: {fileID: 1258807903}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[15].amount
@@ -1024,7 +1024,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[15].target
-      value:
+      value: 
       objectReference: {fileID: 295788700}
     - target: {fileID: 5956044054566134083, guid: bc72bf5a3a5b3a44a8d9c235ac36b264, type: 3}
       propertyPath: pulses.Array.data[10].durationInBeats
@@ -5995,7 +5995,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -6098,7 +6098,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
@@ -6299,7 +6299,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -6734,7 +6734,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   enableRestHitHop: 1
   restHitHopDistance: 0.12
@@ -6922,7 +6922,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -7102,7 +7102,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.08, g: 0.12, b: 0.18, a: 1}
@@ -7278,7 +7278,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
   m_Navigation:
     m_Mode: 3
@@ -7347,7 +7347,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
   m_SendPointerHoverToParent: 1
   m_MoveRepeatDelay: 0.5
@@ -7378,7 +7378,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
@@ -7690,7 +7690,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -7778,7 +7778,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.12, g: 0.2, b: 0.28, a: 1}
@@ -8251,7 +8251,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3128bfe8be884ac99bf46c78f0eb70bb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossPhaseTwoChartLight
   fight: {fileID: 2021200326}
   transition: {fileID: 2021200341}
@@ -8365,7 +8365,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -8447,7 +8447,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   enableRestHitHop: 1
   restHitHopDistance: 0.12
@@ -8577,7 +8577,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   enableRestHitHop: 1
   restHitHopDistance: 0.12
@@ -8669,7 +8669,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1909999451366622236, guid: 8e5fcd6990ad02d4f867866d62f3741e, type: 3}
       propertyPath: beatClock
-      value:
+      value: 
       objectReference: {fileID: 2021200329}
     - target: {fileID: 5563869598467684998, guid: 8e5fcd6990ad02d4f867866d62f3741e, type: 3}
       propertyPath: m_Name
@@ -8678,6 +8678,10 @@ PrefabInstance:
     - target: {fileID: 5563869598467684998, guid: 8e5fcd6990ad02d4f867866d62f3741e, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8703018519615668513, guid: 8e5fcd6990ad02d4f867866d62f3741e, type: 3}
+      propertyPath: m_SortingOrder
+      value: -41
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8841,7 +8845,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96dd0604d1b73f6c63e13d6f599e1c26, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightPressureAccentLight
   combat: {fileID: 2021200326}
   enablePressureLight: 1
@@ -8856,7 +8860,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -9085,7 +9089,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.58, g: 0.68, b: 0.78, a: 1}
@@ -9574,7 +9578,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
@@ -9734,7 +9738,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1356941104645830612, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 768488f36e3be624dbe67a4ba1eb0c03, type: 2}
     - target: {fileID: 4748681987041982144, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: m_Name
@@ -10001,7 +10005,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.3, g: 0.2, b: 0.08, a: 1}
@@ -10102,7 +10106,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   enableRestHitHop: 1
   restHitHopDistance: 0.12
@@ -10327,7 +10331,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.2, g: 0.92, b: 1, a: 1}
@@ -11005,7 +11009,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1356941104645830612, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 768488f36e3be624dbe67a4ba1eb0c03, type: 2}
     - target: {fileID: 4748681987041982144, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: m_Name
@@ -11187,7 +11191,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.58, g: 0.68, b: 0.78, a: 1}
@@ -11557,7 +11561,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.68, b: 0.16, a: 1}
@@ -11628,7 +11632,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.3, g: 1, b: 0.55, a: 1}
@@ -12268,7 +12272,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -12448,7 +12452,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
   m_Navigation:
     m_Mode: 3
@@ -12627,7 +12631,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -12864,7 +12868,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.08, g: 0.12, b: 0.18, a: 1}
@@ -13030,7 +13034,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -13194,7 +13198,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.25, b: 0.3, a: 0}
@@ -13402,7 +13406,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.12}
   m_EffectDistance: {x: 2, y: -2}
@@ -13417,7 +13421,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.035, g: 0.055, b: 0.085, a: 0.94}
@@ -13492,7 +13496,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3044d125049d48f4867f49a4feda51a0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2SceneryContactShadows
   shadowMaterial: {fileID: 2100000, guid: fd15e0aabc714c78b06288c1bbd710f8, type: 2}
   showContactShadows: 1
@@ -13590,7 +13594,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.58, g: 0.68, b: 0.78, a: 1}
@@ -13972,7 +13976,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
   m_IgnoreReversedGraphics: 1
   m_BlockingObjects: 0
@@ -13989,7 +13993,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
@@ -14080,7 +14084,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.2, g: 0.92, b: 1, a: 1}
@@ -14118,7 +14122,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3114776657493095983, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_Sprite
-      value:
+      value: 
       objectReference: {fileID: 21300000, guid: 0566d12addda8704bbd6ef7886cd15a4, type: 3}
     - target: {fileID: 4424178650152436019, guid: 5eeb010da4d140879ecb19ab67f75810, type: 3}
       propertyPath: m_LocalPosition.x
@@ -14574,7 +14578,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1356941104645830612, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 768488f36e3be624dbe67a4ba1eb0c03, type: 2}
     - target: {fileID: 4748681987041982144, guid: 6856ea53750c1774e8d2109f8ef482dd, type: 3}
       propertyPath: m_Name
@@ -19643,7 +19647,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
   m_Color: {r: 0.92, g: 0.96, b: 1, a: 1}
@@ -20037,7 +20041,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.12}
   m_EffectDistance: {x: 2, y: -2}
@@ -20052,7 +20056,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.035, g: 0.055, b: 0.085, a: 0.94}
@@ -20387,7 +20391,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7e78cbc2a40145c8ad601a44caeac6b0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &2000615668
 GameObject:
@@ -20419,7 +20423,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86c6556701af9e04380698b89f691b6e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
   nonRigidbodyVelocity: 0
   attenuationObject: {fileID: 0}
@@ -20507,7 +20511,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
@@ -20590,7 +20594,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5abd07980edf7cd428c34c985b89b4b8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBattlefieldPresenter
   fight: {fileID: 2021200326}
   enemySlots:
@@ -20613,7 +20617,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d3686a9e83f96b84b904c1223cd7b674, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightScenePresenter
   showBossSurvivalHud: 1
   defeatStoneJumpHeight: 65
@@ -20722,7 +20726,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 32a4962375e27d543a29cf52c784c741, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCombatController
   playSuccessfulBlockSound: 1
   successfulBlockSoundEventPath: event:/SoundEffects/InCombat/Paladin_NormalParry
@@ -20854,7 +20858,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a5524212e24e1a4482ac2a543012f3c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightInputRouter
   fightControls: {fileID: -944628639613478452, guid: 3cd4a754d66185f4aa4de56e7822a561, type: 3}
 --- !u!114 &2021200328
@@ -20867,7 +20871,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 797894045f468094db4eae73ea7e7993, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodRhythmJudge
   beatClock: {fileID: 2021200329}
   perfectWindowMs: 120
@@ -20883,7 +20887,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3814f07b225d8f34084d9aed7684d7c7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.RhythmDemo.FmodBeatClock
   sectionPreview: 2
   sectionFadeOutSeconds: 0.15
@@ -20936,7 +20940,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5dd05245035e4803bc6e8ae3535f39c5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightRosterManager
   requireBattlePreparation: 1
   fightController: {fileID: 2021200326}
@@ -20968,7 +20972,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 50ef773be6c94a44b108e27f935cc8f2, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightAudioPlayer
   soundEnabled: 1
   masterVolume: 1
@@ -20983,7 +20987,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e2aaf96685c11ad4eafed2904c2ff534, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightLevelPlanner
   chapter: {fileID: 11400000, guid: d42c845434c163849bc67a7a7698645c, type: 2}
   stageIndex: 0
@@ -21003,7 +21007,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a1d6695abd0c7b04dae944adce98eb6b, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightWaveEntrance
   fight: {fileID: 2021200326}
   roster: {fileID: 2021200331}
@@ -21029,7 +21033,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4bed071d29784a247851471714dbd238, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightVictoryPanel
   results: {fileID: 2021200337}
   showVictoryPanel: 1
@@ -21050,7 +21054,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c07879ce08912cd4798aa5f16e590d8f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageResults
   fight: {fileID: 2021200326}
   planner: {fileID: 2021200334}
@@ -21065,7 +21069,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70edf3323b563ba46884f9e4eeaad503, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightDamageEdgeFeedback
   fight: {fileID: 2021200326}
   showDamageFlash: 1
@@ -21087,7 +21091,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4a72330307327d4e9814102c7632a37, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossEntrance
   doorFanShader: {fileID: 4800000, guid: 6c98064f52a34753ac6e75be1d7f0d06, type: 3}
   doorExplosionAnchor: {fileID: 785508384}
@@ -21110,7 +21114,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c2a1503faad94344a62abdd5c281353, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossStageDebug
   fight: {fileID: 2021200326}
   completePhaseOneOnStart: 0
@@ -21125,7 +21129,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 600fc9731811cd6488c7aa78e2ac511c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossPhaseTwoTransition
   fight: {fileID: 2021200326}
   bossDestination: {fileID: 1975473682}
@@ -21155,7 +21159,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0aaff0f936d6d842b472bab7974db5a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossRhythmBattle
   fight: {fileID: 2021200326}
   transition: {fileID: 2021200341}
@@ -21196,7 +21200,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1ad094fb64fc324ca0ff66002c7814f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightPhaseTwoSpeedLines
   fight: {fileID: 2021200326}
   rhythm: {fileID: 2021200342}
@@ -21294,7 +21298,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 75ee102dc6234249b38ecde95a1c7469, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossPhaseTwoFire
   fight: {fileID: 2021200326}
   view: {fileID: 2147100302}
@@ -21341,7 +21345,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a88071490bb74a5e936fe88ce1a69f91, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.PhaseTwoFocusBlur
   fight: {fileID: 2021200326}
   transition: {fileID: 2021200341}
@@ -21369,7 +21373,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ef6db70a38159f409cabb60064fe273, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossGemFinale
   fight: {fileID: 2021200326}
   rhythm: {fileID: 2021200342}
@@ -21460,7 +21464,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e7d02dd4c4e0cd498aca143044c43a9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightEnvironmentSelector
   fallbackEnvironment: {fileID: 11400000, guid: a217f90cd8674dc3a01ce68a23bacba7, type: 2}
   bindings:
@@ -21531,7 +21535,7 @@ MonoBehaviour:
     - {fileID: 621595463}
     controllers: []
     rootEnabled: 01
-    controllerEnabled:
+    controllerEnabled: 
   actorPresentation: {fileID: 2147100002}
   pressureVisuals: {fileID: 2147300105}
   floorOcclusion: {fileID: 35082290}
@@ -21545,7 +21549,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a185b0d3be6dabb4c9cda1ee96ff87ab, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightTutorialController
   textFont: {fileID: 0}
   dialogueSize: {x: 880, y: 360}
@@ -21603,7 +21607,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f598aa65d809bb419f6daafe72821c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightUnitSlot
   enableRestHitHop: 1
   restHitHopDistance: 0.12
@@ -21701,7 +21705,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.12, g: 0.2, b: 0.28, a: 1}
@@ -21777,7 +21781,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.12, g: 0.2, b: 0.28, a: 1}
@@ -21824,7 +21828,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c6571ba71ad6ee74f885479f75d11ef0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2EffectPresentation
   faceSpritesToCamera: 1
   faceBillboardParticlesToCamera: 1
@@ -21990,7 +21994,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1002, guid: d4efe608d19c484d85b9cd6da7037766, type: 3}
       propertyPath: beatSource
-      value:
+      value: 
       objectReference: {fileID: 2021200326}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -22055,7 +22059,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 149033ff1c1f447cb2c7a21b81cdb2e4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2ActorPresentation
   slots:
   - {fileID: 928599}
@@ -22090,7 +22094,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 135496e18c7a4bc6bded1b0acc477184, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   enableFill: 1
   enableRim: 0
@@ -22121,7 +22125,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9632f258bc5943d3a0690ae23b58e6f1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2SkillFlashLighting
   enableSkillFlashes: 1
   combat: {fileID: 2021200326}
@@ -22158,7 +22162,7 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: edbd9224ac244056b22cbe2622fae863, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2SceneLightingTuning
   enableSceneSeparation: 1
   backgroundAmbientMultiplier: 0.8
@@ -22239,27 +22243,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2133, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: beatClock
-      value:
+      value: 
       objectReference: {fileID: 2021200329}
     - target: {fileID: 2133, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: frames.Array.data[1].sprite
-      value:
+      value: 
       objectReference: {fileID: 21300000, guid: b8213ebd928452840adc2ef3f31d9fbe, type: 3}
     - target: {fileID: 2133, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: frames.Array.data[2].sprite
-      value:
+      value: 
       objectReference: {fileID: 21300000, guid: 70170cc412eb4084ab98f770463e1e42, type: 3}
     - target: {fileID: 2143, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: beatClock
-      value:
+      value: 
       objectReference: {fileID: 2021200329}
     - target: {fileID: 2143, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: frames.Array.data[1].sprite
-      value:
+      value: 
       objectReference: {fileID: 21300000, guid: 25c35bb49856bff438a7c38bd4ddab49, type: 3}
     - target: {fileID: 2143, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: frames.Array.data[2].sprite
-      value:
+      value: 
       objectReference: {fileID: 21300000, guid: 8962ef6c6c78e39469aa74254728e4a3, type: 3}
     - target: {fileID: 2301, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: m_LocalScale.x
@@ -22423,39 +22427,39 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'additionalRoots.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 2147200301}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'additionalRoots.Array.data[1]'
-      value:
+      value: 
       objectReference: {fileID: 2147400301}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'additionalRoots.Array.data[2]'
-      value:
+      value: 
       objectReference: {fileID: 2147400401}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'additionalRoots.Array.data[3]'
-      value:
+      value: 
       objectReference: {fileID: 2147200401}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'emphasizedRoots.Array.data[0]'
-      value:
+      value: 
       objectReference: {fileID: 400426730}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'emphasizedRoots.Array.data[1]'
-      value:
+      value: 
       objectReference: {fileID: 1674957628}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'emphasizedRoots.Array.data[2]'
-      value:
+      value: 
       objectReference: {fileID: 1879600866}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'emphasizedRoots.Array.data[3]'
-      value:
+      value: 
       objectReference: {fileID: 640384060}
     - target: {fileID: 2902, guid: a05cd2b7058c4ec8b02b13446c02f004, type: 3}
       propertyPath: 'emphasizedRoots.Array.data[4]'
-      value:
+      value: 
       objectReference: {fileID: 254189892}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -22514,7 +22518,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1f6700f774bb49b180067f7083792796, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightCharacterCombatAnimator
   targetRenderer: {fileID: 1513715654}
   beatSource: {fileID: 2021200326}
@@ -22540,7 +22544,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9cdc217fcbd4edc43836238efdd3027f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossDoorAnimation
   doorRenderer: {fileID: 1513715654}
   animator: {fileID: 2147100104}
@@ -22717,6 +22721,7 @@ GameObject:
   - component: {fileID: 2147100305}
   - component: {fileID: 2147100306}
   - component: {fileID: 2147100307}
+  - component: {fileID: 2147100308}
   m_Layer: 0
   m_Name: Art2_TestCamera
   m_TagString: MainCamera
@@ -22800,7 +22805,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 1
@@ -22844,7 +22849,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 571f0fdf1dd8431c8105e49094534548, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CameraController
   perspective: 1
   pitch: 45
@@ -22855,6 +22860,7 @@ MonoBehaviour:
   zoomSpeed: 0.15
   zoomLimits: {x: 3.5, y: 8}
   enableKeyboardAndWheel: 1
+  maximumCombinedShake: 0.2
 --- !u!81 &2147100305
 AudioListener:
   m_ObjectHideFlags: 0
@@ -22873,7 +22879,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86c6556701af9e04380698b89f691b6e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
   nonRigidbodyVelocity: 0
   attenuationObject: {fileID: 0}
@@ -22887,7 +22893,7 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bce0a9ad9bb2c374ebb3043a9ca4fd68, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2CinematicFocus
   enableFocus: 1
   roster: {fileID: 2021200331}
@@ -22900,6 +22906,24 @@ MonoBehaviour:
   additionalForegroundRoots: []
   previewInEditMode: 0
   previewWeight: 0
+--- !u!114 &2147100308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147100300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a14dfabdc8785844e9da91883d5f7e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2BattleCameraShake
+  combat: {fileID: 2021200326}
+  cameraController: {fileID: 2147100304}
+  enableEffectShake: 1
+  strengthMultiplier: 0.65
+  maximumEffectShake: 0.08
+  frequency: 24
 --- !u!1 &2147200000
 GameObject:
   m_ObjectHideFlags: 0
@@ -22976,7 +23000,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
   m_IsGlobal: 1
   priority: 10
@@ -23091,7 +23115,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -23221,7 +23245,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   baseIntensity: 10
   flickerAmount: 0.15
@@ -23238,7 +23262,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}
   radius: 0.95
@@ -23255,7 +23279,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -23385,7 +23409,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   baseIntensity: 10
   flickerAmount: 0.15
@@ -23402,7 +23426,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}
   radius: 0.95
@@ -23419,7 +23443,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -23546,7 +23570,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -23675,7 +23699,7 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 440c88abc9ab4108b66436413755af58, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.Art2.Art2ShadowTestLight
   aimTarget: {fileID: 2147300201}
   aimAtTarget: 1
@@ -23689,7 +23713,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 0
   m_AdditionalLightsShadowResolutionTier: 2
@@ -23718,7 +23742,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05cdd9f7ada34727a75184ebaa9b662c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   combat: {fileID: 2021200326}
   mainLight: {fileID: 621595464}
@@ -23881,7 +23905,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   baseIntensity: 10
   flickerAmount: 0.15
@@ -23898,7 +23922,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -23927,7 +23951,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}
   radius: 0.95
@@ -24045,7 +24069,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0dac30723398424f90dbcad39f3ff9d1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   baseIntensity: 10
   flickerAmount: 0.15
@@ -24062,7 +24086,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -24091,7 +24115,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9512f56839cc4d1ba57b4821fb5e2886, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   haloMaterial: {fileID: 2100000, guid: ce68fe174f064d4581e3acaaa8a83521, type: 2}
   radius: 0.95
@@ -24180,7 +24204,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: efcbbccded97484cb6df7d41a6ab15c9, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   beatClock: {fileID: 2021200329}
   motionEnabled: 1
@@ -48544,7 +48568,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -53385,7 +53409,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9205bc1bbacc90040a998067b5643d16, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   clearBehavior: 2
   cameraShake:
@@ -63501,7 +63525,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8395605815165847624, guid: eb2080904599ba2429b6e8d3c3e8d54c, type: 3}
       propertyPath: m_Sprite
-      value:
+      value: 
       objectReference: {fileID: 21300000, guid: 696a134125121484490b14b8041db274, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -73353,7 +73377,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
@@ -73461,7 +73485,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9205bc1bbacc90040a998067b5643d16, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: 
   clearBehavior: 2
   cameraShake:

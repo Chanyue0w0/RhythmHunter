@@ -34,6 +34,9 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Overrides Chapter.DefaultEnvironment. Unassigned inherits the chapter, then falls back to Cave.")]
         [SerializeField] private FightEnvironmentDefinition environment;
         public bool Tutorial => tutorial;
+        [Tooltip("Only enable for a lesson that teaches Fever. Other tutorial stages accept A rhythm input without activating Fever.")]
+        [SerializeField] private bool teachesFever;
+        public bool TeachesFever => tutorial && teachesFever;
         public FightEnvironmentDefinition Environment => environment;
         public string EnvironmentId => environment != null ? environment.EnvironmentId : "Cave";
         [Header("Boss Entrance")]

@@ -24,6 +24,10 @@ namespace RhythmHunter.FightDemo.Art2
         private Vector2 bossEntranceShake;
         private Vector2 bossPhaseTwoShake;
         private Vector2 gemFinaleShake;
+        [Header("Unified shake")]
+        [SerializeField, Min(0)] private float maximumCombinedShake = .2f;
+        private Vector2 effectShake;
+        public void SetEffectShake(Vector2 offset) => effectShake = offset;
         public void SetGemFinaleShake(Vector2 offset) => gemFinaleShake=offset;
         public void SetBossPhaseTwoShake(Vector2 offset) => bossPhaseTwoShake = offset;
         private Vector3 bossFocusTarget;
@@ -99,7 +103,7 @@ namespace RhythmHunter.FightDemo.Art2
             // Equal vertical framing at the focus plane in either projection.
             float distance = effectiveHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
             transform.position = Vector3.Lerp(focus,bossFocusTarget,bossFocusWeight) - transform.forward * distance;
-            var shake = bossEntranceShake + bossPhaseTwoShake + gemFinaleShake;
+            var shake = Vector2.ClampMagnitude(bossEntranceShake + bossPhaseTwoShake + gemFinaleShake + effectShake, maximumCombinedShake);
             transform.position += transform.right * shake.x + transform.up * shake.y;
             view.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
             view.transparencySortAxis = transform.forward;

@@ -100,3 +100,19 @@ Remaining lesson proposals (not active gameplay):
   Solo lessons cannot demonstrate ally-triggered follow-up; defer practical use to reunion.
 - Do not require perfect streaks initially. Show concise Miss guidance, keep completed
   objectives, offer retry. Lesson completion/health protection needs explicit design next.
+
+Tutorial Fever / camera stability (2026-11-20):
+- Stage Definition: Tutorial stages block Fever by default, including free practice.
+  Enable Teaches Fever only for a Fever lesson; other global/Pressure locks still apply.
+  A remains rhythm input during practice, and advances dialogue while reading.
+- Art2_TestCamera > Art2BattleCameraShake: Enable Effect Shake, Strength Multiplier,
+  Maximum Effect Shake and Frequency tune battle effect shake. Native CFX shake is
+  intercepted only on spawned battle instances; purchased source prefabs stay intact.
+- Art2CameraController > Maximum Combined Shake caps combined XY camera displacement.
+- Forest Background_00 / Background_01: Art2CameraPinnedForeground keeps the black
+  foreground screen-fixed at runtime, including shake and zoom; restores on disable.
+  Sky has 6% overscan; ForestRoad_WithMargin adds a boundary skirt without shifting
+  the central ground UVs. Rock/tree beat-motion settings remain unchanged.
+- Play validation passed: A feedback without Fever; direct activation guards;
+  Fever lesson opt-in; native effect shake interception; 200 viewport samples across
+  camera shake/zoom with both foreground cards fixed. Build: 0 warnings / 0 errors.

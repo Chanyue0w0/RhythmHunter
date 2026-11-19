@@ -110,6 +110,7 @@ namespace RhythmHunter.FightDemo
                 if (command == FightInputRouter.HeroCommand.TeamSkill) AdvanceDialogue();
                 return true;
             }
+            if (command == FightInputRouter.HeroCommand.TeamSkill) return false;
             return advancePending || command != FightInputRouter.HeroCommand.Front;
         }
         public void AdvanceDialogue()

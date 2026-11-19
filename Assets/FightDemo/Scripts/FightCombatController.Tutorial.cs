@@ -5,6 +5,14 @@ namespace RhythmHunter.FightDemo
     {
         // One event per confirmed primary sword contact. Delayed damage never counts twice.
         public event Action<FightUnitSlot, bool, int> SwordPrimaryHit;
+        public bool FeverBlockedByTutorial
+        {
+            get
+            {
+                var stage = GetComponent<FightLevelPlanner>()?.ActiveStage;
+                return stage != null ? stage.Tutorial && !stage.TeachesFever : rosterManager != null && rosterManager.IsTutorialStage;
+            }
+        }
         internal bool TutorialChargeSuppressed { get; private set; }
         internal void SetTutorialChargeSuppressed(bool suppressed)
         {

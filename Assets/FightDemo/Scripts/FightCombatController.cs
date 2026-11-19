@@ -548,7 +548,7 @@ namespace RhythmHunter.FightDemo
             if (command == FightInputRouter.HeroCommand.TeamSkill)
             {
                 if (UsesEqualBeats && rhythmJudge != null && inputRouter != null) rhythmJudge.SetInputProfile(inputRouter.CurrentInputProfile);
-                if (WaveTransitionActive || suspendFeverActivation)
+                if (WaveTransitionActive || suspendFeverActivation || FeverBlockedByTutorial)
                 {
                     if (rhythmJudge == null) return;
                     var result = rhythmJudge.JudgeInput(inputRouter != null ? inputRouter.CurrentInputAgeMs : 0);
@@ -561,7 +561,7 @@ namespace RhythmHunter.FightDemo
             if (TeamSkillRunning) return;
             if (UsesEqualBeats && command == FightInputRouter.HeroCommand.Ultimate)
             {
-                if (suspendFeverActivation) return;
+                if (suspendFeverActivation || FeverBlockedByTutorial) return;
                 TryStartTeamUltimate();
                 return;
             }
