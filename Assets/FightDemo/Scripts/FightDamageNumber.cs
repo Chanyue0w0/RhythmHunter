@@ -21,6 +21,24 @@ namespace RhythmHunter.FightDemo
         }
 
         private FightCombatController controller;
+        private static readonly int PopupOpacity = Shader.PropertyToID("_PopupOpacity");
+        private MaterialPropertyBlock opacityProperties;
+        private void SetOpacity(SpriteRenderer renderer, Color original, float alpha)
+        {
+            if (renderer.sharedMaterial != null && renderer.sharedMaterial.HasProperty(PopupOpacity))
+            {
+                renderer.color = original;
+                opacityProperties ??= new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(opacityProperties);
+                opacityProperties.SetFloat(PopupOpacity, alpha);
+                renderer.SetPropertyBlock(opacityProperties);
+            }
+            else
+            {
+                original.a *= alpha;
+                renderer.color = original;
+            }
+        }
         private SortingGroup sortingGroup;
         internal void SetSortingOrder(int order)
         {
@@ -67,7 +85,7 @@ namespace RhythmHunter.FightDemo
             }
             for (int i = 0; i < glyph.sprites.Length; i++)
             {
-                glyph.sprites[i].color = glyph.spriteColors[i];
+                SetOpacity(glyph.sprites[i], glyph.spriteColors[i], 1f);
                 glyph.sprites[i].sortingOrder = sortingOrder;
             }
             glyph.root.SetActive(true);
@@ -130,13 +148,12 @@ namespace RhythmHunter.FightDemo
             if (elapsed >= lifetime) { controller.ReturnDamageNumber(this); return; }
             float t = Mathf.Clamp01(elapsed / lifetime);
             UpdatePosition();
-            float alpha = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.55f, 1, t));
+            // Fade immediately so older hits recede as new numbers appear.
+            float alpha = 1 - t;
             foreach (var glyph in glyphs)
                 for (int i = 0; i < glyph.sprites.Length; i++)
                 {
-                    Color color = glyph.spriteColors[i];
-                    color.a *= alpha;
-                    glyph.sprites[i].color = color;
+                    SetOpacity(glyph.sprites[i], glyph.spriteColors[i], alpha);
                 }
         }
     }

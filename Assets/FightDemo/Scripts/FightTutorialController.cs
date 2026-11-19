@@ -147,7 +147,7 @@ namespace RhythmHunter.FightDemo
             fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, lesson.attackInFreePractice, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
             fight.SetTutorialChargeSuppressed(false);
             modal.SetActive(false); objective.SetActive(true);
-            counter.text = $"<b><color=#FFD879>{heading}</color></b>\n{description}";
+            SetObjectiveText($"<b><color=#FFD879>{heading}</color></b>\n{description}");
         }
         public bool TryEnterNextTutorial()
         {
@@ -160,14 +160,22 @@ namespace RhythmHunter.FightDemo
                 if (stage == null || !stage.Tutorial) continue;
                 pause = GetComponent<FightPauseController>();
                 if (pause != null && pause.TryLoadStage(planner.Chapter, next, out string error)) return true;
-                counter.text = "下一關暫時無法載入，請檢查關卡設定。"; return false;
+                SetObjectiveText("下一關暫時無法載入，請檢查關卡設定。"); return false;
             }
-            counter.text = "<b><color=#FFD879>訓練完成！</color></b>\n目前沒有下一個教學關卡，可以繼續自由練習。";
+            SetObjectiveText("<b><color=#FFD879>訓練完成！</color></b>\n目前沒有下一個教學關卡，可以繼續自由練習。");
             return false;
         }
         private void RefreshObjective()
         {
-            counter.text = $"<b><color=#FFD879>{Step.title}</color></b>\n{Step.text}\n<b><color=#7FE5FF>{progress} / {Mathf.Max(1, Step.required)}</color></b>";
+            SetObjectiveText($"<b><color=#FFD879>{Step.title}</color></b>\n{Step.text}\n<b><color=#7FE5FF>{progress} / {Mathf.Max(1, Step.required)}</color></b>");
+        }
+        private void SetObjectiveText(string text)
+        {
+            counter.text = text;
+            // Multi-line instructions must leave room for the final progress line.
+            float height = Mathf.Max(140f, counter.preferredHeight + 12f);
+            counter.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            ((RectTransform)objective.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
         private void OnHeroCalled(FightCombatController.HeroCallResult call)
         {

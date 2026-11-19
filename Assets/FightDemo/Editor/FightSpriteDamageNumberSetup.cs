@@ -39,7 +39,7 @@ namespace RhythmHunter.FightDemoEditor
             var material = AssetDatabase.LoadAssetAtPath<Material>(Root + "/DamageNumberUnlit.mat");
             if (!material)
             {
-                material = new Material(Shader.Find("RhythmHunter/Art2/SpriteCardUnlit"));
+                material = new Material(Shader.Find("RhythmHunter/Fight/DamageNumberUnlit"));
                 AssetDatabase.CreateAsset(material, Root + "/DamageNumberUnlit.mat");
             }
             foreach (string color in Colors)
@@ -144,6 +144,13 @@ namespace RhythmHunter.FightDemoEditor
         static object Call(object obj, string name, params object[] args) => obj.GetType().GetMethod(name, Flags).Invoke(obj, args);
         static void Set(object obj, string name, object value) => obj.GetType().GetField(name, Flags).SetValue(obj, value);
         static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
+        static float EffectiveOpacity(SpriteRenderer sprite)
+        {
+            if (!sprite.sharedMaterial.HasProperty("_PopupOpacity")) return sprite.color.a;
+            var properties = new MaterialPropertyBlock();
+            sprite.GetPropertyBlock(properties);
+            return sprite.color.a * properties.GetFloat("_PopupOpacity");
+        }
         static void Validate(string color)
         {
             var root = new GameObject("Damage number validation"); root.SetActive(false);
@@ -168,7 +175,7 @@ namespace RhythmHunter.FightDemoEditor
                 Vector3 start = popup.transform.position;
                 Call(popup, "Advance", .65f);
                 Check(Vector3.Dot(popup.transform.position - start, camera.transform.right) < 0, "Enemy popup must move left");
-                Check(sprites.All(s => s.color.a > 0 && s.color.a < 1), "Sprite fade");
+                Check(sprites.All(s => EffectiveOpacity(s) > 0 && EffectiveOpacity(s) < 1), "Sprite fade");
                 Call(popup, "Advance", 1f);
                 int roots = fight.CreatedDamageNumberCount, glyphs = fight.CreatedDamageGlyphCount;
                 for (int i = 0; i < 1000; i++) { Show(25f); Call(active[0], "Advance", 2f); }
@@ -190,7 +197,7 @@ namespace RhythmHunter.FightDemoEditor
                 Check(later.GetComponent<UnityEngine.Rendering.SortingGroup>().sortingOrder > earlier.GetComponent<UnityEngine.Rendering.SortingGroup>().sortingOrder, "Later popup must have a separate higher order");
                 Show(3); Check(active.Count == 2, "Pool cap");
                 Check(((FightDamageNumber)active[0]).GetComponent<UnityEngine.Rendering.SortingGroup>().sortingOrder != ((FightDamageNumber)active[1]).GetComponent<UnityEngine.Rendering.SortingGroup>().sortingOrder, "Recycling caused order collision");
-                Check(((FightDamageNumber)active[0]).GetComponentsInChildren<SpriteRenderer>(true).All(s => s.color.a == 1), "Reuse alpha reset");
+                Check(((FightDamageNumber)active[0]).GetComponentsInChildren<SpriteRenderer>(true).All(s => EffectiveOpacity(s) == 1), "Reuse alpha reset");
                 Call(fight, "ResetDamageNumberPool"); Check(active.Count == 0, "Cleanup");
                 Call(fight, "ShowDamageNumber", target, 2f, true);
                 popup = (FightDamageNumber)active[0]; start = popup.transform.position;

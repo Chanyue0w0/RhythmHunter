@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: DamageNumberUnlit
-  m_Shader: {fileID: 4800000, guid: 06808d6e854e40e9992f06e07bc423db, type: 3}
+  m_Shader: {fileID: 4800000, guid: 682582abb67848ea95d999a3a2ed4d11, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
