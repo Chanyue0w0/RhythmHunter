@@ -22,10 +22,10 @@ Shader "RhythmHunter/Art2/GemBeamVolume"
             {
                 float facing=abs(dot(normalize(i.normal),normalize(GetWorldSpaceViewDir(i.world))));
                 float rim=pow(1-facing,2);
-                float spiral=pow(saturate(sin(i.uv.x*18.84956-i.uv.y*31.4159+_Motion.x*9)),10);
+                float flow=.5+.5*sin(i.uv.y*12.5664-_Motion.x*4);
                 float ends=smoothstep(0,.06,i.uv.y)*(1-smoothstep(.88,1,i.uv.y));
-                half3 color=lerp(half3(.12,.38,.9),half3(.65,.95,1),saturate(rim+spiral*.7));
-                return half4(color,ends*_Motion.y*(.48+.35*rim+.15*spiral));
+                half3 color=lerp(half3(.55,.82,1),half3(.92,.98,1),saturate(facing*.7+flow*.12));
+                return half4(color,ends*_Motion.y*(.58+.2*facing+.04*flow));
             }
             ENDHLSL
         }

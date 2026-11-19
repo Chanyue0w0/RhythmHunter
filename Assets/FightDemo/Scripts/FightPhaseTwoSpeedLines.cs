@@ -38,6 +38,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(0, .25f)] private float protectionFeather = .04f;
         [Header("Chart density growth")]
         [SerializeField] private bool increaseCountWithChart = true;
+        [Tooltip("Multiplier of launched-note progress. 1.6 reaches maximum density after 62.5% of notes.")]
+        [SerializeField,Min(.01f)] private float countGrowthMultiplier=1;
         [SerializeField, Min(.01f)] private float countFadeBeats = .5f;
         [Header("Song section intensity")]
         [SerializeField] private bool sectionIntensityEnabled = true;
@@ -115,7 +117,8 @@ namespace RhythmHunter.FightDemo
             }
             float boost=guardBoostEnabled ? guardBoostAmount*Mathf.Clamp01(boostRemaining/Mathf.Max(.01f,guardBoostDurationBeats)) : 0;
             float speed=Mathf.Lerp(Mathf.Max(0,speedPerBeat.x),Mathf.Max(0,speedPerBeat.y),CurrentIntensity)*Mathf.Min(maximumSpeedMultiplier,1+boost);
-            int count=Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(lowIntensityCount,Mathf.Max(lowIntensityCount,highIntensityCount),increaseCountWithChart ? rhythm.LaunchProgress : CurrentIntensity)),0,128);
+            float populationProgress=Mathf.Clamp01((increaseCountWithChart?rhythm.LaunchProgress:CurrentIntensity)*countGrowthMultiplier);
+            int count=Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(lowIntensityCount,Mathf.Max(lowIntensityCount,highIntensityCount),populationProgress)),0,128);
             Color tint=lineColor;tint.a*=visibility;
             airflow.Present(tunnelCamera,tunnelOrigin.TransformPoint(originOffset),deltaBeat*speed,count,sourceRadius,nearRadius,
                 Mathf.Lerp(streakLength.x,streakLength.y,CurrentIntensity)*(1+boost*.25f),streakWidth,tint,

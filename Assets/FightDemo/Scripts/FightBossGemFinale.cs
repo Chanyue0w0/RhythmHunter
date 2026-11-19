@@ -18,6 +18,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField,Min(0)] private float fireBeat=104;
         [SerializeField,Min(.01f)] private float gatherBeats=1;
         [SerializeField,Range(0,1)] private float gatherFraction=.35f;
+        [Tooltip("Additional world-space movement for the two side heroes during gem charging. +Z moves toward the Boss.")]
+        [SerializeField] private Vector3 sideHeroGatherOffset=new(0,0,1.2f);
         [Header("World-space full gem")]
         [SerializeField] private GameObject gemPrefab;
         [SerializeField] private Sprite[] gemFrames;
@@ -46,10 +48,20 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Color gemLightColor=new(.15f,.5f,1,1);
         [SerializeField] private Vector2 lightIntensity=new(5,35);
         [SerializeField,Min(.1f)] private float lightRange=16;
+        [Header("Camera glare (presentation only)")]
+        [SerializeField] private bool screenGlareEnabled=true;
+        [SerializeField,Range(0,1)] private float screenBrightness=.32f;
+        [SerializeField,Range(0,1)] private float gemGlareStrength=.5f;
+        [SerializeField] private bool fireFlashEnabled=true;
+        [SerializeField,Range(0,1)] private float fireFlashStrength=.95f;
+        [SerializeField,Min(.01f)] private float fireFlashLeadBeats=.18f;
+        [SerializeField,Min(.01f)] private float fireFlashFadeBeats=.35f;
         [Header("Beam: local +Z points to Boss")]
         [SerializeField] private GameObject beamPrefab;
         [SerializeField,Min(.1f)] private float beamScale=1.35f;
         [SerializeField] private bool beamVolumeEnabled=true;
+        [Tooltip("Suppress the authored Sparks around long streaks on this instance only.")]
+        [SerializeField] private bool suppressBeamLongSparks=true;
         [SerializeField] private Shader beamVolumeShader;
         [SerializeField,Min(.01f)] private float beamVolumeRadius=.95f;
         [SerializeField] private int beamSortingOrder=20;
@@ -57,6 +69,19 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector3 beamRotationOffset=Vector3.zero;
         [SerializeField,Range(0,1)] private float weakBeamOpacity=.16f;
         [SerializeField,Min(.01f)] private float beamFadeBeats=1;
+        [Header("Beam camera shake")]
+        [SerializeField] private bool beamCameraShakeEnabled=true;
+        [SerializeField] private Vector2 beamCameraShakeAmplitude=new(.045f,.035f);
+        [SerializeField,Min(.1f)] private float beamCameraShakeCyclesPerBeat=4;
+        Art2.Art2CameraController finaleCamera;
+        [Header("Boss beam impact (visual only)")]
+        [SerializeField] private bool bossImpactShakeEnabled=true;
+        [SerializeField,Min(0)] private float bossImpactShakeAmount=.24f;
+        [SerializeField,Range(.01f,1)] private float bossImpactShakeBeats=.4f;
+        [SerializeField] private bool bossImpactFlashEnabled=true;
+        [SerializeField,Range(0,1)] private float bossImpactFlashStrength=.7f;
+        [SerializeField,Min(.001f)] private float bossImpactFlashSeconds=.08f;
+        Transform impactRoot;Vector3 impactPosition;FightHitFlashController impactFlash;int lastImpactBeat=int.MinValue;
         public bool Active {get;private set;}
         public bool Fired {get;private set;}
         public int PressCount {get;private set;}
@@ -68,9 +93,14 @@ namespace RhythmHunter.FightDemo
         public bool Accepting => Active&&!Fired&&!dying&&CanRun;
         bool CanRun => fight&&fight.BossPhaseTwoActive&&!fight.BattleEnded&&!fight.DefeatSlowMotionActive&&!fight.IsPaused&&!fight.TimingCalibrationActive;
         bool dying;float deathBeats;double beat,lastPress=double.NegativeInfinity;
-        Transform[] heroes;Vector3[] heroFrom;
+        Transform[] heroes;Vector3[] heroFrom,heroFootFrom;
         GameObject gem,beam,prompt;Vector3 gemBaseScale;
         Light gemLight;FightVfxOpacity beamOpacity;FightGemBeamVolume beamVolume;Vector3 promptBaseScale;
+        FightGemFinaleGlare glare;
+        UnityEngine.UI.Image gemAboveGlare,promptAboveGlare;
+        int lastDamageBeat=int.MinValue;
+        public int BeamDamagePulses {get;private set;}
+        public bool HasDisplayedBeamDamageThisBeat => lastDamageBeat==(int)Math.Floor(beat);
         sealed class Burst {public GameObject go;public ParticleSystem[] particles;public float remaining;}
         readonly List<Burst> bursts=new();
         ParticleSystem[] beamParticles=Array.Empty<ParticleSystem>();
@@ -92,10 +122,18 @@ namespace RhythmHunter.FightDemo
         void Begin()
         {
             Active=true;PressCount=0;CompletedPressCount=0;CompletedCharge=0;Fired=dying=false;deathBeats=0;
+            lastDamageBeat=int.MinValue;
+            BeamDamagePulses=0;
             rhythm.EnterGemFinale();
             var slots=new[]{fight.FrontHero.UnitSlot,fight.SecondHero.UnitSlot,fight.ThirdHero.UnitSlot};
-            heroes=new Transform[3];heroFrom=new Vector3[3];
-            for(int i=0;i<3;i++){heroes[i]=slots[i].ActorRoot;heroFrom[i]=heroes[i].position;}
+            heroes=new Transform[3];heroFrom=new Vector3[3];heroFootFrom=new Vector3[3];
+            for(int i=0;i<3;i++)
+            {
+                heroes[i]=slots[i].ActorRoot;heroFrom[i]=heroes[i].position;
+                var foot=slots[i].ActorInstance.transform.Find("FootAnchor");
+                heroFootFrom[i]=foot?foot.position:heroFrom[i];
+            }
+            finaleCamera=view?view.GetComponent<Art2.Art2CameraController>():null;
             if(gemPrefab)
             {
                 gem=Instantiate(gemPrefab,transform);gem.name="FinaleWorldGem_Runtime";
@@ -148,10 +186,23 @@ namespace RhythmHunter.FightDemo
             Fired=true;if(prompt)prompt.SetActive(false);
             if(!beamPrefab||!gem)return;
             var boss=rhythm.Boss;
+            if(boss&&boss.ActorRoot)
+            {
+                impactRoot=boss.ActorRoot;impactPosition=impactRoot.position;lastImpactBeat=int.MinValue;
+                impactFlash=boss.GetComponentInChildren<FightHitFlashController>(true);
+                if(!impactFlash&&boss.CombatAnimator&&boss.CombatAnimator.TargetRenderer)
+                {
+                    impactFlash=boss.gameObject.AddComponent<FightHitFlashController>();
+                    impactFlash.Configure(new[]{boss.CombatAnimator.TargetRenderer},view);
+                }
+            }
             Vector3 destination=boss&&boss.ActorRoot?boss.ActorRoot.position:gem.transform.position+Vector3.forward*10;
             Vector3 origin=gem.transform.position+beamOffset;
             beam=Instantiate(beamPrefab,origin,Quaternion.LookRotation((destination-origin).normalized,Vector3.up)*Quaternion.Euler(beamRotationOffset));
             beam.name="FinaleGemUltRay_Runtime";PrepareEffects(beam);
+            if(suppressBeamLongSparks)
+                foreach(var particle in beam.GetComponentsInChildren<ParticleSystem>(true))
+                    if(particle.name=="Sparks around")particle.gameObject.SetActive(false);
             // Preserve the authored geometry: nonuniform hierarchy scaling changes Unity's
             // stretched billboard length and pivot, so weak charge is represented by radiance.
             beam.transform.localScale=beamPrefab.transform.localScale*beamScale;
@@ -171,11 +222,12 @@ namespace RhythmHunter.FightDemo
             foreach(var r in beam.GetComponentsInChildren<ParticleSystemRenderer>(true))foreach(var mat in r.sharedMaterials)
                 if(mat){mat.DisableKeyword("_FADING_ON");if(mat.HasProperty("_UseSP"))mat.SetFloat("_UseSP",0);}
             (beam.GetComponent<Art2.Art2EffectPresentation>()??beam.AddComponent<Art2.Art2EffectPresentation>()).ConfigureCinematicOverlay();
-            beamParticles=beam.GetComponentsInChildren<ParticleSystem>(true);
+            beamParticles=beam.GetComponentsInChildren<ParticleSystem>(false);
             foreach(var p in beamParticles){p.Stop(false,ParticleSystemStopBehavior.StopEmittingAndClear);p.Play(false);}
         }
         public void BossDied()
         {
+            ClearBossImpact();
             if(!Active)return;
             // Death remains exclusively owned by the existing song-end execution.
             CompletedPressCount=PressCount;CompletedCharge=Charge;
@@ -185,7 +237,16 @@ namespace RhythmHunter.FightDemo
         {
             if(heroes==null)return;
             float gather=Mathf.SmoothStep(0,1,Mathf.Clamp01((float)(beat-startBeat)/Mathf.Max(.01f,gatherBeats)));
-            for(int i=0;i<3;i++)if(heroes[i])heroes[i].position=Vector3.Lerp(heroFrom[i],Vector3.Lerp(heroFrom[i],heroFrom[1],gatherFraction),gather);
+            for(int i=0;i<3;i++)if(heroes[i])
+            {
+                // Different characters have different root-to-foot offsets. Gather their
+                // feet on XZ, preserving each actor's grounded height and authored pivot.
+                Vector3 targetFoot=Vector3.Lerp(heroFootFrom[i],heroFootFrom[1],gatherFraction);
+                targetFoot.y=heroFootFrom[i].y;
+                Vector3 target=targetFoot-(heroFootFrom[i]-heroFrom[i]);
+                if(i!=1)target+=sideHeroGatherOffset;
+                heroes[i].position=Vector3.Lerp(heroFrom[i],target,gather);
+            }
             if(!gem)return;
             float enter=Mathf.Clamp01((float)(beat-startBeat)/Mathf.Max(.01f,gemEntryBeats));
             Vector3 landing=heroFrom[1]+gemOffset;
@@ -235,9 +296,104 @@ namespace RhythmHunter.FightDemo
                 if(deathBeats>=beamFadeBeats&&beam){Destroy(beam);beam=null;beamParticles=Array.Empty<ParticleSystem>();}
             }
             Place();
+            PresentGlare();
+            PresentBossImpact();
+            if(finaleCamera)
+            {
+                float weight=Fired&&beam&&beamCameraShakeEnabled?1:0;
+                if(dying)weight*=1-Mathf.Clamp01(deathBeats/Mathf.Max(.01f,beamFadeBeats));
+                float phase=(float)(beat-fireBeat+deathBeats)*Mathf.PI*2*beamCameraShakeCyclesPerBeat;
+                finaleCamera.SetGemFinaleShake(Vector2.Scale(beamCameraShakeAmplitude,new Vector2(Mathf.Sin(phase),Mathf.Sin(phase*1.27f+.6f)))*weight);
+            }
+        }
+        void PresentBossImpact()
+        {
+            if(!Fired||dying||!impactRoot)return;
+            int current=(int)Math.Floor(beat-fireBeat);
+            if(current!=lastImpactBeat)
+            {
+                lastImpactBeat=current;
+                if(rhythm.Boss&&rhythm.Boss.CurrentHp>0)
+                {
+                    // Phase two HP/death belongs to the song timeline. The sustained beam
+                    // displays an overkill hit each beat without executing the Boss early.
+                    fight.ShowEnemyDamageNumber(rhythm.Boss,99999);
+                    BeamDamagePulses++;
+                    lastDamageBeat=(int)Math.Floor(beat);
+                }
+                if(bossImpactFlashEnabled&&impactFlash)impactFlash.TriggerPresentationFlash(bossImpactFlashStrength,bossImpactFlashSeconds);
+            }
+            float phase=(float)(beat-fireBeat-current);
+            float t=Mathf.Clamp01(phase/Mathf.Max(.01f,bossImpactShakeBeats));
+            Vector3 right=view?view.transform.right:Vector3.right;
+            impactRoot.position=impactPosition+right*(bossImpactShakeEnabled?Mathf.Sin(t*Mathf.PI*6)*(1-t)*bossImpactShakeAmount:0);
+        }
+        void ClearBossImpact()
+        {
+            if(impactRoot)impactRoot.position=impactPosition;
+            if(impactFlash)impactFlash.ClearFlash();
+            impactRoot=null;impactFlash=null;lastImpactBeat=int.MinValue;
+        }
+        void PresentGlare()
+        {
+            if(!glare&&(screenGlareEnabled||fireFlashEnabled))
+            {
+                var root=new GameObject("FinaleCameraGlare",typeof(RectTransform),typeof(Canvas));
+                root.transform.SetParent(transform,false);
+                var canvas=root.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=90;
+                var graphic=new GameObject("Glare",typeof(RectTransform),typeof(CanvasRenderer),typeof(FightGemFinaleGlare));
+                graphic.transform.SetParent(root.transform,false);glare=graphic.GetComponent<FightGemFinaleGlare>();
+                var rect=glare.rectTransform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=rect.offsetMax=Vector2.zero;
+                glare.raycastTarget=false;
+                gemAboveGlare=CreateForegroundSprite(root.transform,"GemAboveGlare");
+                promptAboveGlare=CreateForegroundSprite(root.transform,"PromptAboveGlare");
+            }
+            if(!glare)return;
+            float fade=dying?1-Mathf.Clamp01(deathBeats/Mathf.Max(.01f,beamFadeBeats)):1;
+            float flash=0;
+            if(fireFlashEnabled&&!dying)
+            {
+                double time=beat-fireBeat;
+                flash=time<0?Mathf.Clamp01(1+(float)time/fireFlashLeadBeats):1-Mathf.Clamp01((float)time/fireFlashFadeBeats);
+                flash*=fireFlashStrength;
+            }
+            Vector3 center=gem&&view?view.WorldToViewportPoint(gem.transform.position):new Vector3(.5f,.5f,1);
+            // Keep the charge glow briefly behind the beam, then release it so play remains readable.
+            float release=Fired?1-Mathf.Clamp01((float)(beat-fireBeat)/2):1;
+            glare.Present(center,screenGlareEnabled?Charge*release*fade:0,screenBrightness,gemGlareStrength,flash);
+            SyncForegroundSprite(gemAboveGlare,gem);
+            SyncForegroundSprite(promptAboveGlare,prompt);
+        }
+        static UnityEngine.UI.Image CreateForegroundSprite(Transform parent,string name)
+        {
+            var go=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(UnityEngine.UI.Image));
+            go.transform.SetParent(parent,false);
+            var image=go.GetComponent<UnityEngine.UI.Image>();image.raycastTarget=false;return image;
+        }
+        void SyncForegroundSprite(UnityEngine.UI.Image image,GameObject source)
+        {
+            if(!image)return;
+            var renderer=source?source.GetComponentInChildren<SpriteRenderer>():null;
+            bool visible=renderer&&renderer.enabled&&renderer.gameObject.activeInHierarchy&&renderer.sprite&&view;
+            image.enabled=visible;if(!visible)return;
+            Bounds b=renderer.sprite.bounds;
+            Vector2 min=Vector2.one*float.PositiveInfinity,max=Vector2.one*float.NegativeInfinity;
+            for(int i=0;i<4;i++)
+            {
+                Vector3 p=b.center+new Vector3((i&1)==0?-b.extents.x:b.extents.x,(i&2)==0?-b.extents.y:b.extents.y,0);
+                var v=view.WorldToViewportPoint(renderer.transform.TransformPoint(p));
+                if(v.z<=0){image.enabled=false;return;}
+                min=Vector2.Min(min,v);max=Vector2.Max(max,v);
+            }
+            image.sprite=renderer.sprite;image.color=renderer.color;
+            var rect=image.rectTransform;rect.anchorMin=min;rect.anchorMax=max;rect.offsetMin=rect.offsetMax=Vector2.zero;
         }
         void Reset()
         {
+            if(finaleCamera)finaleCamera.SetGemFinaleShake(Vector2.zero);finaleCamera=null;
+            ClearBossImpact();
+            if(glare)Destroy(glare.transform.parent.gameObject);glare=null;
+            gemAboveGlare=promptAboveGlare=null;
             if(gem)Destroy(gem);if(beam)Destroy(beam);if(prompt)Destroy(prompt);
             foreach(var burst in bursts)if(burst.go)Destroy(burst.go);bursts.Clear();
             gem=beam=prompt=null;beamVolume=null;gemLight=null;beamOpacity=null;beamParticles=Array.Empty<ParticleSystem>();

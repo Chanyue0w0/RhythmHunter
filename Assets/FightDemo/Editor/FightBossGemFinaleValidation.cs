@@ -12,6 +12,8 @@ namespace RhythmHunter.FightDemoEditor
         static double deadline,nextPress,deathAt;static bool requested,chargeShot,beamShot,death,weak;static int missed,bad;
         static double pauseUntil;static bool pauseChecked;
         static Vector3 leftBefore;static bool savedLeft;
+        static bool sawImpactFlash,sawImpactShake,haveBossPosition;static Vector3 previousBossPosition;
+        static float[] initialFootY;static string footReport;
         static FightBossGemFinaleValidation()=>EditorApplication.update+=Poll;
         static void Poll()
         {
@@ -35,6 +37,24 @@ namespace RhythmHunter.FightDemoEditor
                 if(!fight.GetComponent<FightBossPhaseTwoTransition>().Ready)return;
                 if(quick)
                 {
+                    var slots=new[]{fight.FrontHero.UnitSlot,fight.SecondHero.UnitSlot,fight.ThirdHero.UnitSlot};
+                    if(!finale.Active&&initialFootY==null)
+                    {
+                        initialFootY=new float[3];footReport="";
+                        for(int i=0;i<3;i++)
+                        {
+                            var foot=slots[i].ActorInstance.transform.Find("FootAnchor");initialFootY[i]=foot.position.y;
+                            footReport+=$"hero {i}: rootY={slots[i].ActorRoot.position.y:F4}, footY={foot.position.y:F4}, sprite={slots[i].CombatAnimator.TargetRenderer.sprite.name}\n";
+                        }
+                    }
+                    if(finale.Fired&&battle.Boss)
+                    {
+                        var flash=battle.Boss.GetComponentInChildren<FightHitFlashController>();
+                        sawImpactFlash|=flash&&flash.IsFlashing;
+                        var position=battle.Boss.ActorRoot.position;
+                        if(haveBossPosition)sawImpactShake|=Vector3.Distance(position,previousBossPosition)>.001f;
+                        previousBossPosition=position;haveBossPosition=true;
+                    }
                     if(finale.Accepting&&!weak&&finale.PressCount<32)fight.SubmitHeroCommand(FightInputRouter.HeroCommand.TeamSkill);
                     if(finale.Active&&!finale.Fired&&!chargeShot&&battle.CurrentBeat>21){ScreenCapture.CaptureScreenshot("Temp/GemFinaleNewCharge.png");chargeShot=true;}
                     if(finale.Fired&&battle.CurrentBeat>24){
@@ -42,6 +62,20 @@ namespace RhythmHunter.FightDemoEditor
                         if(!beam||!beam.GetComponent<FightGemBeamVolume>()||!beam.transform.Find("BeamVolume3D"))throw new Exception("Missing beam volume");
                         var overlay=beam.GetComponent<RhythmHunter.FightDemo.Art2.Art2EffectPresentation>();
                         if(!overlay||!overlay.DrawAboveScene)throw new Exception("Missing late overlay registration");
+                        if(!UnityEngine.Object.FindFirstObjectByType<FightGemFinaleGlare>())throw new Exception("Missing camera glare");
+                        if(!sawImpactFlash||!sawImpactShake)throw new Exception("Missing Boss beat impact flash/shake");
+                        if(finale.BeamDamagePulses<2||battle.Boss.CurrentHp<=0)throw new Exception("Beam did not repeat damage feedback or killed Boss early");
+                        for(int i=0;i<3;i++)
+                        {
+                            float footY=slots[i].ActorInstance.transform.Find("FootAnchor").position.y;
+                            if(initialFootY==null||Mathf.Abs(footY-initialFootY[i])>.01f)throw new Exception("Gather changed foot height: "+i);
+                            footReport+=$"hero {i} gathered footY={footY:F4}\n";
+                        }
+                        File.WriteAllText("Temp/GemFinaleFeet.result",footReport);
+                        var front=GameObject.Find("GemAboveGlare");var prompt=GameObject.Find("PromptAboveGlare");
+                        if(!front||!prompt||front.transform.GetSiblingIndex()<=0)throw new Exception("Missing foreground gem/prompt");
+                        foreach(var particle in beam.GetComponentsInChildren<ParticleSystem>(false))
+                            if(particle.name=="Sparks around")throw new Exception("Long tearing sparks still active");
                         ScreenCapture.CaptureScreenshot("Temp/GemFinaleNewBeam.png");Finish("PASS: weak beam visual geometry preview (runtime accelerated beats only).");}
                     return;
                 }
@@ -54,6 +88,8 @@ namespace RhythmHunter.FightDemoEditor
                     if(battle.BadInputs!=bad)throw new Exception("Lane input still judged in finale");
                     chargeShot=true;
                 }
+                if(finale.Fired&&fight.CurrentBossMusicPhase!=FightCombatController.BossMusicPhase.PhaseTwoMusicEnded&&battle.Boss&&battle.Boss.CurrentHp<=0)
+                    throw new Exception("Boss died before music end");
                 if(finale.Active&&!pauseChecked)
                 {
                     var pause=fight.GetComponent<FightPauseController>();
@@ -102,6 +138,8 @@ namespace RhythmHunter.FightDemoEditor
         {
             File.WriteAllText("Temp/GemFinalePlay"+(weak?"Weak":"Strong")+".result",text);File.Delete(Request);
             deadline=nextPress=deathAt=pauseUntil=0;pauseChecked=false;requested=chargeShot=beamShot=death=savedLeft=false;
+            sawImpactFlash=sawImpactShake=haveBossPosition=false;
+            initialFootY=null;footReport=null;
             EditorApplication.delayCall+=()=>EditorApplication.isPlaying=false;
         }
     }

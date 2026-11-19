@@ -309,7 +309,7 @@ namespace RhythmHunter.FightDemo
                     var effect = Instantiate(victoryExplosion, boss.ActorRoot.position, victoryExplosion.transform.rotation);
                     (effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>()).Configure(fight, false, 5);
                 }
-                boss.ReleaseBossPhaseOneProtection(); boss.TakeDamage(99999, FightUnitSlot.DamageKind.Direct, true);
+                boss.ReleaseBossPhaseOneProtection(); boss.TakeDamage(99999, FightUnitSlot.DamageKind.Direct, true, !finale || !finale.HasDisplayedBeamDamageThisBeat);
                 finale?.BossDied();
             }
         }

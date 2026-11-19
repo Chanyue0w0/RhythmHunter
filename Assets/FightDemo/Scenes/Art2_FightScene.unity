@@ -20956,8 +20956,8 @@ MonoBehaviour:
   lineColor: {r: 0.5, g: 0.75, b: 1, a: 0.55}
   sourceRadius: 0.35
   nearRadius: 4
-  lowIntensityCount: 28
-  highIntensityCount: 96
+  lowIntensityCount: 42
+  highIntensityCount: 128
   speedPerBeat: {x: 0.12, y: 0.5}
   streakLength: {x: 0.5, y: 2.2}
   streakWidth: {x: 0.018, y: 0.045}
@@ -20971,7 +20971,8 @@ MonoBehaviour:
   protectedDoorWidth: 0.1
   protectionFeather: 0.04
   increaseCountWithChart: 1
-  countFadeBeats: 0.5
+  countGrowthMultiplier: 1.6
+  countFadeBeats: 0.3
   sectionIntensityEnabled: 1
   sectionIntensity:
     serializedVersion: 2
@@ -21095,6 +21096,8 @@ MonoBehaviour:
   targetCamera: {fileID: 2147100302}
   shader: {fileID: 4800000, guid: 9b39e48a2509463db7fb7c8b83966c8c, type: 3}
   blurEnabled: 1
+  darkenOutsideEnabled: 1
+  outsideDarkness: 0.45
   blurPixels: 4
   strength: 0.85
   centerX: 0.5
@@ -21124,6 +21127,7 @@ MonoBehaviour:
   fireBeat: 104
   gatherBeats: 1
   gatherFraction: 0.35
+  sideHeroGatherOffset: {x: 0, y: 0, z: 1.2}
   gemPrefab: {fileID: 8713473937632343340, guid: 1a12fa83c4db6554da95365ba6e9afdb, type: 3}
   gemFrames:
   - {fileID: 21300000, guid: 53907aa8d7412114aacbed4970ed5e3d, type: 3}
@@ -21132,7 +21136,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 76510089599750f4eaa8aa51a80ae1c4, type: 3}
   - {fileID: 21300000, guid: ea32bd1915aee1245a289d4b6af1fa02, type: 3}
   gemLoopBeats: 1
-  gemOffset: {x: 0, y: 1.3, z: 1.4}
+  gemOffset: {x: 0, y: 1.3, z: 2.2}
   gemHeight: 1.25
   gemEntryOffset: {x: 0, y: 0, z: 7}
   gemEnterFromScreenTop: 1
@@ -21152,9 +21156,17 @@ MonoBehaviour:
   gemLightColor: {r: 0.15, g: 0.5, b: 1, a: 1}
   lightIntensity: {x: 5, y: 35}
   lightRange: 16
+  screenGlareEnabled: 1
+  screenBrightness: 0.32
+  gemGlareStrength: 0.5
+  fireFlashEnabled: 1
+  fireFlashStrength: 0.95
+  fireFlashLeadBeats: 0.18
+  fireFlashFadeBeats: 0.35
   beamPrefab: {fileID: 426792629797048137, guid: f82af0adb07debc4195ad380c5e8aab7, type: 3}
   beamScale: 1.35
   beamVolumeEnabled: 1
+  suppressBeamLongSparks: 1
   beamVolumeShader: {fileID: 4800000, guid: 26ccfe7a4f29064459a5c7b004275191, type: 3}
   beamVolumeRadius: 0.95
   beamSortingOrder: 20
@@ -21162,6 +21174,12 @@ MonoBehaviour:
   beamRotationOffset: {x: 0, y: 0, z: 0}
   weakBeamOpacity: 0.16
   beamFadeBeats: 1
+  bossImpactShakeEnabled: 1
+  bossImpactShakeAmount: 0.12
+  bossImpactShakeBeats: 0.4
+  bossImpactFlashEnabled: 1
+  bossImpactFlashStrength: 0.7
+  bossImpactFlashSeconds: 0.08
 --- !u!1 &2037638509
 GameObject:
   m_ObjectHideFlags: 0
@@ -22809,7 +22827,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5916e-41, y: 0, z: 4.135903e-25, w: 5.693906e-39}
+  m_BoundingSphereOverride: {x: 5.7e-43, y: 1.16e-43, z: 0, w: -2.9566658e-38}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -22973,7 +22991,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.6774e-41, y: 0, z: 4.135903e-25, w: 6.42859e-39}
+  m_BoundingSphereOverride: {x: -7.8274666e+17, y: 1.470916e-39, z: 1.1180835e-19, w: 1.5046328e-36}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23469,7 +23487,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: -5.600575e-38, z: 5.7e-43, w: -1.2343331e+38}
+  m_BoundingSphereOverride: {x: 5.7e-43, y: 1.42e-43, z: 5.7e-43, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23633,7 +23651,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 4.135903e-25, w: 2.663334e-39}
+  m_BoundingSphereOverride: {x: 5.7e-43, y: 1.16e-43, z: 0, w: -6.60527e-40}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

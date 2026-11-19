@@ -15,6 +15,52 @@ namespace RhythmHunter.FightDemoEditor
         static FightBossGemFinaleSetup()=>EditorApplication.update+=Poll;
         static void Poll()
         {
+            const string formation="Temp/GemFinaleFormation.request";
+            if(File.Exists(formation)&&!EditorApplication.isPlayingOrWillChangePlaymode&&!EditorApplication.isCompiling&&!EditorApplication.isUpdating)
+            {
+                File.Delete(formation);
+                try
+                {
+                    var scene=UnityEngine.SceneManagement.SceneManager.GetSceneByPath("Assets/FightDemo/Scenes/Art2_FightScene.unity");
+                    var finale=scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<FightBossGemFinale>(true)).Single();
+                    var data=new SerializedObject(finale);
+                    var offset=data.FindProperty("gemOffset").vector3Value;offset.z=2.2f;
+                    data.FindProperty("gemOffset").vector3Value=offset;
+                    data.FindProperty("sideHeroGatherOffset").vector3Value=new Vector3(0,0,1.2f);
+                    data.ApplyModifiedProperties();
+                    var speed=new SerializedObject(finale.GetComponent<FightPhaseTwoSpeedLines>());
+                    speed.FindProperty("lowIntensityCount").intValue=42;
+                    speed.FindProperty("highIntensityCount").intValue=128;
+                    speed.FindProperty("countGrowthMultiplier").floatValue=1.6f;
+                    speed.FindProperty("countFadeBeats").floatValue=.3f;
+                    speed.ApplyModifiedProperties();
+                    EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+                    File.WriteAllText("Temp/GemFinaleFormation.result","PASS: density 42-128, growth 1.6, fade .3; side heroes +Z1.2; gem +Z2.2.");
+                }catch(Exception e){File.WriteAllText("Temp/GemFinaleFormation.result","FAIL: "+e);}
+                return;
+            }
+            const string digits="Temp/GemFinaleDigits.request";
+            if(File.Exists(digits)&&!EditorApplication.isPlayingOrWillChangePlaymode&&!EditorApplication.isCompiling&&!EditorApplication.isUpdating)
+            {
+                File.Delete(digits);
+                try
+                {
+                    for(int i=0;i<10;i++)
+                    {
+                        string path=$"Assets/FightDemo/Prefabs/VFX/DamageNumbers/number_red/{i}.prefab";
+                        string source=$"Assets/FightDemo/Arts/UI/戰鬥場景/數字/number_red/number_red_{i}.png";
+                        var sprite=AssetDatabase.LoadAllAssetsAtPath(source).OfType<Sprite>().First();
+                        var root=PrefabUtility.LoadPrefabContents(path);
+                        try{root.GetComponentInChildren<SpriteRenderer>(true).sprite=sprite;PrefabUtility.SaveAsPrefabAsset(root,path);}
+                        finally{PrefabUtility.UnloadPrefabContents(root);}
+                        var saved=AssetDatabase.LoadAssetAtPath<GameObject>(path).GetComponentInChildren<SpriteRenderer>(true).sprite;
+                        if(AssetDatabase.GetAssetPath(saved)!=source)throw new Exception("Wrong digit source: "+i);
+                    }
+                    AssetDatabase.SaveAssets();
+                    File.WriteAllText("Temp/GemFinaleDigits.result","PASS: all ten red digit prefabs reference new artwork outside old.");
+                }catch(Exception e){File.WriteAllText("Temp/GemFinaleDigits.result","FAIL: "+e);}
+                return;
+            }
             const string tune="Temp/GemFinalePresentation.request";
             if(File.Exists(tune)&&EditorApplication.isPlaying)
             {

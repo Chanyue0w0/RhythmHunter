@@ -23,6 +23,15 @@ namespace RhythmHunter.FightDemo
         private MaterialPropertyBlock properties;
         private FightUnitSlot slot;
         private float elapsed;
+        private bool presentationFlash;
+        private float presentationStrength, presentationDuration;
+        public void TriggerPresentationFlash(float strength, float seconds)
+        {
+            if(!isActiveAndEnabled)return;
+            StartFlash();
+            presentationFlash=true;presentationStrength=Mathf.Clamp01(strength);presentationDuration=Mathf.Max(.001f,seconds);
+            ApplyFlash(0);
+        }
         public bool IsFlashing { get; private set; }
         private static readonly int Amount = Shader.PropertyToID("_FlashAmount");
         private static readonly int Tint = Shader.PropertyToID("_FlashColor");
@@ -57,6 +66,10 @@ namespace RhythmHunter.FightDemo
         public void TriggerFlash()
         {
             if (!flashEnabled || !isActiveAndEnabled) return;
+            StartFlash();
+        }
+        private void StartFlash()
+        {
             ClearFlash();
             properties ??= new MaterialPropertyBlock();
             if (targets == null) return;
@@ -79,7 +92,7 @@ namespace RhythmHunter.FightDemo
         private void LateUpdate()
         {
             if (!IsFlashing) return;
-            if (!flashEnabled) { ClearFlash(); return; }
+            if (!flashEnabled&&!presentationFlash) { ClearFlash(); return; }
             var fight = slot ? slot.CombatController : null;
             if (fight && (fight.IsPaused || fight.TimingCalibrationActive || (fight.BeatClock && fight.BeatClock.IsPaused))) return;
             Advance(Time.deltaTime);
@@ -87,8 +100,9 @@ namespace RhythmHunter.FightDemo
         private void Advance(float seconds)
         {
             elapsed += Mathf.Max(0, seconds);
-            if (elapsed >= Mathf.Max(.001f, durationSeconds)) { ClearFlash(); return; }
-            ApplyFlash(elapsed / Mathf.Max(.001f, durationSeconds));
+            float duration=presentationFlash?presentationDuration:durationSeconds;
+            if (elapsed >= Mathf.Max(.001f, duration)) { ClearFlash(); return; }
+            ApplyFlash(elapsed / Mathf.Max(.001f, duration));
         }
         private void ApplyFlash(float progress)
         {
@@ -109,15 +123,15 @@ namespace RhythmHunter.FightDemo
                         minimum = Mathf.Min(minimum, x); maximum = Mathf.Max(maximum, x);
                     }
                 }
-            bool sweep = mode == FlashMode.RightToLeft && minimum <= maximum;
+            bool sweep = !presentationFlash&&mode == FlashMode.RightToLeft && minimum <= maximum;
             Vector4 sweepData = sweep ? new Vector4(minimum, maximum, progress, sweepWidth) : Vector4.zero;
             foreach (var renderer in activeTargets)
             {
                 if (!renderer) continue;
                 // Merge only our properties; preserve animation texture, silhouette, focus and lighting blocks.
                 renderer.GetPropertyBlock(properties);
-                properties.SetFloat(Amount, Mathf.Clamp01(flashStrength));
-                properties.SetColor(Tint, flashColor);
+                properties.SetFloat(Amount, presentationFlash?presentationStrength:Mathf.Clamp01(flashStrength));
+                properties.SetColor(Tint, presentationFlash?Color.white:flashColor);
                 properties.SetVector(Sweep, sweepData);
                 properties.SetVector(Axis, right);
                 renderer.SetPropertyBlock(properties);
@@ -133,7 +147,7 @@ namespace RhythmHunter.FightDemo
                     properties.SetFloat(Amount, 0);
                     renderer.SetPropertyBlock(properties);
                 }
-            activeTargets.Clear(); IsFlashing = false; elapsed = 0;
+            activeTargets.Clear(); IsFlashing = false; elapsed = 0;presentationFlash=false;
         }
         private void OnDisable()
         {

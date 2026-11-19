@@ -58,3 +58,19 @@ Beam Scale=1.35；Beam Volume Enabled 可切換真正的圓柱網格能量外層
 覆蓋 Boss：Art2EffectPresentation 的 Draw Above Scene 僅由終結光束動態啟用。Art2FloorOcclusionFeature 在角色地板補畫後重繪此光束，避免單純 Sorting Order 被後段角色補畫蓋過。此選項預設關閉、不修改其他物件或 Renderer Asset。
 
 寶石落點修訂：Gem Offset=(0,1.3,1.4)。Gem Enter From Screen Top=true，Gem Entry Viewport Margin=0.2；以落點的相機深度從畫面頂端外垂直移入，0.45 拍完成。關閉時才使用原本世界 Gem Entry Offset。
+
+終結眩光：Screen Glare Enabled、Screen Brightness (0.32)、Gem Glare Strength (0.5) 控制連打後的全畫面藍白亮度與寶石中心眩光。Fire Flash Enabled / Strength (0.95)、Lead Beats (0.18)、Fade Beats (0.35) 控制104拍前快速閃白與發射後退去。使用獨立不攔截輸入的Canvas，不修改主相機曝光。暫停凍結，重開/停用清除。
+光束整理：Suppress Beam Long Sparks 預設開啟，只停用執行中 GemUltRay 的 Sparks around 長拉伸粒子，原Prefab與素材包保留。3D外層改柔和縱向流動，移除高對比螺旋條紋。
+
+二階段周圍暗化：FightDemoController / Phase Two Focus Blur 的 Darken Outside Enabled、Outside Darkness (0.45)，沿用中央梯形與 Feather 邊界，與 Blur Enabled 獨立切換，不影響 HUD。
+Boss 光束受擊：Fight Boss Gem Finale / Boss Beam Impact 可分開開關 Shake、Flash，設定震動幅度0.12、每拍震動0.4拍，閃白0.7/0.08秒。只作演出、不新增傷害、不重播受擊動畫；死亡與停用時還原位置及材質參數。
+紅色傷害數字：既有0~9數字Prefab圖片改為 Arts/UI/戰鬥場景/數字/number_red，排除old；保留綠色回血、物件池與位移設定。
+
+寶石保護：眩光Canvas後方新增GemAboveGlare、PromptAboveGlare兩個不攔截輸入的Image，逐幀跟隨場景Sprite投影、圖片、大小與彈跳，確保閃白不遮住寶石/A。
+光束每普通歌曲拍點顯示一次99999，使用既有數字池；二階段HP仍由音樂時間控制，不提前處決。最後處決與同拍光束數字去重。Boss震動幅度預設由0.12提高為0.24。
+
+蓄能包圍站位：Side Hero Gather Offset=(0,0,1.2)，只推進左右勇者；Gem Offset Z=2.2，中央勇者不前移。Gather Fraction 仍0.35。
+速度線密度提高：Fight Phase Two Speed Lines / Low Intensity Count=42、High Intensity Count=128、Count Growth Multiplier=1.6（約62.5%發射進度達最大數量）、Count Fade Beats=0.3。Speed Per Beat為飛行速度，這次保持原值；Section Intensity為段落強度曲線。
+
+光束鏡頭震動：Beam Camera Shake Enabled / Amplitude=(0.045,0.035) / Cycles Per Beat=4。從發射持續到光束結束，死亡後隨最後一拍淡出；使用Art2CameraController獨立偏移，不與落地震動競爭。
+聚集踩地修復：以三名角色FootAnchor的XZ座標聚集，保留各自腳底高度，避免不同rootY朝法師root插值而埋入地面。Play診斷rootY：戰士0.270、法師-0.018、射手0.666；原算法使射手降低0.2394。修正後三人的聚集前後FootAnchor Y皆為0，無修改圖片/PPU/Pivot/FootAnchor。
