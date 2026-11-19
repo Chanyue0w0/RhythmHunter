@@ -188,6 +188,7 @@ namespace RhythmHunter.FightDemoEditor
                 stage=ScriptableObject.CreateInstance<FightStageDefinition>();AssetDatabase.CreateAsset(stage,stagePath);
                 var stageData=new SerializedObject(stage);stageData.FindProperty("stageId").stringValue="Chapter01_Stage01";
                 stageData.FindProperty("displayName").stringValue="Chapter 1 - Stage 1 - Forest Tutorial";stageData.FindProperty("tutorial").boolValue=true;
+                stageData.FindProperty("tutorialHero").objectReferenceValue=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/FightDemo/Prefabs/ArtBattle/LongSwordWarrior_Weapon.prefab").GetComponent<FightCharacterDefinition>();
                 stageData.FindProperty("musicEventPath").stringValue="event:/Ritual Slam _120_3";
                 var waves=stageData.FindProperty("waves");waves.arraySize=1;var wave=waves.GetArrayElementAtIndex(0);
                 wave.FindPropertyRelative("name").stringValue="Forest Preview";

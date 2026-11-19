@@ -8667,6 +8667,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ForestEnvironment_2_5D
       objectReference: {fileID: 0}
+    - target: {fileID: 5563869598467684998, guid: 8e5fcd6990ad02d4f867866d62f3741e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -20957,6 +20961,9 @@ MonoBehaviour:
   roster: {fileID: 2021200331}
   beatClock: {fileID: 2021200329}
   environmentSelector: {fileID: 2021200347}
+  selectableChapters:
+  - {fileID: 11400000, guid: d42c845434c163849bc67a7a7698645c, type: 2}
+  - {fileID: 11400000, guid: f10b282c4e3349dfbadbfb9bb9823a1e, type: 2}
 --- !u!114 &2021200335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21078,7 +21085,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossStageDebug
   fight: {fileID: 2021200326}
   completePhaseOneOnStart: 0
-  skipToPhaseTwoOnStart: 1
+  skipToPhaseTwoOnStart: 0
 --- !u!114 &2021200341
 MonoBehaviour:
   m_ObjectHideFlags: 0

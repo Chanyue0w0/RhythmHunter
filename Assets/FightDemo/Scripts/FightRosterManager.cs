@@ -44,6 +44,8 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Optional waves after the initial Enemy Prefabs. Hero formation stays locked.")]
         [SerializeField] private EnemyWave[] additionalWaves = Array.Empty<EnemyWave>();
         private FightCharacterDefinition[][] stageWaves;
+        private FightCharacterDefinition[] defaultStageHeroes;
+        public bool IsTutorialStage { get; private set; }
         private FightEnemyPressureSettings[] stagePressure;
         private FightStageDefinition.WaveKind[] stageWaveKinds;
         public bool UsesStageDeadline { get; private set; }
@@ -85,6 +87,11 @@ namespace RhythmHunter.FightDemo
                 for (int p = 0; p < 3; p++) snapshot[w][order[p]] = stage.Waves[w].At(p);
             }
             stageWaves = snapshot; // Do not mutate shared assets or re-read edits mid-battle.
+            defaultStageHeroes ??= (FightCharacterDefinition[])heroPrefabs.Clone();
+            IsTutorialStage = stage.Tutorial;
+            heroPrefabs = IsTutorialStage
+                ? new[] { stage.TutorialHero, null, null }
+                : (FightCharacterDefinition[])defaultStageHeroes.Clone();
             stagePressure = pressureSnapshot;
             stageWaveKinds = kindSnapshot;
             IsBossStage = stage.BossStage;
@@ -189,6 +196,7 @@ namespace RhythmHunter.FightDemo
 
         public bool TrySwapHeroes(PartyPosition first, PartyPosition second)
         {
+            if (IsTutorialStage) return false; // A solo lesson always teaches the Front position.
             int a = (int)first, b = (int)second;
             if ((fightController != null && fightController.BattleEntranceRunning) || FormationLocked || a < 0 || b < 0 || a >= heroPrefabs.Length ||
                 b >= heroPrefabs.Length || a == b) return false;
@@ -200,8 +208,9 @@ namespace RhythmHunter.FightDemo
         internal bool TryLockFormation()
         {
             if (!requireBattlePreparation || BattleStarted) return false;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < (IsTutorialStage ? 1 : 3); i++)
                 if (GetHeroAtPosition((PartyPosition)i) == null) return false;
+            if (IsTutorialStage && (GetHeroAtPosition(PartyPosition.Middle) != null || GetHeroAtPosition(PartyPosition.Back) != null)) return false;
             BattleStarted = true;
             return true;
         }

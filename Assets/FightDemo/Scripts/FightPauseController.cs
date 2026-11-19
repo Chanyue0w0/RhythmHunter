@@ -7,13 +7,14 @@ using UnityEngine.UI;
 namespace RhythmHunter.FightDemo
 {
     [DefaultExecutionOrder(-200)]
-    public sealed class FightPauseController : MonoBehaviour
+    public sealed partial class FightPauseController : MonoBehaviour
     {
         FmodBeatClock clock;
         GameObject overlay, toggle;
         float previousTimeScale;
         bool restarting;
         public bool IsPaused { get; private set; }
+        public bool MenuReady => overlay != null;
 
         public void Configure(FmodBeatClock source, Canvas canvas, Font font)
         {
@@ -26,14 +27,15 @@ namespace RhythmHunter.FightDemo
             panel.anchorMin = Vector2.zero; panel.anchorMax = Vector2.one; panel.offsetMin = panel.offsetMax = Vector2.zero;
             panel.gameObject.AddComponent<Image>().color = new Color(.01f,.025f,.05f,.9f);
             overlay = panel.gameObject;
-            var title = FightMenuUi.Label(panel,"PAUSED",new Vector2(0,70),new Vector2(720,70),font,48);
+            var title = FightMenuUi.Label(panel,"PAUSED",new Vector2(0,220),new Vector2(720,70),font,48);
             Center(title.rectTransform);
-            var hint = FightMenuUi.Label(panel,"Music and battle paused. Press START / ESC / F8 to continue.",new Vector2(0,0),new Vector2(900,40),font,22);
+            var hint = FightMenuUi.Label(panel,"Music and battle paused. Press START / ESC / F8 to continue.",new Vector2(0,155),new Vector2(900,40),font,22);
             Center(hint.rectTransform);
-            var resume = FightMenuUi.Button(panel,"RESUME",new Vector2(0,-80),new Vector2(260,54),font,TogglePause);
+            var resume = FightMenuUi.Button(panel,"RESUME",new Vector2(-170,85),new Vector2(260,54),font,TogglePause);
             Center((RectTransform)resume.transform);
-            var restart = FightMenuUi.Button(panel, "RESTART BATTLE  [F9]", new Vector2(0,-150),new Vector2(300,54),font,RestartBattle);
+            var restart = FightMenuUi.Button(panel, "RESTART BATTLE  [F9]", new Vector2(155,85),new Vector2(300,54),font,RestartBattle);
             Center((RectTransform)restart.transform);
+            BuildStageSelector(panel,font);
             overlay.SetActive(false);
         }
 
@@ -86,7 +88,7 @@ namespace RhythmHunter.FightDemo
 #endif
             restarting = true;
             // Restore global time before unloading. OnDisable must not restore it twice.
-            if (IsPaused) Time.timeScale = previousTimeScale;
+            Time.timeScale = 1;
             IsPaused = false;
             clock?.StopMusic();
             // Reload authored formation, resources, waves and entrance/debug settings.

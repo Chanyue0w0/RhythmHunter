@@ -25,6 +25,9 @@ namespace RhythmHunter.FightDemo
         [Header("Stage Classification / Environment")]
         [Tooltip("Marks this as a tutorial Stage. Does not automatically change damage, music, Pressure or victory rules.")]
         [SerializeField] private bool tutorial;
+        [Tooltip("Tutorial only: this hero occupies Front; Middle and Back stay empty. Normal stages retain the scene's default party.")]
+        [SerializeField] private FightCharacterDefinition tutorialHero;
+        public FightCharacterDefinition TutorialHero => tutorialHero;
         [Tooltip("Overrides Chapter.DefaultEnvironment. Unassigned inherits the chapter, then falls back to Cave.")]
         [SerializeField] private FightEnvironmentDefinition environment;
         public bool Tutorial => tutorial;
@@ -135,6 +138,8 @@ namespace RhythmHunter.FightDemo
 
         public bool Validate(out string error)
         {
+            if (tutorial && (tutorialHero == null || tutorialHero.Team != FightUnitSlot.UnitTeam.Hero))
+            { error = "Tutorial requires a hero prefab in Tutorial Hero."; return false; }
             if (string.IsNullOrWhiteSpace(stageId)) { error = "Stage ID is empty."; return false; }
             if (string.IsNullOrWhiteSpace(musicEventPath) || !musicEventPath.StartsWith("event:/", StringComparison.Ordinal))
             { error = "Stage requires an FMOD event:/ song path."; return false; }

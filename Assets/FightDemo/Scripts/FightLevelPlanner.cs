@@ -13,6 +13,27 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightRosterManager roster;
         [SerializeField] private FmodBeatClock beatClock;
         [SerializeField] private FightEnvironmentSelector environmentSelector;
+        [Tooltip("Chapters available in the pause-menu test selector. Explicit references also include their stages in builds.")]
+        [SerializeField] private FightChapterDefinition[] selectableChapters = System.Array.Empty<FightChapterDefinition>();
+        public System.Collections.Generic.IReadOnlyList<FightChapterDefinition> SelectableChapters => selectableChapters;
+        static string selectedScene;
+        static FightChapterDefinition runtimeChapter;
+        static int runtimeStage;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSessionSelection(){selectedScene=null;runtimeChapter=null;runtimeStage=0;}
+        public bool TrySelectForReload(FightChapterDefinition target, int index, out string error)
+        {
+            if(target==null || (target!=chapter && System.Array.IndexOf(selectableChapters,target)<0))
+            {error="Chapter is not available in this scene.";return false;}
+            if(index<0||index>=target.Stages.Count||target.Stages[index]==null)
+            {error="Stage is not configured.";return false;}
+            var stage=target.Stages[index];
+            if(!stage.Validate(out error))return false;
+            var environment=stage.Environment?stage.Environment:target.DefaultEnvironment;
+            if(environmentSelector&&!environmentSelector.CanApply(environment,out error))return false;
+            selectedScene=gameObject.scene.path;runtimeChapter=target;runtimeStage=index;
+            error=null;return true;
+        }
         public FightChapterDefinition Chapter => chapter;
         public int StageIndex => stageIndex;
         public FightStageDefinition SelectedStage => chapter != null && stageIndex >= 0 && stageIndex < chapter.Stages.Count ? chapter.Stages[stageIndex] : null;
@@ -23,6 +44,7 @@ namespace RhythmHunter.FightDemo
 
         private void Awake()
         {
+            if(runtimeChapter&&selectedScene==gameObject.scene.path){chapter=runtimeChapter;stageIndex=runtimeStage;}
             if (chapter == null) return; // Legacy scenes retain their own roster and song.
             var stage = SelectedStage;
             if (stage == null) { Fail("Selected Chapter/Stage is missing."); return; }

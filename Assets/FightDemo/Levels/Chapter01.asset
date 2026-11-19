@@ -17,3 +17,5 @@ MonoBehaviour:
   defaultEnvironment: {fileID: 11400000, guid: 3a23c3ca4d574e22ba4f65b2d12ae51b, type: 2}
   stages:
   - {fileID: 11400000, guid: c686747c0059dcd499442da9f2315b14, type: 2}
+  - {fileID: 11400000, guid: 47b4a3aec4b11454fbb855ee5337b9cd, type: 2}
+  - {fileID: 11400000, guid: a3d3521f97e40fc48a67d1deb346a885, type: 2}

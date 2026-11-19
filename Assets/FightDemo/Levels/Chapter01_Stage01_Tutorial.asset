@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Chapter01_Stage01_Tutorial
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
   stageId: Chapter01_Stage01
-  displayName: Chapter 1 - Stage 1 - Forest Tutorial
+  displayName: Chapter 1 - Stage 1 - LongSwordWarrior_Weapon Tutorial
   tutorial: 1
+  tutorialHero: {fileID: 1698642025307986667, guid: bd3b0004258f3ef40ac6017ec0694d53, type: 3}
   environment: {fileID: 0}
   bossStage: 0
   bossEntrance:

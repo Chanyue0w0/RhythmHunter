@@ -4,13 +4,26 @@ Rhythm Hunter > Level Planner:
 - Chapter.Default Environment is inherited when Stage.Environment is empty.
 - Chapter01 defaults to Forest. Chapter01_Stage01_Tutorial is selected in Art2.
 - Tutorial is a tag; guided tutorial steps are not implemented yet.
-- Stage01 Tutorial currently contains one preview Goblin_Normal, no Pressure or deadline.
+- Chapter01 Stages 1/2/3 teach LongSwordWarrior_Weapon / Mage / Skeleton respectively.
+- Each Tutorial asset requires Tutorial Hero: only Front is populated. Formation swaps
+  are disabled for tutorials. Normal stages retain the scene-authored three hero order.
+- Current tutorial waves are preview Goblin_Normal encounters, no Pressure or deadline.
+  Guided objectives and objective-based victory are NOT implemented in this checkpoint.
+  In particular, the solo Mage cannot clear an enemy with its defensive basic ability.
+- Shared HP/DEF/MP capacities still derive from the characters actually present; no
+  tutorial resource boost or invulnerability is silently added.
 - Chapter02 defaults to Cave; third slot is Chapter02_Stage03_Boss.
 - Original Stage01/Stage02 assets and the Chapter02 Boss copy are preserved.
 
 Art2_FightScene > FightDemoController > Fight Level Planner:
 - Chapter = Chapter01; Stage Index = 0 (Stage 1).
 - Environment is applied before roster/music startup; Restart repeats initialization.
+- Selectable Chapters supplies the runtime pause-menu catalog (currently Chapter01/02).
+  Unassigned Stage slots are omitted. Click PAUSE or press ESC, select Chapter and Stage
+  with the arrow buttons, then LOAD SELECTED STAGE. This discards current battle progress.
+- Selection reloads the same scene through the existing Restart path. F9 keeps the
+  selected Stage for this Play session; exiting Play resets to the authored scene choice.
+  No Stage asset, saved scene selection or PlayerPrefs is changed by runtime selection.
 
 Art2_FightScene > ForestEnvironment_2_5D:
 - ForestGround_XZ: road plane; Background_*: depth-separated scenery cards.
@@ -33,4 +46,20 @@ selected environment. The floor recovery object is shared under FightDemoControl
 Validation: Chapter01/Stage01 Forest initialization, three hero spawns, supported
 materials, Cave disabled, forest floor recovery and Restart retaining Forest passed.
 Cloud motion and stationary rock positions also validated.
-Scene screenshots checked separately for composition. User visual approval pending.
+Pause-menu validation passed: actual Stage arrow/load button, reload through Mage,
+Skeleton, Boss and Warrior, empty Stage rejection, restart retaining selection,
+Forest/Cave activation, party counts and restored time scale. Pause UI screenshot checked.
+Scene screenshots checked separately for composition. Forest approved and pushed d4fbb957.
+
+Recommended next checkpoint (proposal, not active gameplay):
+- One objective card: ability description, current task, progress, active Front key.
+  Resolve key labels from the position/input profile; Mage and Skeleton are also Front.
+- Warrior: 3 successful calls; reach full charge once; land 3 empowered attacks.
+  Explain each normal hit raises charge one stage, two hits reach full, duration 5 beats.
+- Mage: call shield once; block 3 real hits; block 2 hits within one shield beat.
+  Describe one-beat protection, shared armor, no healing. Complete by objectives, not kills.
+- Skeleton: finish two consecutive calls 3 times; apply gold Aimed once; repeat after
+  one missed-beat reset. Explain 8-beat mark and teammate-triggered follow-up separately.
+  Solo lessons cannot demonstrate ally-triggered follow-up; defer practical use to reunion.
+- Do not require perfect streaks initially. Show concise Miss guidance, keep completed
+  objectives, offer retry. Lesson completion/health protection needs explicit design next.

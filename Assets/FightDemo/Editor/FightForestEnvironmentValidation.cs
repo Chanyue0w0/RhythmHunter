@@ -41,7 +41,8 @@ namespace RhythmHunter.FightDemoEditor
                 if(scrollers.Length!=1||scrollers[0].name!="Background_09")throw new Exception("Only clouds may scroll");
                 var caveLight=GameObject.Find("ShadowTestLight_MoveMe");
                 if((caveLight&&caveLight.GetComponent<Light>().enabled)||GameObject.Find("Art2_Atmosphere"))throw new Exception("Cave lighting still active");
-                if(!fight.FrontHero.UnitSlot.HasCharacter||!fight.SecondHero.UnitSlot.HasCharacter||!fight.ThirdHero.UnitSlot.HasCharacter)throw new Exception("Missing party");
+                var roster=fight.GetComponent<FightRosterManager>();
+                if(roster.ActiveHeroes.Count!=1||!fight.FrontHero.UnitSlot||fight.FrontHero.UnitSlot.CharacterDefinition.CharacterId!=plan.ActiveStage.TutorialHero.CharacterId||fight.SecondHero.UnitSlot||fight.ThirdHero.UnitSlot)throw new Exception("Incorrect solo tutorial party");
                 if(forest.GetComponentsInChildren<SpriteRenderer>().Any(r=>r.sharedMaterial==null||!r.sharedMaterial.shader.isSupported))throw new Exception("Unsupported forest material");
                 var floor=UnityEngine.Object.FindFirstObjectByType<Art2FloorOcclusion>();
                 if(!floor||floor.floors.Length!=1||!floor.floors[0].transform.IsChildOf(forest.transform))throw new Exception("Incorrect ground binding");
