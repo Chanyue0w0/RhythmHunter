@@ -27,6 +27,9 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private bool tutorial;
         [Tooltip("Tutorial only: this hero occupies Front; Middle and Back stay empty. Normal stages retain the scene's default party.")]
         [SerializeField] private FightCharacterDefinition tutorialHero;
+        [Tooltip("Tutorial with the scene's full default party, instead of one hero in Front.")]
+        [SerializeField] private bool tutorialFullParty;
+        public bool TutorialFullParty => tutorial && tutorialFullParty;
         public FightCharacterDefinition TutorialHero => tutorialHero;
         [Tooltip("Optional guided lesson. Only used when Tutorial is checked.")]
         [SerializeField] private FightTutorialLesson tutorialLesson;
@@ -144,7 +147,7 @@ namespace RhythmHunter.FightDemo
 
         public bool Validate(out string error)
         {
-            if (tutorial && (tutorialHero == null || tutorialHero.Team != FightUnitSlot.UnitTeam.Hero))
+            if (tutorial && !tutorialFullParty && (tutorialHero == null || tutorialHero.Team != FightUnitSlot.UnitTeam.Hero))
             { error = "Tutorial requires a hero prefab in Tutorial Hero."; return false; }
             if (string.IsNullOrWhiteSpace(stageId)) { error = "Stage ID is empty."; return false; }
             if (string.IsNullOrWhiteSpace(musicEventPath) || !musicEventPath.StartsWith("event:/", StringComparison.Ordinal))

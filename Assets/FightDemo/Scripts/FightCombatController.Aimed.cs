@@ -25,6 +25,7 @@ namespace RhythmHunter.FightDemo
         private readonly List<NormalImpact> normalImpacts = new();
         private int normalImpactLastMs;
         private bool hasNormalImpactTime;
+        public event Action<FightUnitSlot, bool, int> AimedShotHit;
 
         private FightUnitSlot FindAimedTarget(FightUnitSlot owner, bool goldOnly)
         {
@@ -66,6 +67,7 @@ namespace RhythmHunter.FightDemo
                 (visual.GetComponent<FightBattleEffect>() ?? visual.AddComponent<FightBattleEffect>()).Configure(this, false, 0);
             }
             int version = rosterVersion;
+            int issuedFrame = Time.frameCount;
             ScheduleNormalImpact(actor, target, () =>
             {
                 // Contact and damage are distinct: armor/guard may make damage zero.
@@ -75,12 +77,14 @@ namespace RhythmHunter.FightDemo
                 if (target.CurrentHp <= 0 || !IsCurrentHeroAction(version, actor, target)) return;
                 if (!followUp)
                 {
-                    target.ApplyAimed(actor, true);
+                    bool refreshed = target.HasGoldAimed && target.AimedOwner == actor;
+                    bool applied = target.ApplyAimed(actor, true);
                     if (data.AimedTargetEffect != null)
                         actor.EffectPlayer.SpawnConfiguredAbility(data.AimedTargetEffect, target.ImpactEffectAnchor, 0,
                             FightAttackEffect.VisualStyle.Skill, Color.yellow);
+                    if (applied) AimedShotHit?.Invoke(actor, refreshed, issuedFrame);
                 }
-                else PulseAimedIcon(target);
+                else { PulseAimedIcon(target); AimedFollowUpHit?.Invoke(actor, target, issuedFrame); }
             }, visual);
             // This is presentation only: no callback can recursively create a new attack call.
             actor.PlayCombatAnimation(FightCharacterCombatAnimator.CombatAnimation.NormalAttack, null, null, null,

@@ -197,7 +197,7 @@ MonoBehaviour:
   swordDelayedOnHitEffect: {fileID: 0}
   swordChargeAura: {fileID: 0}
   characterId: SkeletonGunner
-  displayName: SKELETON GUNNER
+  displayName: 遊俠-死亡比利
   team: 1
   role: 2
   maxHp: 2

@@ -15,6 +15,7 @@ MonoBehaviour:
   stageId: Chapter01_Stage03
   displayName: Chapter 1 - Stage 3 - Skeleton Tutorial
   tutorial: 1
+  tutorialLesson: {fileID: 11400000, guid: 31ef45d6e8e8434cb680eaf67627ef91, type: 2}
   tutorialHero: {fileID: 4415416321156734532, guid: 81c1367b5bbb4f45ab9a7039e857c330, type: 3}
   environment: {fileID: 0}
   bossStage: 0

@@ -46,6 +46,7 @@ namespace RhythmHunter.FightDemo
         private FightCharacterDefinition[][] stageWaves;
         private FightCharacterDefinition[] defaultStageHeroes;
         public bool IsTutorialStage { get; private set; }
+        public bool IsSoloTutorialStage { get; private set; }
         private FightEnemyPressureSettings[] stagePressure;
         private FightStageDefinition.WaveKind[] stageWaveKinds;
         public bool UsesStageDeadline { get; private set; }
@@ -89,7 +90,8 @@ namespace RhythmHunter.FightDemo
             stageWaves = snapshot; // Do not mutate shared assets or re-read edits mid-battle.
             defaultStageHeroes ??= (FightCharacterDefinition[])heroPrefabs.Clone();
             IsTutorialStage = stage.Tutorial;
-            heroPrefabs = IsTutorialStage
+            IsSoloTutorialStage = stage.Tutorial && !stage.TutorialFullParty;
+            heroPrefabs = IsSoloTutorialStage
                 ? new[] { stage.TutorialHero, null, null }
                 : (FightCharacterDefinition[])defaultStageHeroes.Clone();
             stagePressure = pressureSnapshot;
@@ -208,9 +210,9 @@ namespace RhythmHunter.FightDemo
         internal bool TryLockFormation()
         {
             if (!requireBattlePreparation || BattleStarted) return false;
-            for (int i = 0; i < (IsTutorialStage ? 1 : 3); i++)
+            for (int i = 0; i < (IsSoloTutorialStage ? 1 : 3); i++)
                 if (GetHeroAtPosition((PartyPosition)i) == null) return false;
-            if (IsTutorialStage && (GetHeroAtPosition(PartyPosition.Middle) != null || GetHeroAtPosition(PartyPosition.Back) != null)) return false;
+            if (IsSoloTutorialStage && (GetHeroAtPosition(PartyPosition.Middle) != null || GetHeroAtPosition(PartyPosition.Back) != null)) return false;
             BattleStarted = true;
             return true;
         }

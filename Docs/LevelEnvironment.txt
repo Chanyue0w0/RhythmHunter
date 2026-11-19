@@ -152,3 +152,41 @@ Weaken status icon:
   Pulses on the existing music beat without fading. Disappears when reduction expires/death/reset.
 - Updated Play verification passed next-beat triggering, multi-hit deduplication,
   pause shifting, pooled Weaken icon, non-overlapping rows, and the full Mage lesson.
+Team training and position buttons (2026-11-20):
+- Chapter 1 now has five stages: Alex, Mage, Billy (solo practice), Team Training,
+  Fever (Reserved). Stage 5 has no guided lesson and no Fever exemption yet.
+- FightStageDefinition / Tutorial Full Party selects the scene's default three heroes.
+  Existing stages default false and retain their single front hero. Chapter environment
+  remains Forest. Boss and normal stages retain their existing roster behavior.
+- Tutorial_Team.asset: all three hero commands enabled, enemy/player death protected.
+  Objectives are sequential: 5 charged sword primary hits -> 3 successful blocks ->
+  4 actual shooter follow-up contacts. Enemy HP floors at 1; contact/status/number
+  feedback continue so objectives remain possible after the normal HP is exhausted.
+- Goblin attacks only during the block objective, using the confirmed 4-beat interval.
+  Dialogue, later follow-up practice and completed free practice stop enemy attacks.
+  Training protections are scoped to this lesson and do not change Goblin_Normal prefab.
+- Tutorial position badges: FightTutorialController / Tutorial position buttons.
+  Show Tutorial Position Buttons, Position Button Offset=(0,-34), Size=(44,44).
+  X/Y/B are overlay UI projected below each occupied Front/Middle/Back FootAnchor.
+  Empty slots hide their badge; normal stages hide all badges; floor depth cannot cover UI.
+- Skeleton display name is now 遊俠-死亡比利. Proposed guided Stage 3, not implemented:
+  1. Introduce Billy; first X aims, next consecutive on-beat X shoots.
+  2. Finish three consecutive-two-beat shots against the training dummy.
+  3. Explain gold Aimed: ally attacks cause Billy's follow-up; reapply to refresh.
+  4. Reapply the gold mark three times; broken preparation must start over.
+  5. Free practice / RB to team training, where ally-triggered follow-up is practiced.
+- User requested Stage 5 Fever tutorial for a later session (2026-11-21); reserved only.
+- Play validation passed: chapter classification, all three badges below feet, lethal-hit protection, 5 charged hits at 1 enemy HP, 3 blocks, 4 follow-up contacts, and five beats without enemy attacks after completion.
+
+Billy guided lesson implemented (2026-11-20; replaces the earlier proposal):
+- Chapter01_Stage03_Tutorial references Tutorial_Billy.asset; solo Front, TrainingDummy.
+- Confirmed five-step copy: 遊俠－死亡比利 / 連續兩拍按下 X，先瞄準，再射擊！
+  -> 3 actual shots -> 技能：追擊 / 射擊會標記敵人，隊友攻擊時，比利會同步追擊！
+  -> refresh an existing gold mark 3 times -> free practice, RB next lesson.
+- New appended goal types AimedShotHits / AimedRefreshHits preserve old enum values.
+  Counts use actual primary bullet contacts, never preparation, duplicate input,
+  follow-up bullets or delayed effects. Events issued before the step cannot advance it.
+  An expired mark must first be applied again; that application is not a refresh.
+- Music continues during dialogue; A advances pages, Fever remains blocked.
+  Tutorial death protection applies to player and dummy; dummy attacks remain disabled.
+- Ability mechanics and projectile timing remain unchanged. This lesson only observes hits.

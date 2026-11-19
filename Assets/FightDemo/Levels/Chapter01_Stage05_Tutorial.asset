@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f994234d5791e84c817efaa02eb6a08, type: 3}
+  m_Name: Chapter01_Stage05_Tutorial
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
+  stageId: Chapter01_Stage05
+  displayName: "Chapter 1 - Stage 5 - Fever (Reserved)"
+  tutorial: 1
+  tutorialHero: {fileID: 0}
+  tutorialFullParty: 1
+  tutorialLesson: {fileID: 0}
+  teachesFever: 0
+  environment: {fileID: 0}
+  bossStage: 0
+  musicEventPath: event:/Ritual Slam _120_3
+  useNormalEndDeadline: 0
+  plannedSongSeconds: 0
+  waves:
+  - name: Training
+    kind: 0
+    front: {fileID: 8354792478736558662, guid: 5e65bdb4ca2999343b0918c7eac03f00, type: 3}
+    middle: {fileID: 0}
+    back: {fileID: 0}
+    pressure:
+      enablePressurePhase: 0

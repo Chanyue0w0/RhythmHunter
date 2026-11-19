@@ -7,7 +7,7 @@ namespace RhythmHunter.FightDemo
     [CreateAssetMenu(menuName = "Rhythm Hunter/Levels/Tutorial Lesson")]
     public sealed class FightTutorialLesson : ScriptableObject
     {
-        public enum Goal { Dialogue, OnBeatCalls, NormalHits, ChargedHits, FreePractice, SuccessfulBlocks, SlimeHits }
+        public enum Goal { Dialogue, OnBeatCalls, NormalHits, ChargedHits, FreePractice, SuccessfulBlocks, SlimeHits, FollowUpHits, AimedShotHits, AimedRefreshHits }
         [Serializable]
         public sealed class Step
         {
@@ -21,6 +21,9 @@ namespace RhythmHunter.FightDemo
         }
         public bool controlEnemyAttacks;
         public bool preventPlayerDeath;
+        public bool preventEnemyDeath;
+        public bool allowAllHeroCommands;
+        public bool attackInFreePractice = true;
         [Min(1)] public int enemyAttackIntervalBeats = 4;
         public List<Step> steps = new();
     }

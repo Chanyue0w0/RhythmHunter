@@ -7,6 +7,9 @@ namespace RhythmHunter.FightDemo
         private int tutorialAttackInterval = 4;
         private long tutorialAttackStart;
         public bool TutorialPreventsDeath { get; private set; }
+        public bool TutorialEnemyDeathProtected(FightUnitSlot target) => target != null && target.Team == FightUnitSlot.UnitTeam.Enemy &&
+            GetComponent<FightLevelPlanner>()?.ActiveStage?.TutorialLesson?.preventEnemyDeath == true;
+        public event Action<FightUnitSlot, FightUnitSlot, int> AimedFollowUpHit;
         internal bool TutorialControlsEnemies => tutorialControlsEnemies;
         internal void ConfigureTutorialEnemies(bool control, bool enabled, int interval, bool preventDeath)
         {

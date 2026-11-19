@@ -348,6 +348,8 @@ namespace RhythmHunter.FightDemo
             float resolvedDamage = consumeFragile ? damage * 2f : damage;
             bool wasTired=BossPhaseOneTired;
             float hpFloor=BossPhaseOneProtected ? Mathf.Min(FightCombatUnits.BossHpFloor,currentHp) : 0;
+            bool trainingProtected = CombatController != null && CombatController.TutorialEnemyDeathProtected(this);
+            if (trainingProtected) hpFloor = Mathf.Max(hpFloor, Mathf.Min(1, currentHp));
             float applied = Mathf.Clamp(resolvedDamage, 0f, currentHp-hpFloor);
             // Clear before notifications: reentrant damage must not reuse the status.
             if (consumeFragile && resolvedDamage > 0)
@@ -366,9 +368,9 @@ namespace RhythmHunter.FightDemo
                 BeginRestHitHop();
             CombatController?.RecordPressureDamage(this, applied);
             // Burst presentation shows full resolved damage; actual HP loss remains capped at zero.
-            if (displayDamageNumber && CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained || BossPhaseOneTired || showFullDamage ? resolvedDamage : applied);
+            if (displayDamageNumber && CombatController != null) CombatController.ShowEnemyDamageNumber(this, retained || BossPhaseOneTired || trainingProtected || showFullDamage ? resolvedDamage : applied);
             // Consume before callbacks; secondary damage and DoT cannot trigger fragments.
-            if ((applied > 0 || (retained || BossPhaseOneTired) && resolvedDamage > 0) && kind == DamageKind.Direct && HasSlimeFragment)
+            if ((applied > 0 || (retained || BossPhaseOneTired || trainingProtected) && resolvedDamage > 0) && kind == DamageKind.Direct && HasSlimeFragment)
             {
                 ArmSlimeDetonation();
             }
@@ -383,7 +385,7 @@ namespace RhythmHunter.FightDemo
                 EnemyDefeated?.Invoke(this, ImpactEffectAnchor != null ? ImpactEffectAnchor.position : transform.position);
             }
             if (wasAlive) HealthChanged?.Invoke(this, currentHp, maxHp);
-            if (resolvedDamage > 0 && (applied > 0 || retained || BossPhaseOneTired))
+            if (resolvedDamage > 0 && (applied > 0 || retained || BossPhaseOneTired || trainingProtected))
                 DamageConfirmed?.Invoke(this, kind);
             if(wasTired)RecordBossExtraDamage(resolvedDamage,kind);
             return applied;

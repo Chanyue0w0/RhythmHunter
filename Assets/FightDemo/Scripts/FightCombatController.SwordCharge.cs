@@ -133,7 +133,7 @@ namespace RhythmHunter.FightDemo
                         ShowSwordStage(state);
                     }
                 }
-                if (target.CurrentHp < hpBefore) SwordPrimaryHit?.Invoke(actor, charged, issuedFrame);
+                if (target.CurrentHp < hpBefore || TutorialEnemyDeathProtected(target)) SwordPrimaryHit?.Invoke(actor, charged, issuedFrame);
             }, onCancelled: () => { if (!charged && state.generation == generation) state.BreakStreak(); });
             // Queue against the original contact time: not VFX lifetime, not a second input.
             // Dead targets and roster changes cancel this tick rather than retargeting another enemy.

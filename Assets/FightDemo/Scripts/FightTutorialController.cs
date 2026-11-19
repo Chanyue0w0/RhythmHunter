@@ -7,7 +7,7 @@ namespace RhythmHunter.FightDemo
 {
     // Stage-owned data, normal input judgement and primary-contact events drive the lesson.
     [DisallowMultipleComponent]
-    public sealed class FightTutorialController : MonoBehaviour
+    public sealed partial class FightTutorialController : MonoBehaviour
     {
         [Header("Dialogue")]
         [SerializeField] private Font textFont;
@@ -44,6 +44,8 @@ namespace RhythmHunter.FightDemo
             fight.SwordPrimaryHit += OnSwordHit;
             fight.EnemyAttackResolved += OnEnemyHit;
             fight.MageSlimeAttached += OnSlimeHit;
+            fight.AimedFollowUpHit += OnFollowUpHit;
+            fight.AimedShotHit += OnAimedShotHit;
             fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, false, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
             fight.BattleLost += Hide;
             fight.BattleVictory += Hide;
@@ -61,6 +63,7 @@ namespace RhythmHunter.FightDemo
                 runtimeFont = Font.CreateDynamicFontFromOSFont(new[] { "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC", "Arial Unicode MS" }, bodyFontSize);
                 font = runtimeFont != null ? runtimeFont : fallback;
             }
+            ConfigurePositionBadges(root, font);
             var veil = FightMenuUi.Rect("ReadingMask", root, Vector2.zero, Vector2.zero);
             Stretch(veil); modal = veil.gameObject;
             veil.gameObject.AddComponent<Image>().color = new Color(.015f, .025f, .045f, backdropOpacity);
@@ -115,7 +118,8 @@ namespace RhythmHunter.FightDemo
                 return true;
             }
             if (command == FightInputRouter.HeroCommand.TeamSkill) return false;
-            return advancePending || command != FightInputRouter.HeroCommand.Front;
+            bool heroCommand = command >= FightInputRouter.HeroCommand.Front && command <= FightInputRouter.HeroCommand.Back;
+            return advancePending || (lesson.allowAllHeroCommands ? !heroCommand : command != FightInputRouter.HeroCommand.Front);
         }
         public void AdvanceDialogue()
         {
@@ -140,7 +144,7 @@ namespace RhythmHunter.FightDemo
         private void BeginFreePractice(string heading, string description)
         {
             Completed = true;
-            fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, true, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
+            fight.ConfigureTutorialEnemies(lesson.controlEnemyAttacks, lesson.attackInFreePractice, lesson.enemyAttackIntervalBeats, lesson.preventPlayerDeath);
             fight.SetTutorialChargeSuppressed(false);
             modal.SetActive(false); objective.SetActive(true);
             counter.text = $"<b><color=#FFD879>{heading}</color></b>\n{description}";
@@ -181,6 +185,15 @@ namespace RhythmHunter.FightDemo
         { if (Active && started && !Reading && !advancePending && Step.goal == FightTutorialLesson.Goal.SuccessfulBlocks && hit.Blocked) Count(); }
         private void OnSlimeHit(FightUnitSlot target)
         { if (Active && started && !Reading && !advancePending && Step.goal == FightTutorialLesson.Goal.SlimeHits) Count(); }
+        private void OnFollowUpHit(FightUnitSlot actor, FightUnitSlot target, int issuedFrame)
+        { if (Active && started && !Reading && !advancePending && issuedFrame >= enteredFrame && Step.goal == FightTutorialLesson.Goal.FollowUpHits) Count(); }
+        private void OnAimedShotHit(FightUnitSlot actor, bool refreshed, int issuedFrame)
+        {
+            if (!Active || !started || Reading || advancePending || issuedFrame < enteredFrame ||
+                fight.GetHeroForCommand(FightInputRouter.HeroCommand.Front)?.UnitSlot != actor) return;
+            if (Step.goal == FightTutorialLesson.Goal.AimedShotHits ||
+                Step.goal == FightTutorialLesson.Goal.AimedRefreshHits && refreshed) Count();
+        }
         private void Count()
         {
             progress++; RefreshObjective();
@@ -194,7 +207,8 @@ namespace RhythmHunter.FightDemo
         }
         private void OnDisable()
         {
-            if (fight != null) { fight.ConfigureTutorialEnemies(false, false, 4, false); fight.EnemyAttackResolved -= OnEnemyHit; fight.MageSlimeAttached -= OnSlimeHit; fight.HeroCalled -= OnHeroCalled; fight.SwordPrimaryHit -= OnSwordHit; fight.BattleLost -= Hide; fight.BattleVictory -= Hide; }
+            if (fight != null) fight.AimedShotHit -= OnAimedShotHit;
+            if (fight != null) { fight.ConfigureTutorialEnemies(false, false, 4, false); fight.AimedFollowUpHit -= OnFollowUpHit; fight.EnemyAttackResolved -= OnEnemyHit; fight.MageSlimeAttached -= OnSlimeHit; fight.HeroCalled -= OnHeroCalled; fight.SwordPrimaryHit -= OnSwordHit; fight.BattleLost -= Hide; fight.BattleVictory -= Hide; }
             Hide();
         }
         private void OnDestroy()
