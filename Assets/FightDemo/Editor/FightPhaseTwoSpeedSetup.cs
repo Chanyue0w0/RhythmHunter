@@ -66,6 +66,15 @@ namespace RhythmHunter.FightDemoEditor
                 var mesh=meshObject.GetComponent<MeshFilter>().sharedMesh;
                 Check(mesh.vertexCount==512&&mesh.triangles.Length==768,"Fixed mesh capacity including fading lines");
                 Check(mesh.vertices.All(v=>!float.IsNaN(v.x)&&!float.IsInfinity(v.y)),"Invalid world geometry");
+                Vector3 tail=new(0,0,-9),head=new(0,0,-11);
+                Check(FightTunnelAirflow.ClipToNearPlane(camera,ref tail,ref head,out float ta,out float ha),"Visible tail discarded");
+                Check(ta==0&&ha>0&&ha<1&&camera.WorldToViewportPoint(head).z>=camera.nearClipPlane,"Near-plane alpha continuity");
+                tail=new Vector3(0,0,-11);head=new Vector3(0,0,-12);
+                Check(!FightTunnelAirflow.ClipToNearPlane(camera,ref tail,ref head,out ta,out ha),"Behind-camera ribbon retained");
+                airflow.Present(camera,Vector3.zero,0,96,.35f,4,10,new Vector2(.02f,.04f),Color.white,true,.5f,.68f,.1f,.04f,true,true);
+                airflow.Present(camera,Vector3.zero,0,96,.35f,4,2,new Vector2(.02f,.04f),Color.white,true,.5f,.68f,.1f,.04f,true,true,lengthBlend:.1f);
+                float smooth=(float)typeof(FightTunnelAirflow).GetField("displayedLength",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(airflow);
+                Check(Mathf.Abs(smooth-9.2f)<.001f,"Abrupt length change");
             }
             finally{UnityEngine.Object.DestroyImmediate(root);}
         }

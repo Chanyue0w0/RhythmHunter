@@ -55,8 +55,18 @@ namespace RhythmHunter.FightDemoEditor
                         if(haveBossPosition)sawImpactShake|=Vector3.Distance(position,previousBossPosition)>.001f;
                         previousBossPosition=position;haveBossPosition=true;
                     }
-                    if(finale.Accepting&&!weak&&finale.PressCount<32)fight.SubmitHeroCommand(FightInputRouter.HeroCommand.TeamSkill);
-                    if(finale.Active&&!finale.Fired&&!chargeShot&&battle.CurrentBeat>21){ScreenCapture.CaptureScreenshot("Temp/GemFinaleNewCharge.png");chargeShot=true;}
+                    if(finale.Accepting&&!weak)
+                        for(int press=0;press<4&&finale.PressCount<32;press++)fight.SubmitHeroCommand(FightInputRouter.HeroCommand.TeamSkill);
+                    if(finale.Active&&!finale.Fired&&!chargeShot&&battle.CurrentBeat>21)
+                    {
+                        if(!GameObject.Find("FinaleChargingEnergy"))throw new Exception("Missing charge shell");
+                        var energy=GameObject.Find("FinaleChargingEnergy");
+                        if(energy.GetComponentsInChildren<LineRenderer>().Length!=3)throw new Exception("Expected three gem links");
+                        Vector3 size=energy.transform.Find("HeroEnergy_0").localScale;
+                        for(int i=0;i<3;i++)if(energy.transform.Find("HeroEnergy_"+i).localScale!=size)throw new Exception("Energy shell sizes differ");
+                        if(!weak&&(!finale.IsPerfect||finale.BeamDamage!=99999))throw new Exception("Perfect damage not active");
+                        ScreenCapture.CaptureScreenshot("Temp/GemFinaleNewCharge.png");chargeShot=true;
+                    }
                     if(finale.Fired&&battle.CurrentBeat>24){
                         var beam=GameObject.Find("FinaleGemUltRay_Runtime");
                         if(!beam||!beam.GetComponent<FightGemBeamVolume>()||!beam.transform.Find("BeamVolume3D"))throw new Exception("Missing beam volume");
@@ -64,6 +74,7 @@ namespace RhythmHunter.FightDemoEditor
                         if(!overlay||!overlay.DrawAboveScene)throw new Exception("Missing late overlay registration");
                         if(!UnityEngine.Object.FindFirstObjectByType<FightGemFinaleGlare>())throw new Exception("Missing camera glare");
                         if(!sawImpactFlash||!sawImpactShake)throw new Exception("Missing Boss beat impact flash/shake");
+                        if(GameObject.Find("FinaleChargingEnergy"))throw new Exception("Charge shell persists after fire");
                         if(finale.BeamDamagePulses<2||battle.Boss.CurrentHp<=0)throw new Exception("Beam did not repeat damage feedback or killed Boss early");
                         for(int i=0;i<3;i++)
                         {

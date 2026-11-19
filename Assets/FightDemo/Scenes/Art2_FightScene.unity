@@ -20960,6 +20960,7 @@ MonoBehaviour:
   highIntensityCount: 128
   speedPerBeat: {x: 0.12, y: 0.5}
   streakLength: {x: 0.5, y: 2.2}
+  lengthResponseBeats: 0.35
   streakWidth: {x: 0.018, y: 0.045}
   pixelSnap: 0
   respectSceneDepth: 1
@@ -21031,7 +21032,6 @@ MonoBehaviour:
   guardBoostDurationBeats: 0.4
   maximumSpeedMultiplier: 1.6
   exitViewportMargin: 0.08
-  maximumTravel: 1.4
 --- !u!114 &2021200344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21142,9 +21142,20 @@ MonoBehaviour:
   gemEnterFromScreenTop: 1
   gemEntryViewportMargin: 0.2
   gemEntryBeats: 0.45
-  bounceAmount: 0.18
-  bounceBeats: 0.25
-  fullChargePresses: 32
+  bounceAmount: 0.4
+  bounceBeats: 0.3
+  fullChargePresses: 21
+  damagePerPress: 10
+  perfectPressThreshold: 20
+  perfectDamage: 99999
+  chargingShellEnabled: 1
+  chargingShellShader: {fileID: 4800000, guid: 3ccb4853149a0af449c88edbb6dcfee8, type: 3}
+  chargingShellSize: {x: 2.1, y: 2.8, z: 1.4}
+  chargingShellOpacity: 0.24
+  chargingShellCenterOffset: {x: 0, y: 1.2, z: 0}
+  chargingLinkShader: {fileID: 4800000, guid: f67242e3ec387a24096d0191a57d756b, type: 3}
+  chargingLinkWidth: 0.045
+  chargingLinkColor: {r: 0.2, g: 0.7, b: 1, a: 0.65}
   promptSprite: {fileID: -4251633771384370885, guid: 0fda30878fe3bde42b2ecd07c374b45a, type: 3}
   promptHeight: 0.65
   promptOffset: {x: 0, y: 1, z: 0}
@@ -21174,6 +21185,9 @@ MonoBehaviour:
   beamRotationOffset: {x: 0, y: 0, z: 0}
   weakBeamOpacity: 0.16
   beamFadeBeats: 1
+  beamCameraShakeEnabled: 1
+  beamCameraShakeAmplitude: {x: 0.045, y: 0.035}
+  beamCameraShakeCyclesPerBeat: 4
   bossImpactShakeEnabled: 1
   bossImpactShakeAmount: 0.12
   bossImpactShakeBeats: 0.4
@@ -22827,7 +22841,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.7e-43, y: 1.16e-43, z: 0, w: -2.9566658e-38}
+  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -22991,7 +23005,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: -7.8274666e+17, y: 1.470916e-39, z: 1.1180835e-19, w: 1.5046328e-36}
+  m_BoundingSphereOverride: {x: 5.7e-43, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23487,7 +23501,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.7e-43, y: 1.42e-43, z: 5.7e-43, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23651,7 +23665,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 5.7e-43, y: 1.16e-43, z: 0, w: -6.60527e-40}
+  m_BoundingSphereOverride: {x: 4.9738e-41, y: -1.2343128e+38, z: 5.69e-43, w: 4.2950854e+24}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

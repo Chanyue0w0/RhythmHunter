@@ -74,3 +74,11 @@ Boss 光束受擊：Fight Boss Gem Finale / Boss Beam Impact 可分開開關 Sha
 
 光束鏡頭震動：Beam Camera Shake Enabled / Amplitude=(0.045,0.035) / Cycles Per Beat=4。從發射持續到光束結束，死亡後隨最後一拍淡出；使用Art2CameraController獨立偏移，不與落地震動競爭。
 聚集踩地修復：以三名角色FootAnchor的XZ座標聚集，保留各自腳底高度，避免不同rootY朝法師root插值而埋入地面。Play診斷rootY：戰士0.270、法師-0.018、射手0.666；原算法使射手降低0.2394。修正後三人的聚集前後FootAnchor Y皆為0，無修改圖片/PPU/Pivot/FootAnchor。
+
+速度線離場修復：先裁切鏡頭近裁切面，再建立朝鏡頭的線寬，保留裁切點原本的透明度插值，避免前端越過鏡頭導致幾何翻轉。離場檢查四頂點皆超出同一畫面邊界；移除Maximum Travel固定距離強制刪除。Length Response Beats預設0.35，以歌曲拍差平滑段落/格擋加速引起的長度變化。保留Respect Scene Depth與中央保護區，場景遮擋仍正常生效。
+
+終結新規則：BeamDamage=PressCount*10，嚴格超過20下（21下起）每波及最終數字=99999。0下不顯示傷害數字，但歌曲結束仍處決，延續無輸入也勝利規則。Perfect金字於達標當下在右側出現。視覺滿充能同步21下。
+點擊彈跳：Bounce Amount=0.4、Bounce Beats=0.3，按下立即放大後回彈，快速連打不會一直重設為無變化。
+Charging Shell Enabled / Shader / Size=(6.5,4.5,7) / Opacity=0.24：寶石中心的3D藍色透明能量罩，蓄能顯示、發射立即隱藏，停止/重開清除，不修改角色材質或戰鬥判定。
+
+能量罩改版：取消整隊大罩，三位勇者各有同尺寸2.1×2.8×1.4的橢圓罩，朝鏡頭且跟隨各自FootAnchor，Camera-space Center Offset=(0,1.2,0)。每罩一條LineRenderer直連寶石，Charging Link Width=0.045、Color可調。三罩共用一份材質，三線共用一份材質，發射時整組關閉、停止時釋放。

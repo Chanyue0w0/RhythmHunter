@@ -36,6 +36,19 @@ namespace RhythmHunter.FightDemo
         [SerializeField,Min(.01f)] private float bounceBeats=.25f;
         [Header("Free A presses (future reward input; no reward formula yet)")]
         [SerializeField,Min(1)] private int fullChargePresses=32;
+        [SerializeField,Min(0)] private int damagePerPress=10;
+        [SerializeField,Min(0)] private int perfectPressThreshold=20;
+        [SerializeField,Min(1)] private int perfectDamage=99999;
+        [Header("Charging energy shell")]
+        [SerializeField] private bool chargingShellEnabled=true;
+        [SerializeField] private Shader chargingShellShader;
+        [SerializeField] private Vector3 chargingShellSize=new(2.1f,2.8f,1.4f);
+        [SerializeField,Range(0,1)] private float chargingShellOpacity=.24f;
+        [Tooltip("Offset from each hero's feet in camera right/up/forward coordinates.")]
+        [SerializeField] private Vector3 chargingShellCenterOffset=new(0,1.2f,0);
+        [SerializeField] private Shader chargingLinkShader;
+        [SerializeField,Min(.001f)] private float chargingLinkWidth=.045f;
+        [SerializeField] private Color chargingLinkColor=new(.2f,.7f,1,.65f);
         [SerializeField] private Sprite promptSprite;
         [SerializeField,Min(.01f)] private float promptHeight=.55f;
         [SerializeField] private Vector3 promptOffset=new(0,1.15f,0);
@@ -85,6 +98,10 @@ namespace RhythmHunter.FightDemo
         public bool Active {get;private set;}
         public bool Fired {get;private set;}
         public int PressCount {get;private set;}
+        public bool IsPerfect => PressCount>perfectPressThreshold;
+        public int BeamDamage => CalculateBeamDamage(PressCount,damagePerPress,perfectPressThreshold,perfectDamage);
+        public static int CalculateBeamDamage(int presses,int perPress,int threshold,int maximum)
+            => presses>threshold?maximum:(int)Math.Min(int.MaxValue,(long)Math.Max(0,presses)*Math.Max(0,perPress));
         public float Charge => Mathf.Clamp01(PressCount/(float)Mathf.Max(1,fullChargePresses));
         // Reward design pending: zero presses still wins; consume PressCount/Charge in future reward calculation.
         public bool LowParticipation => PressCount<fullChargePresses;
@@ -98,6 +115,9 @@ namespace RhythmHunter.FightDemo
         Light gemLight;FightVfxOpacity beamOpacity;FightGemBeamVolume beamVolume;Vector3 promptBaseScale;
         FightGemFinaleGlare glare;
         UnityEngine.UI.Image gemAboveGlare,promptAboveGlare;
+        UnityEngine.UI.Text perfectLabel;
+        GameObject chargingShell;Material chargingShellMaterial;double perfectAt=double.NegativeInfinity;
+        Transform[] heroShells;LineRenderer[] chargingLinks;Material chargingLinkMaterial;
         int lastDamageBeat=int.MinValue;
         public int BeamDamagePulses {get;private set;}
         public bool HasDisplayedBeamDamageThisBeat => lastDamageBeat==(int)Math.Floor(beat);
@@ -124,6 +144,7 @@ namespace RhythmHunter.FightDemo
             Active=true;PressCount=0;CompletedPressCount=0;CompletedCharge=0;Fired=dying=false;deathBeats=0;
             lastDamageBeat=int.MinValue;
             BeamDamagePulses=0;
+            perfectAt=double.NegativeInfinity;
             rhythm.EnterGemFinale();
             var slots=new[]{fight.FrontHero.UnitSlot,fight.SecondHero.UnitSlot,fight.ThirdHero.UnitSlot};
             heroes=new Transform[3];heroFrom=new Vector3[3];heroFootFrom=new Vector3[3];
@@ -156,6 +177,27 @@ namespace RhythmHunter.FightDemo
                     text.GetComponent<MeshRenderer>().sortingOrder=60;
                 }
                 promptBaseScale=prompt.transform.localScale;
+                if(chargingShellEnabled&&chargingShellShader)
+                {
+                    chargingShell=new GameObject("FinaleChargingEnergy");
+                    chargingShell.transform.SetParent(transform,false);
+                    chargingShellMaterial=new Material(chargingShellShader);
+                    if(chargingLinkShader)chargingLinkMaterial=new Material(chargingLinkShader);
+                    heroShells=new Transform[3];chargingLinks=new LineRenderer[3];
+                    for(int i=0;i<3;i++)
+                    {
+                        var shell=GameObject.CreatePrimitive(PrimitiveType.Sphere);shell.name="HeroEnergy_"+i;shell.transform.SetParent(chargingShell.transform,false);
+                        var collider=shell.GetComponent<Collider>();collider.enabled=false;Destroy(collider);
+                        var renderer=shell.GetComponent<MeshRenderer>();renderer.shadowCastingMode=ShadowCastingMode.Off;renderer.receiveShadows=false;
+                        renderer.sharedMaterial=chargingShellMaterial;heroShells[i]=shell.transform;
+                        if(chargingLinkMaterial)
+                        {
+                            var link=new GameObject("GemEnergyLink_"+i).AddComponent<LineRenderer>();link.transform.SetParent(chargingShell.transform,false);
+                            link.sharedMaterial=chargingLinkMaterial;link.positionCount=2;link.useWorldSpace=true;link.alignment=LineAlignment.View;
+                            link.shadowCastingMode=ShadowCastingMode.Off;link.receiveShadows=false;link.numCapVertices=3;chargingLinks[i]=link;
+                        }
+                    }
+                }
             }
             Place();
         }
@@ -163,6 +205,7 @@ namespace RhythmHunter.FightDemo
         {
             if(!Accepting)return;
             PressCount++;lastPress=beat;
+            if(PressCount==perfectPressThreshold+1)perfectAt=beat;
             fight.AudioPlayer.PlayBeatSound(fight.BossHitSoundPath,fight.BossHitSoundVolume,0,false,0);
             if(!gem||!hitEffectPrefab)return;
             Burst burst=bursts.Find(b=>!b.go.activeSelf);
@@ -184,6 +227,7 @@ namespace RhythmHunter.FightDemo
         void Fire()
         {
             Fired=true;if(prompt)prompt.SetActive(false);
+            if(chargingShell)chargingShell.SetActive(false);
             if(!beamPrefab||!gem)return;
             var boss=rhythm.Boss;
             if(boss&&boss.ActorRoot)
@@ -262,8 +306,28 @@ namespace RhythmHunter.FightDemo
             }
             gem.transform.position=Vector3.Lerp(landing,entry,Mathf.Pow(1-enter,3));
             if(view)gem.transform.rotation=view.transform.rotation;
-            float pulse=1+bounceAmount*Mathf.Sin(Mathf.Clamp01((float)(beat-lastPress)/Mathf.Max(.01f,bounceBeats))*Mathf.PI);
+            float bounceT=Mathf.Clamp01((float)(beat-lastPress)/Mathf.Max(.01f,bounceBeats));
+            float pulse=1+bounceAmount*Mathf.Cos(bounceT*Mathf.PI*2)*Mathf.Pow(1-bounceT,2);
             gem.transform.localScale=gemBaseScale*pulse;
+            if(chargingShell)
+            {
+                chargingShell.SetActive(chargingShellEnabled&&!Fired&&!dying);
+                float opacity=chargingShellOpacity*Mathf.Clamp01((float)(beat-startBeat)/.5f);
+                chargingShellMaterial.SetVector("_Charge",new Vector4((float)beat,opacity,Charge,0));
+                Quaternion facing=view?view.transform.rotation:Quaternion.identity;
+                for(int i=0;i<3;i++)
+                {
+                    if(!heroes[i])continue;
+                    Vector3 foot=heroes[i].position+heroFootFrom[i]-heroFrom[i];
+                    Vector3 center=foot+facing*chargingShellCenterOffset;
+                    heroShells[i].SetPositionAndRotation(center,facing);heroShells[i].localScale=chargingShellSize;
+                    var link=chargingLinks[i];if(!link)continue;
+                    link.SetPosition(0,center);link.SetPosition(1,gem.transform.position);
+                    link.widthMultiplier=chargingLinkWidth;
+                    Color tint=chargingLinkColor;tint.a*=Mathf.Clamp01((float)(beat-startBeat)/.5f);
+                    link.startColor=link.endColor=tint;
+                }
+            }
             float fade=dying?1-Mathf.Clamp01(deathBeats/Mathf.Max(.01f,beamFadeBeats)):1;
             gemLight.intensity=Mathf.Lerp(lightIntensity.x,lightIntensity.y,Charge)*fade;gemLight.color=gemLightColor;gemLight.range=lightRange;
             if(prompt)
@@ -317,7 +381,7 @@ namespace RhythmHunter.FightDemo
                 {
                     // Phase two HP/death belongs to the song timeline. The sustained beam
                     // displays an overkill hit each beat without executing the Boss early.
-                    fight.ShowEnemyDamageNumber(rhythm.Boss,99999);
+                    if(BeamDamage>0)fight.ShowEnemyDamageNumber(rhythm.Boss,BeamDamage);
                     BeamDamagePulses++;
                     lastDamageBeat=(int)Math.Floor(beat);
                 }
@@ -336,7 +400,7 @@ namespace RhythmHunter.FightDemo
         }
         void PresentGlare()
         {
-            if(!glare&&(screenGlareEnabled||fireFlashEnabled))
+            if(!glare)
             {
                 var root=new GameObject("FinaleCameraGlare",typeof(RectTransform),typeof(Canvas));
                 root.transform.SetParent(transform,false);
@@ -347,6 +411,13 @@ namespace RhythmHunter.FightDemo
                 glare.raycastTarget=false;
                 gemAboveGlare=CreateForegroundSprite(root.transform,"GemAboveGlare");
                 promptAboveGlare=CreateForegroundSprite(root.transform,"PromptAboveGlare");
+                var label=new GameObject("FinalePerfect",typeof(RectTransform),typeof(CanvasRenderer),typeof(UnityEngine.UI.Text));
+                label.transform.SetParent(root.transform,false);perfectLabel=label.GetComponent<UnityEngine.UI.Text>();
+                perfectLabel.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");perfectLabel.text="Perfect";
+                perfectLabel.fontStyle=FontStyle.Bold;perfectLabel.fontSize=48;perfectLabel.alignment=TextAnchor.MiddleCenter;
+                perfectLabel.color=new Color(1,.76f,.15f);perfectLabel.raycastTarget=false;
+                var labelRect=perfectLabel.rectTransform;labelRect.anchorMin=new Vector2(.7f,.45f);labelRect.anchorMax=new Vector2(.97f,.65f);labelRect.offsetMin=labelRect.offsetMax=Vector2.zero;
+                var outline=label.AddComponent<UnityEngine.UI.Outline>();outline.effectColor=new Color(.22f,.09f,0,.85f);outline.effectDistance=new Vector2(2,-2);
             }
             if(!glare)return;
             float fade=dying?1-Mathf.Clamp01(deathBeats/Mathf.Max(.01f,beamFadeBeats)):1;
@@ -363,6 +434,9 @@ namespace RhythmHunter.FightDemo
             glare.Present(center,screenGlareEnabled?Charge*release*fade:0,screenBrightness,gemGlareStrength,flash);
             SyncForegroundSprite(gemAboveGlare,gem);
             SyncForegroundSprite(promptAboveGlare,prompt);
+            perfectLabel.enabled=IsPerfect&&!dying;
+            float pop=1+.3f*Mathf.Pow(1-Mathf.Clamp01((float)(beat-perfectAt)/.5f),2);
+            perfectLabel.rectTransform.localScale=Vector3.one*pop;
         }
         static UnityEngine.UI.Image CreateForegroundSprite(Transform parent,string name)
         {
@@ -394,6 +468,10 @@ namespace RhythmHunter.FightDemo
             ClearBossImpact();
             if(glare)Destroy(glare.transform.parent.gameObject);glare=null;
             gemAboveGlare=promptAboveGlare=null;
+            perfectLabel=null;
+            if(chargingShell)Destroy(chargingShell);if(chargingShellMaterial)Destroy(chargingShellMaterial);
+            chargingShell=null;chargingShellMaterial=null;
+            if(chargingLinkMaterial)Destroy(chargingLinkMaterial);chargingLinkMaterial=null;heroShells=null;chargingLinks=null;
             if(gem)Destroy(gem);if(beam)Destroy(beam);if(prompt)Destroy(prompt);
             foreach(var burst in bursts)if(burst.go)Destroy(burst.go);bursts.Clear();
             gem=beam=prompt=null;beamVolume=null;gemLight=null;beamOpacity=null;beamParticles=Array.Empty<ParticleSystem>();

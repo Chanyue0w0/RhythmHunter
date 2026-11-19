@@ -24,6 +24,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private Vector2 speedPerBeat = new(.12f, .5f);
         [Tooltip("World-space streak length at low/high intensity.")]
         [SerializeField] private Vector2 streakLength = new(.5f, 2.2f);
+        [Tooltip("Beat-based smoothing of streak length when intensity or guard boost changes.")]
+        [SerializeField,Min(.01f)] private float lengthResponseBeats=.35f;
         [SerializeField] private Vector2 streakWidth = new(.018f, .045f);
         [SerializeField] private bool pixelSnap = false;
         [SerializeField] private bool respectSceneDepth = true;
@@ -53,7 +55,6 @@ namespace RhythmHunter.FightDemo
         [SerializeField, Range(1, 4)] private float maximumSpeedMultiplier = 1.6f;
         [Header("Streak exit")]
         [SerializeField,Min(0)] private float exitViewportMargin=.08f;
-        [SerializeField,Min(1)] private float maximumTravel=1.4f;
         private FightTunnelAirflow airflow;
         private float visibility, boostRemaining;
         private double previousBeat;
@@ -122,7 +123,8 @@ namespace RhythmHunter.FightDemo
             Color tint=lineColor;tint.a*=visibility;
             airflow.Present(tunnelCamera,tunnelOrigin.TransformPoint(originOffset),deltaBeat*speed,count,sourceRadius,nearRadius,
                 Mathf.Lerp(streakLength.x,streakLength.y,CurrentIntensity)*(1+boost*.25f),streakWidth,tint,
-                centralProtectionEnabled,protectedCenterX,protectedWidth,protectedDoorWidth,protectionFeather,pixelSnap,respectSceneDepth,deltaBeat/Mathf.Max(.01f,countFadeBeats),running,exitViewportMargin,maximumTravel);
+                centralProtectionEnabled,protectedCenterX,protectedWidth,protectedDoorWidth,protectionFeather,pixelSnap,respectSceneDepth,deltaBeat/Mathf.Max(.01f,countFadeBeats),running,exitViewportMargin,
+                1-Mathf.Exp(-deltaBeat/Mathf.Max(.01f,lengthResponseBeats)));
 
         }
     }

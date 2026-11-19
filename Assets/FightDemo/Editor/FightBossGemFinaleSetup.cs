@@ -15,6 +15,26 @@ namespace RhythmHunter.FightDemoEditor
         static FightBossGemFinaleSetup()=>EditorApplication.update+=Poll;
         static void Poll()
         {
+            const string energy="Temp/GemFinaleEnergy.request";
+            if(File.Exists(energy)&&!EditorApplication.isPlayingOrWillChangePlaymode&&!EditorApplication.isCompiling&&!EditorApplication.isUpdating)
+            {
+                File.Delete(energy);
+                try
+                {
+                    var scene=UnityEngine.SceneManagement.SceneManager.GetSceneByPath("Assets/FightDemo/Scenes/Art2_FightScene.unity");
+                    var finale=scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<FightBossGemFinale>(true)).Single();
+                    var data=new SerializedObject(finale);
+                    data.FindProperty("chargingShellSize").vector3Value=new Vector3(2.1f,2.8f,1.4f);
+                    data.FindProperty("chargingLinkShader").objectReferenceValue=Shader.Find("RhythmHunter/Art2/GemEnergyLink");
+                    data.FindProperty("chargingShellShader").objectReferenceValue=Shader.Find("RhythmHunter/Art2/GemChargingEnergy");
+                    if(!data.FindProperty("chargingShellShader").objectReferenceValue)throw new Exception("Missing shell shader");
+                    data.ApplyModifiedProperties();
+                    if(FightBossGemFinale.CalculateBeamDamage(0,10,20,99999)!=0||FightBossGemFinale.CalculateBeamDamage(20,10,20,99999)!=200||FightBossGemFinale.CalculateBeamDamage(21,10,20,99999)!=99999)throw new Exception("Damage threshold");
+                    EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+                    File.WriteAllText("Temp/GemFinaleEnergy.result","PASS: 0/20/21 presses = 0/200/99999; stronger bounce, charge shell assigned.");
+                }catch(Exception e){File.WriteAllText("Temp/GemFinaleEnergy.result","FAIL: "+e);}
+                return;
+            }
             const string formation="Temp/GemFinaleFormation.request";
             if(File.Exists(formation)&&!EditorApplication.isPlayingOrWillChangePlaymode&&!EditorApplication.isCompiling&&!EditorApplication.isUpdating)
             {

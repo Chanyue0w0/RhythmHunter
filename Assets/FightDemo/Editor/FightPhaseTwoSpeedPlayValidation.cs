@@ -65,7 +65,7 @@ namespace RhythmHunter.FightDemoEditor
                     if(EditorApplication.timeSinceStartup<waitUntil)return;
                     Check(speed.GuardBoostRemaining==0&&Mathf.Abs(speed.CurrentIntensity-.7f)<.001f,"Inspector toggles");
                     ScreenCapture.CaptureScreenshot("Temp/PhaseTwoTunnelPreview.png");
-                    Set(speed,"speedLinesEnabled",false);waitUntil=EditorApplication.timeSinceStartup+.5;step=4;return;
+                    Set(speed,"speedLinesEnabled",false);waitUntil=EditorApplication.timeSinceStartup+(float)Get(speed,"fadeOutSeconds")+.2;step=4;return;
                 }
                 if(step==4)
                 {

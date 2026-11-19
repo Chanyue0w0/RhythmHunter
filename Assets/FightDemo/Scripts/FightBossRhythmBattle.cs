@@ -309,7 +309,10 @@ namespace RhythmHunter.FightDemo
                     var effect = Instantiate(victoryExplosion, boss.ActorRoot.position, victoryExplosion.transform.rotation);
                     (effect.GetComponent<FightBattleEffect>() ?? effect.AddComponent<FightBattleEffect>()).Configure(fight, false, 5);
                 }
-                boss.ReleaseBossPhaseOneProtection(); boss.TakeDamage(99999, FightUnitSlot.DamageKind.Direct, true, !finale || !finale.HasDisplayedBeamDamageThisBeat);
+                bool gemFinish=finale&&finale.Active;
+                if(gemFinish&&!finale.HasDisplayedBeamDamageThisBeat&&finale.BeamDamage>0)fight.ShowEnemyDamageNumber(boss,finale.BeamDamage);
+                // Music-end execution is independent of participation, including zero presses.
+                boss.ReleaseBossPhaseOneProtection(); boss.TakeDamage(Mathf.Max(99999,boss.CurrentHp), FightUnitSlot.DamageKind.Direct, true, !gemFinish);
                 finale?.BossDied();
             }
         }
