@@ -10,6 +10,10 @@ namespace RhythmHunter.FightDemo
         [Tooltip("Local direction toward the target. Thruster exhaust points +Z, so its travel direction is -Z.")]
         [SerializeField] private Vector3 localTravelDirection=Vector3.back;
         [SerializeField] private bool localParticleSimulation;
+        [Header("Flight-local visual shape (does not move the hit point)")]
+        [SerializeField] private Vector3 visualScale=Vector3.one;
+        [SerializeField,Min(.01f)] private float stretchLengthMultiplier=1;
+        private Transform visualRoot;
         private Quaternion authoredRotation;
         private LineRenderer line;
         private float baseWidth;
@@ -21,7 +25,19 @@ namespace RhythmHunter.FightDemo
         {
             line=GetComponent<LineRenderer>();if(line)baseWidth=line.widthMultiplier;
             baseScale=transform.localScale;authoredRotation=transform.localRotation;
+            // Keep trajectory rotation/position on the root; deform only the authored visuals.
+            if(faceTravelDirection)
+            {
+                var children=new Transform[transform.childCount];
+                for(int i=0;i<children.Length;i++)children[i]=transform.GetChild(i);
+                visualRoot=new GameObject("FlightVisualShape_Runtime").transform;
+                visualRoot.SetParent(transform,false);
+                foreach(var child in children)child.SetParent(visualRoot,false);
+                visualRoot.localScale=visualScale;
+            }
             particles=GetComponentsInChildren<ParticleSystem>(true);
+            foreach(var renderer in GetComponentsInChildren<ParticleSystemRenderer>(true))
+                if(renderer.renderMode==ParticleSystemRenderMode.Stretch)renderer.lengthScale*=stretchLengthMultiplier;
             foreach(var p in particles){var main=p.main;main.stopAction=ParticleSystemStopAction.None;main.playOnAwake=false;if(localParticleSimulation)main.simulationSpace=ParticleSystemSimulationSpace.Local;}
         }
         private void OnEnable()
@@ -50,6 +66,7 @@ namespace RhythmHunter.FightDemo
         {
             transform.SetPositionAndRotation(position, facing*Quaternion.Euler(facingOffset));
             transform.localScale = baseScale * scale;
+            if(visualRoot)visualRoot.localScale=visualScale;
             // World-space particles must start at the new note origin, never at the old pooled position.
             if(restartPending)
             {

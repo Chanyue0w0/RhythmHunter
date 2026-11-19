@@ -8204,6 +8204,84 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &543353183
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 543353184}
+  - component: {fileID: 543353185}
+  m_Layer: 0
+  m_Name: BossPhaseTwoChartLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &543353184
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543353183}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2021200330}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &543353185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543353183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3128bfe8be884ac99bf46c78f0eb70bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightBossPhaseTwoChartLight
+  fight: {fileID: 2021200326}
+  transition: {fileID: 2021200341}
+  origin: {fileID: 1975473682}
+  heroDestinations:
+  - {fileID: 526461800}
+  - {fileID: 1751426622}
+  - {fileID: 1166879276}
+  fanShader: {fileID: 4800000, guid: 6c98064f52a34753ac6e75be1d7f0d06, type: 3}
+  lightingEnabled: 1
+  spotEnabled: 1
+  groundFanEnabled: 1
+  lightColor: {r: 1, g: 0.42, b: 0.38, a: 1}
+  intensity: 2
+  lightHeight: 4
+  spotAngle: 65
+  minimumRange: 18
+  extraLengthPastHeroes: 3
+  minimumLength: 12
+  startWidth: 1.8
+  endWidth: 9
+  fanBrightness: 0.18
+  groundY: 0.025
+  fadeSeconds: 0.12
+  separatorsEnabled: 1
+  separatorShader: {fileID: 4800000, guid: cee91879772b9284da99fd20b92a6fe0, type: 3}
+  separatorOpacity: 0.45
+  separatorWidth: 0.055
+  separatorStartSpread: 0.15
+  extensionSeconds: 0.35
+  fireFlickerEnabled: 1
+  fireFlickerAmount: 0.18
+  fireFlickerSpeed: 3
+  fireWarmColor: {r: 1, g: 0.58, b: 0.25, a: 1}
+  fireColorVariation: 0.2
 --- !u!1 &547510896
 GameObject:
   m_ObjectHideFlags: 0
@@ -20571,7 +20649,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 543353184}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2021200331
@@ -20962,6 +21041,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   fadeInSeconds: 1.2
   sortingOrdersBehind: 1
+  bossGroupOrder: 1
   flameBaseLocalPoint: {x: 0, y: 0, z: 0}
 --- !u!114 &2021200345
 MonoBehaviour:
@@ -22635,7 +22715,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5916e-41, y: 0, z: 0, w: 3.663164e+16}
+  m_BoundingSphereOverride: {x: 9.1858e-41, y: 4.591775e-39, z: 2.2227777e-38, w: 9.1858e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -22799,7 +22879,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.6587401e-10, y: 7.3964775e+31, z: 7.5353915e+11, w: 7.0362092e+22}
+  m_BoundingSphereOverride: {x: 9.1858e-41, y: 4.591775e-39, z: 2.2227777e-38, w: 9.1858e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23295,7 +23375,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 6.2097996e+22, y: 7.7140256e+31, z: 538860700, w: 3.9415303e+12}
+  m_BoundingSphereOverride: {x: 2.2e-44, y: 9.1835e-41, z: 1.65555e-39, w: 2.2e-44}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
@@ -23459,7 +23539,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.8575694e-20, y: 1.836815e-39, z: 4.7517e-41, w: 1.707765e+19}
+  m_BoundingSphereOverride: {x: 9.1858e-41, y: 4.591775e-39, z: 2.2227777e-38, w: 9.1858e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0

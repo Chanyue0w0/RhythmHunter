@@ -1,0 +1,36 @@
+二階段譜面照明
+位置：Art2_FightScene / FightDemoController / BossPhaseTwoChartLight
+組件：Fight Boss Phase Two Chart Light
+Boss 在二階段抵達門口後淡入；歌曲二階段結束、勝敗或停用時淡出／清理。
+不影響原本開門的燈光。新增 Spot Light 固定 Shadows=None，地面亮區不投射或接收陰影。
+其他既有主光源的角色陰影維持原設定。
+
+Lighting Enabled：整體開關。
+Spot Enabled：實際聚光燈開關。
+Ground Fan Enabled：地面扇形亮區開關。
+Light Color：預設淡藍白，可改成暖色。
+Intensity：聚光燈亮度，預設 2。
+Light Height：位於 Boss 目的地上方高度，預設 4。
+Spot Angle：聚光角度，預設 65 度。
+Minimum Range：光源最短距離，預設 18，會依勇者距離加長。
+Extra Length Past Heroes：超過最遠勇者的額外地面長度，預設 3。
+Minimum Length：地面亮區最短長度，預設 12。
+Start Width / End Width：地面亮區兩端寬度，預設 1.8 / 9。
+Fan Brightness：亮區亮度，預設 0.18。
+Ground Y：地面亮區高度，預設 0.025。需略高於地板以避免重疊。
+Fade Seconds：淡入淡出時間，預設 0.6 秒。
+Origin / Hero Destinations：沿用二階段 Boss 與三位勇者定位點；移動勇者後會自動重新計算長度。
+執行時子物件：PhaseTwoChartLight_Runtime / BossChartSpotLight_NoShadows、ChartGroundFan_NoShadows。
+請在組件調整燈光參數；執行時 Light 的強度及方向由組件控制。
+
+譜面分隔線（Lane separators）
+Separators Enabled：兩條分隔線開關。
+Separator Opacity：黑線透明度，預設 0.45。
+Separator Width：地面世界寬度，預設 0.055。
+Separator Start Spread：Boss 端兩條線各自離中心的距離，預設 0.15。
+分隔線自動穿過相鄰勇者定位點的中間，延伸長度跟隨譜面光；不更動音符與判定。
+
+2026-11-19：譜面光改為淡紅色 (1,0.42,0.38)，Extension Seconds 預設 0.35 秒，亮區與兩條黑線由 Boss 向勇者延伸。Fade Seconds=0.12 秒。
+BossRythmSlash 的 FightBossRhythmVisual：Visual Scale=(1.4,0.65,0.65)，X 為飛行局部寬度、Y 為厚度、Z 為長度；Stretch Length Multiplier=0.65 控制拉伸粒子尾長。外觀子物件縮放不更改飛行根位置、譜面時間或判定。
+
+譜面光現在等待 Transition.Ready（Boss 與三位勇者皆定位完畢）才開始延伸。Fire Flicker Enabled 控制火光動態，Amount 預設 0.18、Speed 預設 3，Warm Color 與 Color Variation 控制紅橘色變化。暫停時凍結；開門光不啟用這項效果。BossRythmSlash 的粒子 Start Color、Color over Lifetime 與附帶 Light 已改為紅橘色，保留透明度曲線。

@@ -23,7 +23,7 @@ Shader "RhythmHunter/Art2/BossDoorFan"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             CBUFFER_START(UnityPerMaterial)
             half4 _Color;
-            float4 _DoorLightPosition, _DoorLightForward, _DoorCone;
+            float4 _DoorLightPosition, _DoorLightForward, _DoorCone, _FireMotion;
             CBUFFER_END
             struct A { float3 positionOS:POSITION; float2 uv:TEXCOORD0; };
             struct V { float4 positionCS:SV_POSITION; float2 uv:TEXCOORD0; float3 positionWS:TEXCOORD1; };
@@ -40,6 +40,10 @@ Shader "RhythmHunter/Art2/BossDoorFan"
                     weight=smoothstep(_DoorCone.y,_DoorCone.z,dot(ray/distanceToLight,_DoorLightForward.xyz));
                     weight*=1-smoothstep(_DoorCone.x*.7,_DoorCone.x,distanceToLight);
                 }
+                // Optional gentle travelling illumination; zero by default for the entrance light.
+                float ripple=.5+.25*sin(i.uv.y*17-i.uv.x*9-_FireMotion.x*2.1)
+                    +.25*sin(i.uv.y*31+i.uv.x*15-_FireMotion.x*3.7);
+                weight*=1-_FireMotion.y*ripple;
                 half shadow=1;
                 #if defined(_ADDITIONAL_LIGHTS)
                 InputData inputData=(InputData)0;
