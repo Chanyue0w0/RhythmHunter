@@ -24,6 +24,7 @@ namespace RhythmHunter.FightDemo
         int performerIndex, nextSlashEvent, sampledLoop = -1;
         double performanceStarted;
         float performanceEffectTime;
+        bool echoesReturned;
 
         private void BeginPerformances()
         {
@@ -53,7 +54,7 @@ namespace RhythmHunter.FightDemo
                 int marked = 0;
                 for (int i = 0; i < authoredSlash.Frames.Count; i++) if (authoredSlash.PlaysAttackEffectAt(i)) marked++;
                 if (marked != 2) { Debug.LogError("Fever Multi-Slash requires two authored slash frames.", hero); continue; }
-                PerformingHero = hero; fight.SetFeverWarrior(hero);
+                PerformingHero = hero; fight.SetFeverWarrior(hero); echoesReturned = false;
                 animator.InterruptPlayback(); animator.SetPlaybackPaused(false);
                 introSequence = FitSequence(intro, IntroBeats);
                 slashSequence = FitSequence(authoredSlash, (SlashEnd - IntroBeats) / SlashLoops);
@@ -121,7 +122,22 @@ namespace RhythmHunter.FightDemo
             foreach (var pair in enemyHitStarts)
                 if (pair.Key && pair.Key.CombatAnimator && enemyHitSequences.ContainsKey(pair.Key))
                     pair.Key.CombatAnimator.SampleVisualSequenceBeats(Math.Max(0, PerformanceElapsedBeats - pair.Value));
-            if (PerformanceElapsedBeats >= IdleStart) afterimages.ReleaseAll();
+            if (PerformanceElapsedBeats >= IdleStart && !echoesReturned)
+            {
+                echoesReturned = true;
+                if (afterimages.ActiveCount > 0)
+                {
+                    var data = PerformingHero.CharacterDefinition;
+                    foreach (var target in performanceEnemies)
+                    {
+                        if (!target || !target.ActorInstance) continue;
+                        Vector3 impact = target.ImpactEffectAnchor ? target.ImpactEffectAnchor.position : target.ActorInstance.transform.position + Vector3.up;
+                        SpawnPerformanceEffect(data.SwordChargedOnHitEffect, impact, Quaternion.identity, .45f);
+                        SpawnPerformanceEffect(data.SwordImmediateExplosionEffect, impact, Quaternion.identity, .55f);
+                    }
+                }
+                afterimages.ReleaseAll();
+            }
             if (PerformanceElapsedBeats >= HeroBeats) SelectNextPerformer(performanceStarted + HeroBeats);
         }
         private void ResolveFeverSlash(int frame, bool delayed, double at, int strike)
