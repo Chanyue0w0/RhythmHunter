@@ -111,8 +111,20 @@ MonoBehaviour:
     rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   enemyAbilities: []
+  disableNormalHitReaction: 0
+  hitReactionCooldownBeats: 2
   protectBossPhaseOne: 0
   tiredIdleAnimationName: Idle_Tired
+  enableUnusedGuardSlime: 1
+  slimeAttackReduction: 1
+  slimeAttackReductionBeats: 8
+  slimeMinimumAttackDamage: 0
+  retaliationProjectileScale: 0.75
+  retaliationFloorOpacity: 0.5
+  retaliationFloorOffset: {x: 0, y: 0.025, z: -0.1}
+  feverMagicAura: {fileID: 7965313516056568436, guid: 25a35d62cbeb29f469faafedefeeb641, type: 3}
+  feverEnergyStrike: {fileID: 6675268078526545721, guid: d2ef8e6581b4e7a4ca3329a1dbb0639c, type: 3}
+  feverBlueExplosion: {fileID: 1491377527257926432, guid: 130cad8f8fed8534e8e46c49713e0406, type: 3}
   teamQteMode: 2
   qteFailureDamageMultiplier: 0.5
   qteFailureAppliesStatus: 1
@@ -134,15 +146,9 @@ MonoBehaviour:
   swordChargedOnHitEffect: {fileID: 0}
   swordDelayedOnHitEffect: {fileID: 0}
   swordChargeAura: {fileID: 0}
+  enemyCanAttack: 1
   characterId: Mage
-  displayName: 能量法師-瑞緹絲與路克
-  enableUnusedGuardSlime: 1
-  slimeAttackReduction: 1
-  slimeAttackReductionBeats: 8
-  slimeMinimumAttackDamage: 0
-  retaliationProjectileScale: 0.75
-  retaliationFloorOpacity: 0.5
-  retaliationFloorOffset: {x: 0, y: 0.025, z: -0.1}
+  displayName: "\u80FD\u91CF\u6CD5\u5E2B-\u745E\u7DF9\u7D72\u8207\u8DEF\u514B"
   team: 1
   role: 3
   maxHp: 2

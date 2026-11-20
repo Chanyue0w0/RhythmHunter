@@ -20,5 +20,10 @@ namespace RhythmHunter.FightDemo
         public float SlimeAttackReduction => Mathf.Max(0, slimeAttackReduction);
         public int SlimeAttackReductionBeats => Mathf.Max(1, slimeAttackReductionBeats);
         public float SlimeMinimumAttackDamage => Mathf.Max(0, slimeMinimumAttackDamage);
+        [Header("Mage Fever")]
+        [SerializeField] private GameObject feverMagicAura, feverEnergyStrike, feverBlueExplosion;
+        public GameObject FeverMagicAura => feverMagicAura;
+        public GameObject FeverEnergyStrike => feverEnergyStrike;
+        public GameObject FeverBlueExplosion => feverBlueExplosion;
     }
 }

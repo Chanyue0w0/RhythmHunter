@@ -98,6 +98,19 @@ namespace RhythmHunter.FightDemo
             position.y = state.target.transform.position.y;
             return position + state.offset;
         }
+        internal GameObject ApplyFeverMageSlime(FightUnitSlot actor, FightUnitSlot target)
+        {
+            if (!actor || !target || !target.HasCharacter || target.CurrentHp <= 0) return null;
+            ApplyMageSlime(actor, target);
+            var state = slimeReductions.Find(s => s.target == target);
+            state.until = NormalBattleBeatCount + 8;
+            return state.visual;
+        }
+        public int MageWeakenBeatsRemaining(FightUnitSlot target)
+        {
+            var state = slimeReductions.Find(s => s.target == target);
+            return state == null ? 0 : Mathf.Max(0, (int)(state.until - NormalBattleBeatCount));
+        }
         public float GetSlimeReducedDamage(FightUnitSlot source, float damage)
         {
             var state = slimeReductions.Find(s => s.target == source && NormalBattleBeatCount < s.until);

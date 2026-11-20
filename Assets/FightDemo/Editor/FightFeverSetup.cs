@@ -25,9 +25,9 @@ namespace RhythmHunter.FightDemoEditor
                     var fever = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FightFeverController>(true)).Single();
                     var data = new SerializedObject(fever);
                     var charge = data.FindProperty("charge");
-                    charge.FindPropertyRelative("initialGain").floatValue = .05f;
-                    charge.FindPropertyRelative("finalGain").floatValue = .016f;
-                    charge.FindPropertyRelative("decayPerBeat").floatValue = .024f;
+                    charge.FindPropertyRelative("initialGain").floatValue = .053f;
+                    charge.FindPropertyRelative("finalGain").floatValue = .018f;
+                    charge.FindPropertyRelative("decayPerBeat").floatValue = .022f;
                     charge.FindPropertyRelative("limitBeats").floatValue = 16;
                     data.ApplyModifiedProperties();
                     EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);

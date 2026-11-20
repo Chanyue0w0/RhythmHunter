@@ -23,6 +23,8 @@ namespace RhythmHunter.FightDemoEditor
         static FightUnitSlot[] targets;
         static bool sawSlash, sawIdle, performancePauseChecked, lethal;
         static int lethalEvents;
+        static bool sawMage, magePauseChecked, mageFinished;
+        static long mageResumeBeat;
         static FightFeverValidation() => EditorApplication.update += Poll;
         static void Check(bool valid, string message) { if (!valid) throw new Exception(message); }
         static void Poll()
@@ -133,8 +135,67 @@ namespace RhythmHunter.FightDemoEditor
                 }
                 if (step == 6)
                 {
+                    bool checkResume = File.ReadAllText(Request).Trim() == "resume";
+                    if (checkResume && mageFinished && fever.CurrentPhase != FightFeverController.Phase.Performing)
+                    {
+                        long elapsed = fight.NormalBattleBeatCount - mageResumeBeat;
+                        if (elapsed < 8)
+                        {
+                            Check(targets.All(t => fight.HasMageWeaken(t) && fight.MageWeakenBeatsRemaining(t) == 8 - elapsed), "Post-Fever weaken countdown mismatch");
+                            return;
+                        }
+                        Check(!fight.FeverBattleSuspended && targets.All(t => !fight.HasMageWeaken(t)), "Weaken must expire after eight actual normal battle beats");
+                        Check(GameObject.Find("Fever Isolated Render Stage") == null, "Mage render stage leaked after resume");
+                        Finish("PASS: warrior/mage damage, 20 penetrating shots, pause, and actual post-Fever eight-beat weaken countdown/expiry. Screenshots saved."); return;
+                    }
                     if (fever.CurrentPhase == FightFeverController.Phase.Performing)
                     {
+                        if (fever.PerformingHero.CharacterDefinition.EnableUnusedGuardSlime)
+                        {
+                            sawMage = true;
+                            if (fever.PerformanceElapsedBeats < fever.MageFireStartBeat)
+                                Check(fever.MageShotsFired == 0, "Mage fired before the three-beat aura delay");
+                            if (!magePauseChecked && fever.MageShotsFired >= 3)
+                            {
+                                if (!fight.IsPaused)
+                                { pausedElapsed = fever.PerformanceElapsedBeats; fight.GetComponent<FightPauseController>().SetPaused(true); phaseAt = EditorApplication.timeSinceStartup; return; }
+                                if (EditorApplication.timeSinceStartup - phaseAt < 1) return;
+                                Check(Math.Abs(pausedElapsed - fever.PerformanceElapsedBeats) < .001, "Mage volley advanced during pause");
+                                fight.GetComponent<FightPauseController>().SetPaused(false); magePauseChecked = true;
+                            }
+                            foreach (var target in targets)
+                                if (target.CurrentHp > 0 && fight.HasMageWeaken(target))
+                                {
+                                    Check(fight.MageWeakenBeatsRemaining(target) == 8, "Mage debuff must not count down during Fever");
+                                    Check(fight.GetSlimeReducedDamage(target, 10) < 10, "Mage weaken must already be effective during Fever");
+                                }
+                            if (fever.PerformanceElapsedBeats > fever.MageFireStartBeat + 1 && fever.PerformanceElapsedBeats < fever.MageFireStartBeat + 3)
+                                ScreenCapture.CaptureScreenshot("Temp/Fever-mage-volley.png");
+                            if (fever.PerformanceElapsedBeats >= 9.5 && !mageFinished)
+                            {
+                                Check(fever.MageShotsFired == 20 && fever.MageHitCount == 60, "Expected twenty piercing volleys, each hitting all three enemies");
+                                Check(targets.Select((t, i) => Mathf.Abs(t.CurrentHp - (lethal && i == 0 ? 0 : 30)) < .001f).All(x => x), "Mage must deal exactly 20 damage per enemy after warrior's 50");
+                                Check(GameObject.Find("MagicAura(Clone)") == null && GameObject.Find("EnergyStrike(Clone)") == null, "Mage projectiles or aura remained after firing");
+                                // Advance only the ordinary battle clock to verify the post-Fever duration contract.
+                                var beatField = typeof(FightCombatController).GetField("<NormalBattleBeatCount>k__BackingField", Flags);
+                                long beat = fight.NormalBattleBeatCount;
+                                try
+                                {
+                                    beatField.SetValue(fight, beat + 7);
+                                    Check(targets.Where(t => t.CurrentHp > 0).All(t => fight.HasMageWeaken(t) && fight.MageWeakenBeatsRemaining(t) == 1), "Weaken must last seven resumed beats");
+                                    beatField.SetValue(fight, beat + 8);
+                                    Check(targets.All(t => !fight.HasMageWeaken(t)), "Weaken must expire after eight resumed beats");
+                                }
+                                finally { beatField.SetValue(fight, beat); }
+                                if (checkResume)
+                                {
+                                    typeof(FightFeverController).GetField("tutorial", Flags).SetValue(fever, false);
+                                    mageResumeBeat = beat;
+                                }
+                                mageFinished = true; ScreenCapture.CaptureScreenshot("Temp/Fever-mage-idle.png");
+                            }
+                            return;
+                        }
                         Check(fight.GetSwordChargeStage(fever.PerformingHero) == 3, "Weapon must stay fully charged");
                         if (fever.PerformanceElapsedBeats < 2) Check(targets.Select((t, i) => t.CurrentHp == (lethal && i == 0 ? 2 : 100)).All(x => x), "Intro must not deal damage");
                         if (!performancePauseChecked && fever.PerformanceElapsedBeats > 3)
@@ -169,7 +230,7 @@ namespace RhythmHunter.FightDemoEditor
                         return;
                     }
                     if (!fever.TutorialCompleted) return;
-                    Check(sawSlash && sawIdle, "Warrior phases were skipped");
+                    Check(sawSlash && sawIdle && sawMage && mageFinished, "Warrior or mage phases were skipped");
                     Check(fight.BattleEnded && fight.BattleWon, "Fever success must finish the tutorial battle");
                     Check(fight.GetComponent<FightLevelPlanner>().TryFindNextStage(out _, out _), "Tutorial must offer next battle");
                     var pool = fight.GetComponent<FightFeverAfterimagePool>(); int allocated = pool.AllocatedCount;
@@ -191,12 +252,13 @@ namespace RhythmHunter.FightDemoEditor
                     step++; phaseAt = EditorApplication.timeSinceStartup; return;
                 }
                 Check(GameObject.Find("Fever Isolated Render Stage") == null, "Render stage leaked");
-                Finish("PASS: 16-beat QTE failure/retry and pause; warrior fully charged; 10 Multi-Slash loops, 20 main + 20 delayed hits, exactly 50 HP per enemy across three targets; last two beats Idle; pooled echoes return and reuse; unimplemented heroes skipped; automatic tutorial victory, next stage available and cleanup. Screenshots saved.");
+                Finish("PASS: QTE failure/retry; warrior 50 damage; mage three-beat delay, twenty penetrating shots, 20 damage per enemy; mage pause, weaken active during Fever and eight resumed beats duration; aura/projectile cleanup; tutorial victory and next stage. Screenshots saved.");
             }
             catch (Exception e) { Finish("FAIL: " + e); }
         }
         static void Finish(string result)
         {
+            sawMage = magePauseChecked = mageFinished = false;
             File.WriteAllText("Temp/FeverPlay.result", result); File.Delete(Request);
             step = frames = 0; deadline = nextPress = phaseAt = 0; pauseChecked = false;
             targets = null; sawSlash = sawIdle = performancePauseChecked = lethal = false; lethalEvents = 0;

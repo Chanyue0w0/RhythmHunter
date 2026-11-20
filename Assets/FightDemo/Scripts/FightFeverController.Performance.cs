@@ -47,7 +47,9 @@ namespace RhythmHunter.FightDemo
             {
                 var hero = heroes[performerIndex];
                 var animator = hero ? hero.CombatAnimator : null;
-                if (!hero || !hero.HasCharacter || animator == null || hero.CharacterDefinition?.EnableSwordCharge != true) continue;
+                if (!hero || !hero.HasCharacter || animator == null) continue;
+                if (hero.CharacterDefinition.EnableUnusedGuardSlime && TryBeginMage(hero, started)) return;
+                if (hero.CharacterDefinition?.EnableSwordCharge != true) continue;
                 var intro = animator.FindSequence("FeverUlt");
                 authoredSlash = animator.FindSequence("Multi-Slash");
                 if (intro == null || authoredSlash == null || intro.Frames.Count == 0 || authoredSlash.Frames.Count == 0) continue;
@@ -98,6 +100,7 @@ namespace RhythmHunter.FightDemo
         {
             if (!PerformingHero || !PerformingHero.ActorInstance) { SelectNextPerformer(BeatPosition()); return; }
             double now = BeatPosition(); PerformanceElapsedBeats = Math.Max(0, now - performanceStarted);
+            if (magePerforming) { AdvanceMagePerformance(); return; }
             while (nextSlashEvent < slashEvents.Count && slashEvents[nextSlashEvent].beat <= PerformanceElapsedBeats + 1e-7)
             {
                 var entry = slashEvents[nextSlashEvent++]; ResolveFeverSlash(entry.frame, entry.delayed, entry.beat, entry.strike);
@@ -176,9 +179,9 @@ namespace RhythmHunter.FightDemo
             }
             pulse = delayed ? .25f : .65f;
         }
-        private void SpawnPerformanceEffect(GameObject prefab, Vector3 position, Quaternion rotation, float lifetime, bool centerSlash = false)
+        private GameObject SpawnPerformanceEffect(GameObject prefab, Vector3 position, Quaternion rotation, float lifetime, bool centerSlash = false)
         {
-            if (!prefab) return;
+            if (!prefab) return null;
             var effect = Instantiate(prefab, stage.transform);
             effect.transform.SetPositionAndRotation(position + stageOffset,
                 (centerSlash ? Quaternion.identity : battleCamera.transform.rotation) * rotation * prefab.transform.localRotation);
@@ -193,6 +196,7 @@ namespace RhythmHunter.FightDemo
             foreach (var ps in effect.GetComponentsInChildren<ParticleSystem>(true))
             { ps.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear); var main = ps.main; main.loop = false; main.stopAction = ParticleSystemStopAction.None; ps.Play(false); }
             effects.Add(effect); performanceEffects.Add((effect, performanceEffectTime + Mathf.Max(.05f, lifetime)));
+            return effect;
         }
         private void AdvancePerformanceEffects(float seconds)
         {
@@ -206,6 +210,7 @@ namespace RhythmHunter.FightDemo
         }
         private void StopPerformer()
         {
+            StopMagePerformance();
             if (PerformingHero && PerformingHero.CombatAnimator)
             {
                 PerformingHero.CombatAnimator.InterruptPlayback();

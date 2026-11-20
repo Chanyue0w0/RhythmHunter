@@ -13,6 +13,13 @@ namespace RhythmHunter.FightDemoEditor
         static FightFeverWarriorSetup() => EditorApplication.update += Poll;
         static void Poll()
         {
+            if (File.Exists("Temp/FeverMageSetup.request") && !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                File.Delete("Temp/FeverMageSetup.request");
+                try { ConfigureMage(); }
+                catch (Exception e) { File.WriteAllText("Temp/FeverMageSetup.result", "FAIL: " + e); }
+                return;
+            }
             const string request = "Temp/FeverWarriorSetup.request";
             if (!File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode) return;
             File.Delete(request);
@@ -58,6 +65,32 @@ namespace RhythmHunter.FightDemoEditor
                     effect.FindPropertyRelative("soundEventPath").stringValue = "";
                 }
                 data.ApplyModifiedPropertiesWithoutUndo(); PrefabUtility.SaveAsPrefabAsset(root, path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+        [MenuItem("Rhythm Hunter/Fever/Configure Mage Effects")]
+        static void ConfigureMage()
+        {
+            const string path = "Assets/FightDemo/Prefabs/ArtBattle/Mage.prefab";
+            var root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var actor = root.GetComponent<FightCharacterDefinition>();
+                var data = new SerializedObject(actor);
+                var paths = new[] { "TeamSkill/MagicAura", "TeamSkill/EnergyStrike", "VFX/UI/BlueExplosion_UI" };
+                var fields = new[] { "feverMagicAura", "feverEnergyStrike", "feverBlueExplosion" };
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/FightDemo/Prefabs/" + paths[i] + ".prefab");
+                    if (!prefab) throw new Exception("Missing " + paths[i]);
+                    data.FindProperty(fields[i]).objectReferenceValue = prefab;
+                }
+                var animator = root.GetComponentInChildren<FightCharacterCombatAnimator>(true);
+                var skill = animator.FindSequence(FightCharacterCombatAnimator.CombatAnimation.Skill);
+                var marked = Enumerable.Range(0, skill.Frames.Count).Where(skill.PlaysAttackEffectAt).ToArray();
+                if (marked.Length == 0) throw new Exception("Mage Skill has no attack-effect frame");
+                data.ApplyModifiedPropertiesWithoutUndo(); PrefabUtility.SaveAsPrefabAsset(root, path);
+                File.WriteAllText("Temp/FeverMageSetup.result", "PASS: Mage effects wired. Skill frames=" + skill.Frames.Count + "; effect frames=" + string.Join(",", marked));
             }
             finally { PrefabUtility.UnloadPrefabContents(root); }
         }

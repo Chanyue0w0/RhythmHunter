@@ -6,9 +6,9 @@ namespace RhythmHunter.FightDemo
     [System.Serializable]
     public sealed class FightFeverCharge
     {
-        [Min(.001f)] public float initialGain = .05f;
-        [Min(.001f)] public float finalGain = .016f;
-        [Min(0)] public float decayPerBeat = .024f;
+        [Min(.001f)] public float initialGain = .053f;
+        [Min(.001f)] public float finalGain = .018f;
+        [Min(0)] public float decayPerBeat = .022f;
         [Min(1)] public float limitBeats = 16;
         public float Progress { get; private set; }
         public double Elapsed { get; private set; }

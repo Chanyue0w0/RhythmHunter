@@ -182,6 +182,7 @@ namespace RhythmHunter.FightDemo
             cameraRig?.SetFeverShake(shake);
             EnsureTexture();
             stageCamera.transform.SetPositionAndRotation(battleCamera.transform.position + stageOffset, battleCamera.transform.rotation);
+            PresentMageFloors();
             stageCamera.fieldOfView = battleCamera.fieldOfView; stageCamera.orthographic = battleCamera.orthographic; stageCamera.orthographicSize = battleCamera.orthographicSize;
             foreach (var pair in copies)
             {
@@ -251,6 +252,7 @@ namespace RhythmHunter.FightDemo
             if (stage) { stage.SetActive(false); Destroy(stage); }
             if (stageTexture) { stageTexture.Release(); Destroy(stageTexture); }
             copies.Clear(); effects.Clear(); heroEffects.Clear(); particlesPaused = false;
+            mageFloors.Clear();
             if (heroesImage) heroesImage.texture = null;
         }
     }

@@ -21699,9 +21699,9 @@ MonoBehaviour:
   chargeEffectPrefab: {fileID: 7067157056305843929, guid: 0ef46bc50f2fcbc4298417e8ecde65e7, type: 3}
   battleCamera: {fileID: 2147100302}
   charge:
-    initialGain: 0.05
-    finalGain: 0.016
-    decayPerBeat: 0.024
+    initialGain: 0.053
+    finalGain: 0.018
+    decayPerBeat: 0.022
     limitBeats: 16
   flightSeconds: 0.85
   cameraZoom: 0.22
