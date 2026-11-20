@@ -25,6 +25,8 @@ namespace RhythmHunter.FightDemoEditor
         static int lethalEvents;
         static bool sawMage, magePauseChecked, mageFinished;
         static long mageResumeBeat;
+        static bool sawSkeleton, skeletonFinished, skeletonPauseChecked;
+        static Vector3[] skeletonGround;
         static FightFeverValidation() => EditorApplication.update += Poll;
         static void Check(bool valid, string message) { if (!valid) throw new Exception(message); }
         static void Poll()
@@ -150,6 +152,49 @@ namespace RhythmHunter.FightDemoEditor
                     }
                     if (fever.CurrentPhase == FightFeverController.Phase.Performing)
                     {
+                        if (fever.PerformingHero.CharacterDefinition.EnableAimedFollowUp)
+                        {
+                            if (!sawSkeleton)
+                            { sawSkeleton = true; skeletonGround = targets.Select(t => t.ActorInstance.transform.position).ToArray(); }
+                            if (fever.PerformanceElapsedBeats < 3)
+                                Check(targets.Select((t, i) => t.CurrentHp == (lethal && i == 0 ? 0 : 30)).All(x => x), "Skeleton bombs must not deal damage");
+                            if (fever.PerformanceElapsedBeats > 3.5 && fever.PerformanceElapsedBeats < 7)
+                            {
+                                Check(fever.SkeletonBombsThrown == 3, "Expected one bomb per enemy, maximum three");
+                                Vector3 up = Camera.main.transform.up;
+                                var heights = targets.Select(t => Vector3.Dot(t.ImpactEffectAnchor.position, up)).ToArray();
+                                Check(heights.Max() - heights.Min() < .02f, "Enemies must float at the same visible height");
+                                Check(targets.Select((t, i) => Vector3.Distance(t.ActorInstance.transform.position, skeletonGround[i]) > .5f).All(x => x), "Bombs must lift every enemy");
+                                if (File.ReadAllText(Request).Trim() == "skeleton-abort")
+                                {
+                                    fever.enabled = false;
+                                    Check(targets.Select((t, i) => Vector3.Distance(t.ActorInstance.transform.position, skeletonGround[i]) < .001f).All(x => x), "Abort must restore enemy transforms");
+                                    Check(!fight.FeverBattleSuspended, "Abort must resume combat");
+                                    Finish("PASS: Skeleton airborne abort restores all enemy positions and resumes combat."); return;
+                                }
+                                if (!skeletonPauseChecked)
+                                {
+                                    if (!fight.IsPaused)
+                                    { pausedElapsed = fever.PerformanceElapsedBeats; fight.GetComponent<FightPauseController>().SetPaused(true); phaseAt = EditorApplication.timeSinceStartup; return; }
+                                    if (EditorApplication.timeSinceStartup - phaseAt < 1) return;
+                                    Check(Math.Abs(pausedElapsed - fever.PerformanceElapsedBeats) < .001, "Skeleton volley advanced during pause");
+                                    fight.GetComponent<FightPauseController>().SetPaused(false); skeletonPauseChecked = true;
+                                }
+                                foreach (var target in targets.Where(t => t.CurrentHp > 0))
+                                    Check(fight.MageWeakenBeatsRemaining(target) == 8, "Mage weaken must remain frozen throughout skeleton performance");
+                                ScreenCapture.CaptureScreenshot("Temp/Fever-skeleton-volley.png");
+                            }
+                            if (fever.PerformanceElapsedBeats >= 8.5 && !skeletonFinished)
+                            {
+                                Check(fever.SkeletonVolleysFired == 20 && fever.SkeletonBulletHits == 60, "Expected twenty skeleton volleys with three bullets each");
+                                Check(targets.Select((t, i) => t.CurrentHp == (lethal && i == 0 ? 0 : 10)).All(x => x), "Skeleton must deal exactly twenty HP per enemy");
+                                Check(targets.Select((t, i) => Vector3.Distance(t.ActorInstance.transform.position, skeletonGround[i]) < .001f).All(x => x), "Enemies must return to their ground positions");
+                                Check(fever.PerformingHero.CombatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.OpeningIdle ||
+                                    fever.PerformingHero.CombatAnimator.FindSequence("Idle")?.Animation == fever.PerformingHero.CombatAnimator.ActiveAnimation, "Skeleton must end in Idle");
+                                skeletonFinished = true; ScreenCapture.CaptureScreenshot("Temp/Fever-skeleton-idle.png");
+                            }
+                            return;
+                        }
                         if (fever.PerformingHero.CharacterDefinition.EnableUnusedGuardSlime)
                         {
                             sawMage = true;
@@ -230,7 +275,7 @@ namespace RhythmHunter.FightDemoEditor
                         return;
                     }
                     if (!fever.TutorialCompleted) return;
-                    Check(sawSlash && sawIdle && sawMage && mageFinished, "Warrior or mage phases were skipped");
+                    Check(sawSlash && sawIdle && sawMage && mageFinished && sawSkeleton && skeletonFinished, "A hero performance was skipped");
                     Check(fight.BattleEnded && fight.BattleWon, "Fever success must finish the tutorial battle");
                     Check(fight.GetComponent<FightLevelPlanner>().TryFindNextStage(out _, out _), "Tutorial must offer next battle");
                     var pool = fight.GetComponent<FightFeverAfterimagePool>(); int allocated = pool.AllocatedCount;
@@ -252,13 +297,14 @@ namespace RhythmHunter.FightDemoEditor
                     step++; phaseAt = EditorApplication.timeSinceStartup; return;
                 }
                 Check(GameObject.Find("Fever Isolated Render Stage") == null, "Render stage leaked");
-                Finish("PASS: QTE failure/retry; warrior 50 damage; mage three-beat delay, twenty penetrating shots, 20 damage per enemy; mage pause, weaken active during Fever and eight resumed beats duration; aura/projectile cleanup; tutorial victory and next stage. Screenshots saved.");
+                Finish("PASS: Three ten-beat performances; warrior 50 HP, mage 20 HP, skeleton 20 HP per enemy; three zero-damage bombs, common airborne height, twenty three-target volleys; pause; landing/Idle; mage weaken frozen through skeleton; tutorial victory and next stage. Screenshots saved.");
             }
             catch (Exception e) { Finish("FAIL: " + e); }
         }
         static void Finish(string result)
         {
             sawMage = magePauseChecked = mageFinished = false;
+            sawSkeleton = skeletonFinished = skeletonPauseChecked = false; skeletonGround = null;
             File.WriteAllText("Temp/FeverPlay.result", result); File.Delete(Request);
             step = frames = 0; deadline = nextPress = phaseAt = 0; pauseChecked = false;
             targets = null; sawSlash = sawIdle = performancePauseChecked = lethal = false; lethalEvents = 0;

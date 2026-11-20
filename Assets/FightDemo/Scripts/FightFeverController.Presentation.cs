@@ -174,7 +174,7 @@ namespace RhythmHunter.FightDemo
             if (CurrentPhase == Phase.Performing && PerformingHero)
             {
                 var bounds = new Bounds(PerformingHero.ActorInstance.transform.position, Vector3.zero);
-                foreach (var enemy in performanceEnemies) if (enemy && enemy.ActorInstance) bounds.Encapsulate(enemy.ActorInstance.transform.position);
+                foreach (var enemy in performanceEnemies) if (enemy && enemy.ActorInstance) bounds.Encapsulate(SkeletonGroundPosition(enemy));
                 center = bounds.center + Vector3.up * 1.7f;
             }
             cameraRig?.SetFeverFocus(center, weight, CurrentPhase == Phase.Performing ? 0 : cameraZoom * weight);

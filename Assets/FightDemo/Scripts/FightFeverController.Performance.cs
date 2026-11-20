@@ -49,6 +49,7 @@ namespace RhythmHunter.FightDemo
                 var animator = hero ? hero.CombatAnimator : null;
                 if (!hero || !hero.HasCharacter || animator == null) continue;
                 if (hero.CharacterDefinition.EnableUnusedGuardSlime && TryBeginMage(hero, started)) return;
+                if (hero.CharacterDefinition.EnableAimedFollowUp && TryBeginSkeleton(hero, started)) return;
                 if (hero.CharacterDefinition?.EnableSwordCharge != true) continue;
                 var intro = animator.FindSequence("FeverUlt");
                 authoredSlash = animator.FindSequence("Multi-Slash");
@@ -101,6 +102,7 @@ namespace RhythmHunter.FightDemo
             if (!PerformingHero || !PerformingHero.ActorInstance) { SelectNextPerformer(BeatPosition()); return; }
             double now = BeatPosition(); PerformanceElapsedBeats = Math.Max(0, now - performanceStarted);
             if (magePerforming) { AdvanceMagePerformance(); return; }
+            if (skeletonPerforming) { AdvanceSkeletonPerformance(); return; }
             while (nextSlashEvent < slashEvents.Count && slashEvents[nextSlashEvent].beat <= PerformanceElapsedBeats + 1e-7)
             {
                 var entry = slashEvents[nextSlashEvent++]; ResolveFeverSlash(entry.frame, entry.delayed, entry.beat, entry.strike);
@@ -211,6 +213,7 @@ namespace RhythmHunter.FightDemo
         private void StopPerformer()
         {
             StopMagePerformance();
+            StopSkeletonPerformance();
             if (PerformingHero && PerformingHero.CombatAnimator)
             {
                 PerformingHero.CombatAnimator.InterruptPlayback();
