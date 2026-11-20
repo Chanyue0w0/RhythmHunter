@@ -18,6 +18,14 @@ namespace RhythmHunter.FightDemoEditor
         static Art2LightingPolishSetup() => EditorApplication.update += Poll;
         private static void Poll()
         {
+            const string disableRequest = "Temp/WarriorFlashDisable.request";
+            if (File.Exists(disableRequest) && !EditorApplication.isCompiling && !EditorApplication.isUpdating && !EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                File.Delete(disableRequest);
+                try { DisableWarriorFlashes(); File.WriteAllText("Temp/WarriorFlashDisable.result", "PASS: charged slash/explosion extra flash rules disabled; explosion prefab Light disabled; particles retained."); }
+                catch (Exception e) { File.WriteAllText("Temp/WarriorFlashDisable.result", "FAIL: " + e); }
+                return;
+            }
             const string request = "Temp/Art2LightingPolish.request";
             if (!File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode) return;
             File.Delete(request);
@@ -70,8 +78,8 @@ namespace RhythmHunter.FightDemoEditor
             Undo.RecordObject(flashes, "Configure skill light pool");
             flashes.combat = all.Select(t => t.GetComponent<FightCombatController>()).First(c => c != null);
             if (flashes.rules.Length == 0) flashes.rules = new[] {
-                new Art2SkillFlashLighting.Rule { effectName = "LightExplosionQuick", intensity = 1.5f, durationBeats = .3f },
-                new Art2SkillFlashLighting.Rule { effectName = "SwordSlash_Pixel_Yellow", intensity = .8f, durationBeats = .2f, range = 2.5f },
+                new Art2SkillFlashLighting.Rule { enabled = false, effectName = "LightExplosionQuick", intensity = 1.5f, durationBeats = .3f },
+                new Art2SkillFlashLighting.Rule { enabled = false, effectName = "SwordSlash_Pixel_Yellow", intensity = .8f, durationBeats = .2f, range = 2.5f },
                 new Art2SkillFlashLighting.Rule { effectName = "FireExplosion", color = new Color(1, .3f, .08f), intensity = 1.5f, durationBeats = .35f }
             };
             EditorUtility.SetDirty(fill); EditorUtility.SetDirty(tuning); EditorUtility.SetDirty(flashes);
@@ -80,6 +88,25 @@ namespace RhythmHunter.FightDemoEditor
             EditorGUIUtility.PingObject(host);
             ValidateControls(flashes);
             File.WriteAllText("Temp/Art2LightingPolish.result", $"PASS setup: {targets.Count} scene targets, {surfaceCount} surface maps, rim main-light reference, {flashes.rules.Length} flash rules. Material toggles/restoration and bounded light pool passed. Main light transform/settings unchanged.");
+        }
+
+        [MenuItem("Rhythm Hunter/Art2/Disable Warrior Extra Flashes")]
+        public static void DisableWarriorFlashes()
+        {
+            var scene = SceneManager.GetSceneByPath("Assets/FightDemo/Scenes/Art2_FightScene.unity");
+            if (!scene.isLoaded) throw new Exception("Open Art2_FightScene first.");
+            var flashes = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Art2SkillFlashLighting>(true)).Single();
+            Undo.RecordObject(flashes, "Disable warrior extra flashes");
+            int count = 0;
+            foreach (var rule in flashes.rules)
+                if (rule.effectName == "LightExplosionQuick" || rule.effectName == "SwordSlash_Pixel_Yellow")
+                { rule.enabled = false; count++; }
+            typeof(Art2SkillFlashLighting).GetMethod("Clear", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(flashes, null);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (count != 2) throw new Exception("Expected both warrior flash rules");
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/FightDemo/Prefabs/VFX/LightExplosionQuick.prefab");
+            if (prefab.GetComponentsInChildren<Light>(true).Any(light => light.enabled)) throw new Exception("Explosion light is still enabled");
+            if (prefab.GetComponentsInChildren<ParticleSystem>(true).Length == 0) throw new Exception("Explosion particles missing");
         }
 
         private static void ValidateControls(Art2SkillFlashLighting sceneFlashes)
@@ -105,7 +132,8 @@ namespace RhythmHunter.FightDemoEditor
                 if (renderer.sharedMaterial != material) throw new Exception("Original material not restored");
 
                 var flashes = root.AddComponent<Art2SkillFlashLighting>();
-                flashes.combat = sceneFlashes.combat; flashes.rules = sceneFlashes.rules;
+                flashes.combat = sceneFlashes.combat;
+                flashes.rules = new[] { new Art2SkillFlashLighting.Rule { effectName = "ValidationFlash" } };
                 var effect = new GameObject(flashes.rules[0].effectName + "(Clone)").AddComponent<FightBattleEffect>();
                 effect.transform.SetParent(root.transform);
                 for (int i = 0; i < 12; i++) Call(flashes, "OnEffect", effect);

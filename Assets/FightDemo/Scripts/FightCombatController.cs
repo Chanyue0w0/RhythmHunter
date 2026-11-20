@@ -314,7 +314,7 @@ namespace RhythmHunter.FightDemo
             if (BattleEntranceRunning || !AwaitingBattleStart || IsPaused || TimingCalibrationActive || !rosterManager.TryLockFormation()) return false;
             ResetBattleStateForRoster();
             rhythmJudge?.ResetDuplicateTracking();
-            if (startWithFullTeamSkill)
+            if (startWithFullTeamSkill || GetComponent<FightLevelPlanner>()?.ActiveStage?.TeachesFever == true)
             {
                 teamSkillGauge = TeamSkillGaugeMax;
                 TeamSkillStatus = "READY  A / R";
@@ -463,6 +463,7 @@ namespace RhythmHunter.FightDemo
             UpdateBattleEntrance();
             UpdateSkillVisualPause();
             UpdateNormalImpacts();
+            if (FeverBattleSuspended) return;
             UpdateSwordStreaks();
             if (TimingCalibrationActive || IsPaused || AwaitingBattleStart || battleEnded) return;
 
@@ -525,6 +526,8 @@ namespace RhythmHunter.FightDemo
 
         public void SubmitHeroCommand(FightInputRouter.HeroCommand command)
         {
+            var fever = GetComponent<FightFeverController>();
+            if (fever != null && fever.ConsumeCommand(command)) return;
             var tutorial = GetComponent<FightTutorialController>();
             if (tutorial != null && tutorial.ConsumeCommand(command)) return;
             if (BossPhaseTwoActive)
@@ -879,6 +882,7 @@ namespace RhythmHunter.FightDemo
             if (IsPaused) return;
 
             latestCombatBeat = beat.GlobalBeat;
+            if (FeverBattleSuspended) { AdvanceEnemyPause(beat.GlobalBeat); return; }
             if (DefeatSlowMotionActive) return;
             if (TimingCalibrationActive || battleEnded) return;
             if (BossPhaseTwoActive) { FightBeat?.Invoke(beat); return; }

@@ -13,17 +13,85 @@ MonoBehaviour:
   m_Name: Chapter01_Stage05_Tutorial
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
   stageId: Chapter01_Stage05
-  includeInProgression: 0
-  displayName: "Chapter 1 - Stage 5 - Fever (Reserved)"
+  displayName: Chapter 1 - Stage 5 - Fever
+  includeInProgression: 1
   tutorial: 1
   tutorialHero: {fileID: 0}
   tutorialFullParty: 1
   tutorialLesson: {fileID: 0}
-  teachesFever: 0
   environment: {fileID: 0}
+  teachesFever: 1
   bossStage: 0
+  bossEntrance:
+    enabled: 1
+    waitBeforeDoorBeats: 6
+    doorOpenBeats: 1
+    openingAnimationName: OpenIdle
+    openingIdleBeats: 2
+    doorBossScale: 0.6
+    jumpBeats: 4
+    jumpAnimationName: Jump
+    flyingAnimationName: Flying
+    landingAnimationName: Landing
+    flyingHoldBeats: 0.5
+    doorCloseBeats: 1
+    ascentFraction: 0.4
+    extraJumpHeight: 2
+    landingWaitBeats: 4
+    landingEffect: {fileID: 0}
+    landingEffectOffset: {x: 0, y: 0, z: 0}
+    doorExplosion: {fileID: 0}
+    doorExplosionEnabled: 0
+    doorExplosionBeats: 2
+    bossRevealBeats: 1
+    doorExplosionOffset: {x: 0, y: 0, z: 0}
+    doorExplosionScale: 1
+    landingExplosionEnabled: 1
+    landingExplosionOffset: {x: 0, y: 0, z: 0}
+    landingExplosionScale: 1
+    doorFocusEnabled: 1
+    doorFocusLeadBeats: 2
+    doorFocusWeight: 0.25
+    doorFocusZoom: 0.1
+    doorFocusOffset: {x: 0, y: 1, z: 0}
+    doorFocusReturnBeats: 1
+    doorShakeEnabled: 1
+    doorShakeBeats: 2
+    doorShakeAmplitude: {x: 0.08, y: 0.06}
+    doorShakeCyclesPerBeat: 5
+    doorShakeDecay: 2
+    blackSilhouette: 1
+    doorLightEnabled: 1
+    doorLightColor: {r: 1, g: 0.78, b: 0.42, a: 1}
+    doorLightIntensity: 12
+    doorLightRange: 25
+    doorLightAngle: 65
+    doorLightOffset: {x: 0, y: 2, z: 3}
+    doorLightEuler: {x: 25, y: 180, z: 0}
+    doorLightFadeOutBeats: 1
+    doorLightCastShadows: 1
+    doorLightExcludeHeroes: 1
+    doorLightShadowStrength: 1
+    doorLightShadowBias: 0.05
+    doorLightShadowNormalBias: 0.05
+    fanFollowsDoorLight: 1
+    fanBrightness: 1.5
+    fanLength: 12
+    fanEndWidth: 10
+    fanStartWidth: 1
+    fanYaw: 180
+    fanGroundY: 0.04
+    landingShakeEnabled: 1
+    landingShakeBeats: 6
+    landingShakeAmplitude: {x: 0.16, y: 0.12}
+    landingShakeCyclesPerBeat: 5
+    landingShakeDecay: 2
   musicEventPath: event:/Ritual Slam _120_3
   useNormalEndDeadline: 0
+  overtimeOnlyOnFinalCombatWave: 0
+  overtimeAccelerationIntervalBeats: 20
+  overtimeRecoveryReductionBeats: 1
+  overtimeMinimumRecoveryBeats: 0
   plannedSongSeconds: 0
   waves:
   - name: Training
@@ -33,3 +101,8 @@ MonoBehaviour:
     back: {fileID: 0}
     pressure:
       enablePressurePhase: 0
+      startBeat: 20
+      durationBeats: 20
+      recoveryBeats: 2
+      repeat: 1
+      repeatEveryBeats: 40

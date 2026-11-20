@@ -87,7 +87,7 @@ Transform:
   m_GameObject: {fileID: 3543546682101975063}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -1.48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -118,7 +118,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4391649701422933393}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268346, y: 0, z: 0, w: 0.9238795}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.025, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -174,7 +174,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: a62eada7d7e44b74094c07eeed6efb32, type: 2}
+  m_Sprite: {fileID: 21300000, guid: f6331c8e6606d2b4e84c823709df6827, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -212,7 +212,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.68, y: 0.68, z: 0.68}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3431784722450572310}
@@ -268,6 +268,13 @@ MonoBehaviour:
   hitReactionCooldownBeats: 2
   protectBossPhaseOne: 0
   tiredIdleAnimationName: Idle_Tired
+  enableUnusedGuardSlime: 0
+  slimeAttackReduction: 1
+  slimeAttackReductionBeats: 8
+  slimeMinimumAttackDamage: 0
+  retaliationProjectileScale: 0.75
+  retaliationFloorOpacity: 0.5
+  retaliationFloorOffset: {x: 0, y: 0.025, z: -0.1}
   teamQteMode: 0
   qteFailureDamageMultiplier: 0.5
   qteFailureAppliesStatus: 1

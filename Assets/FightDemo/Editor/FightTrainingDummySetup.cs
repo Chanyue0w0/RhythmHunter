@@ -60,7 +60,8 @@ namespace RhythmHunter.FightDemoEditor
                 data.FindProperty("castEffectAnchor").objectReferenceValue=Anchor("VFX_CastAnchor",new Vector3(0,1,0));data.ApplyModifiedPropertiesWithoutUndo();
                 // Keep opaque feet above the floor even at rest. Beat motion only lifts upwards.
                 var visual=Anchor("Visual",new Vector3(0,.025f,0));var renderer=visual.gameObject.AddComponent<SpriteRenderer>();
-                visual.localRotation=Quaternion.Euler(45,0,0);
+                // The battle slot already supplies the 45-degree camera-facing tilt.
+                visual.localRotation=Quaternion.identity;
                 var texture=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/FightDemo/Arts/敵人/old/ChatGPT Image 2025年12月10日 下午10_11_25.png");
                 renderer.sprite=SaveSprite("TrainingDummySprite",texture,new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.12f),texture.height/2.5f);
                 renderer.sharedMaterial=AssetDatabase.LoadAssetAtPath<Material>(Art+"ForestSpriteCard.mat");

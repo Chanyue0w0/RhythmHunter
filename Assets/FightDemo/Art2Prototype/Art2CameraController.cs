@@ -26,6 +26,12 @@ namespace RhythmHunter.FightDemo.Art2
         private Vector2 gemFinaleShake;
         [Header("Unified shake")]
         [SerializeField, Min(0)] private float maximumCombinedShake = .2f;
+        private Vector2 feverShake;
+        private Vector3 feverFocus;
+        private float feverWeight, feverZoom;
+        public void SetFeverFocus(Vector3 target, float weight, float zoom)
+        { feverFocus = target; feverWeight = Mathf.Clamp01(weight); feverZoom = Mathf.Clamp(zoom, 0, .4f); }
+        public void SetFeverShake(Vector2 offset) => feverShake = offset;
         private Vector2 effectShake;
         public void SetEffectShake(Vector2 offset) => effectShake = offset;
         public void SetGemFinaleShake(Vector2 offset) => gemFinaleShake=offset;
@@ -58,7 +64,7 @@ namespace RhythmHunter.FightDemo.Art2
 
         private void LateUpdate()
         {
-            if (enableKeyboardAndWheel && Application.isFocused)
+            if (enableKeyboardAndWheel && Application.isFocused && feverWeight <= 0)
             {
                 var keys = Keyboard.current;
                 if (keys != null)
@@ -96,14 +102,14 @@ namespace RhythmHunter.FightDemo.Art2
         {
             if (!view) view = GetComponent<Camera>();
             view.orthographic = !perspective;
-            float effectiveHeight=framingHalfHeight*(1-bossZoom);
+            float effectiveHeight=framingHalfHeight*(1-bossZoom)*(1-feverZoom);
             view.orthographicSize = effectiveHeight;
             view.fieldOfView = fieldOfView;
             transform.rotation = Quaternion.Euler(pitch, 0, 0);
             // Equal vertical framing at the focus plane in either projection.
             float distance = effectiveHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
-            transform.position = Vector3.Lerp(focus,bossFocusTarget,bossFocusWeight) - transform.forward * distance;
-            var shake = Vector2.ClampMagnitude(bossEntranceShake + bossPhaseTwoShake + gemFinaleShake + effectShake, maximumCombinedShake);
+            transform.position = Vector3.Lerp(Vector3.Lerp(focus,bossFocusTarget,bossFocusWeight), feverFocus, feverWeight) - transform.forward * distance;
+            var shake = Vector2.ClampMagnitude(bossEntranceShake + bossPhaseTwoShake + gemFinaleShake + effectShake + feverShake, maximumCombinedShake);
             transform.position += transform.right * shake.x + transform.up * shake.y;
             view.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
             view.transparencySortAxis = transform.forward;

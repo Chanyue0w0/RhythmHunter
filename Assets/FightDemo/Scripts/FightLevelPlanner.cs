@@ -79,7 +79,7 @@ namespace RhythmHunter.FightDemo
             beatClock.Configure(stage.MusicEventPath, beatClock.MusicStartDelaySeconds, false, beatClock.MusicVolume);
             // Guided practice may continue indefinitely. Reuse the song's native loop,
             // without enabling a stage deadline or overtime Pressure.
-            beatClock.ConfigureStageSections(stage.UseNormalEndDeadline || stage.BossStage || stage.TutorialLesson != null);
+            beatClock.ConfigureStageSections(stage.UseNormalEndDeadline || stage.BossStage || stage.TutorialLesson != null || stage.TeachesFever);
             ActiveStage = stage;
         }
         private void Fail(string message)

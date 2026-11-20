@@ -15,7 +15,7 @@ namespace RhythmHunter.FightDemo
         private float[] speeds;
         private bool paused;
         private ParticleSystem[] completionParticles;
-        public bool Frozen => fight != null && (fight.IsPaused || fight.TimingCalibrationActive || (enemy && fight.EnemyActionsPaused));
+        public bool Frozen => fight != null && (fight.IsPaused || fight.TimingCalibrationActive || fight.FeverBattleSuspended || (enemy && fight.EnemyActionsPaused));
         public void Configure(FightCombatController controller, bool isEnemy, float lifetime)
         {
             fight = controller; enemy = isEnemy; remaining = lifetime;

@@ -34,7 +34,7 @@ namespace RhythmHunter.FightDemo
 
         private void UpdateSkillVisualPause()
         {
-            bool paused = IsPaused || TimingCalibrationActive;
+            bool paused = IsPaused || TimingCalibrationActive || FeverBattleSuspended;
             if (paused == skillParticlesPaused) return;
             skillParticlesPaused = paused;
             foreach (var item in activeSkillVisuals)

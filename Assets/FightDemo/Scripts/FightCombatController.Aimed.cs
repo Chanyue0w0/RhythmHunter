@@ -106,7 +106,7 @@ namespace RhythmHunter.FightDemo
             if (beatClock == null || !beatClock.TryGetTimelinePositionMs(out int now)) return;
             double delta = hasNormalImpactTime ? Math.Max(0, now - normalImpactLastMs) / Math.Max(1d, beatClock.MillisecondsPerBeat) : 0;
             normalImpactLastMs = now; hasNormalImpactTime = true;
-            if (IsPaused || TimingCalibrationActive || AwaitingBattleStart) return;
+            if (IsPaused || TimingCalibrationActive || AwaitingBattleStart || FeverBattleSuspended) return;
             AdvanceNormalImpacts(delta);
         }
 
