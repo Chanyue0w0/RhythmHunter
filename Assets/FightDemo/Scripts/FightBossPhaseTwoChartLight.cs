@@ -24,6 +24,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField,Min(1)] private float minimumLength=12;
         [SerializeField,Min(.1f)] private float startWidth=1.8f;
         [SerializeField,Min(.1f)] private float endWidth=9;
+        [Tooltip("Symmetric edge fade as a fraction of the chart width at each depth.")]
+        [SerializeField,Range(.001f,.5f)] private float edgeFeather=.1f;
         [SerializeField,Min(0)] private float fanBrightness=.18f;
         [SerializeField] private float groundY=.025f;
         [SerializeField,Min(.01f)] private float fadeSeconds=.6f;
@@ -131,6 +133,7 @@ namespace RhythmHunter.FightDemo
                 vertices[2]=new(-shownWidth*.5f,0,shownLength);vertices[3]=new(shownWidth*.5f,0,shownLength);
                 mesh.vertices=vertices;mesh.RecalculateBounds();
                 material.SetColor("_Color",fireColor*(fanBrightness*weight*fireGain));
+                material.SetVector("_ChartGeometry",new Vector4(startWidth,shownWidth,shownLength,Mathf.Clamp(edgeFeather,.001f,.5f)));
                 material.SetVector("_FireMotion",new Vector4(fireTime,fireFlickerEnabled?fireFlickerAmount:0,0,0));
                 material.SetVector("_DoorCone",Vector4.zero);
                 // Do not match any scene light: this unshadowed ground overlay only marks the chart area.

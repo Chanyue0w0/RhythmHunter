@@ -21084,8 +21084,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2aaf96685c11ad4eafed2904c2ff534, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightLevelPlanner
-  chapter: {fileID: 11400000, guid: d42c845434c163849bc67a7a7698645c, type: 2}
-  stageIndex: 0
+  chapter: {fileID: 11400000, guid: f10b282c4e3349dfbadbfb9bb9823a1e, type: 2}
+  stageIndex: 2
   roster: {fileID: 2021200331}
   beatClock: {fileID: 2021200329}
   environmentSelector: {fileID: 2021200347}
@@ -21646,6 +21646,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a185b0d3be6dabb4c9cda1ee96ff87ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightTutorialController
+  showTutorialPositionButtons: 1
+  positionButtonOffset: {x: 0, y: -34}
+  positionButtonSize: {x: 44, y: 44}
   textFont: {fileID: 0}
   dialogueSize: {x: 880, y: 360}
   backdropOpacity: 0.72

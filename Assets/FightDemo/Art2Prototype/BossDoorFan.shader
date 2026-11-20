@@ -24,14 +24,27 @@ Shader "RhythmHunter/Art2/BossDoorFan"
             CBUFFER_START(UnityPerMaterial)
             half4 _Color;
             float4 _DoorLightPosition, _DoorLightForward, _DoorCone, _FireMotion;
+            // Start/end width, revealed length, edge feather. Zero keeps entrance lighting unchanged.
+            float4 _ChartGeometry;
             CBUFFER_END
             struct A { float3 positionOS:POSITION; float2 uv:TEXCOORD0; };
-            struct V { float4 positionCS:SV_POSITION; float2 uv:TEXCOORD0; float3 positionWS:TEXCOORD1; };
-            V Vert(A i) { V o; o.positionWS=TransformObjectToWorld(i.positionOS); o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=i.uv; return o; }
+            struct V { float4 positionCS:SV_POSITION; float2 uv:TEXCOORD0; float3 positionWS:TEXCOORD1; float2 chartPosition:TEXCOORD2; };
+            V Vert(A i) { V o; o.positionWS=TransformObjectToWorld(i.positionOS); o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=i.uv; o.chartPosition=i.positionOS.xz; return o; }
             half4 Frag(V i):SV_Target
             {
-                float edges=smoothstep(0,.1,i.uv.x)*smoothstep(0,.1,1-i.uv.x);
-                float endFade=1-smoothstep(.6,1,i.uv.y);
+                float2 uv=i.uv;
+                float feather=.1;
+                if(_ChartGeometry.z>0)
+                {
+                    // Reconstruct across the trapezoid, rather than interpolating square UVs
+                    // independently on its two triangles (which stretches the two edges unequally).
+                    uv.y=saturate(i.chartPosition.y/_ChartGeometry.z);
+                    float width=max(.001,lerp(_ChartGeometry.x,_ChartGeometry.y,uv.y));
+                    uv.x=.5+i.chartPosition.x/width;
+                    feather=max(.001,_ChartGeometry.w);
+                }
+                float edges=smoothstep(0,feather,uv.x)*smoothstep(0,feather,1-uv.x);
+                float endFade=1-smoothstep(.6,1,uv.y);
                 float weight=edges*endFade;
                 if(_DoorCone.w>.5)
                 {
@@ -41,8 +54,8 @@ Shader "RhythmHunter/Art2/BossDoorFan"
                     weight*=1-smoothstep(_DoorCone.x*.7,_DoorCone.x,distanceToLight);
                 }
                 // Optional gentle travelling illumination; zero by default for the entrance light.
-                float ripple=.5+.25*sin(i.uv.y*17-i.uv.x*9-_FireMotion.x*2.1)
-                    +.25*sin(i.uv.y*31+i.uv.x*15-_FireMotion.x*3.7);
+                float ripple=.5+.25*sin(uv.y*17-uv.x*9-_FireMotion.x*2.1)
+                    +.25*sin(uv.y*31+uv.x*15-_FireMotion.x*3.7);
                 weight*=1-_FireMotion.y*ripple;
                 half shadow=1;
                 #if defined(_ADDITIONAL_LIGHTS)
