@@ -29,7 +29,46 @@ namespace RhythmHunter.FightDemo
             }
         }
         public FightUnitSlot[] FeverHeroes => new[] { frontHero?.UnitSlot, secondHero?.UnitSlot, thirdHero?.UnitSlot };
+        public FightUnitSlot[] FeverEnemies => fightScene2Enemies.ToArray();
+        public bool FeverPerformanceRunning { get; private set; }
+        private SwordCharge feverSword;
+        private int feverSavedSwordStage;
+        internal void BeginFeverPerformance()
+        {
+            FeverPerformanceRunning = true;
+            BeginBurstTargets();
+            // Hit presentations replace enemy animations, so discard their unfinished attack callbacks.
+            foreach (var enemy in fightScene2Enemies) if (enemy) InterruptEnemyAttack(enemy);
+        }
+        internal void SetFeverWarrior(FightUnitSlot actor)
+        {
+            RestoreFeverSword();
+            if (!actor) return;
+            feverSword = SwordState(actor); feverSavedSwordStage = feverSword.stage;
+            feverSword.stage = 3; ShowSwordStage(feverSword);
+        }
+        private void RestoreFeverSword()
+        {
+            if (feverSword == null) return;
+            feverSword.stage = feverSavedSwordStage; ShowSwordStage(feverSword); feverSword = null;
+        }
+        internal bool ApplyFeverDamage(FightUnitSlot actor, FightUnitSlot target, float amount)
+        {
+            if (!FeverPerformanceRunning || !FeverBattleSuspended || IsPaused || battleEnded ||
+                actor == null || !actor.HasCharacter || !CanHitBurstTarget(target) || !fightScene2Enemies.Contains(target)) return false;
+            target.TakeDamage(ModifyBossDamage(target, amount), FightUnitSlot.DamageKind.Secondary, true);
+            return true;
+        }
+        internal void EndFeverPerformance()
+        {
+            RestoreFeverSword(); FeverPerformanceRunning = false; ClearBurstTargets();
+        }
         internal void SetFeverMana(bool full)
         { teamSkillGauge = full ? TeamSkillGaugeMax : 0; teamSkillGaugeFraction = 0; }
+        internal void CompleteFeverTutorial()
+        {
+            if (GetComponent<FightLevelPlanner>()?.ActiveStage?.TeachesFever == true)
+                FinishBattle(true);
+        }
     }
 }

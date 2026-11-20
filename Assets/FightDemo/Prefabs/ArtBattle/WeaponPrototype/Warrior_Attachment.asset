@@ -86,20 +86,20 @@ MonoBehaviour:
     rotation: 90
     visible: 1
   - frameId: 4d649a068da54e25b97f177dbd591f37
-    position: {x: 0.35, y: 0.25}
-    rotation: 90
+    position: {x: -1.15, y: 0.06}
+    rotation: 118.85566
     visible: 1
   - frameId: 92756b4004d74841a7dad0713ef759dc
-    position: {x: 0.35, y: 0.25}
-    rotation: 90
+    position: {x: -0.95, y: 0.89}
+    rotation: 107.65013
     visible: 1
   - frameId: b9e196fbd0044c3cacbe49bde203e6e4
-    position: {x: 0.35, y: 0.25}
+    position: {x: 0.1, y: 0.65}
     rotation: 90
     visible: 1
   - frameId: 5b4b173aeeb14ed0959ec9eae5ac788e
-    position: {x: 0.35, y: 0.25}
-    rotation: 90
+    position: {x: 1.27, y: 0.2}
+    rotation: 49.39871
     visible: 1
   - frameId: ad790c611c0541fe82a3350f5c568d45
     position: {x: 0.35, y: 0.25}
@@ -180,4 +180,28 @@ MonoBehaviour:
   - frameId: 1c6258c7f1974000b2452b75c816528a
     position: {x: -1.26, y: -0.47}
     rotation: 132.41422
+    visible: 1
+  - frameId: acc48a1a251c44158ff82838be8c84c8
+    position: {x: -1.65, y: -1.75}
+    rotation: -158.5104
+    visible: 1
+  - frameId: b362909a08bf49ab80e6c3f36629a27c
+    position: {x: -0.65, y: 0.26}
+    rotation: 104.29032
+    visible: 1
+  - frameId: c6b6eb156e67445785115f6bf169f06e
+    position: {x: -1.58, y: -1.67}
+    rotation: -158.5104
+    visible: 1
+  - frameId: 867ceb1e91924e2f9b4ec6d06a453200
+    position: {x: 0.57, y: 0.33}
+    rotation: 60.89527
+    visible: 1
+  - frameId: 417be7be604441b4b2cf73f6ed6fcf11
+    position: {x: 1.77, y: -1.66}
+    rotation: -10.527788
+    visible: 1
+  - frameId: 674a4b41a597488f9f6f1ae52e37ef5a
+    position: {x: 1.87, y: -1.51}
+    rotation: -10.527788
     visible: 1

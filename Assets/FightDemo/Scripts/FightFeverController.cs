@@ -7,16 +7,17 @@ namespace RhythmHunter.FightDemo
     [DisallowMultipleComponent, DefaultExecutionOrder(150)]
     public sealed partial class FightFeverController : MonoBehaviour
     {
-        public enum Phase { Idle, Introduction, Flight, Charging, Released, Returning, Explanation }
+        public enum Phase { Idle, Introduction, Flight, Charging, Released, Returning, Explanation, Performing }
         [SerializeField] private GameObject chargeEffectPrefab;
         [SerializeField] private Camera battleCamera;
         [SerializeField] private FightFeverCharge charge = new();
         [SerializeField, Min(.1f)] private float flightSeconds = .85f;
         [SerializeField, Range(0, .4f)] private float cameraZoom = .22f;
         public Phase CurrentPhase { get; private set; }
-        public bool Active => CurrentPhase == Phase.Flight || CurrentPhase == Phase.Charging || CurrentPhase == Phase.Released || CurrentPhase == Phase.Returning;
+        public bool Active => CurrentPhase == Phase.Flight || CurrentPhase == Phase.Charging || CurrentPhase == Phase.Released || CurrentPhase == Phase.Returning || CurrentPhase == Phase.Performing;
         public float Progress => charge.Progress;
         public bool TutorialCompleted { get; private set; }
+        public Vector3 DamagePresentationOffset => Active && stage ? stageOffset : Vector3.zero;
         public event Action ChargeSucceeded;
         private FightCombatController fight;
         private FightScenePresenter presenter;
@@ -52,7 +53,6 @@ namespace RhythmHunter.FightDemo
                 if (a && enteredFrame != Time.frameCount)
                 {
                     if (CurrentPhase == Phase.Charging) Press();
-                    else if (CurrentPhase == Phase.Released && phaseTime >= 1.2f) BeginReturn();
                 }
                 return true;
             }
@@ -73,6 +73,7 @@ namespace RhythmHunter.FightDemo
             presenter.SetFeverHudHidden(true);
             BeginStage(); SetPhase(Phase.Flight);
             show.gameObject.SetActive(true); dialogue.gameObject.SetActive(false);
+            hint.rectTransform.anchoredPosition = new Vector2(0, -270);
             gem.sprite = presenter.FeverFullGem; gem.gameObject.SetActive(true);
             barRoot.gameObject.SetActive(false); flash.color = Color.clear;
         }
@@ -98,7 +99,7 @@ namespace RhythmHunter.FightDemo
             {
                 lastSuccess = true; SetPhase(Phase.Released); ReleaseToHeroes();
                 rumble.Pulse(.8f, .16f); ChargeSucceeded?.Invoke();
-                hint.text = "能量解放！\nA　結束本次測試";
+                hint.text = "團隊共鳴！";
             }
         }
         private void Update()
@@ -118,6 +119,9 @@ namespace RhythmHunter.FightDemo
             if (CurrentPhase == Phase.Flight && phaseTime >= flightSeconds)
             { SetPhase(Phase.Charging); lastBeat = BeatPosition(); barRoot.gameObject.SetActive(true); }
             if (CurrentPhase == Phase.Charging) AdvanceChargeClock();
+            if (CurrentPhase == Phase.Released && phaseTime >= .6f) BeginPerformances();
+            if (CurrentPhase == Phase.Performing) AdvancePerformance();
+            AdvancePerformanceEffects(Time.unscaledDeltaTime);
             if (CurrentPhase == Phase.Returning && phaseTime >= .45f) FinishReturn();
             pulse = Mathf.MoveTowards(pulse, 0, Time.unscaledDeltaTime * 7);
             overshoot = Mathf.MoveTowards(overshoot, 0, Time.unscaledDeltaTime * .25f);
@@ -137,7 +141,11 @@ namespace RhythmHunter.FightDemo
             CleanupStage(); presenter.SetFeverHudHidden(false); show.gameObject.SetActive(false);
             fight.SetFeverMana(false);
             if (tutorial && lastSuccess && !TutorialCompleted)
-            { SetPhase(Phase.Explanation); ShowPage(); }
+            {
+                TutorialCompleted = true; SetPhase(Phase.Idle);
+                dialogue.gameObject.SetActive(false); hint.text = "";
+                fight.SetFeverSuspended(false); fight.CompleteFeverTutorial();
+            }
             else
             {
                 SetPhase(Phase.Idle); fight.SetFeverSuspended(false);
@@ -153,6 +161,7 @@ namespace RhythmHunter.FightDemo
             }
             if (++page < 2) { enteredFrame = Time.frameCount; ShowPage(); return; }
             dialogue.gameObject.SetActive(false); SetPhase(Phase.Idle); fight.SetFeverSuspended(false);
+            hint.rectTransform.anchoredPosition = new Vector2(0, 210);
             hint.text = "魔力已充滿！按 A 啟動 Fever，再連打 A 解放能量。";
         }
         private void Abort()

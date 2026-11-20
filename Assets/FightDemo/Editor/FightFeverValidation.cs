@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using RhythmHunter.FightDemo;
@@ -18,6 +20,9 @@ namespace RhythmHunter.FightDemoEditor
         static float hp;
         static bool pauseChecked;
         static double pausedElapsed;
+        static FightUnitSlot[] targets;
+        static bool sawSlash, sawIdle, performancePauseChecked, lethal;
+        static int lethalEvents;
         static FightFeverValidation() => EditorApplication.update += Poll;
         static void Check(bool valid, string message) { if (!valid) throw new Exception(message); }
         static void Poll()
@@ -32,7 +37,7 @@ namespace RhythmHunter.FightDemoEditor
                     return;
                 }
                 Application.runInBackground = true;
-                if (deadline == 0) deadline = EditorApplication.timeSinceStartup + 100;
+                if (deadline == 0) { deadline = EditorApplication.timeSinceStartup + 100; lethal = File.ReadAllText(Request).Trim() == "lethal"; }
                 if (EditorApplication.timeSinceStartup > deadline) throw new Exception("Fever validation timeout at step " + step);
                 var fight = UnityEngine.Object.FindFirstObjectByType<FightCombatController>();
                 var fever = fight ? fight.GetComponent<FightFeverController>() : null;
@@ -84,6 +89,24 @@ namespace RhythmHunter.FightDemoEditor
                     {
                         Check(!fight.FeverBattleSuspended && fight.TeamSkillGauge == 0, "Failure cleanup");
                         typeof(FightCombatController).GetMethod("SetFeverMana", Flags).Invoke(fight, new object[] { true });
+                        targets = UnityEngine.Object.FindObjectsByType<FightUnitSlot>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                            .Where(s => s.Team == FightUnitSlot.UnitTeam.Enemy).Take(3).ToArray();
+                        Check(targets.Length == 3, "Need three enemy slots for area-damage test");
+                        var prefab = AssetDatabase.LoadAssetAtPath<FightCharacterDefinition>(File.ReadAllText(Request).Trim() == "dummy" ? "Assets/FightDemo/Prefabs/ArtBattle/TrainingDummy.prefab" : "Assets/FightDemo/Prefabs/ArtBattle/Goblin_Normal.prefab");
+                        foreach (var target in targets)
+                        {
+                            target.SpawnCharacter(prefab, fight);
+                            var data = new SerializedObject(target);
+                            typeof(FightUnitSlot).GetField("currentHp", Flags).SetValue(target, 100f);
+                            data.FindProperty("maxHp").floatValue = 100; data.ApplyModifiedPropertiesWithoutUndo();
+                        }
+                        var enemies = (List<FightUnitSlot>)typeof(FightCombatController).GetField("fightScene2Enemies", Flags).GetValue(fight);
+                        enemies.Clear(); enemies.AddRange(targets);
+                        if (lethal)
+                        {
+                            typeof(FightUnitSlot).GetField("currentHp", Flags).SetValue(targets[0], 2f);
+                            targets[0].EnemyDefeated += (_, __) => lethalEvents++;
+                        }
                         step++; return;
                     }
                     return;
@@ -110,10 +133,49 @@ namespace RhythmHunter.FightDemoEditor
                 }
                 if (step == 6)
                 {
-                    if (EditorApplication.timeSinceStartup - phaseAt < 1.4) return;
-                    ScreenCapture.CaptureScreenshot("Temp/Fever-success.png");
-                    Check(!fever.TutorialCompleted, "Success must not complete tutorial before reading");
-                    step++; phaseAt = EditorApplication.timeSinceStartup; return;
+                    if (fever.CurrentPhase == FightFeverController.Phase.Performing)
+                    {
+                        Check(fight.GetSwordChargeStage(fever.PerformingHero) == 3, "Weapon must stay fully charged");
+                        if (fever.PerformanceElapsedBeats < 2) Check(targets.Select((t, i) => t.CurrentHp == (lethal && i == 0 ? 2 : 100)).All(x => x), "Intro must not deal damage");
+                        if (!performancePauseChecked && fever.PerformanceElapsedBeats > 3)
+                        {
+                            if (!fight.IsPaused)
+                            {
+                                pausedElapsed = fever.PerformanceElapsedBeats; fight.GetComponent<FightPauseController>().SetPaused(true);
+                                phaseAt = EditorApplication.timeSinceStartup; return;
+                            }
+                            if (EditorApplication.timeSinceStartup - phaseAt < 1) return;
+                            Check(Math.Abs(pausedElapsed - fever.PerformanceElapsedBeats) < .001, "Performance pause advanced the timeline");
+                            fight.GetComponent<FightPauseController>().SetPaused(false); performancePauseChecked = true;
+                        }
+                        if (fever.PerformanceElapsedBeats > 4 && fever.PerformanceElapsedBeats < 7)
+                        {
+                            sawSlash = true;
+                            Check(fever.PrimarySlashCount > 0 && fever.DelayedSlashCount > 0, "Missing slash ticks");
+                            Check(fight.GetComponent<FightFeverAfterimagePool>().ActiveCount > 0, "Missing pooled echoes");
+                            ScreenCapture.CaptureScreenshot("Temp/Fever-warrior-slashes.png");
+                        }
+                        if (fever.PerformanceElapsedBeats >= 8 && !sawIdle)
+                        {
+                            sawIdle = true;
+                            Check(fever.PrimarySlashCount == 20 && fever.DelayedSlashCount == 20, "Expected twenty main and twenty delayed hits");
+                            Check(targets.Select((t, i) => Mathf.Abs(t.CurrentHp - (lethal && i == 0 ? 0 : 50)) < .001f).All(x => x), "Each enemy must lose exactly 50 HP (capped at zero)");
+                            if (lethal) Check(targets[0].ActorInstance && fight.IsBurstRetainedTarget(targets[0]) && lethalEvents == 1, "Lethal enemy must remain until performance ends, with one defeat event");
+                            Check(fever.PerformingHero.CombatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.OpeningIdle ||
+                                fever.PerformingHero.CombatAnimator.FindSequence("Idle")?.Animation == fever.PerformingHero.CombatAnimator.ActiveAnimation, "Last two beats must be Idle");
+                            Check(fight.GetComponent<FightFeverAfterimagePool>().ActiveCount == 0, "Echoes must return by Idle");
+                            ScreenCapture.CaptureScreenshot("Temp/Fever-warrior-idle.png");
+                        }
+                        return;
+                    }
+                    if (!fever.TutorialCompleted) return;
+                    Check(sawSlash && sawIdle, "Warrior phases were skipped");
+                    Check(fight.BattleEnded && fight.BattleWon, "Fever success must finish the tutorial battle");
+                    Check(fight.GetComponent<FightLevelPlanner>().TryFindNextStage(out _, out _), "Tutorial must offer next battle");
+                    var pool = fight.GetComponent<FightFeverAfterimagePool>(); int allocated = pool.AllocatedCount;
+                    foreach (var target in targets) pool.Strike(target);
+                    Check(pool.AllocatedCount == allocated, "Echo pool must reuse existing renderers"); pool.ReleaseAll();
+                    step = 8; phaseAt = EditorApplication.timeSinceStartup; return;
                 }
                 if (step == 7)
                 {
@@ -125,11 +187,11 @@ namespace RhythmHunter.FightDemoEditor
                 if (step == 8)
                 {
                     fight.SubmitHeroCommand(FightInputRouter.HeroCommand.TeamSkill);
-                    Check(fever.TutorialCompleted && !fight.FeverBattleSuspended && fight.TeamSkillGauge == 0, "Read confirmation cleanup");
+                    Check(fever.TutorialCompleted && !fight.FeverBattleSuspended && fight.TeamSkillGauge == 0, "Automatic tutorial completion cleanup");
                     step++; phaseAt = EditorApplication.timeSinceStartup; return;
                 }
                 Check(GameObject.Find("Fever Isolated Render Stage") == null, "Render stage leaked");
-                Finish("PASS: full mana; two introduction pages; activation excluded; 16-beat timeout; combat frozen; zero mana after failure; successful retry; charged hero effects; explicit completion reading; render-stage cleanup. Screenshots saved.");
+                Finish("PASS: 16-beat QTE failure/retry and pause; warrior fully charged; 10 Multi-Slash loops, 20 main + 20 delayed hits, exactly 50 HP per enemy across three targets; last two beats Idle; pooled echoes return and reuse; unimplemented heroes skipped; automatic tutorial victory, next stage available and cleanup. Screenshots saved.");
             }
             catch (Exception e) { Finish("FAIL: " + e); }
         }
@@ -137,6 +199,7 @@ namespace RhythmHunter.FightDemoEditor
         {
             File.WriteAllText("Temp/FeverPlay.result", result); File.Delete(Request);
             step = frames = 0; deadline = nextPress = phaseAt = 0; pauseChecked = false;
+            targets = null; sawSlash = sawIdle = performancePauseChecked = lethal = false; lethalEvents = 0;
             EditorApplication.isPlaying = false;
         }
     }

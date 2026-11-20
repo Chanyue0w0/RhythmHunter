@@ -340,11 +340,11 @@ namespace RhythmHunter.FightDemo
         }
         private double idlePausedBeats, pauseBeatPosition;
         public bool PlaybackPaused => playbackPaused;
-        private bool visualSequence, loopVisualSequence, visualSequenceComplete, externallyTimedVisual;
+        private bool visualSequence, loopVisualSequence, visualSequenceComplete, externallyTimedVisual, suppressVisualEvents;
 
         // Reuses the same frame stepping, tempo, pause and sprite texture binding as characters.
         // No gameplay callbacks are registered for auxiliary visuals such as weapons.
-        public bool PlayVisualSequence(SpriteRenderer renderer, Sequence sequence, bool loop, bool externallyTimed = false)
+        public bool PlayVisualSequence(SpriteRenderer renderer, Sequence sequence, bool loop, bool externallyTimed = false, bool suppressEvents = false)
         {
             if (renderer == null || sequence == null || sequence.Frames.Count == 0) return false;
             FinishActiveSequence(false);
@@ -353,6 +353,7 @@ namespace RhythmHunter.FightDemo
             activeFrame = 0; frameElapsed = 0;
             visualSequence = true; loopVisualSequence = loop; visualSequenceComplete = false;
             externallyTimedVisual = externallyTimed;
+            suppressVisualEvents = suppressEvents;
             playbackVersion++;
             EnterFrame(0);
             return true;
@@ -727,6 +728,7 @@ namespace RhythmHunter.FightDemo
             activeFrame = frameIndex;
             DisplaySprite((int)activeSequence.Animation, frameIndex, activeSequence.Frames[frameIndex]);
             if (version != playbackVersion || activeSequence == null) return;
+            if (visualSequence && suppressVisualEvents) return;
             var effects = activeSequence.EffectsAt(frameIndex);
             if (effects != null)
                 foreach (var effect in effects)

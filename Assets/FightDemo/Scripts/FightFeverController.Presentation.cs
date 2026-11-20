@@ -19,7 +19,7 @@ namespace RhythmHunter.FightDemo
         private Camera stageCamera;
         private RenderTexture stageTexture;
         private RawImage heroesImage;
-        private readonly List<(SpriteRenderer source, SpriteRenderer copy)> copies = new();
+        private readonly List<(FightUnitSlot owner, SpriteRenderer source, SpriteRenderer copy)> copies = new();
         private readonly List<GameObject> effects = new();
         private GameObject gemEffect;
         private FightVfxOpacity gemOpacity;
@@ -114,18 +114,21 @@ namespace RhythmHunter.FightDemo
             var data = stageCamera.GetUniversalAdditionalCameraData(); data.SetRenderer(2); data.renderPostProcessing = false; data.renderShadows = false; data.volumeLayerMask = 0;
             EnsureTexture();
             foreach (var hero in fight.FeverHeroes)
-            {
-                if (hero == null || hero.ActorInstance == null) continue;
-                foreach (var source in hero.ActorInstance.GetComponentsInChildren<SpriteRenderer>(true))
-                {
-                    var copy = new GameObject(source.name + " Fever View").AddComponent<SpriteRenderer>();
-                    copy.transform.SetParent(stage.transform); copy.gameObject.layer = 31;
-                    copy.sharedMaterial = source.sharedMaterial; copies.Add((source, copy));
-                }
-            }
+                AddActorCopies(hero);
             gemEffect = CreateEffect(stage.transform);
             gemOpacity = gemEffect.GetComponent<FightVfxOpacity>() ?? gemEffect.AddComponent<FightVfxOpacity>();
             gemOpacity.SetOpacity(.04f);
+        }
+        private void AddActorCopies(FightUnitSlot actor)
+        {
+            if (!actor || !actor.ActorInstance) return;
+            foreach (var source in actor.ActorInstance.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                if (copies.Exists(pair => pair.source == source)) continue;
+                var copy = new GameObject(source.name + " Fever View").AddComponent<SpriteRenderer>();
+                copy.transform.SetParent(stage.transform); copy.gameObject.layer = 31;
+                copy.sharedMaterial = source.sharedMaterial; copies.Add((actor, source, copy));
+            }
         }
         private void EnsureTexture()
         {
@@ -168,7 +171,13 @@ namespace RhythmHunter.FightDemo
             foreach (var hero in heroes) if (hero && hero.ActorInstance) { center += hero.ActorInstance.transform.position; count++; }
             if (count == 0) { Abort(); return; }
             center = center / count + Vector3.up * 2.1f;
-            cameraRig?.SetFeverFocus(center, weight, cameraZoom * weight);
+            if (CurrentPhase == Phase.Performing && PerformingHero)
+            {
+                var bounds = new Bounds(PerformingHero.ActorInstance.transform.position, Vector3.zero);
+                foreach (var enemy in performanceEnemies) if (enemy && enemy.ActorInstance) bounds.Encapsulate(enemy.ActorInstance.transform.position);
+                center = bounds.center + Vector3.up * 1.7f;
+            }
+            cameraRig?.SetFeverFocus(center, weight, CurrentPhase == Phase.Performing ? 0 : cameraZoom * weight);
             Vector2 shake = new Vector2(Mathf.Sin(phaseTime * 91), Mathf.Sin(phaseTime * 73)) * (.045f * pulse * weight);
             cameraRig?.SetFeverShake(shake);
             EnsureTexture();
@@ -177,9 +186,11 @@ namespace RhythmHunter.FightDemo
             foreach (var pair in copies)
             {
                 if (!pair.source || !pair.copy) continue;
-                pair.copy.enabled = pair.source.enabled && pair.source.gameObject.activeInHierarchy;
+                pair.copy.enabled = pair.source.enabled && pair.source.gameObject.activeInHierarchy &&
+                    (CurrentPhase != Phase.Performing || pair.owner == PerformingHero || pair.owner.Team == FightUnitSlot.UnitTeam.Enemy);
                 pair.copy.sprite = pair.source.sprite; pair.copy.color = pair.source.color;
                 pair.copy.flipX = pair.source.flipX; pair.copy.flipY = pair.source.flipY;
+                pair.copy.sortingLayerID = pair.source.sortingLayerID;
                 pair.copy.sortingOrder = pair.source.sortingOrder;
                 pair.copy.transform.SetPositionAndRotation(pair.source.transform.position + stageOffset, pair.source.transform.rotation);
                 pair.copy.transform.localScale = pair.source.transform.lossyScale;
@@ -217,10 +228,13 @@ namespace RhythmHunter.FightDemo
             foreach (var item in heroEffects)
                 if (item.hero && item.foot && item.effect)
                 {
+                    item.effect.gameObject.SetActive(CurrentPhase != Phase.Performing || item.hero == PerformingHero);
                     item.effect.position = item.foot.position + stageOffset;
                     item.effect.rotation = battleCamera.transform.rotation;
                     item.effect.localScale = Vector3.one * .75f;
                 }
+            if (CurrentPhase == Phase.Performing && afterimages)
+                afterimages.Present(battleCamera, stageOffset, Mathf.Clamp01((float)((PerformanceElapsedBeats - SlashEnd) / (IdleStart - SlashEnd))));
         }
         private void SetStagePaused(bool paused)
         {
@@ -231,6 +245,7 @@ namespace RhythmHunter.FightDemo
         }
         private void CleanupStage()
         {
+            CleanupPerformance();
             cameraRig?.SetFeverFocus(Vector3.zero, 0, 0); cameraRig?.SetFeverShake(Vector2.zero);
             if (stageCamera) stageCamera.targetTexture = null;
             if (stage) { stage.SetActive(false); Destroy(stage); }

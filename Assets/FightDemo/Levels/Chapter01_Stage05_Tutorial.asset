@@ -97,8 +97,8 @@ MonoBehaviour:
   - name: Training
     kind: 0
     front: {fileID: 8354792478736558662, guid: 5e65bdb4ca2999343b0918c7eac03f00, type: 3}
-    middle: {fileID: 0}
-    back: {fileID: 0}
+    middle: {fileID: 8354792478736558662, guid: 5e65bdb4ca2999343b0918c7eac03f00, type: 3}
+    back: {fileID: 8354792478736558662, guid: 5e65bdb4ca2999343b0918c7eac03f00, type: 3}
     pressure:
       enablePressurePhase: 0
       startBeat: 20

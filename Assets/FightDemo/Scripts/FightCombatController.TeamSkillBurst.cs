@@ -14,7 +14,7 @@ namespace RhythmHunter.FightDemo
         private double burstPresentationBeat;
         private readonly System.Collections.Generic.HashSet<FightUnitSlot> burstTargets = new();
         private FightUnitSlot lastBurstDefeatedEnemy;
-        public bool IsBurstRetainedTarget(FightUnitSlot target) => TeamSkillRunning && target != null &&
+        public bool IsBurstRetainedTarget(FightUnitSlot target) => (TeamSkillRunning || FeverPerformanceRunning) && target != null &&
             target.HasCharacter && burstTargets.Contains(target) && fightScene2Enemies.Contains(target);
         private bool CanHitBurstTarget(FightUnitSlot target) => target != null && target.HasCharacter &&
             (target.CurrentHp > 0 || IsBurstRetainedTarget(target));

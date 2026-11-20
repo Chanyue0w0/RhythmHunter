@@ -21,6 +21,14 @@ namespace RhythmHunter.FightDemo
         }
 
         private FightCombatController controller;
+        private FightFeverController fever;
+        private readonly Dictionary<GameObject, int> originalLayers = new();
+        private void RouteAboveFeverMask()
+        {
+            bool isolated = fever && fever.DamagePresentationOffset != Vector3.zero;
+            foreach (var entry in originalLayers)
+                if (entry.Key) entry.Key.layer = isolated ? 31 : entry.Value;
+        }
         private static readonly int PopupOpacity = Shader.PropertyToID("_PopupOpacity");
         private MaterialPropertyBlock opacityProperties;
         private void SetOpacity(SpriteRenderer renderer, Color original, float alpha)
@@ -58,6 +66,7 @@ namespace RhythmHunter.FightDemo
         internal void Begin(FightCombatController fight, Vector3 position, float size, float seconds, float riseDistance, Camera camera = null)
         {
             controller = fight;
+            fever = fight.GetComponent<FightFeverController>();
             viewCamera = camera;
             transform.rotation = camera != null ? camera.transform.rotation : Quaternion.identity;
             transform.position = origin = position;
@@ -78,6 +87,10 @@ namespace RhythmHunter.FightDemo
             glyph.root.transform.localPosition = new Vector3(x, glyph.point != null ? -.12f : 0, 0);
             glyph.root.transform.localRotation = Quaternion.identity;
             glyph.root.transform.localScale = glyph.scale;
+            foreach (var child in glyph.root.GetComponentsInChildren<Transform>(true))
+                originalLayers[child.gameObject] = child.gameObject.layer;
+            RouteAboveFeverMask();
+            UpdatePosition();
             if (glyph.point != null)
             {
                 glyph.point.color = glyph.spriteColors[0];
@@ -106,6 +119,8 @@ namespace RhythmHunter.FightDemo
         {
             if (!Leased) return;
             Leased = false;
+            foreach (var entry in originalLayers) if (entry.Key) entry.Key.layer = entry.Value;
+            originalLayers.Clear();
             foreach (var glyph in glyphs) controller.ReturnDamageGlyph(glyph);
             glyphs.Clear();
             paused = false;
@@ -129,6 +144,8 @@ namespace RhythmHunter.FightDemo
             Vector3 up = viewCamera != null ? viewCamera.transform.up : Vector3.up;
             Vector3 right = viewCamera != null ? viewCamera.transform.right : Vector3.right;
             transform.position = origin + right * (horizontalTravel * t) + up * (rise * t + Mathf.Sin(t * Mathf.PI) * jumpHeight);
+            if (fever) transform.position += fever.DamagePresentationOffset;
+            RouteAboveFeverMask();
         }
 
         // Also permits deterministic editor validation without waiting for real frames.
