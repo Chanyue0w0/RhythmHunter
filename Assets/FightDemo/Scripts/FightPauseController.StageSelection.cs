@@ -24,8 +24,8 @@ namespace RhythmHunter.FightDemo
             {var b=FightMenuUi.Button(parent,label,new Vector2(x,y),new Vector2(60,44),font,action);Center((RectTransform)b.transform);}
             Arrow("<",-355,-10,()=>ChangeChapter(-1));Arrow(">",355,-10,()=>ChangeChapter(1));
             Arrow("<",-355,-75,()=>ChangeStage(-1));Arrow(">",355,-75,()=>ChangeStage(1));
-            loadStage=FightMenuUi.Button(parent,"LOAD SELECTED STAGE",new Vector2(0,-155),new Vector2(370,54),font,LoadSelection);Center((RectTransform)loadStage.transform);
-            selectionHint=FightMenuUi.Label(parent,"",new Vector2(0,-225),new Vector2(840,65),font,18);Center(selectionHint.rectTransform);
+            loadStage=FightMenuUi.Button(parent,"進入所選關卡",new Vector2(0,-155),new Vector2(370,46),font,LoadSelection);Center((RectTransform)loadStage.transform);
+            selectionHint=FightMenuUi.Label(parent,"",new Vector2(0,-199),new Vector2(1040,54),font,17);Center(selectionHint.rectTransform);
             PopulateStages();stageChoice=Mathf.Max(0,stageIndices.IndexOf(planner.StageIndex));RefreshStageLabels();
         }
         void PopulateStages()
@@ -47,7 +47,7 @@ namespace RhythmHunter.FightDemo
             var chapter=chapters[chapterChoice];var stage=chapter.Stages[stageIndices[stageChoice]];
             stageLabel.text=$"Stage {stageIndices[stageChoice]+1}  |  {stage.DisplayName}";
             var environment=stage.Environment?stage.Environment:chapter.DefaultEnvironment;
-            selectionHint.text=$"{(stage.Tutorial?"TUTORIAL":stage.BossStage?"BOSS":"BATTLE")}  /  {(environment?environment.DisplayName:"Cave")}\nLoading restarts the selected stage. Current progress is discarded.";
+            selectionHint.text=$"{(stage.Tutorial?"教學":stage.BossStage?"首領戰":"戰鬥")}  /  {(environment?environment.DisplayName:"洞窟")}\n進入所選關卡將重新開始該關卡。";
         }
         void LoadSelection()
         {

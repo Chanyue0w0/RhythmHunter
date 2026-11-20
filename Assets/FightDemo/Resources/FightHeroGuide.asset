@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfc0f001057a0824c9220793a83b8ce7, type: 3}
+  m_Name: FightHeroGuide
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightHeroGuide
+  heroes:
+  - portrait: {fileID: 21300000, guid: 49fdb0bd0eadfe94ebfdbd5e0d45292b, type: 3}
+    characterName: "\u827E\u529B\u514B\u65AF"
+    profession: "\u6230\u58EB"
+    role: "\u4E3B\u8F38\u51FA"
+    abilities: "\u65AC\u64CA\u3001\u9023\u7E8C\u5145\u80FD\u65AC\u64CA"
+  - portrait: {fileID: 21300000, guid: 234a1adf846e6f84ca7c887b4badc633, type: 3}
+    characterName: "\u745E\u7DF9\u7D72\u8207\u8DEF\u514B"
+    profession: "\u6CD5\u5E2B"
+    role: "\u9632\u79A6\uFF0F\u524A\u5F31"
+    abilities: "\u683C\u64CB\u4E00\u6B21\u50B7\u5BB3\n\u9ECF\u6DB2\u964D\u4F4E\u6575\u4EBA\u653B\u64CA"
+  - portrait: {fileID: 21300000, guid: 804b1c10673e96e4a8e33520e03539ec, type: 3}
+    characterName: "\u6B7B\u4EA1\u6BD4\u5229"
+    profession: "\u904A\u4FE0"
+    role: "\u9060\u7A0B\u8F38\u51FA"
+    abilities: "\u7784\u6E96\u5C04\u64CA\n\u6A19\u8A18\u8207\u8FFD\u64CA"
+  - portrait: {fileID: 21300000, guid: 438723a1b4823ea47b34ca7294817028, type: 3}
+    characterName: ???
+    profession: ???
+    role: ???
+    abilities: ???
+  - portrait: {fileID: 21300000, guid: 77b5d2c32e4f2434887384c1dfca864f, type: 3}
+    characterName: ???
+    profession: ???
+    role: ???
+    abilities: ???
+  - portrait: {fileID: 21300000, guid: 82576859ce349d54c91ebc61eeac8812, type: 3}
+    characterName: ???
+    profession: ???
+    role: ???
+    abilities: ???

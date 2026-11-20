@@ -28,15 +28,19 @@ namespace RhythmHunter.FightDemo
             panel.anchorMin = Vector2.zero; panel.anchorMax = Vector2.one; panel.offsetMin = panel.offsetMax = Vector2.zero;
             panel.gameObject.AddComponent<Image>().color = new Color(.01f,.025f,.05f,.9f);
             overlay = panel.gameObject;
-            var title = FightMenuUi.Label(panel,"PAUSED",new Vector2(0,220),new Vector2(720,70),font,48);
-            Center(title.rectTransform);
-            var hint = FightMenuUi.Label(panel,"Music and battle paused. Press START / ESC / F8 to continue.",new Vector2(0,155),new Vector2(900,40),font,22);
+            guideFont = Font.CreateDynamicFontFromOSFont(new[] { "Microsoft JhengHei", "Noto Sans CJK TC", "Arial" }, 24);
+            font = guideFont;
+            pauseContent = FightMenuUi.Rect("PauseContent", panel, Vector2.zero, new Vector2(1280, 720)); Center(pauseContent);
+            BuildHeroGuide(pauseContent, font);
+            var hint = FightMenuUi.Label(pauseContent,"已暫停　｜　START / ESC 繼續　・　方向鍵／搖桿選擇　・　A 確認　・　B 返回",new Vector2(0,-336),new Vector2(1160,32),font,18);
             Center(hint.rectTransform);
-            var resume = FightMenuUi.Button(panel,"RESUME",new Vector2(-170,85),new Vector2(260,54),font,TogglePause);
+            var resume = FightMenuUi.Button(pauseContent,"繼續戰鬥",new Vector2(-170,-40),new Vector2(260,46),font,TogglePause);
             Center((RectTransform)resume.transform);
-            var restart = FightMenuUi.Button(panel, "RESTART BATTLE  [F9]", new Vector2(155,85),new Vector2(300,54),font,RestartBattle);
+            var restart = FightMenuUi.Button(pauseContent, "重新開始　[F9]", new Vector2(155,-40),new Vector2(300,46),font,RestartBattle);
             Center((RectTransform)restart.transform);
-            BuildStageSelector(panel,font);
+            var selector = FightMenuUi.Rect("StageSelector", pauseContent, new Vector2(0, -80), Vector2.zero); Center(selector);
+            BuildStageSelector(selector,font);
+            FitPauseContent();
             overlay.AddComponent<FightMenuNavigation>();
             overlay.SetActive(false);
         }
@@ -48,6 +52,7 @@ namespace RhythmHunter.FightDemo
 
         void Update()
         {
+            if (IsPaused) FitPauseContent();
             if (restarting) return;
             if (IsPaused && (Gamepad.current?.buttonEast.wasPressedThisFrame ?? false)) { SetPaused(false); return; }
             if (Keyboard.current?.f9Key.wasPressedThisFrame ?? false)
@@ -69,6 +74,7 @@ namespace RhythmHunter.FightDemo
             if (restarting) return;
             if (clock == null || value == IsPaused) return;
             IsPaused = value;
+            if (toggle) toggle.SetActive(!value);
             ApplyPauseState();
             if (overlay != null) { overlay.SetActive(value); if (value) overlay.transform.SetAsLastSibling(); }
         }
@@ -138,11 +144,13 @@ namespace RhythmHunter.FightDemo
             Time.timeScale = previousTimeScale;
             IsPaused = false;
             tutorialReading = appliedPause = false;
+            if (toggle) toggle.SetActive(true);
             if (overlay != null) overlay.SetActive(false);
         }
 
         void OnDestroy()
         {
+            if (guideFont) Destroy(guideFont);
             if (overlay != null) { if(Application.isPlaying) Destroy(overlay); else DestroyImmediate(overlay); }
             if (toggle != null) { if(Application.isPlaying) Destroy(toggle); else DestroyImmediate(toggle); }
         }
