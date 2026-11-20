@@ -5,6 +5,7 @@ namespace RhythmHunter.FightDemo
     public sealed partial class FightCombatController
     {
         private long overtimePressureStartBeat;
+        public event Action OvertimeStarted;
         private int lastOvertimeRecoveryBeats;
         public long OvertimeElapsedBeats => StageOvertimeActive ? Math.Max(0, NormalBattleBeatCount - overtimePressureStartBeat) : 0;
         public int OvertimeAccelerationSteps => (int)Math.Min(int.MaxValue,
@@ -16,6 +17,7 @@ namespace RhythmHunter.FightDemo
 
         private void BeginOvertimePressure()
         {
+            OvertimeStarted?.Invoke();
             overtimePressureStartBeat = NormalBattleBeatCount;
             pressureRemaining = PressureDurationBeats; // Stable full-bar presentation; never consumed in overtime.
             pressureRestUntil = 0;

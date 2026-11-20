@@ -90,12 +90,12 @@ namespace RhythmHunter.FightDemoEditor
                     Resolve();
                     Queue(3); Resolve();
                     Queue(3); Resolve();
-                    Check(fight.BlockedAttackCount == 3 && fight.PartyArmor == 3 && fight.PartyHp == 4, "One guard blocks three distinct hits on the same beat.");
+                    Check(fight.BlockedAttackCount == 1 && fight.PartyArmor == 1 && fight.PartyHp == 4, "One guard blocks only one of three distinct hits on the same beat.");
                     Check(fight.TeamSkillGauge == 1, "Multiple blocks do not generate extra MP.");
                     Resolve();
-                    Check(fight.BlockedAttackCount == 3, "A damage callback cannot be applied twice.");
+                    Check(fight.BlockedAttackCount == 1, "A damage callback cannot be applied twice.");
                     Queue(4); Resolve();
-                    Check(fight.PartyArmor == 2, "Guard does not leak into the next beat.");
+                    Check(fight.PartyArmor == 0, "Guard does not leak into the next beat.");
                 }
                 Reset();
                 Input(Guard, 3, 121); Queue(3); Resolve();
@@ -108,10 +108,10 @@ namespace RhythmHunter.FightDemoEditor
                 Reset();
                 Input(Guard, 3, 120); Input(Guard, 4, -120);
                 Queue(3); Resolve(); Queue(4); Resolve(); Queue(4); Resolve();
-                Check(fight.BlockedAttackCount == 3, "Adjacent guards coexist and do not consume one another.");
+                Check(fight.BlockedAttackCount == 2, "Adjacent guards each block once and do not consume one another.");
                 Set(mage.CharacterDefinition, "basicGuardBeats", 2);
                 Reset(); Input(Guard, 3); Queue(3); Resolve(); Queue(4); Resolve(); Queue(5); Resolve();
-                Check(fight.BlockedAttackCount == 2 && fight.PartyArmor == 2, "Authored guard duration is used.");
+                Check(fight.BlockedAttackCount == 1 && fight.PartyArmor == 1, "A longer guard window still has only one charge.");
                 Set(mage.CharacterDefinition, "basicGuardBeats", 1);
 
                 Reset(); target = fight.ActiveEnemySlot;
@@ -209,7 +209,7 @@ namespace RhythmHunter.FightDemoEditor
                     typeof(FightScene3BeatValidation).GetMethod("CaptureHud", BindingFlags.Static | BindingFlags.NonPublic)
                         .Invoke(null, new object[] { health.canvas, "Temp/FightPartyBasic-preview.png" });
                 UnityEngine.Object.DestroyImmediate(hud);
-                File.WriteAllText(Result, $"PASS: {checks} checks. Immediate sword; multi-hit beat guard and boundaries; three consecutive inputs; duplicate/miss/skip/reset; calibrated 60/120/150 BPM timing; MP input accounting/cap; target reacquisition; Team Skill freeze/resume; lifecycle resets; authored parameters; progress HUD.\nInterruption/bonus, new Team Skills, waves and final art remain later checkpoints. Live FMOD/device timing is not covered by this deterministic suite.\n");
+                File.WriteAllText(Result, $"PASS: {checks} checks. Immediate sword; single-hit guard and boundaries; three consecutive inputs; duplicate/miss/skip/reset; calibrated 60/120/150 BPM timing; MP input accounting/cap; target reacquisition; Team Skill freeze/resume; lifecycle resets; authored parameters; progress HUD.\nInterruption/bonus, new Team Skills, waves and final art remain later checkpoints. Live FMOD/device timing is not covered by this deterministic suite.\n");
                 Debug.Log("FIGHT_PARTY_BASIC_VALIDATION_PASS");
             }
             catch (Exception exception) { File.WriteAllText(Result, "FAIL: " + exception); Debug.LogException(exception); }

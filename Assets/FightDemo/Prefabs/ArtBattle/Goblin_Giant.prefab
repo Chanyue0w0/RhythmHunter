@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1317346221629769421}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.11917573, y: -0.31797814, z: -0.2}
+  m_LocalPosition: {x: -0.11917573, y: -0.57, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -174,8 +174,17 @@ MonoBehaviour:
     rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   enemyAbilities: []
+  disableNormalHitReaction: 0
+  hitReactionCooldownBeats: 2
   protectBossPhaseOne: 0
   tiredIdleAnimationName: Idle_Tired
+  enableUnusedGuardSlime: 0
+  slimeAttackReduction: 1
+  slimeAttackReductionBeats: 8
+  slimeMinimumAttackDamage: 0
+  retaliationProjectileScale: 0.75
+  retaliationFloorOpacity: 0.5
+  retaliationFloorOffset: {x: 0, y: 0.025, z: -0.1}
   teamQteMode: 0
   qteFailureDamageMultiplier: 0.5
   qteFailureAppliesStatus: 1
@@ -197,11 +206,12 @@ MonoBehaviour:
   swordChargedOnHitEffect: {fileID: 0}
   swordDelayedOnHitEffect: {fileID: 0}
   swordChargeAura: {fileID: 0}
+  enemyCanAttack: 1
   characterId: Goblin_Giant
   displayName: GIANT GOBLIN
   team: 0
   role: 0
-  maxHp: 80
+  maxHp: 120
   defense: 0
   frontlineDefenseBonus: 0
   basicAbilityName: Basic Ability
@@ -253,7 +263,7 @@ MonoBehaviour:
   castEffectAnchor: {fileID: 6601874366244489931}
   impactEffectAnchor: {fileID: 7004274928639243472}
   headAnchor: {fileID: 6708979518259821821}
-  attackIntervalBeats: 20
+  attackIntervalBeats: 18
   maxMana: 4
   ignoreFloorOcclusion: 0
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}
@@ -321,7 +331,7 @@ Transform:
   m_GameObject: {fileID: 8252524555248054281}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.17734058, y: 1.7177917, z: -0.2}
+  m_LocalPosition: {x: -0.17734058, y: 2.21, z: -0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -366,6 +376,14 @@ PrefabInstance:
     - target: {fileID: 298298661553404314, guid: aa86617e3530d44418739a780609a517, type: 3}
       propertyPath: sequences.Array.data[0].frameEffects.Array.data[3].effects.Array.size
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1889573094597611675, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1889573094597611675, guid: aa86617e3530d44418739a780609a517, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 8946446362606103679, guid: aa86617e3530d44418739a780609a517, type: 3}
       propertyPath: m_LocalPosition.x

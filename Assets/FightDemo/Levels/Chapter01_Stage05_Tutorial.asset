@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Chapter01_Stage05_Tutorial
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
   stageId: Chapter01_Stage05
+  includeInProgression: 0
   displayName: "Chapter 1 - Stage 5 - Fever (Reserved)"
   tutorial: 1
   tutorialHero: {fileID: 0}

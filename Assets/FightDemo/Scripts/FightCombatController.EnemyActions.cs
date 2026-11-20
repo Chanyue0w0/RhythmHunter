@@ -20,6 +20,41 @@ namespace RhythmHunter.FightDemo
         private long lastAuthoredEnemyBeat = long.MinValue;
         public int ScheduledEnemyHitCount => enemyHits.Count;
 
+        private void ConsumeGuard(long beat)
+        {
+            if (!guardChargeByBeat.TryGetValue(beat, out long charge)) { guardedBeats.Remove(beat); return; }
+            foreach (var pair in new List<KeyValuePair<long, long>>(guardChargeByBeat))
+                if (pair.Value == charge) { guardedBeats.Remove(pair.Key); guardChargeByBeat.Remove(pair.Key); }
+        }
+
+        private float PendingHitPower()
+        {
+            var source = pendingEnemyAttacker != null ? pendingEnemyAttacker : activeEnemySlot;
+            float amount = pendingBossDamage > 0 ? pendingBossDamage : UsesFrontHeroControls && source != null
+                ? Mathf.Max(1f, source.AttackPower) : enemyAttackDamage;
+            return QuantizeCombatValue(GetSlimeReducedDamage(source, amount));
+        }
+
+        private bool ScheduledHitPrecedesPendingGuard()
+        {
+            foreach (var hit in enemyHits)
+            {
+                if (hit.version != rosterVersion || !hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
+                int impact = hit.timeline;
+                long beat = hit.hitBeat;
+                if (beat == long.MaxValue)
+                {
+                    if (beatClock == null) continue;
+                    double relative = hit.due - NormalBattleBeatCount;
+                    beat = beatClock.LatestBeat.GlobalBeat + (long)System.Math.Floor(relative + .00001);
+                    impact = beatClock.LatestBeat.TimelinePositionMs + Mathf.RoundToInt((float)(relative * beatClock.MillisecondsPerBeat));
+                }
+                if (beat == pendingAttackGlobalBeat && (impact < pendingAttackTimelineMs ||
+                    impact == pendingAttackTimelineMs && QuantizeCombatValue(GetSlimeReducedDamage(hit.source, hit.damage)) > PendingHitPower())) return true;
+            }
+            return false;
+        }
+
         private void StartAuthoredEnemyTurns(long globalBeat)
         {
             if (globalBeat == lastAuthoredEnemyBeat || battleEnded || AwaitingBattleStart ||
@@ -176,9 +211,23 @@ namespace RhythmHunter.FightDemo
                 }
             }
             float window = Mathf.Max(0, rhythmJudge.PerfectWindowMs - rhythmJudge.JudgementOffsetMs) + resolutionSafetyMs;
-            foreach (var hit in enemyHits.ToArray())
+            var orderedHits = enemyHits.ToArray();
+            System.Array.Sort(orderedHits, (a, b) =>
+            {
+                int time = a.timeline.CompareTo(b.timeline);
+                return time != 0 ? time : QuantizeCombatValue(GetSlimeReducedDamage(b.source, b.damage))
+                    .CompareTo(QuantizeCombatValue(GetSlimeReducedDamage(a.source, a.damage)));
+            });
+            foreach (var hit in orderedHits)
             {
                 if (hit.hitBeat == long.MaxValue || timelineMs < hit.timeline) continue;
+                if (!enemyHits.Contains(hit) || hit.version != rosterVersion ||
+                    !hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
+                // Resolve earlier impacts first; at the same instant the largest hit gets the shield.
+                if (pendingEnemyAttack && !pendingEnemyWindup && pendingAttackTimelineMs <= hit.timeline &&
+                    (pendingAttackTimelineMs < hit.timeline || PendingHitPower() >= QuantizeCombatValue(GetSlimeReducedDamage(hit.source, hit.damage))))
+                    TryResolvePendingAttack();
+                if (battleEnded) break;
                 // A confirmed guard cannot become a miss. Resolve it at impact instead of
                 // holding its sound/visual feedback until the late-input window closes.
                 bool blocked = guardedBeats.Contains(hit.hitBeat);
@@ -186,6 +235,7 @@ namespace RhythmHunter.FightDemo
                 if (!enemyHits.Remove(hit) || hit.version != rosterVersion) continue;
                 if (!hit.launched && (hit.source == null || hit.source.CurrentHp <= 0)) continue;
                 float damage = ResolveEnemyHitDamage(GetSlimeReducedDamage(hit.source, hit.damage), blocked, hit.guardChip);
+                if (blocked) ConsumeGuard(hit.hitBeat);
                 if (blocked) RecordMageGuardBlock(hit.hitBeat);
                 if (blocked) { blockedAttackCount++; PlaySuccessfulBlockFeedback(); } else receivedAttackCount++;
                 damage = ApplyEnemyPartyDamage(damage, blocked, hit.hitBeat);

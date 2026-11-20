@@ -45,6 +45,7 @@ namespace RhythmHunter.FightDemo
         {
             if (deathPresentationStarted || actorInstance == null) return;
             deathPresentationStarted = true;
+            if (team == UnitTeam.Enemy) CombatController?.PlayDeathCoins(actorInstance.transform.position);
             // A lethal hit still cancels the enemy action, but an existing hit reaction finishes once.
             if (combatAnimator != null && combatAnimator.IsPlaying &&
                 combatAnimator.ActiveAnimation == FightCharacterCombatAnimator.CombatAnimation.Hit)

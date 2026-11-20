@@ -154,12 +154,10 @@ namespace RhythmHunter.FightDemo
             if (!Completed || !isActiveAndEnabled || fight == null || fight.BattleEnded || fight.IsPaused) return false;
             var planner = GetComponent<FightLevelPlanner>();
             if (planner == null || planner.Chapter == null) return false;
-            for (int next = planner.StageIndex + 1; next < planner.Chapter.Stages.Count; next++)
+            if (planner.TryFindNextStage(out var nextChapter, out int next))
             {
-                var stage = planner.Chapter.Stages[next];
-                if (stage == null || !stage.Tutorial) continue;
                 pause = GetComponent<FightPauseController>();
-                if (pause != null && pause.TryLoadStage(planner.Chapter, next, out string error)) return true;
+                if (pause != null && pause.TryLoadStage(nextChapter, next, out string error)) return true;
                 SetObjectiveText("下一關暫時無法載入，請檢查關卡設定。"); return false;
             }
             SetObjectiveText("<b><color=#FFD879>訓練完成！</color></b>\n目前沒有下一個教學關卡，可以繼續自由練習。");

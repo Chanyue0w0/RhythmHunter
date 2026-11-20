@@ -1,0 +1,36 @@
+結算、評價與選單導覽（2026-11-20）
+
+Art2_FightScene / FightDemoController:
+- Fight Stage Results / Result rating:
+  Grade A Health Ratio=0.75、Grade B Health Ratio=0.5、Overtime Grade Cap=B。
+  S=勝利且未受傷；A/B依剩餘HP比例；其餘勝利C；戰敗D。
+  加時最高B（可調整）。曾實際扣DEF或HP就失去S資格，回血不會恢復資格。
+  教學不給字母評級。採用事件快照，不會把結算後動畫或操作寬限算進統計。
+- Fight Victory Panel / Result Reveal:
+  Minimum Result Seconds=3（下限3秒），Characters Per Second=35，
+  Item Delay Seconds=0.15，Rating Hold Seconds=0.6。
+  Show Developer Info 可隱藏右側的舊統計資訊。
+  原勝敗轉場完成後，中央依序顯示完成波數、戰鬥時間、成功格擋、
+  受擊次數、剩餘愛心、最終評價。標題不打字，只有內容逐字顯示。
+  剩餘愛心以每顆2HP換算；受擊為未格擋攻擊次數加Boss二階段漏接。
+  Pressure穿透即使算成功格擋，實際扣甲或血仍失去S資格。
+  所有內容完成且至少3秒後才開放動作，A必須放開後重新按下。
+  A不能略過演出；F9同樣遵守鎖定。
+- 勝利預設選中下一場戰鬥（若有），其次再來一場；戰敗只有再來一場。
+  最終關卡隱藏下一場，不循環回第一章。
+- 暫停/結果選單沿用EventSystem與InputSystemUIInputModule。
+  搖桿與D-Pad導覽、A確認；B退出暫停，Start/ESC繼續保留。
+  各選單限制自己的導覽範圍，跳過隱藏與停用按鈕。
+
+關卡順序：
+- Fight Level Planner / Selectable Chapters 列表的順序就是跨章順序。
+- Chapter / Stages 列表為章內順序；跳過null、無效設定或未參與順序的Stage。
+- Stage / Include In Progression控制是否被自動下一關選中，預設開啟。
+  手動暫停選關不受此開關限制。
+- Chapter01_Stage05_Tutorial暫設關閉，保留未完成的Fever教學供手動測試。
+- 教學RB下一關也沿用上述規則，可跨章。
+- 修改不會自動重排或覆寫美術與關卡配置。
+
+驗證入口：Rhythm Hunter / Validate Result Flow（非Play）。
+涵蓋評級門檻、傷害紀錄、加時、下一關搜尋、逐字資訊與解鎖、導覽與版面。
+實體搖桿與不同解析度仍需實機確認。

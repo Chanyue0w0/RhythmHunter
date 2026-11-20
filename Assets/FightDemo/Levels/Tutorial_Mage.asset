@@ -17,7 +17,7 @@ MonoBehaviour:
   enemyAttackIntervalBeats: 4
   steps:
   - title: "能量法師-瑞緹絲與路克"
-    text: "對拍按下 <b><color=#FFD879>X</color></b>，施放護盾，<b><color=#FFD879>保護前衛勇者</color></b>！"
+    text: "對拍按下 <b><color=#FFD879>X</color></b>，施放護盾，為前衛勇者<b><color=#FFD879>格擋一次傷害</color></b>！"
     goal: 0
     required: 1
     allowSwordCharge: 0

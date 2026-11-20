@@ -34,7 +34,7 @@ MonoBehaviour:
     allowEnemyAttacks: 0
     suppressMageRetaliation: 0
   - title: "練習防禦"
-    text: "哥布林即將開始攻擊。\n觀察警告，對拍按 <b><color=#FFD879>Y</color></b>，呼喚法師施放護盾！"
+    text: "哥布林即將開始攻擊。\n觀察警告，對拍按 <b><color=#FFD879>Y</color></b>，呼喚法師施放護盾，<b><color=#FFD879>格擋一次傷害</color></b>！"
     goal: 0
     required: 1
     allowSwordCharge: 1

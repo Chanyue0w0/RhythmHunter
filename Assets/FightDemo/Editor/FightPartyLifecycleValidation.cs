@@ -73,7 +73,7 @@ namespace RhythmHunter.FightDemoEditor
                 f.Beat(1);
                 Field<System.Collections.Generic.HashSet<long>>(fight, "guardedBeats").Add(1);
                 Resolve(fight, 1);
-                Check(fight.PartyArmor == 3 && fight.BlockedAttackCount == 2, "One-beat guard blocks every simultaneous eligible impact.");
+                Check(fight.PartyArmor == 2 && fight.BlockedAttackCount == 1, "One-beat guard blocks only one simultaneous impact.");
 
                 f.Reset(); Quiet(f);
                 fight.ScheduleEnemyHits(source, new[] { 1 }, 1, true, true); f.Beat(1);
@@ -149,7 +149,7 @@ namespace RhythmHunter.FightDemoEditor
                     "Defeat fires once and clears chain, pause and pending work.");
                 int mana = fight.TeamSkillGauge; fight.SubmitHeroCommand(FightInputRouter.HeroCommand.Front);
                 Check(fight.TeamSkillGauge == mana && !fight.TryStartTeamUltimate(), "No input/Ultimate after defeat.");
-                File.WriteAllText(Result, $"PASS: {checks} checks. Action cancellation, delayed impacts, pause and late-window ordering, multi-hit guard, normal-beat clock, effect cleanup, waves/resources/formation, no cross-wave skills, victory and defeat. Deterministic; live FMOD/art remain checkpoint 5.\n");
+                File.WriteAllText(Result, $"PASS: {checks} checks. Action cancellation, delayed impacts, pause and late-window ordering, single-hit guard, normal-beat clock, effect cleanup, waves/resources/formation, no cross-wave skills, victory and defeat. Deterministic; live FMOD/art remain checkpoint 5.\n");
             }
             catch (Exception exception) { File.WriteAllText(Result, "FAIL: " + exception); Debug.LogException(exception); }
         }

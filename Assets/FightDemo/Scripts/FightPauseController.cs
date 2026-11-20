@@ -37,6 +37,7 @@ namespace RhythmHunter.FightDemo
             var restart = FightMenuUi.Button(panel, "RESTART BATTLE  [F9]", new Vector2(155,85),new Vector2(300,54),font,RestartBattle);
             Center((RectTransform)restart.transform);
             BuildStageSelector(panel,font);
+            overlay.AddComponent<FightMenuNavigation>();
             overlay.SetActive(false);
         }
 
@@ -48,6 +49,7 @@ namespace RhythmHunter.FightDemo
         void Update()
         {
             if (restarting) return;
+            if (IsPaused && (Gamepad.current?.buttonEast.wasPressedThisFrame ?? false)) { SetPaused(false); return; }
             if (Keyboard.current?.f9Key.wasPressedThisFrame ?? false)
             {
                 RestartBattle();
@@ -62,6 +64,7 @@ namespace RhythmHunter.FightDemo
 
         public void SetPaused(bool value)
         {
+            if (value && GetComponent<FightStageResults>()?.Completed == true) return;
             if (value && GetComponent<FightCombatController>()?.DefeatSlowMotionActive == true) return;
             if (restarting) return;
             if (clock == null || value == IsPaused) return;
@@ -87,6 +90,8 @@ namespace RhythmHunter.FightDemo
         public void RestartBattle()
         {
             if (!Application.isPlaying || restarting) return;
+            var resultPanel = GetComponent<FightVictoryPanel>();
+            if (resultPanel && resultPanel.IsVisible && !resultPanel.ActionsReady) return;
             Scene scene = gameObject.scene;
             if (string.IsNullOrEmpty(scene.path))
             {

@@ -33,6 +33,9 @@ namespace RhythmHunter.FightDemo
             var retainedGuards = new List<long>(guardedBeats);
             guardedBeats.Clear();
             foreach (long guard in retainedGuards) guardedBeats.Add(guard + elapsed);
+            var retainedCharges = new List<KeyValuePair<long, long>>(guardChargeByBeat);
+            guardChargeByBeat.Clear();
+            foreach (var charge in retainedCharges) guardChargeByBeat[charge.Key + elapsed] = charge.Value + elapsed;
             ShiftScheduledEnemyHits(elapsed);
             ShiftMageGuards(elapsed);
             if (lastEnemyQueuedBeat != long.MinValue) lastEnemyQueuedBeat += elapsed;

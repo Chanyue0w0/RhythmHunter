@@ -106,7 +106,7 @@ namespace RhythmHunter.FightDemoEditor
                 var canvas = root.GetComponentInChildren<Canvas>();
                 Check(canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay && canvas.sortingOrder == 200, "Results are not independent player UI");
                 var texts = root.GetComponentsInChildren<Text>();
-                Check(texts.Any(t => t.text == "VICTORY") && texts.Any(t => t.text.StartsWith("OVERTIME")), "Victory statistics missing");
+                Check(texts.Any(t => t.text == "VICTORY") && texts.Any(t => t.text.Contains("OVERTIME")), "Victory statistics missing");
                 ValidateTitle(texts.Single(t => t.text == "VICTORY"));
                 foreach (var text in texts) Check(text.rectTransform.anchorMin == new Vector2(.5f, .5f), "Result label is not centered");
                 Call(panel, "OnDisable");

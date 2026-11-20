@@ -22,13 +22,13 @@ namespace RhythmHunter.FightDemo
         public bool PressurePhaseEnabled => StageOvertimeActive || wavePressure.enablePressurePhase;
         [Header("Pressure Break / Rest")]
         [SerializeField, Min(1f), InspectorName("Damage Per Segment")] private float pressureDamagePerPair = 10;
-        [SerializeField, Min(1), InspectorName("Blocks Per Segment")] private int pressureBlocksPerPair = 5;
-        [Tooltip("每次達標削減的拍數 = 本次 Pressured 總持續拍數 / 此段數。20 拍除以 20 段 = 每次削減 1 拍；段數越大，每次削減越少。")]
-        [SerializeField, Min(1), InspectorName("Reduction Segments")] private int pressureReductionSegments = 20;
+        [SerializeField, Min(1), InspectorName("Blocks Per Segment")] private int pressureBlocksPerPair = 1;
+        [Tooltip("每次達標削減的拍數 = 本次 Pressured 總持續拍數 / 此段數。40 拍除以 40 段 = 每次削減 1 拍；段數越大，每次削減越少。")]
+        [SerializeField, Min(1), InspectorName("Reduction Segments")] private int pressureReductionSegments = 40;
         [SerializeField, Min(0)] private int pressureRestBeats = 20;
         [SerializeField, Min(0)] private float pressureManaMultiplier = 2;
         [Tooltip("Pressure 攻擊遭到格擋時仍造成的傷害，先扣護甲再扣 HP。未格擋不增傷；0 表示關閉。")]
-        [SerializeField, Min(0)] private float pressureGuardChipDamage = 1f;
+        [SerializeField, Min(0)] private float pressureGuardChipDamage = 0f;
         [Header("Pressure Reward / Fever")]
         [SerializeField] private bool refillManaAfterPressure = true;
         [SerializeField] private bool blockFeverDuringPressure = true;

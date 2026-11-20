@@ -38,6 +38,28 @@ namespace RhythmHunter.FightDemo
         public int StageIndex => stageIndex;
         public FightStageDefinition SelectedStage => chapter != null && stageIndex >= 0 && stageIndex < chapter.Stages.Count ? chapter.Stages[stageIndex] : null;
         public FightStageDefinition ActiveStage { get; private set; }
+        public bool TryFindNextStage(out FightChapterDefinition nextChapter, out int nextIndex)
+        {
+            nextChapter = null; nextIndex = -1;
+            var ordered = new System.Collections.Generic.List<FightChapterDefinition>();
+            foreach (var entry in selectableChapters) if (entry && !ordered.Contains(entry)) ordered.Add(entry);
+            if (chapter && !ordered.Contains(chapter)) ordered.Insert(0, chapter);
+            int current = ordered.IndexOf(chapter);
+            if (current < 0) return false;
+            for (int c = current; c < ordered.Count; c++)
+                for (int s = c == current ? stageIndex + 1 : 0; s < ordered[c].Stages.Count; s++)
+                {
+                    var candidate = ordered[c].Stages[s];
+                    if (!candidate || !candidate.IncludeInProgression) continue;
+                    if (!candidate.Validate(out string error))
+                    { Debug.LogWarning($"[Next Stage] Skipping {candidate.name}: {error}", candidate); continue; }
+                    var environment = candidate.Environment ? candidate.Environment : ordered[c].DefaultEnvironment;
+                    if (environmentSelector && !environmentSelector.CanApply(environment, out error))
+                    { Debug.LogWarning($"[Next Stage] Skipping {candidate.name}: {error}", candidate); continue; }
+                    nextChapter = ordered[c]; nextIndex = s; return true;
+                }
+            return false;
+        }
         public FightEnvironmentDefinition SelectedEnvironment => SelectedStage != null && SelectedStage.Environment != null
             ? SelectedStage.Environment : chapter != null ? chapter.DefaultEnvironment : null;
         public string ConfigurationError { get; private set; }

@@ -19,6 +19,9 @@ namespace RhythmHunter.FightDemo
         {
             var r=Rect(text,parent,pos,size);var image=r.gameObject.AddComponent<Image>();image.color=new Color(.08f,.22f,.3f);
             var button=r.gameObject.AddComponent<Button>();button.targetGraphic=image;button.navigation=new Navigation{mode=Navigation.Mode.None};
+            var colors=button.colors;
+            colors.selectedColor=new Color(1f,.8f,.3f); colors.highlightedColor=new Color(.65f,.9f,1f);
+            colors.colorMultiplier=2; button.colors=colors;
             button.onClick.AddListener(action);Label(r,text,Vector2.zero,size,font,18);return button;
         }
     }

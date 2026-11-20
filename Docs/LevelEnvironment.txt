@@ -190,3 +190,12 @@ Billy guided lesson implemented (2026-11-20; replaces the earlier proposal):
 - Music continues during dialogue; A advances pages, Fever remains blocked.
   Tutorial death protection applies to player and dummy; dummy attacks remain disabled.
 - Ability mechanics and projectile timing remain unchanged. This lesson only observes hits.
+
+待開發：Fever 教學結尾的血量／護甲說明面板（2026-11-20）
+- 狀態：僅記錄需求，尚未實作。
+- 教學最後的 Fever 結束後，顯示一個說明 Panel。
+- 玩家閱讀並確認完畢後，才算教學結束；Fever 結束或 Panel 顯示本身不可直接完成教學。
+- Panel 說明右上角數值，預定文字：
+  「愛心代表血量，取決於全隊員的血量加總。」
+  「盾牌代表護甲，取決於首位勇者的天生護甲值。每次戰勝一波敵人後，護甲都會恢復至全滿。」
+- 驗收：Fever 結束會顯示 Panel；玩家確認前教學保持未完成；確認後才進入教學完成流程。

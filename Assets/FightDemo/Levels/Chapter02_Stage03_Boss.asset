@@ -14,8 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightStageDefinition
   stageId: Chapter02_Stage03
   displayName: Chapter 2 - Stage 3 - Goblin King
+  includeInProgression: 1
   tutorial: 0
+  tutorialHero: {fileID: 0}
+  tutorialFullParty: 0
+  tutorialLesson: {fileID: 0}
   environment: {fileID: 11400000, guid: a217f90cd8674dc3a01ce68a23bacba7, type: 2}
+  teachesFever: 0
   bossStage: 1
   bossEntrance:
     enabled: 1
@@ -96,20 +101,8 @@ MonoBehaviour:
     back: {fileID: 0}
     pressure:
       enablePressurePhase: 1
-      startBeat: 20
-      durationBeats: 40
-      recoveryBeats: 4
+      startBeat: 40
+      durationBeats: 60
+      recoveryBeats: 2
       repeat: 1
       repeatEveryBeats: 60
-  - name: Wave 2
-    kind: 0
-    front: {fileID: 2418354018728722847, guid: 58027208f6f64c22a1c628b184a89f77, type: 3}
-    middle: {fileID: 2418354018728722847, guid: f6f5612f6468ef340a4e2d9422b3fbb2, type: 3}
-    back: {fileID: 1049329208925010419, guid: d1687460d02df1b47bac316481cf4276, type: 3}
-    pressure:
-      enablePressurePhase: 1
-      startBeat: 20
-      durationBeats: 40
-      recoveryBeats: 4
-      repeat: 1
-      repeatEveryBeats: 40

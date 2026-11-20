@@ -262,6 +262,7 @@ namespace RhythmHunter.FightDemo
         private int pendingAttackTimelineMs;
         private long guardedGlobalBeat = long.MinValue;
         private readonly HashSet<long> guardedBeats = new();
+        private readonly Dictionary<long, long> guardChargeByBeat = new();
         private bool battleEnded;
         private int blockedAttackCount;
         private int receivedAttackCount;
@@ -282,6 +283,7 @@ namespace RhythmHunter.FightDemo
             pendingEnemyAttacker = null;
             pendingEnemyActionId = long.MinValue;
             guardedBeats.Clear();
+            guardChargeByBeat.Clear();
             guardedGlobalBeat = long.MinValue;
             if (active) calibrationStartBeat = latestCombatBeat;
             else
@@ -475,8 +477,8 @@ namespace RhythmHunter.FightDemo
             CheckWaveCompletion();
             UpdateBasicAbilityProgress();
             if (WaveEntranceRunning) return;
-            TryResolvePendingAttack();
             if (beatClock != null && beatClock.TryGetTimelinePositionMs(out int impactTime)) ResolveEnemyCombatWork(impactTime);
+            TryResolvePendingAttack();
             UpdateMageAbility();
         }
 
@@ -744,7 +746,7 @@ namespace RhythmHunter.FightDemo
                         UsesEqualBeats ? animation : FightCharacterCombatAnimator.CombatAnimation.Guard,
                         () => PlayGuardProjectileVisual(actor, skill, UsesEqualBeats ? tankSlot : actor),
                         null);
-                    return UsesEqualBeats ? $"{abilityName} blocks enemy damage on this beat only"
+                    return UsesEqualBeats ? $"{abilityName} blocks one enemy hit on this beat"
                         : $"{abilityName} blocks all damage from the next enemy attack";
 
                 case FightCharacterDefinition.AbilityBehavior.HealParty:
@@ -792,7 +794,10 @@ namespace RhythmHunter.FightDemo
                 // Preserve adjacent accepted beats independently, even when a late attack
                 // resolution overlaps an early input for the following beat.
                 for (int offset = 0; offset < Mathf.Max(1, durationBeats); offset++)
+                {
                     guardedBeats.Add(inputGlobalBeat + offset);
+                    guardChargeByBeat[inputGlobalBeat + offset] = inputGlobalBeat;
+                }
                 return;
             }
             guardedGlobalBeat = pendingEnemyAttack
@@ -898,9 +903,13 @@ namespace RhythmHunter.FightDemo
             if (UsesBattlePreparation && AdvanceWaveBoundary()) return;
             AdvanceNormalBattleBeat(beat);
             if (UsesEqualBeats)
+            {
                 guardedBeats.RemoveWhere(guardBeat => guardBeat < beat.GlobalBeat &&
                     (!pendingEnemyAttack || guardBeat != pendingAttackGlobalBeat) &&
                     !enemyHits.Exists(hit => hit.hitBeat == guardBeat));
+                foreach (long expired in new List<long>(guardChargeByBeat.Keys))
+                    if (!guardedBeats.Contains(expired)) guardChargeByBeat.Remove(expired);
+            }
             FightBeat?.Invoke(beat);
 
             if (battleEnded || AwaitingNextWave)
@@ -1013,6 +1022,13 @@ namespace RhythmHunter.FightDemo
 
             bool blocked = UsesEqualBeats ? guardedBeats.Contains(pendingAttackGlobalBeat)
                 : guardedGlobalBeat == pendingAttackGlobalBeat;
+            if (UsesEqualBeats && blocked && ScheduledHitPrecedesPendingGuard())
+            {
+                // A frame callback may arrive before the scheduled hit. Let the normal
+                // resolver finish this attack after the shield's higher-priority target.
+                pendingEnemyAnimationDriven = false;
+                return;
+            }
             // Only unresolved guards need the remaining late-input window.
             if (pendingEnemyAnimationDriven && !blocked && !HasEnemyResolutionWindowElapsed())
             {
@@ -1026,6 +1042,7 @@ namespace RhythmHunter.FightDemo
                 : enemyAttackDamage;
             if (pendingBossDamage > 0) configuredDamage = pendingBossDamage;
             float damage = ResolveEnemyHitDamage(GetSlimeReducedDamage(attacker, configuredDamage), blocked, pendingEnemyGuardChip);
+            if (blocked && UsesEqualBeats) ConsumeGuard(pendingAttackGlobalBeat);
             if (blocked) RecordMageGuardBlock(pendingAttackGlobalBeat);
 
             if (blocked)
@@ -1167,6 +1184,7 @@ namespace RhythmHunter.FightDemo
             pendingAttackTimelineMs = 0;
             guardedGlobalBeat = long.MinValue;
             guardedBeats.Clear();
+            guardChargeByBeat.Clear();
             battleEnded = false;
             BattleWon = AwaitingNextWave = false;
             CurrentWave = 1;

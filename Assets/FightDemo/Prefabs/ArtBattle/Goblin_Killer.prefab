@@ -205,8 +205,17 @@ MonoBehaviour:
     rageFinisherDamage: 6
     successfulGuardBreakPower: 1
   enemyAbilities: []
+  disableNormalHitReaction: 0
+  hitReactionCooldownBeats: 2
   protectBossPhaseOne: 0
   tiredIdleAnimationName: Idle_Tired
+  enableUnusedGuardSlime: 0
+  slimeAttackReduction: 1
+  slimeAttackReductionBeats: 8
+  slimeMinimumAttackDamage: 0
+  retaliationProjectileScale: 0.75
+  retaliationFloorOpacity: 0.5
+  retaliationFloorOffset: {x: 0, y: 0.025, z: -0.1}
   teamQteMode: 0
   qteFailureDamageMultiplier: 0.5
   qteFailureAppliesStatus: 1
@@ -228,11 +237,12 @@ MonoBehaviour:
   swordChargedOnHitEffect: {fileID: 0}
   swordDelayedOnHitEffect: {fileID: 0}
   swordChargeAura: {fileID: 0}
+  enemyCanAttack: 1
   characterId: Goblin_Killer
   displayName: KILLER GOBLIN
   team: 0
   role: 0
-  maxHp: 60
+  maxHp: 100
   defense: 0
   frontlineDefenseBonus: 0
   basicAbilityName: Basic Ability
@@ -284,7 +294,7 @@ MonoBehaviour:
   castEffectAnchor: {fileID: 7844641504107683177}
   impactEffectAnchor: {fileID: 8765688678766679457}
   headAnchor: {fileID: 5571737518414513795}
-  attackIntervalBeats: 20
+  attackIntervalBeats: 16
   maxMana: 4
   ignoreFloorOcclusion: 0
   accentColor: {r: 0.85, g: 0.2, b: 0.25, a: 1}

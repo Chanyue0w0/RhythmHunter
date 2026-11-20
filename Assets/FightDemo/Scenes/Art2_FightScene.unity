@@ -8273,6 +8273,7 @@ MonoBehaviour:
   minimumLength: 12
   startWidth: 1.8
   endWidth: 9
+  edgeFeather: 0.1
   fanBrightness: 0.18
   groundY: 0.025
   fadeSeconds: 0.12
@@ -20877,12 +20878,12 @@ MonoBehaviour:
   defeatInputGraceBeats: 1
   enableCharacterPassives: 0
   pressureWarningBeats: 1
-  pressureDamagePerPair: 4
-  pressureBlocksPerPair: 5
-  pressureReductionSegments: 20
+  pressureDamagePerPair: 10
+  pressureBlocksPerPair: 1
+  pressureReductionSegments: 40
   pressureRestBeats: 20
   pressureManaMultiplier: 2
-  pressureGuardChipDamage: 1
+  pressureGuardChipDamage: 0
   refillManaAfterPressure: 1
   blockFeverDuringPressure: 1
   stageTimeExpired: 0
@@ -20943,6 +20944,12 @@ MonoBehaviour:
     heroLabel: MAGE
     unitSlot: {fileID: 828184398}
     skillActivationCount: 0
+  deathCoinItem: {fileID: 5844825875154900834, guid: b6de0327e62b14443a6e3857d6656310, type: 3}
+  deathCoinMaterial: {fileID: 2100000, guid: 7c93b0a8aee340d6a53a0f62bc9b3f28, type: 2}
+  deathCoinCount: 7
+  deathCoinLifetime: 0.8
+  deathCoinSize: 0.4
+  deathCoinOffset: {x: 0, y: 0.85, z: 0}
 --- !u!114 &2021200327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21085,7 +21092,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmHunter.FightDemo.FightLevelPlanner
   chapter: {fileID: 11400000, guid: f10b282c4e3349dfbadbfb9bb9823a1e, type: 2}
-  stageIndex: 2
+  stageIndex: 1
   roster: {fileID: 2021200331}
   beatClock: {fileID: 2021200329}
   environmentSelector: {fileID: 2021200347}
@@ -21139,6 +21146,11 @@ MonoBehaviour:
   defeatAccentColor: {r: 1, g: 0.35, b: 0.3, a: 1}
   defeatDelayBeats: 2
   defeatFadeSeconds: 0.35
+  minimumResultSeconds: 3
+  charactersPerSecond: 35
+  itemDelaySeconds: 0.15
+  ratingHoldSeconds: 0.6
+  showDeveloperInfo: 1
 --- !u!114 &2021200337
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21154,6 +21166,9 @@ MonoBehaviour:
   fight: {fileID: 2021200326}
   planner: {fileID: 2021200334}
   beatClock: {fileID: 2021200329}
+  gradeAHealthRatio: 0.75
+  gradeBHealthRatio: 0.5
+  overtimeGradeCap: 2
 --- !u!114 &2021200338
 MonoBehaviour:
   m_ObjectHideFlags: 0

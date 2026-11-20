@@ -22,6 +22,9 @@ namespace RhythmHunter.FightDemo
         }
         [SerializeField] private string stageId = "Stage01";
         [SerializeField] private string displayName = "Stage 1";
+        [Tooltip("Include in automatic next-stage progression. Manual test selection remains available.")]
+        [SerializeField] private bool includeInProgression = true;
+        public bool IncludeInProgression => includeInProgression;
         [Header("Stage Classification / Environment")]
         [Tooltip("Marks this as a tutorial Stage. Does not automatically change damage, music, Pressure or victory rules.")]
         [SerializeField] private bool tutorial;

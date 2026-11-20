@@ -111,6 +111,7 @@ namespace RhythmHunter.FightDemo
             pendingEnemyAttacker = null;
             pendingEnemyActionId = long.MinValue;
             guardedBeats.Clear();
+            guardChargeByBeat.Clear();
             ResetBossState();
             ClearEnemyScheduledActions();
             foreach (var enemy in fightScene2Enemies)

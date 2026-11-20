@@ -11,6 +11,31 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private FightCombatController fight;
         [SerializeField] private FightLevelPlanner planner;
         [SerializeField] private FmodBeatClock beatClock;
+        public enum Grade { S, A, B, C, D }
+        [Header("Result rating")]
+        [SerializeField, Range(0, 1)] private float gradeAHealthRatio = .75f;
+        [SerializeField, Range(0, 1)] private float gradeBHealthRatio = .5f;
+        [SerializeField] private Grade overtimeGradeCap = Grade.B;
+        public int SuccessfulBlocks { get; private set; }
+        public int ReceivedHits { get; private set; }
+        public float RemainingHp { get; private set; }
+        public float MaximumHp { get; private set; }
+        public bool TookDamage { get; private set; }
+        public bool UsedOvertime { get; private set; }
+        public bool IsTutorial { get; private set; }
+        public Grade Rating { get; private set; }
+        public string RatingText => IsTutorial ? "訓練完成" : Rating.ToString();
+
+        public static Grade Evaluate(bool won, bool tookDamage, bool overtime, float healthRatio,
+            float aThreshold = .75f, float bThreshold = .5f, Grade cap = Grade.B)
+        {
+            if (!won) return Grade.D;
+            bThreshold = Mathf.Clamp01(bThreshold);
+            aThreshold = Mathf.Clamp(aThreshold, bThreshold, 1);
+            Grade grade = !tookDamage ? Grade.S : healthRatio >= aThreshold ? Grade.A :
+                healthRatio >= bThreshold ? Grade.B : Grade.C;
+            return overtime ? (Grade)Math.Max((int)grade, Mathf.Clamp((int)cap, 0, (int)Grade.C)) : grade;
+        }
         public double ElapsedSeconds { get; private set; }
         public double SongProgressSeconds { get; private set; }
         public float SongLengthSeconds { get; private set; }
@@ -34,6 +59,8 @@ namespace RhythmHunter.FightDemo
             fight.BattleVictory += OnVictory;
             fight.BattleLost += OnDefeat;
             fight.WaveCleared += OnWaveCleared;
+            fight.PartyDamageTaken += OnDamageTaken;
+            fight.OvertimeStarted += OnOvertime;
         }
         private void OnDisable()
         {
@@ -41,7 +68,11 @@ namespace RhythmHunter.FightDemo
             fight.BattleVictory -= OnVictory;
             fight.BattleLost -= OnDefeat;
             fight.WaveCleared -= OnWaveCleared;
+            fight.PartyDamageTaken -= OnDamageTaken;
+            fight.OvertimeStarted -= OnOvertime;
         }
+        private void OnDamageTaken(float armor, float hp) { if (!Completed && (armor > 0 || hp > 0)) TookDamage = true; }
+        private void OnOvertime() { if (!Completed) UsedOvertime = true; }
         private void Update()
         {
             if (fight == null || beatClock == null || Completed) return;
@@ -81,6 +112,15 @@ namespace RhythmHunter.FightDemo
             if (!Started) Begin();
             Completed = true;
             Won = won;
+            var stage = planner != null ? planner.ActiveStage : null;
+            IsTutorial = stage != null && stage.Tutorial;
+            SuccessfulBlocks = fight.BlockedAttackCount;
+            ReceivedHits = fight.ReceivedAttackCount + (fight.BossRhythm != null ? fight.BossRhythm.MissedNotes : 0);
+            RemainingHp = fight.PartyHp;
+            MaximumHp = fight.MaxPartyHp;
+            UsedOvertime |= fight.StageOvertimeActive;
+            Rating = Evaluate(won, TookDamage, UsedOvertime, MaximumHp > 0 ? RemainingHp / MaximumHp : 0,
+                gradeAHealthRatio, gradeBHealthRatio, overtimeGradeCap);
             if (won && !fight.StageTimeExpired) ClearedWaves = TotalWaves;
             if (fight.StageDeadlineEnabled && fight.StageTimeLimitSeconds > 0)
             {

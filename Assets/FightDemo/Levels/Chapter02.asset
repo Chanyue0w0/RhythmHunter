@@ -16,6 +16,6 @@ MonoBehaviour:
   displayName: Chapter 2
   defaultEnvironment: {fileID: 11400000, guid: a217f90cd8674dc3a01ce68a23bacba7, type: 2}
   stages:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: dea811e992bc0634faad33e866213fdf, type: 2}
+  - {fileID: 11400000, guid: 0a351e88084db2e4aa34fc8ff90364c6, type: 2}
   - {fileID: 11400000, guid: 1e51eedab4834ee597e87cdf18a7389c, type: 2}
