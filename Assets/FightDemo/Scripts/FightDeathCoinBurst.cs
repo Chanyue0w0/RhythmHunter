@@ -8,8 +8,8 @@ namespace RhythmHunter.FightDemo
         [SerializeField] private GameObject deathCoinItem;
         [SerializeField] private Material deathCoinMaterial;
         [SerializeField, Range(1, 20)] private int deathCoinCount = 7;
-        [SerializeField, Min(.1f)] private float deathCoinLifetime = .8f;
-        [SerializeField, Min(.01f)] private float deathCoinSize = .4f;
+        [SerializeField, Min(.1f)] private float deathCoinLifetime = 1f;
+        [SerializeField, Min(.01f)] private float deathCoinSize = .65f;
         [SerializeField] private Vector3 deathCoinOffset = new Vector3(0, .85f, 0);
 
         internal void PlayDeathCoins(Vector3 position)
@@ -90,8 +90,8 @@ namespace RhythmHunter.FightDemo
                 var coin = new ParticleSystem.EmitParams
                 {
                     position = transform.position + new Vector3(Random.Range(-.16f, .16f), 0, 0),
-                    velocity = new Vector3(Mathf.Lerp(-2.2f, 2.2f, (i + .5f) / main.maxParticles),
-                        Random.Range(3.6f, 5f), Random.Range(-.15f, .15f))
+                    velocity = new Vector3(Mathf.Lerp(-3f, 3f, (i + .5f) / main.maxParticles),
+                        Random.Range(4.2f, 5.8f), Random.Range(-.15f, .15f))
                 };
                 particles.Emit(coin, 1);
             }

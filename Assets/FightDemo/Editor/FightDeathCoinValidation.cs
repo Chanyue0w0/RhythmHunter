@@ -14,7 +14,9 @@ namespace RhythmHunter.FightDemo.Editor
         static FightDeathCoinValidation() => EditorApplication.update += Poll;
         static void Poll()
         {
-            const string request = "Temp/DeathCoinValidation.request";
+            // A separate sync request can wait safely while Unity still runs an older assembly.
+            string request = File.Exists("Temp/DeathCoinSync.request")
+                ? "Temp/DeathCoinSync.request" : "Temp/DeathCoinValidation.request";
             if (!File.Exists(request) || EditorApplication.isCompiling || EditorApplication.isUpdating) return;
             string mode = File.ReadAllText(request).Trim();
             if ((mode == "render" || mode == "save") && EditorApplication.isPlayingOrWillChangePlaymode) return;
@@ -99,8 +101,8 @@ namespace RhythmHunter.FightDemo.Editor
                         data.FindProperty("deathCoinItem").objectReferenceValue = prefab;
                     if (!data.FindProperty("deathCoinMaterial").objectReferenceValue)
                         data.FindProperty("deathCoinMaterial").objectReferenceValue = material;
-                    data.FindProperty("deathCoinLifetime").floatValue = .8f;
-                    data.FindProperty("deathCoinSize").floatValue = .4f;
+                    data.FindProperty("deathCoinLifetime").floatValue = 1f;
+                    data.FindProperty("deathCoinSize").floatValue = .65f;
                     data.FindProperty("deathCoinOffset").vector3Value = new Vector3(0, .85f, 0);
                     if (data.ApplyModifiedProperties() && !Application.isPlaying)
                         EditorSceneManager.MarkSceneDirty(fight.gameObject.scene);
@@ -124,16 +126,16 @@ namespace RhythmHunter.FightDemo.Editor
                     root.SetActive(true);
                     var burst = root.AddComponent<FightDeathCoinBurst>();
                     typeof(FightDeathCoinBurst).GetMethod("Initialize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                        .Invoke(burst, new object[] { fight, sprite, material, 7, .8f, .4f });
+                        .Invoke(burst, new object[] { fight, sprite, material, 7, 1f, .65f });
                     var particles = root.GetComponent<ParticleSystem>();
                     if (particles.particleCount != 7) throw new Exception("Expected 7 death coin particles, got " + particles.particleCount);
                     var coins = new ParticleSystem.Particle[7];
                     particles.GetParticles(coins);
                     foreach (var coin in coins)
-                        if (coin.velocity.y <= 0 || coin.startLifetime > .801f) throw new Exception("Invalid coin trajectory/lifetime");
-                    particles.Simulate(.9f, true, false);
+                        if (coin.velocity.y <= 0 || coin.startLifetime > 1.001f) throw new Exception("Invalid coin trajectory/lifetime");
+                    particles.Simulate(1.01f, true, false);
                     if (particles.particleCount != 0) throw new Exception("Coins did not expire");
-                    report.AppendLine("PASS: 7 upward particles, lifetime <= 0.8 seconds, all expire by 0.9 seconds.");
+                    report.AppendLine("PASS: 7 upward particles, lifetime <= 1 second, all expire by 1.01 seconds.");
                 }
                 finally { EditorSceneManager.ClosePreviewScene(preview); }
             }

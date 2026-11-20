@@ -20947,8 +20947,8 @@ MonoBehaviour:
   deathCoinItem: {fileID: 5844825875154900834, guid: b6de0327e62b14443a6e3857d6656310, type: 3}
   deathCoinMaterial: {fileID: 2100000, guid: 7c93b0a8aee340d6a53a0f62bc9b3f28, type: 2}
   deathCoinCount: 7
-  deathCoinLifetime: 0.8
-  deathCoinSize: 0.4
+  deathCoinLifetime: 1
+  deathCoinSize: 0.65
   deathCoinOffset: {x: 0, y: 0.85, z: 0}
 --- !u!114 &2021200327
 MonoBehaviour:
